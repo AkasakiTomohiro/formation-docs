@@ -1,0 +1,66 @@
+☐ ワークスペース管理
+    ☐ ワークスペースの作成（ローカルディレクトリを選択してワークスペースを作成）
+    ☐ ワークスペースの一覧
+    ☐ ワークスペースの削除
+    ☐ Dropbox連携（ワークスペースがDropbox場にあるときに利用できる機能）
+        ☐ 他のユーザーが編集中のファイルをロック/アンロック
+        ☐ アンロック解除依頼
+☐ テンプレート管理
+    ☐ テンプレートのインポート
+    ☐ テンプレートの表示
+        ☐ リソースのパラメータの説明表示（英語）
+            ☐ CloudFormationのリソースごとのデータ構造を管理するjson
+                https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/resource-type-schemas.html
+                上記でDLできるリソースのスキーマルール
+                https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-schema.html
+            ☐ リソースの説明はAWS CLIのservice-2.jsonを参照する
+                https://github.com/aws/aws-cli/tree/v2/awscli/botocore/data
+            ☐ リソースのパラメータの説明表示（日本語）
+                日本語訳を手打ち可能とする
+                手打ちする場合アプリのヘッダーの表示メニューから「リソースの説明言語」から言語を選択できる
+                さらに、リソースの説明をデフォルト言語と同時に表示（2段組み）
+            ☐ リソースの説明をChaptGPTで自動生成
+        ☐ CloudFormationの組み込み関数を利用した値の表示
+            たとえば、Fn::Joinだったら文字列結合を行う。組み込み関数を用いた値は編集不可とする。
+            Refはリソースタイプごとに参照できるものが異なり、JSONなどで機械的に参照可能な形で公開されていないためサポート方式は未定。
+        ☐ Transform連携
+        ☐ リソースのパラメータの種別に応じたにアイコンないしマークを追加
+            パラメータ種別
+                - primaryIdentifier
+                - readOnlyProperties
+                - writeOnlyProperties
+                - createOnlyProperties
+                - additionalProperties
+                - required
+    ☐ テンプレートの編集
+        ☐ 値とその説明フィールドの編集が行える
+        ☐ 再インポートによるテンプレートの更新
+            - 論理IDが重複している場合はマージ
+            - 論理IDが重複していない場合は新規追加
+            - 論理IDが削除されている場合は削除マークをつける。
+            - primaryIdentifierが一致する場合は論理IDが変更されていてもマージし、新しい論理IDに変更する。
+        ☐ Ctrl + S で保存
+        ☐ Ctrl + Z で元に戻す
+        ☐ Ctrl + Shift + Z でやり直し
+    ☐ テンプレートの削除
+    ☐ グラフビュー
+        ☐ スタックグラフビュー
+        ☐ リソースグラフビュー
+    ☐ テンプレートに依存しない手動管理リソース（たとえば、RDSとかEC2とか）
+☐ エクスポート機能
+    ☐ エクセル
+    ☐ HTML
+☐ 変更履歴
+    ☐ テンプレートごとに変更履歴を表示
+    ☐ リソースごとに変更履歴を表示
+☐ バックグラウンド処理
+    ☐ 初めてアプリを起動する場合
+        ☐ チュートリアル機能
+        ☐ CloudFormationのリソースごとのデータ構造を事前DL
+        ☐ AWS CLIのservice-2.jsonを事前DL
+    ☐ アップデート確認
+        ☐ アップデート通知の表示（今すぐ更新・後で確認・スキップ）
+        ☐ アップデート通知の非表示
+        ☐ アップデート実行
+    ☐ AWS CLIのservice-2.jsonに更新があるかをバックグラウンドで確認（週1回）し、更新があれば自動DL
+    ☐ CloudFormationのリソースごとのデータ構造を管理するjsonに更新があるかをバックグラウンドで確認（週1回）し、更新があれば自動DL
