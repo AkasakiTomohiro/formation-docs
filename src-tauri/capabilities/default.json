@@ -9,6 +9,9 @@
     "log:default",
     "fs:default",
     "dialog:default",
-    "http:default"
+    "http:default",
+    "fs:allow-localdata-read-recursive",
+    "fs:allow-localdata-write-recursive",
+    "fs:allow-localdata-meta-recursive"
   ]
 }

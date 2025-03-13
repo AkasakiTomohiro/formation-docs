@@ -8,12 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@cloudscape-design/collection-hooks':
+        specifier: ^1.0.62
+        version: 1.0.62(react@18.3.1)
       '@cloudscape-design/components':
-        specifier: ^3.0.904
-        version: 3.0.904(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^3.0.907
+        version: 3.0.907(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@cloudscape-design/global-styles':
-        specifier: ^1.0.36
-        version: 1.0.36
+        specifier: ^1.0.37
+        version: 1.0.37
       '@tauri-apps/api':
         specifier: ^2
         version: 2.2.0
@@ -217,14 +220,14 @@ packages:
   '@cloudscape-design/component-toolkit@1.0.0-beta.88':
     resolution: {integrity: sha512-oC88fh+TRlRXkhZhcR9yHst55IOqkqTRae7SiCEWE9C6tBqF7yZaNsI5W91VKrqCDkdfYTuV6aDzMt9kQoZbow==}
 
-  '@cloudscape-design/components@3.0.904':
-    resolution: {integrity: sha512-wpI+7m3Jqk6VZkCoclikCjwrRn4d04odyXxHqVTmmRFZNPQjFe0nQiBQBzAu5K/6Ub8irUc0OqKzZRjB0N9tDw==}
+  '@cloudscape-design/components@3.0.907':
+    resolution: {integrity: sha512-22fNleJGLggdby1IRiE/m3sj3wVTTIUEsJCGodavdcNRg1BF3tftqnqijrgljdtFR7XJ+EcKk+IO3OGxH6dCNQ==}
     peerDependencies:
       react: ^16.8 || ^17 || ^18
       react-dom: ^16.8 || ^17 || ^18
 
-  '@cloudscape-design/global-styles@1.0.36':
-    resolution: {integrity: sha512-l5fUu5jhwya3oLZeWeXGbL8o98+UWUH4QNOC/VCLht6YvPT7iSyAUNxNZ3aPhnb7VeQGiyiCCdv9T1Eof4FWFw==}
+  '@cloudscape-design/global-styles@1.0.37':
+    resolution: {integrity: sha512-cLGHXtSYDK5KIjygKquLr3tOh8NyxLZt+746Cjq/XsUSH3tIbU/xnEfy7V+PFnpF5jY390JhPWUbwhRmhZKz4Q==}
 
   '@cloudscape-design/test-utils-core@1.0.52':
     resolution: {integrity: sha512-HcBbc6j5lnzhLC5OP3mOPqf0TY5Jbpd0i/f5AOzZ25Qv1XfaHi804wP38EVBYugXRj06hIc3x6/g9eXwAeioSg==}
@@ -1141,7 +1144,7 @@ snapshots:
       '@juggle/resize-observer': 3.4.0
       tslib: 2.8.1
 
-  '@cloudscape-design/components@3.0.904(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@cloudscape-design/components@3.0.907(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@cloudscape-design/collection-hooks': 1.0.62(react@18.3.1)
       '@cloudscape-design/component-toolkit': 1.0.0-beta.88
@@ -1165,7 +1168,7 @@ snapshots:
       tslib: 2.8.1
       weekstart: 1.1.0
 
-  '@cloudscape-design/global-styles@1.0.36': {}
+  '@cloudscape-design/global-styles@1.0.37': {}
 
   '@cloudscape-design/test-utils-core@1.0.52':
     dependencies:
