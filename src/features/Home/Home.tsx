@@ -11,6 +11,7 @@ import Table from '@cloudscape-design/components/table';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useCallback, useState } from 'react';
 import { useWorkspace } from '../../hooks/useWorkspace';
+import { createRandomId } from '../../lib/RandomId';
 
 export const Home = (): JSX.Element => {
   const [flashbarItems, setFlashbarItems] = useState<
@@ -35,6 +36,7 @@ export const Home = (): JSX.Element => {
       // FIXME: ワークスペース登録時のエッジケースを考慮する。たとえば、ディスク容量が足りないや権限がない場合。
       const result = await addWorkspace({ directory: selectedDir });
       if (!result) {
+        const id = createRandomId();
         setFlashbarItems([
           ...flashbarItems,
           {
@@ -43,6 +45,10 @@ export const Home = (): JSX.Element => {
             content: `「${selectedDir}」は既に登録されています。`,
             dismissible: true,
             dismissLabel: 'close',
+            id: id,
+            onDismiss: () => {
+              setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+            },
           },
         ]);
       }
