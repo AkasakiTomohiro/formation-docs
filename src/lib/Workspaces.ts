@@ -6,6 +6,7 @@ import {
 } from '@tauri-apps/plugin-fs';
 
 export interface Workspace {
+  id: string;
   name: string;
   directory: string;
   description: string;

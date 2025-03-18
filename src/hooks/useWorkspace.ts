@@ -2,6 +2,7 @@ import * as path from '@tauri-apps/api/path';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getWorkspaces, saveWorkspaces } from '../lib/Workspaces';
 
+import { v4 as uuidv4 } from 'uuid';
 import type { AddWorkspace, Workspace, Workspaces } from '../lib/Workspaces';
 
 export type UseWorkspaceResult = {
@@ -36,6 +37,7 @@ export function useWorkspace(): UseWorkspaceResult {
     async (props: AddWorkspace): Promise<boolean> => {
       const direname = await path.basename(props.directory);
       const workspace: Workspace = {
+        id: uuidv4(),
         name: direname,
         directory: props.directory,
         description: '',
