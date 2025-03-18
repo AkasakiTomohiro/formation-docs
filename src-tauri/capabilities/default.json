@@ -12,6 +12,7 @@
     "http:default",
     "fs:allow-localdata-read-recursive",
     "fs:allow-localdata-write-recursive",
-    "fs:allow-localdata-meta-recursive"
+    "fs:allow-localdata-meta-recursive",
+    "dialog:allow-open"
   ]
 }
