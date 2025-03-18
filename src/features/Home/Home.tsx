@@ -1,16 +1,21 @@
 import { useCollection } from '@cloudscape-design/collection-hooks';
+import type { FlashbarProps } from '@cloudscape-design/components';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import ContentLayout from '@cloudscape-design/components/content-layout';
+import Flashbar from '@cloudscape-design/components/flashbar';
 import Header from '@cloudscape-design/components/header';
 import Pagination from '@cloudscape-design/components/pagination';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import { open } from '@tauri-apps/plugin-dialog';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useWorkspace } from '../../hooks/useWorkspace';
 
 export const Home = (): JSX.Element => {
+  const [flashbarItems, setFlashbarItems] = useState<
+    FlashbarProps.MessageDefinition[]
+  >([]);
   const { state, workspaces, addWorkspace, loadWorkspaces } = useWorkspace();
   const { items, collectionProps, paginationProps } = useCollection(
     workspaces.workspaces,
@@ -20,16 +25,29 @@ export const Home = (): JSX.Element => {
   );
 
   const openWorkspace = useCallback(async () => {
-    const selected = await open({
+    const selectedDir = await open({
       multiple: false,
       directory: true,
       defaultPath: '~/Desktop',
     });
-    if (selected != null) {
-      const result = await addWorkspace({ directory: selected });
-      console.log({ result });
+    if (selectedDir != null) {
+      // FIXME: すでに登録されている場合は登録せずただ、ワークスペースを開くだけにする
+      // FIXME: ワークスペース登録時のエッジケースを考慮する。たとえば、ディスク容量が足りないや権限がない場合。
+      const result = await addWorkspace({ directory: selectedDir });
+      if (!result) {
+        setFlashbarItems([
+          ...flashbarItems,
+          {
+            type: 'error',
+            header: '新規Workspaceの読み込みに失敗しました',
+            content: `「${selectedDir}」は既に登録されています。`,
+            dismissible: true,
+            dismissLabel: 'close',
+          },
+        ]);
+      }
     }
-  }, [addWorkspace]);
+  }, [addWorkspace, flashbarItems]);
 
   return (
     <ContentLayout
@@ -37,6 +55,7 @@ export const Home = (): JSX.Element => {
       header={
         <SpaceBetween size="m">
           <Header variant="h1">Home</Header>
+          <Flashbar items={flashbarItems} />
         </SpaceBetween>
       }
     >

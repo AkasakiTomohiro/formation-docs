@@ -1,16 +1,17 @@
 {
-    "version": "0.2",
-    "ignorePaths": [],
-    "dictionaryDefinitions": [],
-    "dictionaries": [],
-    "words": [
-        "akasaki",
-        "cdylib",
-        "rlib",
-        "serde",
-        "staticlib",
-        "tauri"
-    ],
-    "ignoreWords": [],
-    "import": []
+  "version": "0.2",
+  "ignorePaths": [],
+  "dictionaryDefinitions": [],
+  "dictionaries": [],
+  "words": [
+    "akasaki",
+    "cdylib",
+    "Flashbar",
+    "rlib",
+    "serde",
+    "staticlib",
+    "tauri"
+  ],
+  "ignoreWords": [],
+  "import": []
 }
