@@ -12,19 +12,22 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useWorkspace } from '../../hooks/useWorkspace';
+import type { Workspace } from '../../lib/Workspaces';
 
 export const Home = (): JSX.Element => {
   const isFirstRender = useRef(true);
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
   >([]);
-  const { state, workspaces, addWorkspace, loadWorkspaces } = useWorkspace();
+  const { state, workspaces, addWorkspace, loadWorkspaces, deleteWorkspace } =
+    useWorkspace();
   const { items, collectionProps, paginationProps } = useCollection(
     workspaces.workspaces,
     {
       pagination: { pageSize: 10 },
     },
   );
+  const [selectedItems, setSelectedItems] = useState<Workspace[]>([]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -110,6 +113,11 @@ export const Home = (): JSX.Element => {
             cell: (e) => e.description,
           },
         ]}
+        selectionType="single"
+        selectedItems={selectedItems}
+        onSelectionChange={({ detail }) =>
+          setSelectedItems(detail.selectedItems)
+        }
         items={items}
         loadingText="Loading workspace"
         trackBy="name"
@@ -124,6 +132,15 @@ export const Home = (): JSX.Element => {
           <Header
             actions={
               <SpaceBetween direction="horizontal" size="xs">
+                <Button
+                  onClick={() => {
+                    deleteWorkspace(selectedItems[0]);
+                    setSelectedItems([]);
+                  }}
+                  disabled={selectedItems.length === 0}
+                >
+                  削除
+                </Button>
                 <Button onClick={loadWorkspaces}>更新</Button>
                 <Button variant="primary" onClick={openWorkspace}>
                   新規ワークスペース

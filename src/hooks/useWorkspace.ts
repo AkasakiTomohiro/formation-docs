@@ -27,6 +27,11 @@ export type UseWorkspaceResult = {
    * ワークスペースを読み込む
    */
   loadWorkspaces: () => Promise<void>;
+
+  /**
+   * ワークスペースを削除する
+   */
+  deleteWorkspace: (selectedWorkspace: Workspace) => Promise<void>;
 };
 
 export function useWorkspace(): UseWorkspaceResult {
@@ -73,5 +78,18 @@ export function useWorkspace(): UseWorkspaceResult {
       });
   }, []);
 
-  return { state, workspaces, addWorkspace, loadWorkspaces };
+  const deleteWorkspace = useCallback(
+    async (selectedItem: Workspace) => {
+      const newWorkspaces = {
+        workspaces: workspaces.workspaces.filter(
+          (f) => f.id !== selectedItem.id,
+        ),
+      };
+      setWorkspaces(newWorkspaces);
+      await saveWorkspaces(newWorkspaces);
+    },
+    [workspaces],
+  );
+
+  return { state, workspaces, addWorkspace, loadWorkspaces, deleteWorkspace };
 }
