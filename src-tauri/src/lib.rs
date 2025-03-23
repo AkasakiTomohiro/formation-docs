@@ -1,7 +1,30 @@
+use std::path::Path;
+use std::path::PathBuf;
+use tauri::WebviewWindowBuilder;
+
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+async fn open_workspace(
+    handle: tauri::AppHandle,
+    id: &str,
+    name: &str,
+    directory: &str,
+) -> Result<bool, ()> {
+    let path = Path::new(directory);
+    log::info!("Open: {}", path.to_str().unwrap());
+    if !path.exists() {
+        return Ok(false);
+    }
+    let window = WebviewWindowBuilder::new(
+        &handle,
+        name,
+        tauri::WebviewUrl::App(PathBuf::from(format!("workspaces/{}", id))),
+    )
+    .title(name)
+    .build()
+    .expect("failed to create new window");
+    window.show().expect("failed to show window");
+    return Ok(true);
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -12,7 +35,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![open_workspace])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

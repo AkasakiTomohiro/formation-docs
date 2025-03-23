@@ -5,9 +5,11 @@ import Button from '@cloudscape-design/components/button';
 import ContentLayout from '@cloudscape-design/components/content-layout';
 import Flashbar from '@cloudscape-design/components/flashbar';
 import Header from '@cloudscape-design/components/header';
+import Link from '@cloudscape-design/components/link';
 import Pagination from '@cloudscape-design/components/pagination';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
+import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -54,32 +56,43 @@ export const Home = (): JSX.Element => {
     });
   }, []);
 
-  const openWorkspace = useCallback(async () => {
+  const openWorkspace = useCallback(async (workspace: Workspace) => {
+    const result = await invoke('open_workspace', {
+      id: workspace.id,
+      name: workspace.name,
+      directory: workspace.directory,
+    });
+    console.log({ result, workspace });
+  }, []);
+
+  const newWorkspace = useCallback(async () => {
     const selectedDir = await open({
       multiple: false,
       directory: true,
       defaultPath: '~/Desktop',
     });
     if (selectedDir != null) {
-      addWorkspace({ directory: selectedDir }).catch((error) => {
-        const id = uuidv4();
-        setFlashbarItems([
-          ...flashbarItems,
-          {
-            type: 'error',
-            header: '新規Workspaceの読み込みに失敗しました',
-            content: typeof error === 'string' ? error : undefined,
-            dismissible: true,
-            dismissLabel: 'close',
-            id: id,
-            onDismiss: () => {
-              setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+      addWorkspace({ directory: selectedDir })
+        .then((workspace) => openWorkspace(workspace))
+        .catch((error) => {
+          const id = uuidv4();
+          setFlashbarItems([
+            ...flashbarItems,
+            {
+              type: 'error',
+              header: '新規Workspaceの読み込みに失敗しました',
+              content: typeof error === 'string' ? error : undefined,
+              dismissible: true,
+              dismissLabel: 'close',
+              id: id,
+              onDismiss: () => {
+                setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+              },
             },
-          },
-        ]);
-      });
+          ]);
+        });
     }
-  }, [addWorkspace, flashbarItems]);
+  }, [addWorkspace, openWorkspace, flashbarItems]);
 
   return (
     <ContentLayout
@@ -97,7 +110,7 @@ export const Home = (): JSX.Element => {
           {
             id: 'Name',
             header: 'Workspace name',
-            cell: (e) => e.name,
+            cell: (e) => <Link onClick={() => openWorkspace(e)}>{e.name}</Link>,
             isRowHeader: true,
           },
           {
@@ -140,7 +153,7 @@ export const Home = (): JSX.Element => {
                   削除
                 </Button>
                 <Button onClick={loadWorkspaces}>更新</Button>
-                <Button variant="primary" onClick={openWorkspace}>
+                <Button variant="primary" onClick={newWorkspace}>
                   新規ワークスペース
                 </Button>
               </SpaceBetween>
