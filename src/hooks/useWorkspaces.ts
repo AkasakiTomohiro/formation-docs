@@ -6,11 +6,11 @@ import type { CreateWorkspaceInfo, WorkspaceInfo } from '../lib/AppConfig';
 import { createWorkspace, loadWorkspace } from '../lib/Workspace';
 import type { Workspace } from '../lib/Workspace';
 
-export type UseWorkspaceResult = {
+export type UseWorkspacesResult = {
   /**
    * ワークスペースの読み込み状態
    */
-  state: 'initial' | 'loading' | 'loaded' | 'error';
+  state: 'loading' | 'loaded';
 
   /**
    * ワークスペース一覧
@@ -35,7 +35,7 @@ export type UseWorkspaceResult = {
 
 export type WorkspaceExpand = WorkspaceInfo & Workspace;
 
-export function useWorkspaces(): UseWorkspaceResult {
+export function useWorkspaces(): UseWorkspacesResult {
   const [state, setState] = useState<'loading' | 'loaded'>('loading');
   const [workspaces, setWorkspaces] = useState<WorkspaceExpand[]>([]);
 
