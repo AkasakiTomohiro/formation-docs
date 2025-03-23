@@ -56,14 +56,34 @@ export const Home = (): JSX.Element => {
     });
   }, []);
 
-  const openWorkspace = useCallback(async (workspace: Workspace) => {
-    const result = await invoke('open_workspace', {
-      id: workspace.id,
-      name: workspace.name,
-      directory: workspace.directory,
-    });
-    console.log({ result, workspace });
-  }, []);
+  const openWorkspace = useCallback(
+    async (workspace: Workspace) => {
+      const result = await invoke('open_workspace', {
+        id: workspace.id,
+        name: workspace.name,
+        directory: workspace.directory,
+      });
+      console.log({ result, workspace });
+      if (!result) {
+        const id = uuidv4();
+        setFlashbarItems([
+          ...flashbarItems,
+          {
+            type: 'error',
+            header: 'Workspaceが開けませんでした',
+            content: `「${workspace.directory}」が存在することを確認してください`,
+            dismissible: true,
+            dismissLabel: 'close',
+            id: id,
+            onDismiss: () => {
+              setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+            },
+          },
+        ]);
+      }
+    },
+    [flashbarItems],
+  );
 
   const newWorkspace = useCallback(async () => {
     const selectedDir = await open({
