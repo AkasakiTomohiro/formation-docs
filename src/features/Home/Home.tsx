@@ -61,16 +61,14 @@ export const Home = (): JSX.Element => {
       defaultPath: '~/Desktop',
     });
     if (selectedDir != null) {
-      // FIXME: すでに登録されている場合は登録せずただ、ワークスペースを開くだけにする
-      const result = await addWorkspace({ directory: selectedDir });
-      if (!result) {
+      addWorkspace({ directory: selectedDir }).catch((error) => {
         const id = uuidv4();
         setFlashbarItems([
           ...flashbarItems,
           {
             type: 'error',
             header: '新規Workspaceの読み込みに失敗しました',
-            content: `「${selectedDir}」は既に登録されています。`,
+            content: typeof error === 'string' ? error : undefined,
             dismissible: true,
             dismissLabel: 'close',
             id: id,
@@ -79,7 +77,7 @@ export const Home = (): JSX.Element => {
             },
           },
         ]);
-      }
+      });
     }
   }, [addWorkspace, flashbarItems]);
 

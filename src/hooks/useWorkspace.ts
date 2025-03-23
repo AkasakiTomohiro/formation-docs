@@ -19,9 +19,8 @@ export type UseWorkspaceResult = {
 
   /**
    * ワークスペースを追加する
-   * @returns 追加に成功した場合はtrue
    */
-  addWorkspace: (props: AddWorkspace) => Promise<boolean>;
+  addWorkspace: (props: AddWorkspace) => Promise<void>;
 
   /**
    * ワークスペースを読み込む
@@ -39,7 +38,7 @@ export function useWorkspace(): UseWorkspaceResult {
   const [workspaces, setWorkspaces] = useState<Workspaces>({ workspaces: [] });
 
   const addWorkspace = useCallback(
-    async (props: AddWorkspace): Promise<boolean> => {
+    async (props: AddWorkspace): Promise<void> => {
       const direname = await path.basename(props.directory);
       const workspace: Workspace = {
         id: uuidv4(),
@@ -47,17 +46,11 @@ export function useWorkspace(): UseWorkspaceResult {
         directory: props.directory,
         description: '',
       };
-      if (
-        workspaces.workspaces.find((w) => w.directory === workspace.directory)
-      ) {
-        return false;
-      }
       const newWorkspaces: Workspaces = {
         workspaces: [...workspaces.workspaces, workspace],
       };
       setWorkspaces(newWorkspaces);
       await saveWorkspaces(newWorkspaces);
-      return true;
     },
     [workspaces],
   );
