@@ -9,11 +9,12 @@ import Pagination from '@cloudscape-design/components/pagination';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import { open } from '@tauri-apps/plugin-dialog';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useWorkspace } from '../../hooks/useWorkspace';
 
 export const Home = (): JSX.Element => {
+  const isFirstRender = useRef(true);
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
   >([]);
@@ -25,6 +26,31 @@ export const Home = (): JSX.Element => {
     },
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    loadWorkspaces().catch((error) => {
+      const id = uuidv4();
+      setFlashbarItems([
+        ...flashbarItems,
+        {
+          type: 'error',
+          header: 'Workspaceの読み込みに失敗しました',
+          content: typeof error === 'string' ? error : undefined,
+          dismissible: true,
+          dismissLabel: 'close',
+          id: id,
+          onDismiss: () => {
+            setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+          },
+        },
+      ]);
+    });
+  }, []);
+
   const openWorkspace = useCallback(async () => {
     const selectedDir = await open({
       multiple: false,
@@ -33,7 +59,6 @@ export const Home = (): JSX.Element => {
     });
     if (selectedDir != null) {
       // FIXME: すでに登録されている場合は登録せずただ、ワークスペースを開くだけにする
-      // FIXME: ワークスペース登録時のエッジケースを考慮する。たとえば、ディスク容量が足りないや権限がない場合。
       const result = await addWorkspace({ directory: selectedDir });
       if (!result) {
         const id = uuidv4();

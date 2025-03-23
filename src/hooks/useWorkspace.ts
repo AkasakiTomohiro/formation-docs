@@ -1,5 +1,6 @@
 import * as path from '@tauri-apps/api/path';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import * as logger from '@tauri-apps/plugin-log';
+import { useCallback, useState } from 'react';
 import { getWorkspaces, saveWorkspaces } from '../lib/Workspaces';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -29,8 +30,7 @@ export type UseWorkspaceResult = {
 };
 
 export function useWorkspace(): UseWorkspaceResult {
-  const isFirstRender = useRef(true);
-  const [state, setState] = useState<'loading' | 'loaded' | 'error'>('loading');
+  const [state, setState] = useState<'loading' | 'loaded'>('loading');
   const [workspaces, setWorkspaces] = useState<Workspaces>({ workspaces: [] });
 
   const addWorkspace = useCallback(
@@ -63,20 +63,15 @@ export function useWorkspace(): UseWorkspaceResult {
     await getWorkspaces()
       .then((workspaces) => {
         setWorkspaces(workspaces);
-        setState('loaded');
       })
       .catch((error) => {
-        console.error(error);
-        setState('error');
+        logger.error(error);
+        throw error;
+      })
+      .finally(() => {
+        setState('loaded');
       });
   }, []);
 
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    loadWorkspaces();
-  }, [loadWorkspaces]);
   return { state, workspaces, addWorkspace, loadWorkspaces };
 }
