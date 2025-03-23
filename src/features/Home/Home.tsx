@@ -13,51 +13,31 @@ import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { useWorkspace } from '../../hooks/useWorkspace';
-import type { Workspace } from '../../lib/Workspaces';
+import { useWorkspaces } from '../../hooks/useWorkspaces';
+import type { WorkspaceExpand } from '../../hooks/useWorkspaces';
 
 export const Home = (): JSX.Element => {
   const isFirstRender = useRef(true);
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
   >([]);
-  const { state, workspaces, addWorkspace, loadWorkspaces, deleteWorkspace } =
-    useWorkspace();
+  const {
+    state,
+    workspaces,
+    createWorkspace,
+    loadWorkspaces,
+    deleteWorkspace,
+  } = useWorkspaces();
   const { items, collectionProps, paginationProps } = useCollection(
-    workspaces.workspaces,
+    workspaces,
     {
       pagination: { pageSize: 10 },
     },
   );
-  const [selectedItems, setSelectedItems] = useState<Workspace[]>([]);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    loadWorkspaces().catch((error) => {
-      const id = uuidv4();
-      setFlashbarItems([
-        ...flashbarItems,
-        {
-          type: 'error',
-          header: 'Workspaceの読み込みに失敗しました',
-          content: typeof error === 'string' ? error : undefined,
-          dismissible: true,
-          dismissLabel: 'close',
-          id: id,
-          onDismiss: () => {
-            setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
-          },
-        },
-      ]);
-    });
-  }, []);
+  const [selectedItems, setSelectedItems] = useState<WorkspaceExpand[]>([]);
 
   const openWorkspace = useCallback(
-    async (workspace: Workspace) => {
+    async (workspace: WorkspaceExpand) => {
       const result = await invoke('open_workspace', {
         id: workspace.id,
         name: workspace.name,
@@ -92,7 +72,7 @@ export const Home = (): JSX.Element => {
       defaultPath: '~/Desktop',
     });
     if (selectedDir != null) {
-      addWorkspace({ directory: selectedDir })
+      createWorkspace({ directory: selectedDir })
         .then((workspace) => openWorkspace(workspace))
         .catch((error) => {
           const id = uuidv4();
@@ -112,7 +92,32 @@ export const Home = (): JSX.Element => {
           ]);
         });
     }
-  }, [addWorkspace, openWorkspace, flashbarItems]);
+  }, [createWorkspace, openWorkspace, flashbarItems]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    loadWorkspaces().catch((error) => {
+      const id = uuidv4();
+      setFlashbarItems([
+        ...flashbarItems,
+        {
+          type: 'error',
+          header: 'Workspaceの読み込みに失敗しました',
+          content: typeof error === 'string' ? error : undefined,
+          dismissible: true,
+          dismissLabel: 'close',
+          id: id,
+          onDismiss: () => {
+            setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+          },
+        },
+      ]);
+    });
+  }, []);
 
   return (
     <ContentLayout
