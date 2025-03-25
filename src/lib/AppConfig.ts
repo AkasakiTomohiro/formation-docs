@@ -1,9 +1,6 @@
-import {
-  BaseDirectory,
-  exists,
-  readTextFile,
-  writeTextFile,
-} from '@tauri-apps/plugin-fs';
+import { invoke } from '@tauri-apps/api/core';
+import { BaseDirectory, writeTextFile } from '@tauri-apps/plugin-fs';
+import type { CommandResult } from './CommandResult';
 
 export type CreateWorkspaceInfo = Pick<WorkspaceInfo, 'directory'>;
 
@@ -28,22 +25,12 @@ export const APP_CONFIG_FILE_NAME = 'app_config.json';
  * @returns
  */
 export async function loadAppConfig(): Promise<AppConfig> {
-  // ワークスペースファイルの存在確認
-  const isWorkspaceFileExists = await exists(APP_CONFIG_FILE_NAME, {
-    baseDir: BaseDirectory.AppLocalData,
-  });
-  if (isWorkspaceFileExists) {
-    // ワークスペースのファイルを読み込む
-    const workspaces = await readTextFile(APP_CONFIG_FILE_NAME, {
-      baseDir: BaseDirectory.AppLocalData,
-    });
-    return JSON.parse(workspaces);
+  const result = await invoke<CommandResult<AppConfig>>('read_app_config');
+  console.log({ result });
+  if (result.success) {
+    return result.value;
   }
-
-  // ワークスペースファイルの新規作成
-  const result = { workspaces: [] };
-  await saveAppConfig(result);
-  return result;
+  throw new Error(result.value);
 }
 
 /**

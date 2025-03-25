@@ -1,9 +1,12 @@
+mod command;
+mod utils;
+
 use std::path::Path;
 use std::path::PathBuf;
 use tauri::WebviewWindowBuilder;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
+#[tauri::command(rename_all = "snake_case")]
 async fn open_workspace(
     handle: tauri::AppHandle,
     id: &str,
@@ -72,7 +75,8 @@ pub fn run() {
             open_workspace,
             read_file,
             save_file,
-            create_workspace
+            create_workspace,
+            command::app_config::read_app_config
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
