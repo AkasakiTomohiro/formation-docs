@@ -1,6 +1,7 @@
 use crate::utils::CommandResult;
 use dirs::config_local_dir;
 use serde::{Deserialize, Serialize};
+use tokio::fs;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WorkspaceInfo {
@@ -31,13 +32,13 @@ pub async fn read_app_config() -> Result<CommandResult<AppConfig>, CommandResult
         .join(APP_CONFIG_FILE_NAME);
     match app_config_path.exists() {
         true => {
-            let app_config_json = match std::fs::read_to_string(app_config_path) {
+            let app_config_json = match fs::read_to_string(app_config_path).await {
                 Ok(json) => json,
                 Err(_) => return Err(CommandResult::failed("Failed to read AppConfig")),
             };
-            match serde_json::from_str(&app_config_json) {
-                Ok(config) => return Ok(CommandResult::success(config)),
-                Err(_) => return Err(CommandResult::failed("Failed to parse AppConfig")),
+            return match serde_json::from_str(&app_config_json) {
+                Ok(config) => Ok(CommandResult::success(config)),
+                Err(_) => Err(CommandResult::failed("Failed to parse AppConfig")),
             };
         }
         false => {
@@ -47,10 +48,10 @@ pub async fn read_app_config() -> Result<CommandResult<AppConfig>, CommandResult
                 Ok(json) => json,
                 Err(_) => return Err(CommandResult::failed("Failed to serialize AppConfig")),
             };
-            match std::fs::write(app_config_path, app_config_json) {
-                Ok(_) => return Ok(CommandResult::success(app_config)),
-                Err(_) => return Err(CommandResult::failed("Failed to write AppConfig")),
-            }
+            return match fs::write(app_config_path, app_config_json).await {
+                Ok(_) => Ok(CommandResult::success(app_config)),
+                Err(_) => Err(CommandResult::failed("Failed to write AppConfig")),
+            };
         }
     }
 }
