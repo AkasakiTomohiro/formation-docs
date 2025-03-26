@@ -1,29 +1,40 @@
-import { Route, Routes } from 'react-router';
+import { RouterProvider, createBrowserRouter } from 'react-router';
 import { Header } from './components/Header';
 import { Home } from './features/Home';
-import { Workspace } from './features/Workspace';
+import {
+  WorkspaceHome,
+  WorkspaceLayout,
+  workspaceLoader,
+} from './features/Workspace';
+
+const router = createBrowserRouter([
+  {
+    index: true,
+    element: (
+      <Header>
+        <Home />
+      </Header>
+    ),
+  },
+  {
+    path: '/workspaces/:workspaceId',
+    element: (
+      <Header>
+        <WorkspaceLayout />
+      </Header>
+    ),
+    loader: workspaceLoader,
+    children: [
+      {
+        index: true,
+        element: <WorkspaceHome />,
+      },
+    ],
+  },
+]);
 
 function App() {
-  return (
-    <Routes>
-      <Route
-        index
-        element={
-          <Header>
-            <Home />
-          </Header>
-        }
-      />
-      <Route
-        path="/workspaces/:workspaceId"
-        element={
-          <Header>
-            <Workspace />
-          </Header>
-        }
-      />
-    </Routes>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
