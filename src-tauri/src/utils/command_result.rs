@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CommandResult<T: Serialize = String> {
-    success: bool,
-    value: T,
+    pub success: bool,
+    pub value: T,
 }
 
 impl<T: Serialize> CommandResult<T> {

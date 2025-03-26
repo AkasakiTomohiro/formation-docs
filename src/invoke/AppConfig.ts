@@ -1,6 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { BaseDirectory, writeTextFile } from '@tauri-apps/plugin-fs';
-import type { CommandResult } from './CommandResult';
+import type { CommandResult } from '../lib/CommandResult';
 
 export type CreateWorkspaceInfo = Pick<WorkspaceInfo, 'directory'>;
 
@@ -26,7 +25,6 @@ export const APP_CONFIG_FILE_NAME = 'app_config.json';
  */
 export async function loadAppConfig(): Promise<AppConfig> {
   const result = await invoke<CommandResult<AppConfig>>('read_app_config');
-  console.log({ result });
   if (result.success) {
     return result.value;
   }
@@ -34,11 +32,18 @@ export async function loadAppConfig(): Promise<AppConfig> {
 }
 
 /**
- * ワークスペースの設定を保存する
- * @param workspaces
+ * AppConfigからワークスペースを削除する
  */
-export async function saveAppConfig(workspaces: AppConfig): Promise<void> {
-  await writeTextFile(APP_CONFIG_FILE_NAME, JSON.stringify(workspaces), {
-    baseDir: BaseDirectory.AppLocalData,
-  });
+export async function deleteWorkspaceFromAppConfig(
+  workspaceId: string,
+): Promise<void> {
+  const result = await invoke<CommandResult<[]>>(
+    'delete_workspace_from_app_config',
+    {
+      workspace_id: workspaceId,
+    },
+  );
+  if (!result.success) {
+    throw new Error(result.value);
+  }
 }

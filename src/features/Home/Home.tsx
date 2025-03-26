@@ -14,7 +14,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
-import type { WorkspaceExpand } from '../../hooks/useWorkspaces';
+import type { WorkspaceExpand } from '../../invoke/Workspace';
 
 export const Home = (): JSX.Element => {
   const isFirstRender = useRef(true);
