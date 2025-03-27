@@ -6,6 +6,7 @@ import {
   WorkspaceLayout,
   workspaceLoader,
 } from './features/Workspace';
+import { WorkspaceEdit } from './features/Workspace/components/WorkspaceEdit';
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <WorkspaceHome />,
+      },
+      {
+        path: 'edit',
+        element: <WorkspaceEdit />,
       },
     ],
   },

@@ -9,11 +9,12 @@ import Pagination from '@cloudscape-design/components/pagination';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import { useState } from 'react';
-import { useOutletContext } from 'react-router';
+import { useNavigate, useOutletContext } from 'react-router';
 import type { WorkspaceLayoutLoaderData } from '../Loader';
 
 export const WorkspaceHome = (): JSX.Element => {
   const workspace = useOutletContext<WorkspaceLayoutLoaderData>();
+  const navigate = useNavigate();
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
   >([]);
@@ -34,7 +35,12 @@ export const WorkspaceHome = (): JSX.Element => {
             description={workspace.description}
             actions={
               <SpaceBetween size="s">
-                <Button variant="normal">編集</Button>
+                <Button
+                  variant="normal"
+                  onClick={() => navigate(`/workspaces/${workspace.id}/edit`)}
+                >
+                  編集
+                </Button>
               </SpaceBetween>
             }
           >

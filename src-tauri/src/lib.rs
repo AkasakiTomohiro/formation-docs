@@ -43,6 +43,7 @@ pub fn run() {
             command::app_config::delete_workspace_from_app_config,
             command::workspace::create_workspace,
             command::workspace::load_workspace,
+            command::workspace::update_workspace,
             command::workspace::load_workspaces,
         ])
         .run(tauri::generate_context!())

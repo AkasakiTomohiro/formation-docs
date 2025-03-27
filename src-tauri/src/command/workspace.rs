@@ -153,3 +153,27 @@ pub async fn load_workspaces() -> Result<CommandResult<Vec<WorkspaceMergeInfo>>,
     }
     return Ok(CommandResult::success(workspaces));
 }
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn update_workspace(
+    workspace_id: &str,
+    workspace: Workspace,
+) -> Result<CommandResult<()>, CommandResult> {
+    let app_config = match app_config::read_app_config().await {
+        Ok(result) => result.value,
+        Err(_) => return Err(CommandResult::failed("Failed to read AppConfig")),
+    };
+
+    for workspace_info in app_config.workspaces.iter() {
+        if workspace_info.id == workspace_id {
+            let workspace_path =
+                PathBuf::from(workspace_info.directory.as_str()).join(WORKSPACE_FILE_NAME);
+            let workspace_json = serde_json::to_string(&workspace).unwrap();
+            return match fs::write(&workspace_path, workspace_json).await {
+                Ok(_) => Ok(CommandResult::success({})),
+                Err(_) => Err(CommandResult::failed("Failed to save Workspace")),
+            };
+        }
+    }
+    return Err(CommandResult::failed("Failed to find Workspace"));
+}
