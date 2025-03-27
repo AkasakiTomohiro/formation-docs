@@ -1,17 +1,23 @@
 import { useCollection } from '@cloudscape-design/collection-hooks';
+import type { FlashbarProps } from '@cloudscape-design/components';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import ContentLayout from '@cloudscape-design/components/content-layout';
+import Flashbar from '@cloudscape-design/components/flashbar';
 import Header from '@cloudscape-design/components/header';
 import Pagination from '@cloudscape-design/components/pagination';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
+import { useState } from 'react';
 import { useOutletContext } from 'react-router';
 import type { WorkspaceLayoutLoaderData } from '../Loader';
 
 export const WorkspaceHome = (): JSX.Element => {
-  const result = useOutletContext<WorkspaceLayoutLoaderData>();
-  console.log('Component', result);
+  const workspace = useOutletContext<WorkspaceLayoutLoaderData>();
+  const [flashbarItems, setFlashbarItems] = useState<
+    FlashbarProps.MessageDefinition[]
+  >([]);
+  console.log('Component', workspace);
   const { items, collectionProps, paginationProps } = useCollection<{
     name: string;
     description: string;
@@ -23,7 +29,18 @@ export const WorkspaceHome = (): JSX.Element => {
       defaultPadding
       header={
         <SpaceBetween size="m">
-          <Header variant="h1">Home</Header>
+          <Header
+            variant="h1"
+            description={workspace.description}
+            actions={
+              <SpaceBetween size="s">
+                <Button variant="normal">編集</Button>
+              </SpaceBetween>
+            }
+          >
+            {workspace.name}
+          </Header>
+          <Flashbar items={flashbarItems} />
         </SpaceBetween>
       }
     >
@@ -60,7 +77,7 @@ export const WorkspaceHome = (): JSX.Element => {
               </SpaceBetween>
             }
           >
-            ワークスペース一覧
+            スタック一覧
           </Header>
         }
         pagination={<Pagination {...paginationProps} />}
