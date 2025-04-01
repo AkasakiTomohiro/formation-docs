@@ -15,8 +15,8 @@ pub struct Workspace {
 impl Workspace {
     pub fn new(name: &str) -> Self {
         Workspace {
-            name: name.to_string(),
-            description: "".to_string(),
+            name: name.to_string().chars().take(256).collect(),
+            description: "".to_string().chars().take(256).collect(),
         }
     }
 }

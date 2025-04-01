@@ -22,6 +22,8 @@ export function useAppConfig(): UseAppConfigResult {
       await setupApp().then(() => {
         navigate('/workspaces');
       });
+    } else {
+      navigate('/workspaces');
     }
   }, []);
 

@@ -8,5 +8,6 @@
   "editor.tabSize": 2,
   "[typescript]": {
     "editor.defaultFormatter": "biomejs.biome"
-  }
+  },
+  "importSorter.generalConfiguration.sortOnBeforeSave": true
 }

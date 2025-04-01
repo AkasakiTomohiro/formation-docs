@@ -1,20 +1,33 @@
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { useNavigate, useOutletContext, useRevalidator } from 'react-router';
+import { v4 as uuidv4 } from 'uuid';
+import { z } from 'zod';
+
 import {
   Box,
   Button,
   Container,
   ContentLayout,
   Flashbar,
-  type FlashbarProps,
   FormField,
   Header,
   Input,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { useState } from 'react';
-import { useNavigate, useOutletContext, useRevalidator } from 'react-router';
-import { v4 as uuidv4 } from 'uuid';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 import { updateWorkspace } from '../../../invoke/Workspace';
+
+import type { FlashbarProps } from '@cloudscape-design/components';
 import type { WorkspaceLayoutLoaderData } from '../Loader';
+
+const workspaceEditValidator = z.object({
+  name: z.string().min(1).max(256),
+  description: z.string().max(256),
+});
+
+type WorkspaceEditType = z.infer<typeof workspaceEditValidator>;
 
 export const WorkspaceEdit = (): JSX.Element => {
   const workspace = useOutletContext<WorkspaceLayoutLoaderData>();
@@ -23,17 +36,20 @@ export const WorkspaceEdit = (): JSX.Element => {
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
   >([]);
-  const [workspaceName, setWorkspaceName] = useState(workspace.name);
-  const [workspaceDescription, setWorkspaceDescription] = useState(
-    workspace.description,
-  );
+  const { control, handleSubmit } = useForm<WorkspaceEditType>({
+    mode: 'onChange',
+    resolver: zodResolver(workspaceEditValidator),
+    defaultValues: {
+      name: workspace.name,
+      description: workspace.description,
+    },
+  });
 
-  const handleSave = async () => {
+  const onSave = async (newWorkspace: WorkspaceEditType) => {
     try {
-      // FIXME: バリデーションチェックを行う
       await updateWorkspace(workspace.id, {
-        name: workspaceName,
-        description: workspaceDescription,
+        name: newWorkspace.name,
+        description: newWorkspace.description,
       });
 
       // ローダーの再読み込み
@@ -69,39 +85,65 @@ export const WorkspaceEdit = (): JSX.Element => {
         </SpaceBetween>
       }
     >
-      <SpaceBetween direction="vertical" size="m">
-        <Container>
-          <SpaceBetween direction="vertical" size="m">
-            <FormField label="Workspace name">
-              <Input
-                value={workspaceName}
-                onChange={(event) => setWorkspaceName(event.detail.value)}
+      <form onSubmit={handleSubmit(onSave)}>
+        <SpaceBetween direction="vertical" size="m">
+          <Container>
+            <SpaceBetween direction="vertical" size="m">
+              <Controller
+                name="name"
+                control={control}
+                render={({ field, fieldState: { invalid } }) => (
+                  <FormField
+                    label="Workspace name"
+                    errorText={
+                      invalid
+                        ? '1文字以上256文字以下で入力してください'
+                        : undefined
+                    }
+                  >
+                    <Input
+                      {...field}
+                      onChange={(event) => field.onChange(event.detail.value)}
+                      invalid={invalid}
+                    />
+                  </FormField>
+                )}
               />
-            </FormField>
-            <FormField label="Workspace description">
-              <Input
-                value={workspaceDescription}
-                onChange={(event) =>
-                  setWorkspaceDescription(event.detail.value)
-                }
+              <Controller
+                name="description"
+                control={control}
+                render={({ field, fieldState: { invalid } }) => (
+                  <FormField
+                    label="Workspace description"
+                    errorText={
+                      invalid ? '256文字以下で入力してください' : undefined
+                    }
+                  >
+                    <Input
+                      {...field}
+                      onChange={(event) => field.onChange(event.detail.value)}
+                      invalid={invalid}
+                    />
+                  </FormField>
+                )}
               />
-            </FormField>
-          </SpaceBetween>
-        </Container>
-        <Box float="right">
-          <SpaceBetween direction="horizontal" size="xs">
-            <Button
-              variant="normal"
-              onClick={() => navigate(`/workspaces/${workspace.id}`)}
-            >
-              キャンセル
-            </Button>
-            <Button variant="primary" onClick={handleSave}>
-              保存
-            </Button>
-          </SpaceBetween>
-        </Box>
-      </SpaceBetween>
+            </SpaceBetween>
+          </Container>
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button
+                variant="normal"
+                onClick={() => navigate(`/workspaces/${workspace.id}`)}
+              >
+                キャンセル
+              </Button>
+              <Button variant="primary" formAction="submit">
+                保存
+              </Button>
+            </SpaceBetween>
+          </Box>
+        </SpaceBetween>
+      </form>
     </ContentLayout>
   );
 };
