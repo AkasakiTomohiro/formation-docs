@@ -10,6 +10,8 @@ export type WorkspaceInfo = {
 
 export type AppConfig = {
   workspaces: WorkspaceInfo[];
+  initialized: boolean;
+  initialized_at: string;
 };
 
 export interface WorkspacesFile {
@@ -46,4 +48,8 @@ export async function deleteWorkspaceFromAppConfig(
   if (!result.success) {
     throw new Error(result.value);
   }
+}
+
+export async function setupApp() {
+  await invoke<CommandResult<[]>>('setup_app');
 }

@@ -45,6 +45,7 @@ pub fn run() {
             command::workspace::load_workspace,
             command::workspace::update_workspace,
             command::workspace::load_workspaces,
+            command::resource_provider::setup_app,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -22,6 +22,8 @@
                 https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-type-schema.html
             ☐ リソースの説明はAWS CLIのservice-2.jsonを参照する
                 https://github.com/aws/aws-cli/tree/v2/awscli/botocore/data
+                GitHub APIを利用してどのようなサービスがあるかを配列で取得可能
+                https://api.github.com/repos/aws/aws-cli/contents/awscli/botocore/data?ref=v2
             ☐ リソースのパラメータの説明表示（日本語）
                 日本語訳を手打ち可能とする
                 手打ちする場合アプリのヘッダーの表示メニューから「リソースの説明言語」から言語を選択できる

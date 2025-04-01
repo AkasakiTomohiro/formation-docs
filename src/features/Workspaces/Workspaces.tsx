@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
 import type { WorkspaceExpand } from '../../invoke/Workspace';
 
-export const Home = (): JSX.Element => {
+export const Workspaces = (): JSX.Element => {
   const isFirstRender = useRef(true);
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
