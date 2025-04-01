@@ -1,5 +1,7 @@
+import { useState } from 'react';
+import { useNavigate, useOutletContext } from 'react-router';
+
 import { useCollection } from '@cloudscape-design/collection-hooks';
-import type { FlashbarProps } from '@cloudscape-design/components';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import ContentLayout from '@cloudscape-design/components/content-layout';
@@ -8,8 +10,8 @@ import Header from '@cloudscape-design/components/header';
 import Pagination from '@cloudscape-design/components/pagination';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
-import { useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router';
+
+import type { FlashbarProps } from '@cloudscape-design/components';
 import type { WorkspaceLayoutLoaderData } from '../Loader';
 
 export const WorkspaceHome = (): JSX.Element => {

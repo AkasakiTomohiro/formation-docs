@@ -1,4 +1,5 @@
 import { Outlet, useLoaderData } from 'react-router';
+
 import type { WorkspaceLayoutLoaderData } from './Loader';
 
 export const WorkspaceLayout = (): JSX.Element => {

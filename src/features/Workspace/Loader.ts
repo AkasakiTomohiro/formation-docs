@@ -1,5 +1,6 @@
-import type { LoaderFunctionArgs } from 'react-router';
 import { loadWorkspace } from '../../invoke/Workspace';
+
+import type { LoaderFunctionArgs } from 'react-router';
 import type { WorkspaceExpand } from '../../invoke/Workspace';
 
 export type WorkspaceLayoutLoaderData = WorkspaceExpand;

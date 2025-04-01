@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { type AppConfig, loadAppConfig, setupApp } from '../invoke/AppConfig';
+
+import { loadAppConfig, setupApp } from '../invoke/AppConfig';
+
+import type { AppConfig } from '../invoke/AppConfig';
 
 export type UseAppConfigResult = {
   /**

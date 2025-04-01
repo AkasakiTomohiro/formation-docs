@@ -1,5 +1,7 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
 import { useCollection } from '@cloudscape-design/collection-hooks';
-import type { FlashbarProps } from '@cloudscape-design/components';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import ContentLayout from '@cloudscape-design/components/content-layout';
@@ -11,9 +13,10 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import { invoke } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+
 import { useWorkspaces } from '../../hooks/useWorkspaces';
+
+import type { FlashbarProps } from '@cloudscape-design/components';
 import type { WorkspaceExpand } from '../../invoke/Workspace';
 
 export const Workspaces = (): JSX.Element => {
