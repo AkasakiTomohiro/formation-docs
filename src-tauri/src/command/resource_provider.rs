@@ -1,6 +1,6 @@
-use std::path::PathBuf;
+use std::{io::Cursor, path::PathBuf};
 use tokio::fs;
-use tokio::io::AsyncWriteExt;
+use zip::ZipArchive;
 
 use dirs::config_local_dir;
 
@@ -15,7 +15,18 @@ fn get_resource_provider_save_path(region: &str) -> Option<PathBuf> {
     return match config_local_dir() {
         Some(dir) => Some(
             dir.join(super::app_config::APP_CONFIG_DIRECTORY_NAME)
-                .join(format!("CloudformationSchema-{}.zip", region)),
+                .join(format!("CloudformationSchema-{}", region)),
+        ),
+        None => None,
+    };
+}
+
+fn get_resource_provider_save_dir(region: &str) -> Option<PathBuf> {
+    return match config_local_dir() {
+        Some(dir) => Some(
+            dir.join(super::app_config::APP_CONFIG_DIRECTORY_NAME)
+                .join("CloudformationSchema")
+                .join(region),
         ),
         None => None,
     };
@@ -36,35 +47,74 @@ async fn get_resource_provider_dl(region: &str) -> Result<(), ()> {
             return Err(());
         }
     }
-    let mut response = match reqwest::get(url).await {
+    let response = match reqwest::get(url).await {
         Ok(res) => res,
         Err(_) => {
             println!("Failed to get resource provider");
             return Err(());
         }
     };
-    let mut file = match fs::File::create(save_path).await {
-        Ok(file) => file,
+    let bytes = match response.bytes().await {
+        Ok(bytes) => bytes,
         Err(_) => {
-            println!("Failed to create resource provider file");
+            println!("Failed to read resource provider bytes");
             return Err(());
         }
     };
-    while let Some(chunk_result) = response.chunk().await.transpose() {
-        match chunk_result {
-            Ok(chunk) => {
-                if let Err(e) = file.write_all(&chunk).await {
-                    println!("Failed to write chunk to file: {}", e);
-                    return Err(());
-                }
-            }
-            Err(e) => {
-                println!("Failed to read chunk from response: {}", e);
+    let content = Cursor::new(bytes);
+
+    // ZIPファイルを解凍
+    let output_dir = match get_resource_provider_save_dir(region) {
+        Some(path) => path,
+        None => {
+            println!("Failed to get config local dir");
+            return Err(());
+        }
+    };
+    let mut archive = match ZipArchive::new(content) {
+        Ok(archive) => archive,
+        Err(_) => {
+            println!("Failed to create ZIP archive");
+            return Err(());
+        }
+    };
+    for i in 0..archive.len() {
+        let mut file = match archive.by_index(i) {
+            Ok(file) => file,
+            Err(_) => {
+                println!("Failed to get file from ZIP archive");
                 return Err(());
             }
+        };
+        let out_path = output_dir.join(file.name());
+
+        if file.is_dir() {
+            if let Err(_) = std::fs::create_dir_all(&out_path) {
+                println!("Failed to create directory in output path");
+                return Err(());
+            };
+        } else {
+            if let Some(parent) = out_path.parent() {
+                if let Err(_) = std::fs::create_dir_all(parent) {
+                    println!("Failed to create parent directory in output path");
+                    return Err(());
+                };
+            }
+            let mut outfile = match std::fs::File::create(&out_path) {
+                Ok(file) => file,
+                Err(_) => {
+                    println!("Failed to create file in output directory");
+                    return Err(());
+                }
+            };
+            if let Err(_) = std::io::copy(&mut file, &mut outfile) {
+                println!("Failed to copy file to output directory");
+                return Err(());
+            };
         }
     }
-    return Ok(());
+
+    Ok(())
 }
 
 #[tauri::command]
