@@ -25,25 +25,23 @@ const router = createBrowserRouter([
         <Workspaces />
       </Header>
     ),
+  },
+  {
+    path: 'workspaces/:workspaceId',
+    element: (
+      <Header>
+        <WorkspaceLayout />
+      </Header>
+    ),
+    loader: workspaceLoader,
     children: [
       {
-        path: ':workspaceId',
-        element: (
-          <Header>
-            <WorkspaceLayout />
-          </Header>
-        ),
-        loader: workspaceLoader,
-        children: [
-          {
-            index: true,
-            element: <WorkspaceHome />,
-          },
-          {
-            path: 'edit',
-            element: <WorkspaceEdit />,
-          },
-        ],
+        index: true,
+        element: <WorkspaceHome />,
+      },
+      {
+        path: 'edit',
+        element: <WorkspaceEdit />,
       },
     ],
   },
