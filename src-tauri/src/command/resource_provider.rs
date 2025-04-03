@@ -1,3 +1,4 @@
+use super::super::api::github;
 use std::{io::Cursor, path::PathBuf};
 use tokio::fs;
 use zip::ZipArchive;
@@ -117,9 +118,29 @@ async fn get_resource_provider_dl(region: &str) -> Result<(), ()> {
     Ok(())
 }
 
+async fn get_service_data_dl() -> Result<(), ()> {
+    let branch = github::branch::get_branch("aws", "aws-cli", "v2")
+        .await
+        .unwrap();
+
+    let commit_sha = match branch["commit"]["sha"].as_str() {
+        Some(sha) => sha,
+        None => {
+            println!("Failed to get commit SHA from branch data");
+            return Err(());
+        }
+    };
+    println!("Branch commit SHA: {:?}", commit_sha);
+
+    return Ok(());
+}
+
 #[tauri::command]
 pub async fn setup_app() -> Result<(), ()> {
     if let Err(_) = get_resource_provider_dl("us-east-1").await {
+        return Err(());
+    }
+    if let Err(_) = get_service_data_dl().await {
         return Err(());
     }
     if let Err(_) = super::app_config::initialized_app_config().await {
