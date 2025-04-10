@@ -20,6 +20,13 @@ pub struct AppConfig {
     pub workspaces: Vec<WorkspaceInfo>,
     pub initialized: bool,
     pub initialized_at: String,
+    pub aws_cli_commit_hash: Option<String>,
+}
+pub struct AppConfigUpdate {
+    pub workspaces: Option<Vec<WorkspaceInfo>>,
+    pub initialized: Option<bool>,
+    pub initialized_at: Option<String>,
+    pub aws_cli_commit_hash: Option<Option<String>>,
 }
 
 impl AppConfig {
@@ -28,6 +35,7 @@ impl AppConfig {
             workspaces: vec![],
             initialized: false,
             initialized_at: Utc::now().to_string(),
+            aws_cli_commit_hash: None,
         }
     }
 
@@ -104,30 +112,22 @@ pub async fn add_workspace_to_app_config(
         id: workspace_id.clone(),
         directory: workspace_directory.to_string(),
     };
-    let app_config = AppConfig {
-        workspaces: app_config
-            .workspaces
-            .clone()
-            .iter()
-            .chain([workspace_info].iter())
-            .cloned()
-            .collect(),
-        initialized: app_config.initialized,
-        initialized_at: app_config.initialized_at,
-    };
-    let app_config_json = match serde_json::to_string(&app_config) {
-        Ok(json) => json,
-        Err(_) => return Err(CommandResult::failed("Failed to serialize AppConfig")),
-    };
-    let app_config_path = match app_config_path() {
-        Some(dir) => dir,
-        None => {
-            return Err(CommandResult::failed(
-                "Failed to get local config directory",
-            ))
-        }
-    };
-    return match fs::write(app_config_path, app_config_json).await {
+    return match save_app_config(AppConfigUpdate {
+        workspaces: Some(
+            app_config
+                .workspaces
+                .clone()
+                .iter()
+                .chain([workspace_info].iter())
+                .cloned()
+                .collect(),
+        ),
+        initialized: None,
+        initialized_at: None,
+        aws_cli_commit_hash: None,
+    })
+    .await
+    {
         Ok(_) => Ok(CommandResult::success(workspace_id)),
         Err(_) => Err(CommandResult::failed("Failed to write AppConfig")),
     };
@@ -147,27 +147,13 @@ pub async fn delete_workspace_from_app_config(
         .filter(|workspace| workspace.id != workspace_id)
         .cloned()
         .collect();
-    let app_config = AppConfig {
-        workspaces: workspaces,
-        initialized: app_config.initialized,
-        initialized_at: app_config.initialized_at,
-    };
-    let app_config_json = match serde_json::to_string(&app_config) {
-        Ok(json) => json,
-        Err(_) => return Err(CommandResult::failed("Failed to serialize AppConfig")),
-    };
-    let app_config_path = match app_config_path() {
-        Some(dir) => dir,
-        None => {
-            return Err(CommandResult::failed(
-                "Failed to get local config directory",
-            ))
-        }
-    };
-    return match fs::write(app_config_path, app_config_json).await {
-        Ok(_) => Ok(CommandResult::success(())),
-        Err(_) => Err(CommandResult::failed("Failed to write AppConfig")),
-    };
+    return save_app_config(AppConfigUpdate {
+        workspaces: Some(workspaces),
+        initialized: None,
+        initialized_at: None,
+        aws_cli_commit_hash: None,
+    })
+    .await;
 }
 
 pub async fn initialized_app_config() -> Result<CommandResult<()>, CommandResult> {
@@ -175,12 +161,36 @@ pub async fn initialized_app_config() -> Result<CommandResult<()>, CommandResult
         Ok(result) => result.value,
         Err(_) => return Err(CommandResult::failed("Failed to read AppConfig")),
     };
-    let app_config = AppConfig {
-        workspaces: app_config.workspaces,
-        initialized: true,
-        initialized_at: Utc::now().to_string(),
+    if app_config.initialized {
+        return Ok(CommandResult::success(()));
+    }
+    return save_app_config(AppConfigUpdate {
+        workspaces: None,
+        initialized: Some(true),
+        initialized_at: Some(Utc::now().to_string()),
+        aws_cli_commit_hash: None,
+    })
+    .await;
+}
+
+pub async fn save_app_config(
+    update_config: AppConfigUpdate,
+) -> Result<CommandResult<()>, CommandResult> {
+    let app_config = match read_app_config().await {
+        Ok(result) => result.value,
+        Err(_) => return Err(CommandResult::failed("Failed to read AppConfig")),
     };
-    let app_config_json = match serde_json::to_string(&app_config) {
+    let new_app_config = AppConfig {
+        workspaces: update_config.workspaces.unwrap_or(app_config.workspaces),
+        initialized: update_config.initialized.unwrap_or(app_config.initialized),
+        initialized_at: update_config
+            .initialized_at
+            .unwrap_or(app_config.initialized_at),
+        aws_cli_commit_hash: update_config
+            .aws_cli_commit_hash
+            .unwrap_or(app_config.aws_cli_commit_hash),
+    };
+    let app_config_json = match serde_json::to_string(&new_app_config) {
         Ok(json) => json,
         Err(_) => return Err(CommandResult::failed("Failed to serialize AppConfig")),
     };
