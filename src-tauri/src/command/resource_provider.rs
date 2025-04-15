@@ -22,8 +22,6 @@ const AWS_CLI_PATH: &str = "awscli/botocore/data";
 pub enum GetServiceDataDownloadError {
     #[error("app error: {0}")]
     App(#[from] AppError),
-    #[error("octocrab error: {0}")]
-    Octocrab(#[from] octocrab::Error),
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
     #[error("github repos error: {0:?}")]
