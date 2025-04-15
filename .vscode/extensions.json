@@ -2,6 +2,7 @@
   "recommendations": [
     "tauri-apps.tauri-vscode",
     "biomejs.biome",
-    "rust-lang.rust-analyzer"
+    "rust-lang.rust-analyzer",
+    "vadimcn.vscode-lldb"
   ]
 }
