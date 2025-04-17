@@ -3,6 +3,9 @@ use std::path::PathBuf;
 
 use crate::api::github::repos::dl_zip_file;
 use crate::api::github::repos::GithubReposError;
+use crate::command::app_config::read_app_config;
+use crate::command::app_config::save_app_config;
+use crate::command::app_config::AppConfigUpdate;
 use crate::command::app_config::APP_CONFIG_DIRECTORY_NAME;
 use crate::utils::AppError;
 use dirs::config_local_dir;
@@ -13,6 +16,7 @@ use zip::ZipArchive;
 
 use super::super::api::cloudformation;
 use super::super::api::github;
+use super::app_config::AppConfig;
 
 const AWS_CLI_OWNER: &str = "aws";
 const AWS_CLI_REPO: &str = "aws-cli";
@@ -41,7 +45,7 @@ fn get_service_data_save_dir() -> Result<PathBuf, GetServiceDataDownloadError> {
     };
 }
 
-async fn get_service_data_dl() -> Result<(), GetServiceDataDownloadError> {
+async fn get_service_data_dl(app_config: AppConfig) -> Result<(), GetServiceDataDownloadError> {
     let branch = github::repos::get_branch("aws", "aws-cli", "v2")
         .await
         .unwrap();
@@ -58,7 +62,13 @@ async fn get_service_data_dl() -> Result<(), GetServiceDataDownloadError> {
     };
     println!("Branch commit SHA: {:?}", commit_sha);
 
-    // FIXME: コミットハッシュが保存されているものと一致しない場合のみダウンロードするように修正
+    // コミットハッシュが保存されているものと一致しない場合のみダウンロード
+    if app_config.aws_cli_commit_hash.is_some()
+        && app_config.aws_cli_commit_hash.unwrap() == commit_sha.to_string()
+    {
+        println!("Already downloaded service data, skipping download.");
+        return Ok(());
+    }
 
     // aws-cliのリポジトリをZipダウンロード
     let bytes = dl_zip_file(AWS_CLI_OWNER, AWS_CLI_REPO, commit_sha).await?;
@@ -98,18 +108,40 @@ async fn get_service_data_dl() -> Result<(), GetServiceDataDownloadError> {
         }
     }
 
+    // コミットハッシュを保存
+    if let Err(_) = save_app_config(AppConfigUpdate {
+        workspaces: None,
+        initialized: None,
+        initialized_at: None,
+        aws_cli_commit_hash: Some(Some(commit_sha.to_string())),
+    })
+    .await
+    {
+        return Err(GetServiceDataDownloadError::App(AppError::new(
+            "Failed to save commit SHA",
+        )));
+    }
+
     return Ok(());
 }
 
 #[tauri::command]
 pub async fn setup_app() -> Result<(), ()> {
-    if let Err(_) = cloudformation::schema::dl_resource_provider("us-east-1").await {
-        return Err(());
+    let app_config = match read_app_config().await {
+        Ok(result) => result.value,
+        Err(_) => return Err(()),
+    };
+
+    if app_config.initialized {
+        if let Err(_) = cloudformation::schema::dl_resource_provider("us-east-1").await {
+            return Err(());
+        }
+        if let Err(_) = super::app_config::initialized_app_config().await {
+            return Err(());
+        }
     }
-    if let Err(_) = get_service_data_dl().await {
-        return Err(());
-    }
-    if let Err(_) = super::app_config::initialized_app_config().await {
+
+    if let Err(_) = get_service_data_dl(app_config).await {
         return Err(());
     }
     return Ok(());

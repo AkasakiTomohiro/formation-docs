@@ -21,13 +21,9 @@ export function useAppConfig(): UseAppConfigResult {
   const loadAppConfigWrap = useCallback(async () => {
     const config = await loadAppConfig();
     setAppConfig(config);
-    if (config.initialized === false) {
-      await setupApp().then(() => {
-        navigate('/workspaces');
-      });
-    } else {
+    await setupApp().then(() => {
       navigate('/workspaces');
-    }
+    });
   }, []);
 
   useEffect(() => {
