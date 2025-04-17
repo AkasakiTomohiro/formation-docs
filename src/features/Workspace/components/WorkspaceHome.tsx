@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router';
+import { v4 as uuidv4 } from 'uuid';
 
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import Box from '@cloudscape-design/components/box';
@@ -11,8 +12,14 @@ import Pagination from '@cloudscape-design/components/pagination';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 
+import { loadStacks } from '../../../invoke/Stack';
+
 import type { FlashbarProps } from '@cloudscape-design/components';
 import type { WorkspaceLayoutLoaderData } from '../Loader';
+export interface Stack {
+  name: string;
+  description: string;
+}
 
 export const WorkspaceHome = (): JSX.Element => {
   const workspace = useOutletContext<WorkspaceLayoutLoaderData>();
@@ -21,6 +28,35 @@ export const WorkspaceHome = (): JSX.Element => {
     FlashbarProps.MessageDefinition[]
   >([]);
   console.log('Component', workspace);
+  const [stacks, setStacks] = useState<Stack[]>([]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    loadStacks(workspace.directory)
+      .then((stacks) => {
+        setStacks(stacks);
+        console.log('Stacks', stacks);
+      })
+      .catch((error) => {
+        const id = uuidv4();
+        console.error('Error loading stacks:', error);
+        setFlashbarItems([
+          ...flashbarItems,
+          {
+            type: 'error',
+            header: 'スタックの読み込みに失敗しました',
+            content: typeof error === 'string' ? error : undefined,
+            dismissible: true,
+            dismissLabel: 'close',
+            id: id,
+            onDismiss: () => {
+              setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+            },
+          },
+        ]);
+      });
+  }, []);
+
   const { items, collectionProps, paginationProps } = useCollection<{
     name: string;
     description: string;

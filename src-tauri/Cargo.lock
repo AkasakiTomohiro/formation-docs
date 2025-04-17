@@ -1371,6 +1371,7 @@ dependencies = [
  "bytes",
  "chrono",
  "dirs 6.0.0",
+ "globmatch",
  "globset",
  "log",
  "regex",
@@ -1736,6 +1737,16 @@ name = "glob"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8d1add55171497b4705a648c6b583acafb01d58050a51727785f0b2c8e0a2b2"
+
+[[package]]
+name = "globmatch"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c5d4150c6e70e3bce79303d8959fbb11533398b883464f71b5d8db8e880a20d8"
+dependencies = [
+ "globset",
+ "walkdir",
+]
 
 [[package]]
 name = "globset"
