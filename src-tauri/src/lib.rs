@@ -21,7 +21,7 @@ async fn open_workspace(
     }
     let window = WebviewWindowBuilder::new(
         &handle,
-        name,
+        format!("workspace-{}", id),
         tauri::WebviewUrl::App(PathBuf::from(format!("workspaces/{}", id))),
     )
     .title(name)
