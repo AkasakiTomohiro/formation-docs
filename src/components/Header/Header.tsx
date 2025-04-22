@@ -1,4 +1,5 @@
 import TopNavigation from '@cloudscape-design/components/top-navigation';
+import { Window } from '@tauri-apps/api/window';
 
 import type { HeaderProps } from './types';
 
@@ -9,6 +10,14 @@ export const Header = (props: HeaderProps): JSX.Element => {
         identity={{
           href: '/',
           title: 'FormationDocs',
+          onFollow: (event) => {
+            event.preventDefault();
+            Window.getByLabel('main').then((mainWindow) => {
+              if (mainWindow) {
+                mainWindow.setFocus();
+              }
+            });
+          },
         }}
       />
       {props.children}
