@@ -12,6 +12,7 @@ import Pagination from '@cloudscape-design/components/pagination';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import { invoke } from '@tauri-apps/api/core';
+import { Window } from '@tauri-apps/api/window';
 import { open } from '@tauri-apps/plugin-dialog';
 
 import { useWorkspaces } from '../../hooks/useWorkspaces';
@@ -41,28 +42,37 @@ export const Workspaces = (): JSX.Element => {
 
   const openWorkspace = useCallback(
     async (workspace: WorkspaceExpand) => {
-      const result = await invoke('open_workspace', {
-        id: workspace.id,
-        name: workspace.name,
-        directory: workspace.directory,
-      });
-      console.log({ result, workspace });
-      if (!result) {
-        const id = uuidv4();
-        setFlashbarItems([
-          ...flashbarItems,
-          {
-            type: 'error',
-            header: 'Workspaceが開けませんでした',
-            content: `「${workspace.directory}」が存在することを確認してください`,
-            dismissible: true,
-            dismissLabel: 'close',
-            id: id,
-            onDismiss: () => {
-              setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+      const workspaceWindow = await Window.getByLabel(
+        `workspace-${workspace.id}`,
+      );
+      if (workspaceWindow) {
+        // ワークスペースが開いている場合は、フォーカスを当てる
+        workspaceWindow.setFocus();
+      } else {
+        // ワークスペースが開いていない場合は、新しいウィンドウで開く
+        const result = await invoke('open_workspace', {
+          id: workspace.id,
+          name: workspace.name,
+          directory: workspace.directory,
+        });
+        console.log({ result, workspace });
+        if (!result) {
+          const id = uuidv4();
+          setFlashbarItems([
+            ...flashbarItems,
+            {
+              type: 'error',
+              header: 'Workspaceが開けませんでした',
+              content: `「${workspace.directory}」が存在することを確認してください`,
+              dismissible: true,
+              dismissLabel: 'close',
+              id: id,
+              onDismiss: () => {
+                setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+              },
             },
-          },
-        ]);
+          ]);
+        }
       }
     },
     [flashbarItems],
