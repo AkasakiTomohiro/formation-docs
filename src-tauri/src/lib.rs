@@ -49,6 +49,7 @@ pub fn run() {
             command::resource_provider::setup_app,
             command::stack::load_stacks_command,
             command::stack::delete_stack_command,
+            command::stack::import_stack_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

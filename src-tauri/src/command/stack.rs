@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::PathBuf;
 
 use crate::utils::AppError;
 use crate::utils::CommandResult;
@@ -105,6 +106,27 @@ fn delete_stack(workspace_directory: &str, stack_name: &str) -> Result<(), Delet
     return Ok(());
 }
 
+#[derive(Debug, Error)]
+enum ImportStacksError {
+    #[error("app error: {0}")]
+    App(#[from] AppError),
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
+}
+fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Result<(), ImportStacksError> {
+    let stack_file_path_buf = PathBuf::from(stack_file_path);
+    let filename = stack_file_path_buf
+        .file_name()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default();
+    fs::copy(
+        stack_file_path,
+        format!("{}/{}", workspace_directory, filename),
+    )?;
+    return Ok(());
+}
+
 #[tauri::command(rename_all = "snake_case")]
 pub fn load_stacks_command(
     workspace_directory: &str,
@@ -121,6 +143,17 @@ pub fn delete_stack_command(
     stack_name: &str,
 ) -> Result<CommandResult<()>, CommandResult> {
     return match delete_stack(workspace_directory, stack_name) {
+        Ok(_) => Ok(CommandResult::success(())),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn import_stack_command(
+    workspace_directory: &str,
+    stack_file_path: &str,
+) -> Result<CommandResult<()>, CommandResult> {
+    return match import_stack(workspace_directory, stack_file_path) {
         Ok(_) => Ok(CommandResult::success(())),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };

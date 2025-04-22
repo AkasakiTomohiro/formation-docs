@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import { useOutletContext } from 'react-router';
 
-import { deleteStack, loadStacks } from '../../../../invoke/Stack';
+import { deleteStack, importStack, loadStacks } from '../../../../invoke/Stack';
 
-import type { Stack } from '../WorkspaceHome';
 import type { WorkspaceLayoutLoaderData } from '../../Loader';
+import type { Stack } from '../WorkspaceHome';
 
 export type UseStacksResult = {
   /**
@@ -20,7 +20,7 @@ export type UseStacksResult = {
   /**
    * スタックをインポートする
    */
-  importStack: () => Promise<void>;
+  importStack: (stackFilePath: string) => Promise<void>;
 
   /**
    * スタックを読み込む
@@ -38,7 +38,12 @@ export function useStacks(): UseStacksResult {
   const [stacks, setStacks] = useState<Stack[]>([]);
   const workspace = useOutletContext<WorkspaceLayoutLoaderData>();
 
-  const importStack = useCallback(async () => {}, []);
+  const importStackWrap = useCallback(
+    async (stackFilePath: string) => {
+      await importStack(workspace.directory, stackFilePath);
+    },
+    [workspace.directory],
+  );
 
   const loadStacksWrap = useCallback(async () => {
     setState('loading');
@@ -66,7 +71,7 @@ export function useStacks(): UseStacksResult {
   return {
     state,
     stacks,
-    importStack,
+    importStack: importStackWrap,
     loadStacks: loadStacksWrap,
     deleteStack: deleteStackWrap,
   };
