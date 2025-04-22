@@ -2,9 +2,10 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["*"],
+  "windows": ["main", "workspace-*"],
   "permissions": [
     "core:default",
+    "core:window:allow-set-focus",
     "opener:default",
     "log:default",
     "dialog:default",
