@@ -89,12 +89,39 @@ fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, LoadStacksError>
     return Ok(stacks);
 }
 
+#[derive(Debug, Error)]
+pub enum DeleteStacksError {
+    #[error("app error: {0}")]
+    App(#[from] AppError),
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
+}
+fn delete_stack(workspace_directory: &str, stack_name: &str) -> Result<(), DeleteStacksError> {
+    fs::remove_file(format!(
+        "{}/{}.template.json",
+        workspace_directory, stack_name
+    ))?;
+    fs::remove_file(format!("{}/{}.meta.json", workspace_directory, stack_name))?;
+    return Ok(());
+}
+
 #[tauri::command(rename_all = "snake_case")]
 pub fn load_stacks_command(
     workspace_directory: &str,
 ) -> Result<CommandResult<Vec<Stack>>, CommandResult> {
     return match load_stacks(workspace_directory) {
         Ok(stacks) => Ok(CommandResult::success(stacks)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn delete_stack_command(
+    workspace_directory: &str,
+    stack_name: &str,
+) -> Result<CommandResult<()>, CommandResult> {
+    return match delete_stack(workspace_directory, stack_name) {
+        Ok(_) => Ok(CommandResult::success(())),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
