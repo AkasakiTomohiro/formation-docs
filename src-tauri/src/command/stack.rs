@@ -15,7 +15,7 @@ pub struct Stack {
 }
 
 #[derive(Debug, Error)]
-pub enum LoadStacksError {
+enum LoadStacksError {
     #[error("app error: {0}")]
     App(#[from] AppError),
     // FIXME: globmatchのエラーを含める
@@ -90,7 +90,7 @@ fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, LoadStacksError>
 }
 
 #[derive(Debug, Error)]
-pub enum DeleteStacksError {
+enum DeleteStacksError {
     #[error("app error: {0}")]
     App(#[from] AppError),
     #[error("io error: {0}")]
