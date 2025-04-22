@@ -142,10 +142,11 @@ fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Result<(), 
         .unwrap_or_default()
         .to_str()
         .unwrap_or_default();
-    fs::copy(
-        stack_file_path,
-        format!("{}/{}", workspace_directory, filename),
-    )?;
+    let copy_file_path = format!("{}/{}", workspace_directory, filename);
+    if copy_file_path == stack_file_path {
+        return Ok(());
+    }
+    fs::copy(stack_file_path, copy_file_path)?;
     return Ok(());
 }
 
