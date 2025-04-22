@@ -1,8 +1,8 @@
 import TopNavigation from '@cloudscape-design/components/top-navigation';
+import { invoke } from '@tauri-apps/api/core';
 import { Window } from '@tauri-apps/api/window';
 
 import type { HeaderProps } from './types';
-
 export const Header = (props: HeaderProps): JSX.Element => {
   return (
     <>
@@ -15,6 +15,12 @@ export const Header = (props: HeaderProps): JSX.Element => {
             Window.getByLabel('main').then((mainWindow) => {
               if (mainWindow) {
                 mainWindow.setFocus();
+              } else {
+                invoke('open_workspace', {
+                  id: 'main',
+                  name: 'formation-docs',
+                  directory: '',
+                });
               }
             });
           },

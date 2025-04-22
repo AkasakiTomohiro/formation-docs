@@ -14,16 +14,24 @@ async fn open_workspace(
     name: &str,
     directory: &str,
 ) -> Result<bool, ()> {
-    let path = Path::new(directory);
-    log::info!("Open: {}", path.to_str().unwrap());
-    if !path.exists() {
-        return Ok(false);
+    let window = if id == "main" {
+        WebviewWindowBuilder::new(
+            &handle,
+            "main".to_string(),
+            tauri::WebviewUrl::App(PathBuf::from("workspaces")),
+        )
+    } else {
+        let path = Path::new(directory);
+        log::info!("Open: {}", path.to_str().unwrap());
+        if !path.exists() {
+            return Ok(false);
+        }
+        WebviewWindowBuilder::new(
+            &handle,
+            format!("workspace-{}", id),
+            tauri::WebviewUrl::App(PathBuf::from(format!("workspaces/{}", id))),
+        )
     }
-    let window = WebviewWindowBuilder::new(
-        &handle,
-        format!("workspace-{}", id),
-        tauri::WebviewUrl::App(PathBuf::from(format!("workspaces/{}", id))),
-    )
     .title(name)
     .build()
     .expect("failed to create new window");
