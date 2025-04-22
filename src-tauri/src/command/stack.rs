@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::Path;
 use std::path::PathBuf;
 
 use crate::utils::AppError;
@@ -16,9 +17,40 @@ pub struct Stack {
 }
 
 #[derive(Debug, Error)]
+enum LoadStackMetaError {
+    #[error("app error: {0}")]
+    App(#[from] AppError),
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
+}
+
+fn load_stack_meta(
+    workspace_directory: &str,
+    stack_name: &str,
+) -> Result<Value, LoadStackMetaError> {
+    // ${スタック名}.meta.jsonが存在するか確認
+    let meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
+    let meta_path = Path::new(&meta_path);
+    if !meta_path.exists() {
+        // ${スタック名}.meta.jsonを作成する
+        fs::File::create(&meta_path)?;
+        // 空のJSONを作成
+        let empty_json = "{}".to_string();
+        fs::write(&meta_path, empty_json)?;
+    }
+
+    // ${スタック名}.meta.jsonを読み込む
+    let meta_json = fs::read_to_string(&meta_path)?;
+    let meta_json: Value = serde_json::from_str(&meta_json).unwrap_or_default();
+    return Ok(meta_json);
+}
+
+#[derive(Debug, Error)]
 enum LoadStacksError {
     #[error("app error: {0}")]
     App(#[from] AppError),
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
     // FIXME: globmatchのエラーを含める
     // #[error("globmatch error: {0}")]
     // Globmatch(#[from] globmatch::Error),
@@ -43,14 +75,7 @@ fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, LoadStacksError>
     let mut stacks = Vec::new();
     for path in paths {
         // テンプレートファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_stack）
-        let template_json = match fs::read_to_string(&path) {
-            Ok(json) => json,
-            Err(_) => {
-                return Err(LoadStacksError::App(AppError::new(
-                    "Failed to read template.json",
-                )));
-            }
-        };
+        let template_json = fs::read_to_string(&path)?;
         let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
         let description_from_stack = template_json["Description"]
             .as_str()
@@ -63,21 +88,18 @@ fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, LoadStacksError>
             .to_str()
             .unwrap_or_default()
             .replace(".template.json", "");
-        let meta_path = path.with_file_name(format!("{}.meta.json", filename));
-        let meta_json = match fs::read_to_string(&meta_path) {
-            Ok(json) => json,
+
+        // メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
+        let description_from_meta = match load_stack_meta(workspace_directory, &filename) {
+            Ok(meta_json) => meta_json["description"]
+                .as_str()
+                .and_then(|desc: &str| Some(desc.to_string())),
             Err(_) => {
                 return Err(LoadStacksError::App(AppError::new(
-                    "Failed to read meta.json",
+                    "Failed to load stack meta",
                 )));
             }
         };
-        let meta_json: Value = serde_json::from_str(&meta_json).unwrap_or_default();
-
-        // メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
-        let description_from_meta = meta_json["description"]
-            .as_str()
-            .and_then(|desc: &str| Some(desc.to_string()));
 
         // アプリ返却用のデータ構造作成
         stacks.push(Stack {
