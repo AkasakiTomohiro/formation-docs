@@ -91,7 +91,7 @@ async fn load_workspace(workspace_id: &str) -> Result<WorkspaceMergeInfo, Worksp
     )));
 }
 
-pub async fn load_workspaces() -> Result<Vec<WorkspaceMergeInfo>, WorkspaceError> {
+async fn load_workspaces() -> Result<Vec<WorkspaceMergeInfo>, WorkspaceError> {
     let app_config = app_config::read_app_config().await?;
 
     let mut workspaces = Vec::new();
@@ -112,10 +112,7 @@ pub async fn load_workspaces() -> Result<Vec<WorkspaceMergeInfo>, WorkspaceError
     return Ok(workspaces);
 }
 
-pub async fn update_workspace(
-    workspace_id: &str,
-    workspace: Workspace,
-) -> Result<(), WorkspaceError> {
+async fn update_workspace(workspace_id: &str, workspace: Workspace) -> Result<(), WorkspaceError> {
     let app_config = app_config::read_app_config().await?;
 
     for workspace_info in app_config.workspaces.iter() {
