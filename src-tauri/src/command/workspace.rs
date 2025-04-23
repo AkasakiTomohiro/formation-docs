@@ -32,7 +32,7 @@ pub struct WorkspaceMergeInfo {
 }
 
 #[derive(Debug, Error)]
-enum WorkspaceError {
+pub enum WorkspaceError {
     #[error("app error: {0}")]
     App(#[from] AppError),
     #[error("io error: {0}")]
@@ -127,6 +127,34 @@ async fn update_workspace(workspace_id: &str, workspace: Workspace) -> Result<()
     return Err(WorkspaceError::App(AppError::new(
         "Failed to find Workspace",
     )));
+}
+
+pub async fn open_workspace(handle: tauri::AppHandle, id: &str) -> Result<bool, WorkspaceError> {
+    let window = if id == "main" {
+        tauri::WebviewWindowBuilder::new(
+            &handle,
+            "main".to_string(),
+            tauri::WebviewUrl::App(PathBuf::from("workspaces")),
+        )
+        .title("formation-docs")
+    } else {
+        let workspace_info = load_workspace(id).await?;
+        let path = Path::new(workspace_info.directory.as_str());
+        log::info!("Open: {}", path.to_str().unwrap());
+        if !path.exists() {
+            return Ok(false);
+        }
+        tauri::WebviewWindowBuilder::new(
+            &handle,
+            format!("workspace-{}", id),
+            tauri::WebviewUrl::App(PathBuf::from(format!("workspaces/{}", id))),
+        )
+        .title(workspace_info.name)
+    }
+    .build()
+    .expect("failed to create new window");
+    window.show().expect("failed to show window");
+    return Ok(true);
 }
 
 #[tauri::command]

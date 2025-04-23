@@ -2,41 +2,13 @@ mod api;
 mod command;
 mod utils;
 
-use std::path::Path;
-use std::path::PathBuf;
-use tauri::WebviewWindowBuilder;
-
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command(rename_all = "snake_case")]
-async fn open_workspace_command(
-    handle: tauri::AppHandle,
-    id: &str,
-    name: &str,
-    directory: &str,
-) -> Result<bool, ()> {
-    let window = if id == "main" {
-        WebviewWindowBuilder::new(
-            &handle,
-            "main".to_string(),
-            tauri::WebviewUrl::App(PathBuf::from("workspaces")),
-        )
-    } else {
-        let path = Path::new(directory);
-        log::info!("Open: {}", path.to_str().unwrap());
-        if !path.exists() {
-            return Ok(false);
-        }
-        WebviewWindowBuilder::new(
-            &handle,
-            format!("workspace-{}", id),
-            tauri::WebviewUrl::App(PathBuf::from(format!("workspaces/{}", id))),
-        )
+async fn open_workspace_command(handle: tauri::AppHandle, id: &str) -> Result<bool, ()> {
+    match command::workspace::open_workspace(handle, id).await {
+        Ok(result) => Ok(result),
+        Err(_) => Err(()),
     }
-    .title(name)
-    .build()
-    .expect("failed to create new window");
-    window.show().expect("failed to show window");
-    return Ok(true);
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

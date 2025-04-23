@@ -52,8 +52,6 @@ export const Workspaces = (): JSX.Element => {
         // ワークスペースが開いていない場合は、新しいウィンドウで開く
         const result = await invoke('open_workspace_command', {
           id: workspace.id,
-          name: workspace.name,
-          directory: workspace.directory,
         });
         console.log({ result, workspace });
         if (!result) {
