@@ -9,7 +9,20 @@
     "opener:default",
     "log:default",
     "dialog:default",
-    "http:default",
-    "dialog:allow-open"
+    "dialog:allow-open",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://schema.cloudformation.*.amazonaws.com/CloudformationSchema.zip"
+        },
+        {
+          "url": "https://api.github.com/repos/*/*/branches/*"
+        },
+        {
+          "url": "https://api.github.com/repos/*/*/zipball/*"
+        }
+      ]
+    }
   ]
 }
