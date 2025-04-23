@@ -15,7 +15,7 @@ export async function createWorkspace(
   directory: string,
 ): Promise<WorkspaceExpand> {
   const result = await invoke<CommandResult<WorkspaceExpand>>(
-    'create_workspace',
+    'create_workspace_command',
     {
       directory: directory,
     },
@@ -30,7 +30,7 @@ export async function loadWorkspace(
   workspaceId: string,
 ): Promise<WorkspaceExpand> {
   const result = await invoke<CommandResult<WorkspaceExpand>>(
-    'load_workspace',
+    'load_workspace_command',
     {
       workspace_id: workspaceId,
     },
@@ -42,8 +42,9 @@ export async function loadWorkspace(
 }
 
 export async function loadWorkspaces(): Promise<WorkspaceExpand[]> {
-  const result =
-    await invoke<CommandResult<WorkspaceExpand[]>>('load_workspaces');
+  const result = await invoke<CommandResult<WorkspaceExpand[]>>(
+    'load_workspaces_command',
+  );
   if (!result.success) {
     throw new Error(result.value);
   }
@@ -54,7 +55,7 @@ export async function updateWorkspace(
   workspaceId: string,
   workspace: Workspace,
 ): Promise<void> {
-  const result = await invoke<CommandResult<void>>('update_workspace', {
+  const result = await invoke<CommandResult<void>>('update_workspace_command', {
     workspace_id: workspaceId,
     workspace: workspace,
   });

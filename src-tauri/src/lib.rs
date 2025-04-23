@@ -8,7 +8,7 @@ use tauri::WebviewWindowBuilder;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command(rename_all = "snake_case")]
-async fn open_workspace(
+async fn open_workspace_command(
     handle: tauri::AppHandle,
     id: &str,
     name: &str,
@@ -47,14 +47,14 @@ pub fn run() {
         .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            open_workspace,
-            command::app_config::read_app_config,
-            command::app_config::delete_workspace_from_app_config,
-            command::workspace::create_workspace,
-            command::workspace::load_workspace,
-            command::workspace::update_workspace,
-            command::workspace::load_workspaces,
-            command::resource_provider::setup_app,
+            open_workspace_command,
+            command::app_config::read_app_config_command,
+            command::app_config::delete_workspace_from_app_config_command,
+            command::workspace::create_workspace_command,
+            command::workspace::load_workspace_command,
+            command::workspace::update_workspace_command,
+            command::workspace::load_workspaces_command,
+            command::resource_provider::setup_app_command,
             command::stack::load_stacks_command,
             command::stack::delete_stack_command,
             command::stack::import_stack_command,

@@ -23,7 +23,7 @@ const AWS_CLI_REPO: &str = "aws-cli";
 const AWS_CLI_PATH: &str = "awscli/botocore/data";
 
 #[derive(Debug, Error)]
-pub enum GetServiceDataDownloadError {
+pub enum ResourceProviderError {
     #[error("app error: {0}")]
     App(#[from] AppError),
     #[error("io error: {0}")]
@@ -34,18 +34,22 @@ pub enum GetServiceDataDownloadError {
     Zip(#[from] zip::result::ZipError),
     #[error("globset error: {0:?}")]
     Globset(#[from] globset::Error),
+    #[error("app config error: {0}")]
+    AppConfig(#[from] crate::command::app_config::AppConfigError),
+    #[error("cloud formation error: {0}")]
+    Cloudformation(#[from] super::super::api::cloudformation::schema::DlSchemaError),
 }
 
-fn get_service_data_save_dir() -> Result<PathBuf, GetServiceDataDownloadError> {
+fn get_service_data_save_dir() -> Result<PathBuf, ResourceProviderError> {
     return match config_local_dir() {
         Some(dir) => Ok(dir.join(APP_CONFIG_DIRECTORY_NAME).join("aws-cli")),
-        None => Err(GetServiceDataDownloadError::App(AppError::new(
+        None => Err(ResourceProviderError::App(AppError::new(
             "Failed to get config local dir",
         ))),
     };
 }
 
-async fn get_service_data_dl(app_config: AppConfig) -> Result<(), GetServiceDataDownloadError> {
+async fn get_service_data_dl(app_config: AppConfig) -> Result<(), ResourceProviderError> {
     let branch = github::repos::get_branch("aws", "aws-cli", "v2")
         .await
         .unwrap();
@@ -55,7 +59,7 @@ async fn get_service_data_dl(app_config: AppConfig) -> Result<(), GetServiceData
         Some(sha) => sha,
         None => {
             println!("Failed to get commit SHA from branch data");
-            return Err(GetServiceDataDownloadError::App(AppError::new(
+            return Err(ResourceProviderError::App(AppError::new(
                 "Failed to get commit SHA",
             )));
         }
@@ -95,7 +99,7 @@ async fn get_service_data_dl(app_config: AppConfig) -> Result<(), GetServiceData
                 Some(name) => name,
                 None => {
                     println!("Failed to get service name from file name: {}", file.name());
-                    return Err(GetServiceDataDownloadError::App(AppError::new(
+                    return Err(ResourceProviderError::App(AppError::new(
                         "Failed to get service name from file name",
                     )));
                 }
@@ -109,40 +113,31 @@ async fn get_service_data_dl(app_config: AppConfig) -> Result<(), GetServiceData
     }
 
     // コミットハッシュを保存
-    if let Err(_) = save_app_config(AppConfigUpdate {
+    save_app_config(AppConfigUpdate {
         workspaces: None,
         initialized: None,
         initialized_at: None,
         aws_cli_commit_hash: Some(Some(commit_sha.to_string())),
     })
-    .await
-    {
-        return Err(GetServiceDataDownloadError::App(AppError::new(
-            "Failed to save commit SHA",
-        )));
-    }
+    .await?;
 
     return Ok(());
 }
 
-#[tauri::command]
-pub async fn setup_app() -> Result<(), ()> {
-    let app_config = match read_app_config().await {
-        Ok(result) => result.value,
-        Err(_) => return Err(()),
-    };
-
+async fn setup_app() -> Result<(), ResourceProviderError> {
+    let app_config = read_app_config().await?;
     if app_config.initialized {
-        if let Err(_) = cloudformation::schema::dl_resource_provider("us-east-1").await {
-            return Err(());
-        }
-        if let Err(_) = super::app_config::initialized_app_config().await {
-            return Err(());
-        }
+        cloudformation::schema::dl_resource_provider("us-east-1").await?;
+        super::app_config::initialized_app_config().await?;
     }
-
-    if let Err(_) = get_service_data_dl(app_config).await {
-        return Err(());
-    }
+    get_service_data_dl(app_config).await?;
     return Ok(());
+}
+
+#[tauri::command]
+pub async fn setup_app_command() -> Result<(), ()> {
+    match setup_app().await {
+        Ok(_) => Ok(()),
+        Err(_) => Err(()),
+    }
 }

@@ -1,8 +1,10 @@
+use crate::utils::AppError;
 use crate::utils::CommandResult;
 use chrono::{DateTime, NaiveDateTime, Utc};
 use dirs::config_local_dir;
 use serde::{Deserialize, Serialize};
 use std::{path::PathBuf, str::FromStr};
+use thiserror::Error;
 use tokio::fs;
 use uuid::Uuid;
 
@@ -46,64 +48,51 @@ impl AppConfig {
     }
 }
 
-fn app_config_path() -> Option<PathBuf> {
-    return match config_local_dir() {
-        Some(dir) => Some(
-            dir.join(APP_CONFIG_DIRECTORY_NAME)
-                .join(APP_CONFIG_FILE_NAME),
-        ),
-        None => None,
-    };
+fn app_config_path() -> Result<PathBuf, AppConfigError> {
+    let dir = config_local_dir().ok_or(AppConfigError::App(AppError::new(
+        "Failed to get local config directory",
+    )))?;
+    return Ok(dir
+        .join(APP_CONFIG_DIRECTORY_NAME)
+        .join(APP_CONFIG_FILE_NAME));
 }
 
-#[tauri::command]
-pub async fn read_app_config() -> Result<CommandResult<AppConfig>, CommandResult> {
-    let app_config_path = match app_config_path() {
-        Some(dir) => dir,
-        None => {
-            return Err(CommandResult::failed(
-                "Failed to get local config directory",
-            ))
-        }
-    };
+#[derive(Debug, Error)]
+pub enum AppConfigError {
+    #[error("app error: {0}")]
+    App(#[from] AppError),
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("json error: {0}")]
+    Json(#[from] serde_json::Error),
+}
+
+pub async fn read_app_config() -> Result<AppConfig, AppConfigError> {
+    let app_config_path = app_config_path()?;
     match app_config_path.exists() {
         true => {
-            let app_config_json = match fs::read_to_string(app_config_path).await {
-                Ok(json) => json,
-                Err(_) => return Err(CommandResult::failed("Failed to read AppConfig")),
-            };
-            return match serde_json::from_str::<AppConfig>(&app_config_json) {
-                Ok(config) => Ok(CommandResult::success(config)),
-                Err(_) => Err(CommandResult::failed("Failed to parse AppConfig")),
-            };
+            let app_config_json = fs::read_to_string(app_config_path).await?;
+            return Ok(serde_json::from_str::<AppConfig>(&app_config_json)?);
         }
         false => {
             // Create the app config directory if it doesn't exist
             let app_config = AppConfig::new();
-            let app_config_json = match serde_json::to_string(&app_config) {
-                Ok(json) => json,
-                Err(_) => return Err(CommandResult::failed("Failed to serialize AppConfig")),
-            };
-            return match fs::write(app_config_path, app_config_json).await {
-                Ok(_) => Ok(CommandResult::success(app_config)),
-                Err(_) => Err(CommandResult::failed("Failed to write AppConfig")),
-            };
+            let app_config_json = serde_json::to_string(&app_config)?;
+            fs::write(app_config_path, app_config_json).await?;
+            return Ok(app_config);
         }
     }
 }
 
 pub async fn add_workspace_to_app_config(
     workspace_directory: &str,
-) -> Result<CommandResult<String>, CommandResult<String>> {
-    let app_config = match read_app_config().await {
-        Ok(result) => result.value,
-        Err(_) => return Err(CommandResult::failed("Failed to read AppConfig")),
-    };
+) -> Result<String, AppConfigError> {
+    let app_config = read_app_config().await?;
 
     // すでに登録されている場合は登録IDを返す
     for workspace in app_config.workspaces.iter() {
         if workspace.directory == workspace_directory {
-            return Ok(CommandResult::success(workspace.id.clone()));
+            return Ok(workspace.id.clone());
         }
     }
 
@@ -112,7 +101,7 @@ pub async fn add_workspace_to_app_config(
         id: workspace_id.clone(),
         directory: workspace_directory.to_string(),
     };
-    return match save_app_config(AppConfigUpdate {
+    save_app_config(AppConfigUpdate {
         workspaces: Some(
             app_config
                 .workspaces
@@ -126,60 +115,44 @@ pub async fn add_workspace_to_app_config(
         initialized_at: None,
         aws_cli_commit_hash: None,
     })
-    .await
-    {
-        Ok(_) => Ok(CommandResult::success(workspace_id)),
-        Err(_) => Err(CommandResult::failed("Failed to write AppConfig")),
-    };
+    .await?;
+    return Ok(workspace_id);
 }
 
-#[tauri::command(rename_all = "snake_case")]
-pub async fn delete_workspace_from_app_config(
-    workspace_id: &str,
-) -> Result<CommandResult<()>, CommandResult<String>> {
-    let app_config = match read_app_config().await {
-        Ok(result) => result.value,
-        Err(_) => return Err(CommandResult::failed("Failed to read AppConfig")),
-    };
+pub async fn delete_workspace_from_app_config(workspace_id: &str) -> Result<(), AppConfigError> {
+    let app_config = read_app_config().await?;
     let workspaces = app_config
         .workspaces
         .iter()
         .filter(|workspace| workspace.id != workspace_id)
         .cloned()
         .collect();
-    return save_app_config(AppConfigUpdate {
+    save_app_config(AppConfigUpdate {
         workspaces: Some(workspaces),
         initialized: None,
         initialized_at: None,
         aws_cli_commit_hash: None,
     })
-    .await;
+    .await?;
+    return Ok(());
 }
 
-pub async fn initialized_app_config() -> Result<CommandResult<()>, CommandResult> {
-    let app_config = match read_app_config().await {
-        Ok(result) => result.value,
-        Err(_) => return Err(CommandResult::failed("Failed to read AppConfig")),
-    };
-    if app_config.initialized {
-        return Ok(CommandResult::success(()));
+pub async fn initialized_app_config() -> Result<(), AppConfigError> {
+    let app_config = read_app_config().await?;
+    if app_config.initialized == false {
+        save_app_config(AppConfigUpdate {
+            workspaces: None,
+            initialized: Some(true),
+            initialized_at: Some(Utc::now().to_string()),
+            aws_cli_commit_hash: None,
+        })
+        .await?;
     }
-    return save_app_config(AppConfigUpdate {
-        workspaces: None,
-        initialized: Some(true),
-        initialized_at: Some(Utc::now().to_string()),
-        aws_cli_commit_hash: None,
-    })
-    .await;
+    return Ok(());
 }
 
-pub async fn save_app_config(
-    update_config: AppConfigUpdate,
-) -> Result<CommandResult<()>, CommandResult> {
-    let app_config = match read_app_config().await {
-        Ok(result) => result.value,
-        Err(_) => return Err(CommandResult::failed("Failed to read AppConfig")),
-    };
+pub async fn save_app_config(update_config: AppConfigUpdate) -> Result<(), AppConfigError> {
+    let app_config = read_app_config().await?;
     let new_app_config = AppConfig {
         workspaces: update_config.workspaces.unwrap_or(app_config.workspaces),
         initialized: update_config.initialized.unwrap_or(app_config.initialized),
@@ -190,20 +163,26 @@ pub async fn save_app_config(
             .aws_cli_commit_hash
             .unwrap_or(app_config.aws_cli_commit_hash),
     };
-    let app_config_json = match serde_json::to_string(&new_app_config) {
-        Ok(json) => json,
-        Err(_) => return Err(CommandResult::failed("Failed to serialize AppConfig")),
+    let app_config_json = serde_json::to_string(&new_app_config)?;
+    let app_config_path = app_config_path()?;
+    fs::write(app_config_path, app_config_json).await?;
+    return Ok(());
+}
+
+#[tauri::command]
+pub async fn read_app_config_command() -> Result<CommandResult<AppConfig>, CommandResult> {
+    return match read_app_config().await {
+        Ok(result) => Ok(CommandResult::success(result)),
+        Err(_) => Err(CommandResult::failed("Failed to read AppConfig")),
     };
-    let app_config_path = match app_config_path() {
-        Some(dir) => dir,
-        None => {
-            return Err(CommandResult::failed(
-                "Failed to get local config directory",
-            ))
-        }
-    };
-    return match fs::write(app_config_path, app_config_json).await {
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn delete_workspace_from_app_config_command(
+    workspace_id: &str,
+) -> Result<CommandResult<()>, CommandResult<String>> {
+    return match delete_workspace_from_app_config(workspace_id).await {
         Ok(_) => Ok(CommandResult::success(())),
-        Err(_) => Err(CommandResult::failed("Failed to write AppConfig")),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
