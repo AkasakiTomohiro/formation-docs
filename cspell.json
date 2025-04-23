@@ -6,12 +6,17 @@
   "words": [
     "akasaki",
     "cdylib",
+    "chrono",
     "Flashbar",
+    "globmatch",
+    "globset",
+    "indexmap",
     "reqwest",
     "rlib",
     "serde",
     "staticlib",
-    "tauri"
+    "tauri",
+    "thiserror"
   ],
   "ignoreWords": [],
   "import": []

@@ -134,6 +134,10 @@ enum ImportStacksError {
     App(#[from] AppError),
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
+    #[error("yaml error: {0}")]
+    Yaml(#[from] serde_yaml::Error),
+    #[error("json error: {0}")]
+    Json(#[from] serde_json::Error),
 }
 fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Result<(), ImportStacksError> {
     let stack_file_path_buf = PathBuf::from(stack_file_path);
@@ -143,10 +147,25 @@ fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Result<(), 
         .to_str()
         .unwrap_or_default();
     let copy_file_path = format!("{}/{}", workspace_directory, filename);
+
     if copy_file_path == stack_file_path {
         return Ok(());
     }
-    fs::copy(stack_file_path, copy_file_path)?;
+
+    if filename.ends_with(".yaml") || filename.ends_with(".yml") {
+        // YAMLファイルをJSONに変換して保存
+        let yaml_content = fs::read_to_string(stack_file_path)?;
+        let yaml_value: serde_yaml::Value = serde_yaml::from_str(&yaml_content)?;
+        let json_content = serde_json::to_string_pretty(&yaml_value)?;
+        let json_file_path = copy_file_path
+            .replace(".yaml", ".json")
+            .replace(".yml", ".json");
+        fs::write(json_file_path, json_content)?;
+    } else {
+        // 通常のコピー処理
+        fs::copy(stack_file_path, copy_file_path)?;
+    }
+
     return Ok(());
 }
 
