@@ -1,9 +1,9 @@
 use crate::utils::AppError;
 use crate::utils::CommandResult;
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::Utc;
 use dirs::config_local_dir;
 use serde::{Deserialize, Serialize};
-use std::{path::PathBuf, str::FromStr};
+use std::path::PathBuf;
 use thiserror::Error;
 use tokio::fs;
 use uuid::Uuid;
@@ -39,12 +39,6 @@ impl AppConfig {
             initialized_at: Utc::now().to_string(),
             aws_cli_commit_hash: None,
         }
-    }
-
-    pub fn initialized(&self) -> DateTime<Utc> {
-        return NaiveDateTime::from_str(self.initialized_at.as_str())
-            .unwrap()
-            .and_utc();
     }
 }
 
@@ -134,20 +128,6 @@ pub async fn delete_workspace_from_app_config(workspace_id: &str) -> Result<(), 
         aws_cli_commit_hash: None,
     })
     .await?;
-    return Ok(());
-}
-
-pub async fn initialized_app_config() -> Result<(), AppConfigError> {
-    let app_config = read_app_config().await?;
-    if app_config.initialized == false {
-        save_app_config(AppConfigUpdate {
-            workspaces: None,
-            initialized: Some(true),
-            initialized_at: Some(Utc::now().to_string()),
-            aws_cli_commit_hash: None,
-        })
-        .await?;
-    }
     return Ok(());
 }
 

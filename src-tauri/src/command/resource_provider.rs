@@ -8,6 +8,7 @@ use crate::command::app_config::save_app_config;
 use crate::command::app_config::AppConfigUpdate;
 use crate::command::app_config::APP_CONFIG_DIRECTORY_NAME;
 use crate::utils::AppError;
+use chrono::Utc;
 use dirs::config_local_dir;
 use globset::Glob;
 use regex::Regex;
@@ -126,9 +127,15 @@ async fn get_service_data_dl(app_config: AppConfig) -> Result<(), ResourceProvid
 
 async fn setup_app() -> Result<(), ResourceProviderError> {
     let app_config = read_app_config().await?;
-    if app_config.initialized {
+    if app_config.initialized == false {
         cloudformation::schema::dl_resource_provider("us-east-1").await?;
-        super::app_config::initialized_app_config().await?;
+        save_app_config(AppConfigUpdate {
+            workspaces: None,
+            initialized: Some(true),
+            initialized_at: Some(Utc::now().to_string()),
+            aws_cli_commit_hash: None,
+        })
+        .await?;
     }
     get_service_data_dl(app_config).await?;
     return Ok(());
