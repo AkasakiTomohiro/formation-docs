@@ -18,7 +18,8 @@ import { useStacks } from './hooks/useStacks';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
 import type { WorkspaceLayoutLoaderData } from '../Loader';
-export interface Stack {
+
+export interface StackInfo {
   name: string;
   description_from_meta?: string;
   description_from_stack?: string;
@@ -31,8 +32,8 @@ export const WorkspaceHome = (): JSX.Element => {
     FlashbarProps.MessageDefinition[]
   >([]);
   const { state, stacks, importStack, loadStacks, deleteStack } = useStacks();
-  const [selectedItems, setSelectedItems] = useState<Stack[]>([]);
-  const { items, collectionProps, paginationProps } = useCollection<Stack>(
+  const [selectedItems, setSelectedItems] = useState<StackInfo[]>([]);
+  const { items, collectionProps, paginationProps } = useCollection<StackInfo>(
     stacks,
     {
       pagination: { pageSize: 10 },

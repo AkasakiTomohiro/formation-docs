@@ -4,7 +4,7 @@ import { useOutletContext } from 'react-router';
 import { deleteStack, importStack, loadStacks } from '../../../../invoke/Stack';
 
 import type { WorkspaceLayoutLoaderData } from '../../Loader';
-import type { Stack } from '../WorkspaceHome';
+import type { StackInfo } from '../WorkspaceHome';
 
 export type UseStacksResult = {
   /**
@@ -15,7 +15,7 @@ export type UseStacksResult = {
   /**
    * スタック一覧
    */
-  stacks: Stack[];
+  stacks: StackInfo[];
 
   /**
    * スタックをインポートする
@@ -30,12 +30,12 @@ export type UseStacksResult = {
   /**
    * スタックを削除する
    */
-  deleteStack: (selectedStack: Stack) => Promise<void>;
+  deleteStack: (selectedStack: StackInfo) => Promise<void>;
 };
 
 export function useStacks(): UseStacksResult {
   const [state, setState] = useState<'loading' | 'loaded'>('loading');
-  const [stacks, setStacks] = useState<Stack[]>([]);
+  const [stacks, setStacks] = useState<StackInfo[]>([]);
   const workspace = useOutletContext<WorkspaceLayoutLoaderData>();
 
   const importStackWrap = useCallback(
@@ -58,7 +58,7 @@ export function useStacks(): UseStacksResult {
   }, [workspace]);
 
   const deleteStackWrap = useCallback(
-    async (selectedStack: Stack) => {
+    async (selectedStack: StackInfo) => {
       const newStacks = stacks.filter(
         (stack) => stack.name !== selectedStack.name,
       );

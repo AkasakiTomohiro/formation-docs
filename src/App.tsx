@@ -3,6 +3,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router';
 import { Header } from './components/Header';
 import { AppSetup } from './features/AppSetup';
 import {
+  Stack,
   WorkspaceEdit,
   WorkspaceHome,
   WorkspaceLayout,
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: 'edit',
         element: <WorkspaceEdit />,
+      },
+      {
+        path: 'stacks/:stackId',
+        element: <Stack />,
       },
     ],
   },
