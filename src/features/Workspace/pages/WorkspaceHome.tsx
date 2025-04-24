@@ -3,6 +3,7 @@ import { useNavigate, useOutletContext } from 'react-router';
 import { v4 as uuidv4 } from 'uuid';
 
 import { useCollection } from '@cloudscape-design/collection-hooks';
+import { Link } from '@cloudscape-design/components';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import ContentLayout from '@cloudscape-design/components/content-layout';
@@ -126,7 +127,15 @@ export const WorkspaceHome = (): JSX.Element => {
           {
             id: 'Name',
             header: 'Stack name',
-            cell: (e) => e.name,
+            cell: (e) => (
+              <Link
+                onClick={() =>
+                  navigate(`/workspaces/${workspace.id}/stacks/${e.name}`)
+                }
+              >
+                {e.name}
+              </Link>
+            ),
             isRowHeader: true,
           },
           {

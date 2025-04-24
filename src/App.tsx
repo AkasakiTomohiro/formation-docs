@@ -3,11 +3,11 @@ import { RouterProvider, createBrowserRouter } from 'react-router';
 import { Header } from './components/Header';
 import { AppSetup } from './features/AppSetup';
 import {
+  WorkspaceEdit,
   WorkspaceHome,
   WorkspaceLayout,
   workspaceLoader,
 } from './features/Workspace';
-import { WorkspaceEdit } from './features/Workspace/components/WorkspaceEdit';
 import { Workspaces } from './features/Workspaces';
 
 const router = createBrowserRouter([
