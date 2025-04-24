@@ -18,8 +18,6 @@ export const Header = (props: HeaderProps): JSX.Element => {
               } else {
                 invoke('open_workspace', {
                   id: 'main',
-                  name: 'formation-docs',
-                  directory: '',
                 });
               }
             });
