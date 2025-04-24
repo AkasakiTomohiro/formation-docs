@@ -16,7 +16,7 @@ export const Header = (props: HeaderProps): JSX.Element => {
               if (mainWindow) {
                 mainWindow.setFocus();
               } else {
-                invoke('open_workspace', {
+                invoke('open_workspace_command', {
                   id: 'main',
                 });
               }
