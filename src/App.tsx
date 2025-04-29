@@ -1,15 +1,18 @@
-import { RouterProvider, createBrowserRouter } from 'react-router';
+import { createBrowserRouter, RouterProvider } from "react-router";
 
-import { Header } from './components/Header';
-import { AppSetup } from './features/AppSetup';
+import { Header } from "./components/Header";
+import { AppSetup } from "./features/AppSetup";
 import {
-  Stack,
+  StackEdit,
+  StackHome,
+  StackLayout,
+  stackLoader,
   WorkspaceEdit,
   WorkspaceHome,
   WorkspaceLayout,
   workspaceLoader,
-} from './features/Workspace';
-import { Workspaces } from './features/Workspaces';
+} from "./features/Workspace";
+import { Workspaces } from "./features/Workspaces";
 
 const router = createBrowserRouter([
   {
@@ -21,7 +24,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: 'workspaces',
+    path: "workspaces",
     element: (
       <Header>
         <Workspaces />
@@ -29,7 +32,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: 'workspaces/:workspaceId',
+    path: "workspaces/:workspaceId",
     element: (
       <Header>
         <WorkspaceLayout />
@@ -42,12 +45,23 @@ const router = createBrowserRouter([
         element: <WorkspaceHome />,
       },
       {
-        path: 'edit',
+        path: "edit",
         element: <WorkspaceEdit />,
       },
       {
-        path: 'stacks/:stackId',
-        element: <Stack />,
+        path: "stacks/:stackId",
+        element: <StackLayout />,
+        loader: stackLoader,
+        children: [
+          {
+            index: true,
+            element: <StackHome />,
+          },
+          {
+            path: "edit",
+            element: <StackEdit />,
+          },
+        ],
       },
     ],
   },

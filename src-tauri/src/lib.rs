@@ -30,6 +30,7 @@ pub fn run() {
             command::stack::load_stacks_command,
             command::stack::delete_stack_command,
             command::stack::import_stack_command,
+            command::stack::load_stack_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

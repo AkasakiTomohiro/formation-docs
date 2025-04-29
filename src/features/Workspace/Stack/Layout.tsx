@@ -1,29 +1,40 @@
-import { useNavigate, useOutletContext, useParams } from 'react-router';
+import {
+  Outlet,
+  useLoaderData,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from "react-router";
 
 import {
   AppLayout,
   BreadcrumbGroup,
-  Container,
-  ContentLayout,
-  Header,
   SideNavigation,
-} from '@cloudscape-design/components';
+} from "@cloudscape-design/components";
 
-import type { WorkspaceLayoutLoaderData } from '../Loader';
+import type { WorkspaceLayoutContext } from "../Layout";
+import type { StackLayoutLoaderData } from "./Loader";
 
-export const Stack = (): JSX.Element => {
-  const workspace = useOutletContext<WorkspaceLayoutLoaderData>();
+export type StackLayoutContext = WorkspaceLayoutContext & StackLayoutLoaderData;
+
+export const StackLayout = (): JSX.Element => {
+  const workspace = useOutletContext<WorkspaceLayoutContext>();
   const navigate = useNavigate();
   const params = useParams();
   const stackId = params.stackId as string;
+
+  const result: StackLayoutContext = {
+    ...workspace,
+    ...useLoaderData<StackLayoutLoaderData>(),
+  };
   return (
     <AppLayout
       toolsHide
       breadcrumbs={
         <BreadcrumbGroup
           items={[
-            { text: workspace.name, href: '#' },
-            { text: stackId, href: '#' },
+            { text: workspace.name, href: "#" },
+            { text: stackId, href: "#" },
           ]}
           onClick={(e) => {
             if (e.detail.text === workspace.name) {
@@ -36,10 +47,10 @@ export const Stack = (): JSX.Element => {
       navigation={
         <SideNavigation
           header={{
-            href: '#',
+            href: "#",
             text: workspace.name,
           }}
-          items={[{ type: 'link', text: 'Page #1', href: '#' }]}
+          items={[{ type: "link", text: "Page #1", href: "#" }]}
         />
       }
       // notifications={
@@ -54,19 +65,7 @@ export const Stack = (): JSX.Element => {
       //     ]}
       //   />
       // }
-      content={
-        <ContentLayout header={<Header variant="h1">{stackId}</Header>}>
-          <Container
-            header={
-              <Header variant="h2" description="Container description">
-                Container header
-              </Header>
-            }
-          >
-            <div className="contentPlaceholder" />
-          </Container>
-        </ContentLayout>
-      }
+      content={<Outlet context={result} />}
     />
   );
 };

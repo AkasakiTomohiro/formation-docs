@@ -64,14 +64,7 @@ fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, LoadStackError> 
     let paths: Vec<_> = builder.into_iter().flatten().collect();
     let mut stacks = Vec::new();
     for path in paths {
-        // テンプレートファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_stack）
-        let template_json = fs::read_to_string(&path)?;
-        let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
-        let description_from_stack = template_json["Description"]
-            .as_str()
-            .and_then(|desc| Some(desc.to_string()));
-
-        // ${スタック名}.meta.jsonを取得する（description_from_metaと各リソースとそのパラメータの説明文）
+        // スタック名を取得する
         let filename = path
             .file_name()
             .unwrap_or_default()
@@ -79,24 +72,15 @@ fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, LoadStackError> 
             .unwrap_or_default()
             .replace(".template.json", "");
 
-        // メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
-        let description_from_meta = match load_stack_meta(workspace_directory, &filename) {
-            Ok(meta_json) => meta_json["description"]
-                .as_str()
-                .and_then(|desc: &str| Some(desc.to_string())),
+        // スタックを読み込む
+        let stack = match load_stack(workspace_directory, &filename) {
+            Ok(stack) => stack,
             Err(_) => {
-                return Err(LoadStackError::App(AppError::new(
-                    "Failed to load stack meta",
-                )));
+                return Err(LoadStackError::App(AppError::new("Failed to load stack")));
             }
         };
 
-        // アプリ返却用のデータ構造作成
-        stacks.push(Stack {
-            name: filename,
-            description_from_meta: description_from_meta,
-            description_from_stack: description_from_stack,
-        });
+        stacks.push(stack);
     }
 
     return Ok(stacks);
@@ -141,6 +125,36 @@ fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Result<(), 
     return Ok(());
 }
 
+fn load_stack(workspace_directory: &str, stack_name: &str) -> Result<Stack, LoadStackError> {
+    let template_path = format!("{}/{}.template.json", workspace_directory, stack_name);
+
+    // テンプレートファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_stack）
+    let template_json = fs::read_to_string(&template_path)?;
+    let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
+    let description_from_stack = template_json["Description"]
+        .as_str()
+        .and_then(|desc| Some(desc.to_string()));
+
+    // メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
+    let description_from_meta = match load_stack_meta(workspace_directory, stack_name) {
+        Ok(meta_json) => meta_json["description"]
+            .as_str()
+            .and_then(|desc: &str| Some(desc.to_string())),
+        Err(_) => {
+            return Err(LoadStackError::App(AppError::new(
+                "Failed to load stack meta",
+            )));
+        }
+    };
+
+    // アプリ返却用のデータ構造作成
+    return Ok(Stack {
+        name: stack_name.to_string(),
+        description_from_meta: description_from_meta,
+        description_from_stack: description_from_stack,
+    });
+}
+
 #[tauri::command(rename_all = "snake_case")]
 pub fn load_stacks_command(
     workspace_directory: &str,
@@ -169,6 +183,17 @@ pub fn import_stack_command(
 ) -> Result<CommandResult<()>, CommandResult> {
     return match import_stack(workspace_directory, stack_file_path) {
         Ok(_) => Ok(CommandResult::success(())),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn load_stack_command(
+    workspace_directory: &str,
+    stack_name: &str,
+) -> Result<CommandResult<Stack>, CommandResult> {
+    return match load_stack(workspace_directory, stack_name) {
+        Ok(stack) => Ok(CommandResult::success(stack)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }

@@ -45,3 +45,17 @@ export async function importStack(
   }
   return result.value;
 }
+
+export async function loadStack(
+  workspaceDirectory: string,
+  stackName: string,
+): Promise<StackInfo> {
+  const result = await invoke<CommandResult<StackInfo>>('load_stack_command', {
+    workspace_directory: workspaceDirectory,
+    stack_name: stackName,
+  });
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}
