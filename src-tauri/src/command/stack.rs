@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
+use crate::utils::get_window_state;
 use crate::utils::AppError;
 use crate::utils::CommandResult;
 use serde::{Deserialize, Serialize};
@@ -155,11 +156,17 @@ fn load_stack(workspace_directory: &str, stack_name: &str) -> Result<Stack, Load
     });
 }
 
-#[tauri::command(rename_all = "snake_case")]
+#[tauri::command]
 pub fn load_stacks_command(
-    workspace_directory: &str,
+    window: tauri::Window,
 ) -> Result<CommandResult<Vec<Stack>>, CommandResult> {
-    return match load_stacks(workspace_directory) {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match load_stacks(window_state.workspace_directory.as_str()) {
         Ok(stacks) => Ok(CommandResult::success(stacks)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
@@ -167,10 +174,16 @@ pub fn load_stacks_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn delete_stack_command(
-    workspace_directory: &str,
+    window: tauri::Window,
     stack_name: &str,
 ) -> Result<CommandResult<()>, CommandResult> {
-    return match delete_stack(workspace_directory, stack_name) {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match delete_stack(window_state.workspace_directory.as_str(), stack_name) {
         Ok(_) => Ok(CommandResult::success(())),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
@@ -178,10 +191,16 @@ pub fn delete_stack_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn import_stack_command(
-    workspace_directory: &str,
+    window: tauri::Window,
     stack_file_path: &str,
 ) -> Result<CommandResult<()>, CommandResult> {
-    return match import_stack(workspace_directory, stack_file_path) {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match import_stack(window_state.workspace_directory.as_str(), stack_file_path) {
         Ok(_) => Ok(CommandResult::success(())),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
@@ -189,10 +208,16 @@ pub fn import_stack_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn load_stack_command(
-    workspace_directory: &str,
+    window: tauri::Window,
     stack_name: &str,
 ) -> Result<CommandResult<Stack>, CommandResult> {
-    return match load_stack(workspace_directory, stack_name) {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match load_stack(window_state.workspace_directory.as_str(), stack_name) {
         Ok(stack) => Ok(CommandResult::success(stack)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };

@@ -1,6 +1,10 @@
 use super::app_config;
+use crate::command::workspace;
+use crate::utils::get_window_state;
+use crate::utils::set_window_state;
 use crate::utils::AppError;
 use crate::utils::CommandResult;
+use crate::utils::WindowState;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
@@ -112,21 +116,14 @@ async fn load_workspaces() -> Result<Vec<WorkspaceMergeInfo>, WorkspaceError> {
     return Ok(workspaces);
 }
 
-async fn update_workspace(workspace_id: &str, workspace: Workspace) -> Result<(), WorkspaceError> {
-    let app_config = app_config::read_app_config().await?;
-
-    for workspace_info in app_config.workspaces.iter() {
-        if workspace_info.id == workspace_id {
-            let workspace_path =
-                PathBuf::from(workspace_info.directory.as_str()).join(WORKSPACE_FILE_NAME);
-            let workspace_json = serde_json::to_string(&workspace).unwrap();
-            fs::write(&workspace_path, workspace_json).await?;
-            return Ok(());
-        }
-    }
-    return Err(WorkspaceError::App(AppError::new(
-        "Failed to find Workspace",
-    )));
+async fn update_workspace(
+    workspace_directory: &str,
+    workspace: Workspace,
+) -> Result<(), WorkspaceError> {
+    let workspace_path = PathBuf::from(workspace_directory).join(WORKSPACE_FILE_NAME);
+    let workspace_json = serde_json::to_string(&workspace).unwrap();
+    fs::write(&workspace_path, workspace_json).await?;
+    return Ok(());
 }
 
 pub async fn open_workspace(handle: tauri::AppHandle, id: &str) -> Result<bool, WorkspaceError> {
@@ -144,9 +141,16 @@ pub async fn open_workspace(handle: tauri::AppHandle, id: &str) -> Result<bool, 
         if !path.exists() {
             return Ok(false);
         }
+        let window_id = format!("workspace-{}", id);
+        set_window_state(
+            window_id.clone(),
+            WindowState {
+                workspace_directory: path.to_str().unwrap().to_string(),
+            },
+        );
         tauri::WebviewWindowBuilder::new(
             &handle,
-            format!("workspace-{}", id),
+            window_id,
             tauri::WebviewUrl::App(PathBuf::from(format!("workspaces/{}", id))),
         )
         .title(workspace_info.name)
@@ -188,10 +192,16 @@ pub async fn load_workspaces_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_workspace_command(
-    workspace_id: &str,
+    window: tauri::Window,
     workspace: Workspace,
 ) -> Result<CommandResult<()>, CommandResult> {
-    match update_workspace(workspace_id, workspace).await {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    match update_workspace(window_state.workspace_directory.as_str(), workspace).await {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to update Workspace")),
     }

@@ -1,9 +1,7 @@
 import { useCallback, useState } from 'react';
-import { useOutletContext } from 'react-router';
 
 import { deleteStack, importStack, loadStacks } from '../../../../invoke/Stack';
 
-import type { WorkspaceLayoutLoaderData } from '../../Loader';
 import type { StackInfo } from '../WorkspaceHome';
 
 export type UseStacksResult = {
@@ -36,36 +34,32 @@ export type UseStacksResult = {
 export function useStacks(): UseStacksResult {
   const [state, setState] = useState<'loading' | 'loaded'>('loading');
   const [stacks, setStacks] = useState<StackInfo[]>([]);
-  const workspace = useOutletContext<WorkspaceLayoutLoaderData>();
 
-  const importStackWrap = useCallback(
-    async (stackFilePath: string) => {
-      await importStack(workspace.directory, stackFilePath);
-    },
-    [workspace.directory],
-  );
+  const importStackWrap = useCallback(async (stackFilePath: string) => {
+    await importStack(stackFilePath);
+  }, []);
 
   const loadStacksWrap = useCallback(async () => {
     setState('loading');
     await new Promise((resolve) => setTimeout(resolve, 300));
-    await loadStacks(workspace.directory)
+    await loadStacks()
       .then((stacks) => {
         setStacks(stacks);
       })
       .finally(() => {
         setState('loaded');
       });
-  }, [workspace]);
+  }, []);
 
   const deleteStackWrap = useCallback(
     async (selectedStack: StackInfo) => {
       const newStacks = stacks.filter(
         (stack) => stack.name !== selectedStack.name,
       );
-      await deleteStack(workspace.directory, selectedStack.name);
+      await deleteStack(selectedStack.name);
       setStacks(newStacks);
     },
-    [workspace, stacks],
+    [stacks],
   );
 
   return {

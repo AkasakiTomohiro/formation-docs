@@ -51,12 +51,8 @@ export async function loadWorkspaces(): Promise<WorkspaceExpand[]> {
   return result.value;
 }
 
-export async function updateWorkspace(
-  workspaceId: string,
-  workspace: Workspace,
-): Promise<void> {
+export async function updateWorkspace(workspace: Workspace): Promise<void> {
   const result = await invoke<CommandResult<void>>('update_workspace_command', {
-    workspace_id: workspaceId,
     workspace: workspace,
   });
   if (!result.success) {

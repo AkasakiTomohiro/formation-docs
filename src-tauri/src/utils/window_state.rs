@@ -1,5 +1,6 @@
 use dashmap::DashMap;
 use std::sync::LazyLock;
+use tauri::Window;
 
 #[derive(Debug, Clone)]
 pub struct WindowState {
@@ -8,7 +9,8 @@ pub struct WindowState {
 
 static WINDOW_STATE: LazyLock<DashMap<String, WindowState>> = LazyLock::new(DashMap::new);
 
-pub fn get_window_state(window_id: String) -> Option<WindowState> {
+pub fn get_window_state(window: Window) -> Option<WindowState> {
+    let window_id = window.label().to_string();
     WINDOW_STATE
         .get(window_id.as_str())
         .map(|state| state.clone())
