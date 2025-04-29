@@ -1,23 +1,23 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router';
-import { v4 as uuidv4 } from 'uuid';
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate, useOutletContext } from "react-router";
+import { v4 as uuidv4 } from "uuid";
 
-import { useCollection } from '@cloudscape-design/collection-hooks';
-import { Link } from '@cloudscape-design/components';
-import Box from '@cloudscape-design/components/box';
-import Button from '@cloudscape-design/components/button';
-import ContentLayout from '@cloudscape-design/components/content-layout';
-import Flashbar from '@cloudscape-design/components/flashbar';
-import Header from '@cloudscape-design/components/header';
-import Pagination from '@cloudscape-design/components/pagination';
-import SpaceBetween from '@cloudscape-design/components/space-between';
-import Table from '@cloudscape-design/components/table';
-import { open } from '@tauri-apps/plugin-dialog';
+import { useCollection } from "@cloudscape-design/collection-hooks";
+import { Link } from "@cloudscape-design/components";
+import Box from "@cloudscape-design/components/box";
+import Button from "@cloudscape-design/components/button";
+import ContentLayout from "@cloudscape-design/components/content-layout";
+import Flashbar from "@cloudscape-design/components/flashbar";
+import Header from "@cloudscape-design/components/header";
+import Pagination from "@cloudscape-design/components/pagination";
+import SpaceBetween from "@cloudscape-design/components/space-between";
+import Table from "@cloudscape-design/components/table";
+import { open } from "@tauri-apps/plugin-dialog";
 
-import { useStacks } from './hooks/useStacks';
+import { useStacks } from "./hooks/useStacks";
 
-import type { FlashbarProps } from '@cloudscape-design/components';
-import type { WorkspaceLayoutLoaderData } from '../Loader';
+import type { FlashbarProps } from "@cloudscape-design/components";
+import type { WorkspaceLayoutContext } from "../Layout";
 
 export interface StackInfo {
   name: string;
@@ -26,7 +26,7 @@ export interface StackInfo {
 }
 
 export const WorkspaceHome = (): JSX.Element => {
-  const workspace = useOutletContext<WorkspaceLayoutLoaderData>();
+  const workspace = useOutletContext<WorkspaceLayoutContext>();
   const navigate = useNavigate();
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
@@ -37,7 +37,7 @@ export const WorkspaceHome = (): JSX.Element => {
     stacks,
     {
       pagination: { pageSize: 10 },
-    },
+    }
   );
 
   const importStackWrap = useCallback(async () => {
@@ -47,12 +47,12 @@ export const WorkspaceHome = (): JSX.Element => {
       defaultPath: workspace.directory,
       filters: [
         {
-          name: 'Template files',
-          extensions: ['template.json', 'template.yaml', 'template.yml'],
+          name: "Template files",
+          extensions: ["template.json", "template.yaml", "template.yml"],
         },
       ],
     });
-    console.log('Selected file:', selectedFile);
+    console.log("Selected file:", selectedFile);
     if (selectedFile !== null) {
       importStack(selectedFile)
         .then(loadStacks)
@@ -61,11 +61,11 @@ export const WorkspaceHome = (): JSX.Element => {
           setFlashbarItems([
             ...flashbarItems,
             {
-              type: 'error',
-              header: '新規スタックのインポートに失敗しました',
-              content: typeof error === 'string' ? error : undefined,
+              type: "error",
+              header: "新規スタックのインポートに失敗しました",
+              content: typeof error === "string" ? error : undefined,
               dismissible: true,
-              dismissLabel: 'close',
+              dismissLabel: "close",
               id: id,
               onDismiss: () => {
                 setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
@@ -80,15 +80,15 @@ export const WorkspaceHome = (): JSX.Element => {
   useEffect(() => {
     loadStacks().catch((error) => {
       const id = uuidv4();
-      console.error('Error loading stacks:', error);
+      console.error("Error loading stacks:", error);
       setFlashbarItems([
         ...flashbarItems,
         {
-          type: 'error',
-          header: 'スタックの読み込みに失敗しました',
-          content: typeof error === 'string' ? error : undefined,
+          type: "error",
+          header: "スタックの読み込みに失敗しました",
+          content: typeof error === "string" ? error : undefined,
           dismissible: true,
-          dismissLabel: 'close',
+          dismissLabel: "close",
           id: id,
           onDismiss: () => {
             setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
@@ -126,8 +126,8 @@ export const WorkspaceHome = (): JSX.Element => {
         {...collectionProps}
         columnDefinitions={[
           {
-            id: 'Name',
-            header: 'Stack name',
+            id: "Name",
+            header: "Stack name",
             cell: (e) => (
               <Link
                 onClick={() =>
@@ -140,13 +140,13 @@ export const WorkspaceHome = (): JSX.Element => {
             isRowHeader: true,
           },
           {
-            id: 'DescriptionForMeta',
-            header: 'Description for Meta',
+            id: "DescriptionForMeta",
+            header: "Description for Meta",
             cell: (e) => e.description_from_meta,
           },
           {
-            id: 'DescriptionForStack',
-            header: 'Description for Stack',
+            id: "DescriptionForStack",
+            header: "Description for Stack",
             cell: (e) => e.description_from_stack,
           },
         ]}
@@ -159,7 +159,7 @@ export const WorkspaceHome = (): JSX.Element => {
         loadingText="Loading workspace"
         trackBy="name"
         empty={
-          <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
+          <Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
             <SpaceBetween size="m">
               <b>No resources</b>
             </SpaceBetween>
@@ -189,7 +189,7 @@ export const WorkspaceHome = (): JSX.Element => {
           </Header>
         }
         pagination={<Pagination {...paginationProps} />}
-        loading={state === 'loading'}
+        loading={state === "loading"}
       />
     </ContentLayout>
   );
