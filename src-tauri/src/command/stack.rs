@@ -17,17 +17,18 @@ pub struct Stack {
 }
 
 #[derive(Debug, Error)]
-enum LoadStackMetaError {
+enum LoadStackError {
     #[error("app error: {0}")]
     App(#[from] AppError),
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
+    #[error("yaml error: {0}")]
+    Yaml(#[from] serde_yaml::Error),
+    #[error("json error: {0}")]
+    Json(#[from] serde_json::Error),
 }
 
-fn load_stack_meta(
-    workspace_directory: &str,
-    stack_name: &str,
-) -> Result<Value, LoadStackMetaError> {
+fn load_stack_meta(workspace_directory: &str, stack_name: &str) -> Result<Value, LoadStackError> {
     // ${スタック名}.meta.jsonが存在するか確認
     let meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
     let meta_path = Path::new(&meta_path);
@@ -45,30 +46,19 @@ fn load_stack_meta(
     return Ok(meta_json);
 }
 
-#[derive(Debug, Error)]
-enum LoadStacksError {
-    #[error("app error: {0}")]
-    App(#[from] AppError),
-    #[error("io error: {0}")]
-    Io(#[from] std::io::Error),
-    // FIXME: globmatchのエラーを含める
-    // #[error("globmatch error: {0}")]
-    // Globmatch(#[from] globmatch::Error),
-}
-
 /**
  * 1. globmatchを使って、workspace_directoryの直下にある*.template.jsonを取得する
  *  1. テンプレートファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_stack）
  *  2. ${スタック名}.meta.jsonを取得する（description_from_metaと各リソースとそのパラメータの説明文）
  *  3. メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
  */
-fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, LoadStacksError> {
+fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, LoadStackError> {
     // globmatchを使って、workspace_directoryの直下にある*.template.jsonを取得する
     let builder = globmatch::Builder::new("./*.template.json").build(workspace_directory);
     let builder = match builder {
         Ok(builder) => builder,
         Err(_) => {
-            return Err(LoadStacksError::App(AppError::new("Failed to load stacks")));
+            return Err(LoadStackError::App(AppError::new("Failed to load stacks")));
         }
     };
     let paths: Vec<_> = builder.into_iter().flatten().collect();
@@ -95,7 +85,7 @@ fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, LoadStacksError>
                 .as_str()
                 .and_then(|desc: &str| Some(desc.to_string())),
             Err(_) => {
-                return Err(LoadStacksError::App(AppError::new(
+                return Err(LoadStackError::App(AppError::new(
                     "Failed to load stack meta",
                 )));
             }
@@ -112,14 +102,7 @@ fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, LoadStacksError>
     return Ok(stacks);
 }
 
-#[derive(Debug, Error)]
-enum DeleteStacksError {
-    #[error("app error: {0}")]
-    App(#[from] AppError),
-    #[error("io error: {0}")]
-    Io(#[from] std::io::Error),
-}
-fn delete_stack(workspace_directory: &str, stack_name: &str) -> Result<(), DeleteStacksError> {
+fn delete_stack(workspace_directory: &str, stack_name: &str) -> Result<(), LoadStackError> {
     fs::remove_file(format!(
         "{}/{}.template.json",
         workspace_directory, stack_name
@@ -128,18 +111,7 @@ fn delete_stack(workspace_directory: &str, stack_name: &str) -> Result<(), Delet
     return Ok(());
 }
 
-#[derive(Debug, Error)]
-enum ImportStacksError {
-    #[error("app error: {0}")]
-    App(#[from] AppError),
-    #[error("io error: {0}")]
-    Io(#[from] std::io::Error),
-    #[error("yaml error: {0}")]
-    Yaml(#[from] serde_yaml::Error),
-    #[error("json error: {0}")]
-    Json(#[from] serde_json::Error),
-}
-fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Result<(), ImportStacksError> {
+fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Result<(), LoadStackError> {
     let stack_file_path_buf = PathBuf::from(stack_file_path);
     let filename = stack_file_path_buf
         .file_name()
