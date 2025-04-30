@@ -3,6 +3,7 @@ use crate::utils::CommandResult;
 use chrono::Utc;
 use dirs::config_local_dir;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use thiserror::Error;
 use tokio::fs;
@@ -11,21 +12,16 @@ use uuid::Uuid;
 const APP_CONFIG_FILE_NAME: &str = "app_config.json";
 pub const APP_CONFIG_DIRECTORY_NAME: &str = "formation-docs";
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct WorkspaceInfo {
-    pub id: String,
-    pub directory: String,
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AppConfig {
-    pub workspaces: Vec<WorkspaceInfo>,
+    // workspace_id: workspace_directoryのマッピング
+    pub workspaces: HashMap<String, String>,
     pub initialized: bool,
     pub initialized_at: String,
     pub aws_cli_commit_hash: Option<String>,
 }
 pub struct AppConfigUpdate {
-    pub workspaces: Option<Vec<WorkspaceInfo>>,
+    pub workspaces: Option<HashMap<String, String>>,
     pub initialized: Option<bool>,
     pub initialized_at: Option<String>,
     pub aws_cli_commit_hash: Option<Option<String>>,
@@ -34,7 +30,7 @@ pub struct AppConfigUpdate {
 impl AppConfig {
     pub fn new() -> Self {
         AppConfig {
-            workspaces: vec![],
+            workspaces: HashMap::new(),
             initialized: false,
             initialized_at: Utc::now().to_string(),
             aws_cli_commit_hash: None,
@@ -81,30 +77,22 @@ pub async fn read_app_config() -> Result<AppConfig, AppConfigError> {
 pub async fn add_workspace_to_app_config(
     workspace_directory: &str,
 ) -> Result<String, AppConfigError> {
-    let app_config = read_app_config().await?;
+    let mut app_config = read_app_config().await?;
 
     // すでに登録されている場合は登録IDを返す
-    for workspace in app_config.workspaces.iter() {
-        if workspace.directory == workspace_directory {
-            return Ok(workspace.id.clone());
+    for (id, directory) in app_config.workspaces.iter() {
+        if directory == workspace_directory {
+            return Ok(id.clone());
         }
     }
 
     let workspace_id = Uuid::new_v4().to_string();
-    let workspace_info = WorkspaceInfo {
-        id: workspace_id.clone(),
-        directory: workspace_directory.to_string(),
-    };
+    app_config.workspaces.insert(
+        String::from(workspace_id.clone()),
+        workspace_directory.to_string(),
+    );
     save_app_config(AppConfigUpdate {
-        workspaces: Some(
-            app_config
-                .workspaces
-                .clone()
-                .iter()
-                .chain([workspace_info].iter())
-                .cloned()
-                .collect(),
-        ),
+        workspaces: Some(app_config.workspaces),
         initialized: None,
         initialized_at: None,
         aws_cli_commit_hash: None,
@@ -114,15 +102,10 @@ pub async fn add_workspace_to_app_config(
 }
 
 pub async fn delete_workspace_from_app_config(workspace_id: &str) -> Result<(), AppConfigError> {
-    let app_config = read_app_config().await?;
-    let workspaces = app_config
-        .workspaces
-        .iter()
-        .filter(|workspace| workspace.id != workspace_id)
-        .cloned()
-        .collect();
+    let mut app_config = read_app_config().await?;
+    app_config.workspaces.remove(workspace_id);
     save_app_config(AppConfigUpdate {
-        workspaces: Some(workspaces),
+        workspaces: Some(app_config.workspaces),
         initialized: None,
         initialized_at: None,
         aws_cli_commit_hash: None,
