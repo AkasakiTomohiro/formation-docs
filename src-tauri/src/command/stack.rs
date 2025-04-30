@@ -12,7 +12,6 @@ use uuid::Uuid;
 
 use super::workspace::load_workspace;
 use super::workspace::update_workspace;
-use super::workspace::StackInfo;
 use super::workspace::Workspace;
 
 // フロントで利用する形
@@ -76,9 +75,9 @@ async fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, StackError
     // let paths: Vec<_> = builder.into_iter().flatten().collect();
     let workspace = load_workspace(workspace_directory).await?;
     let mut stacks = Vec::new();
-    for stack in workspace.stacks.iter() {
+    for (id, file_name) in workspace.stacks.iter() {
         // スタックを読み込む
-        let stack = match load_stack_from_info(workspace_directory, stack).await {
+        let stack = match load_stack_from_info(workspace_directory, id, file_name).await {
             Ok(stack) => stack,
             Err(err) => {
                 print!("error: {:?}", err);
@@ -93,37 +92,27 @@ async fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, StackError
 }
 
 async fn delete_stack(workspace_directory: &str, stack_id: &str) -> Result<(), StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
-    for stack in workspace.stacks.iter() {
-        if stack.id == stack_id {
+    let mut workspace = load_workspace(workspace_directory).await?;
+
+    match workspace.stacks.get(stack_id) {
+        Some(stack_file_name) => {
             // スタックファイルとメタデータファイルを削除する
-            fs::remove_file(format!("{}/{}", workspace_directory, stack.stack_file_name))?;
+            fs::remove_file(format!("{}/{}", workspace_directory, stack_file_name))?;
             fs::remove_file(format!(
                 "{}/{}",
                 workspace_directory,
-                stack
-                    .stack_file_name
+                stack_file_name
                     .clone()
                     .replace(".template.json", ".meta.json")
             ))?;
-
             // workspace.jsonのstacksから削除する
-            let stacks = workspace
-                .stacks
-                .iter()
-                .filter(|s| s.id != stack_id)
-                .cloned()
-                .collect();
-            let workspace = Workspace {
-                name: workspace.name,
-                description: workspace.description,
-                stacks,
-            };
+            workspace.stacks.remove(stack_id);
             update_workspace(workspace_directory, workspace).await?;
-            return Ok(());
         }
-    }
-    return Err(StackError::App(AppError::new("Stack not found")));
+        None => return Err(StackError::App(AppError::new("Stack not found"))),
+    };
+
+    return Ok(());
 }
 
 async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Result<(), StackError> {
@@ -156,10 +145,7 @@ async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Resul
     // workspace.jsonのstacksに追加する
     let workspace = load_workspace(workspace_directory).await?;
     let mut stacks = workspace.stacks.clone();
-    stacks.push(StackInfo {
-        id: Uuid::new_v4().to_string(),
-        stack_file_name: filename.to_string(),
-    });
+    stacks.insert(Uuid::new_v4().to_string(), filename.to_string());
     let workspace = Workspace {
         name: workspace.name,
         description: workspace.description,
@@ -172,9 +158,10 @@ async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Resul
 
 async fn load_stack_from_info(
     workspace_directory: &str,
-    stack_info: &StackInfo,
+    stack_id: &str,
+    stack_file_name: &str,
 ) -> Result<Stack, StackError> {
-    let template_path = format!("{}/{}", workspace_directory, stack_info.stack_file_name);
+    let template_path = format!("{}/{}", workspace_directory, stack_file_name);
 
     // テンプレートファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_stack）
     let template_json = fs::read_to_string(&template_path)?;
@@ -186,8 +173,8 @@ async fn load_stack_from_info(
     // メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
     let meta_json = match load_stack_meta(
         workspace_directory,
-        stack_info
-            .stack_file_name
+        stack_file_name
+            .to_string()
             .clone()
             .replace(".template.json", "")
             .as_str(),
@@ -201,14 +188,14 @@ async fn load_stack_from_info(
     let stack_name = meta_json["name"]
         .as_str()
         .and_then(|name: &str| Some(name.to_string()))
-        .unwrap_or(stack_info.stack_file_name.clone());
+        .unwrap_or(stack_file_name.to_string().clone());
     let description_from_meta = meta_json["description"]
         .as_str()
         .and_then(|desc: &str| Some(desc.to_string()));
 
     // アプリ返却用のデータ構造作成
     return Ok(Stack {
-        id: stack_info.id.clone(),
+        id: stack_id.to_string().clone(),
         name: stack_name,
         description_from_meta: description_from_meta,
         description_from_stack: description_from_stack,
@@ -221,12 +208,12 @@ async fn load_stack_from_id(
     stack_id: &str,
 ) -> Result<Stack, StackError> {
     let workspace = load_workspace(workspace_directory).await?;
-    for stack in workspace.stacks.iter() {
-        if stack.id == stack_id {
-            return load_stack_from_info(workspace_directory, stack).await;
+    return match workspace.stacks.get(stack_id) {
+        Some(stack_file_name) => {
+            load_stack_from_info(workspace_directory, stack_id, stack_file_name).await
         }
-    }
-    return Err(StackError::App(AppError::new("Stack not found")));
+        None => Err(StackError::App(AppError::new("Stack not found"))),
+    };
 }
 
 #[tauri::command]

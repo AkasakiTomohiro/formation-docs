@@ -5,21 +5,17 @@ use crate::utils::AppError;
 use crate::utils::CommandResult;
 use crate::utils::WindowState;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 use tokio::fs;
 
 const WORKSPACE_FILE_NAME: &str = "workspace.json";
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct StackInfo {
-    pub id: String,
-    pub stack_file_name: String,
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Workspace {
-    pub stacks: Vec<StackInfo>,
+    // stack_id: stack_file_nameのマッピング
+    pub stacks: HashMap<String, String>,
     pub name: String,
     pub description: String,
 }
@@ -27,7 +23,7 @@ pub struct Workspace {
 impl Workspace {
     pub fn new(name: &str) -> Self {
         Workspace {
-            stacks: vec![],
+            stacks: HashMap::new(),
             name: name.to_string().chars().take(256).collect(),
             description: "".to_string().chars().take(256).collect(),
         }
@@ -40,7 +36,7 @@ pub struct WorkspaceMergeInfo {
     pub directory: String,
     pub name: String,
     pub description: String,
-    pub stacks: Vec<StackInfo>,
+    pub stacks: HashMap<String, String>,
 }
 
 #[derive(Debug, Error)]
