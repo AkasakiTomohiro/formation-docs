@@ -85,21 +85,20 @@ async fn load_workspace_merge_info(
     let app_config = app_config::read_app_config().await?;
 
     // すでに登録されている場合は登録IDを返す
-    for workspace_info in app_config.workspaces.iter() {
-        if workspace_info.id == workspace_id {
-            let workspace_path =
-                PathBuf::from(workspace_info.directory.as_str()).join(WORKSPACE_FILE_NAME);
-            if workspace_path.exists() {
-                let workspace_json = fs::read_to_string(&workspace_path).await?;
-                let workspace = serde_json::from_str::<Workspace>(&workspace_json)?;
-                return Ok(WorkspaceMergeInfo {
-                    id: workspace_id.to_string(),
-                    directory: workspace_info.directory.clone(),
-                    name: workspace.name,
-                    description: workspace.description,
-                    stacks: workspace.stacks.clone(),
-                });
-            }
+    let workspace_directory = app_config.workspaces.get(workspace_id);
+    if workspace_directory.is_some() {
+        let workspace_path =
+            PathBuf::from(workspace_directory.unwrap().to_string()).join(WORKSPACE_FILE_NAME);
+        if workspace_path.exists() {
+            let workspace_json = fs::read_to_string(&workspace_path).await?;
+            let workspace = serde_json::from_str::<Workspace>(&workspace_json)?;
+            return Ok(WorkspaceMergeInfo {
+                id: workspace_id.to_string(),
+                directory: workspace_directory.unwrap().to_string(),
+                name: workspace.name,
+                description: workspace.description,
+                stacks: workspace.stacks.clone(),
+            });
         }
     }
     return Err(WorkspaceError::App(AppError::new(
@@ -123,15 +122,14 @@ async fn load_workspaces() -> Result<Vec<WorkspaceMergeInfo>, WorkspaceError> {
     let app_config = app_config::read_app_config().await?;
 
     let mut workspaces = Vec::new();
-    for workspace_info in app_config.workspaces.iter() {
-        let workspace_path =
-            PathBuf::from(workspace_info.directory.as_str()).join(WORKSPACE_FILE_NAME);
+    for (id, directory) in app_config.workspaces.iter() {
+        let workspace_path = PathBuf::from(directory).join(WORKSPACE_FILE_NAME);
         if workspace_path.exists() {
             let workspace_json = fs::read_to_string(&workspace_path).await?;
             let workspace = serde_json::from_str::<Workspace>(&workspace_json)?;
             workspaces.push(WorkspaceMergeInfo {
-                id: workspace_info.id.clone(),
-                directory: workspace_info.directory.clone(),
+                id: id.to_string(),
+                directory: directory.to_string(),
                 name: workspace.name,
                 description: workspace.description,
                 stacks: workspace.stacks.clone(),
