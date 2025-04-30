@@ -53,10 +53,8 @@ export function useStacks(): UseStacksResult {
 
   const deleteStackWrap = useCallback(
     async (selectedStack: StackInfo) => {
-      const newStacks = stacks.filter(
-        (stack) => stack.name !== selectedStack.name,
-      );
-      await deleteStack(selectedStack.name);
+      const newStacks = stacks.filter((stack) => stack.id !== selectedStack.id);
+      await deleteStack(selectedStack.id);
       setStacks(newStacks);
     },
     [stacks],

@@ -30,7 +30,7 @@ export async function loadWorkspace(
   workspaceId: string,
 ): Promise<WorkspaceExpand> {
   const result = await invoke<CommandResult<WorkspaceExpand>>(
-    'load_workspace_command',
+    'load_workspace_merge_info_command',
     {
       workspace_id: workspaceId,
     },

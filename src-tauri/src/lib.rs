@@ -23,7 +23,7 @@ pub fn run() {
             command::app_config::read_app_config_command,
             command::app_config::delete_workspace_from_app_config_command,
             command::workspace::create_workspace_command,
-            command::workspace::load_workspace_command,
+            command::workspace::load_workspace_merge_info_command,
             command::workspace::update_workspace_command,
             command::workspace::load_workspaces_command,
             command::resource_provider::setup_app_command,

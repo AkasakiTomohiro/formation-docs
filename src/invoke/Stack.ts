@@ -13,9 +13,9 @@ export async function loadStacks(): Promise<StackInfo[]> {
   return result.value;
 }
 
-export async function deleteStack(stackName: string): Promise<void> {
+export async function deleteStack(stackId: string): Promise<void> {
   const result = await invoke<CommandResult<void>>('delete_stack_command', {
-    stack_name: stackName,
+    stack_id: stackId,
   });
   if (!result.success) {
     throw new Error(result.value);
@@ -35,7 +35,7 @@ export async function importStack(stackFilePath: string): Promise<void> {
 
 export async function loadStack(stackName: string): Promise<StackInfo> {
   const result = await invoke<CommandResult<StackInfo>>('load_stack_command', {
-    stack_name: stackName,
+    stack_id: stackName,
   });
   if (!result.success) {
     throw new Error(result.value);
