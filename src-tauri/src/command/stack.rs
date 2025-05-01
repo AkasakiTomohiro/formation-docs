@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
@@ -216,6 +218,79 @@ async fn load_stack_from_id(
     };
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Resource {
+    pub service_name: String,
+    pub recourse_type: Vec<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TemplateSummary {
+    pub id: String,
+    pub stack_name: String,
+    pub resources: Vec<Resource>,
+}
+
+async fn load_template_summary(
+    workspace_directory: &str,
+) -> Result<Vec<TemplateSummary>, StackError> {
+    let mut templates = Vec::new();
+    let workspace = load_workspace(workspace_directory).await?;
+    for (id, stack_file_name) in workspace.stacks.iter() {
+        let meta = load_stack_meta(
+            workspace_directory,
+            stack_file_name.replace(".template.json", "").as_str(),
+        )?;
+
+        let template_path = format!("{}/{}", workspace_directory, stack_file_name);
+        let template_json = fs::read_to_string(&template_path)?;
+        let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
+        let resources_json: Value = template_json["Resources"].clone();
+
+        let mut resources = HashMap::<String, HashSet<String>>::new();
+        for (_, resource_value) in resources_json
+            .as_object()
+            .unwrap_or(&serde_json::Map::new())
+            .iter()
+        {
+            let type_value = resource_value["Type"].clone();
+            let parts: Vec<&str> = type_value.as_str().unwrap().split("::").collect();
+            let (_, service_name, resource_type): (&str, &str, &str) = match parts[..] {
+                [a, b, c] => (a, b, c),
+                _ => continue,
+            };
+            if resources.contains_key(service_name) {
+                let original = resources.get_mut(service_name).unwrap();
+                original.insert(resource_type.to_string());
+            } else {
+                let mut resource_types = HashSet::new();
+                resource_types.insert(resource_type.to_string());
+                resources.insert(service_name.to_string(), resource_types);
+            }
+        }
+
+        templates.push(TemplateSummary {
+            id: id.to_string(),
+            stack_name: meta["name"].as_str().unwrap_or(stack_file_name).to_string(),
+            resources: resources
+                .iter()
+                .map(|(key, value)| {
+                    let service_name = key.to_string();
+                    let resource_types = value.clone();
+                    Resource {
+                        service_name,
+                        recourse_type: resource_types.iter().map(|v| v.to_string()).collect(),
+                    }
+                })
+                .collect(),
+        });
+    }
+
+    return Ok(templates);
+}
+
 #[tauri::command]
 pub async fn load_stacks_command(
     window: tauri::Window,
@@ -279,6 +354,22 @@ pub async fn load_stack_command(
     };
     return match load_stack_from_id(window_state.workspace_directory.as_str(), stack_id).await {
         Ok(stack) => Ok(CommandResult::success(stack)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command]
+pub async fn load_template_summary_command(
+    window: tauri::Window,
+) -> Result<CommandResult<Vec<TemplateSummary>>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match load_template_summary(window_state.workspace_directory.as_str()).await {
+        Ok(templates) => Ok(CommandResult::success(templates)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
