@@ -16,7 +16,7 @@ import {
   TextFilter,
 } from '@cloudscape-design/components';
 
-import { useTemplates } from './hooks/UseTemplates';
+import { useTemplates } from './hooks/useTemplates';
 
 import type { SideNavigationProps } from '@cloudscape-design/components';
 

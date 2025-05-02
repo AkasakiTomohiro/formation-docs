@@ -1,8 +1,13 @@
 import { invoke } from '@tauri-apps/api/core';
 
-import type { StackInfo } from '../features/Workspace';
-import type { TemplateSummary } from '../features/Workspace/Stack/hooks/UseTemplates';
 import type { CommandResult } from '../lib/CommandResult';
+
+export interface StackInfo {
+  id: string;
+  name: string;
+  description_from_meta?: string;
+  description_from_stack?: string;
+}
 
 export async function loadStacks(): Promise<StackInfo[]> {
   const result = await invoke<CommandResult<StackInfo[]>>(
@@ -43,6 +48,15 @@ export async function loadStack(stackName: string): Promise<StackInfo> {
   }
   return result.value;
 }
+
+export type TemplateSummary = {
+  id: string;
+  stackName: string;
+  resources: {
+    serviceName: string;
+    recourseType: string[];
+  }[];
+};
 
 export async function loadTemplateSummary(): Promise<TemplateSummary[]> {
   const result = await invoke<CommandResult<TemplateSummary[]>>(

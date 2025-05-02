@@ -17,14 +17,8 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { useStacks } from './hooks/useStacks';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
+import type { StackInfo } from '../../../invoke/Stack';
 import type { WorkspaceLayoutContext } from '../Layout';
-
-export interface StackInfo {
-  id: string;
-  name: string;
-  description_from_meta?: string;
-  description_from_stack?: string;
-}
 
 export const WorkspaceHome = (): JSX.Element => {
   const workspace = useOutletContext<WorkspaceLayoutContext>();

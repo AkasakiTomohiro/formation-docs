@@ -1,7 +1,7 @@
 import { loadStack } from '../../../invoke/Stack';
 
 import type { LoaderFunctionArgs } from 'react-router';
-import type { StackInfo } from '../pages';
+import type { StackInfo } from '../../../invoke/Stack';
 
 export type StackLayoutLoaderData = {
   stack: StackInfo;
