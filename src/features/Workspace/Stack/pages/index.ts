@@ -1,2 +1,1 @@
-export * from './StackEdit';
-export * from './StackHome';
+export * from './StackTab';

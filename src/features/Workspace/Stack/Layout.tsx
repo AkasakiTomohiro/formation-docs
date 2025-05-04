@@ -13,7 +13,7 @@ import {
 
 import { useTemplates } from './hooks/useTemplates';
 import { filterSideMenu } from './lib/FilterSideMenu';
-import { StackHome } from './pages';
+import { StackTab } from './pages';
 
 import type { WorkspaceLayoutContext } from '../Layout';
 
@@ -120,7 +120,7 @@ export const StackLayout = (): JSX.Element => {
                 id: tab.tabId,
                 label: tab.stackName,
                 content: (
-                  <StackHome stackId={tab.stackId} stackName={tab.stackName} />
+                  <StackTab stackId={tab.stackId} stackName={tab.stackName} />
                 ),
                 dismissible: true,
                 onDismiss: () => {

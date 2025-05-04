@@ -4,12 +4,12 @@ import {
   Header,
 } from '@cloudscape-design/components';
 
-export type StackHomeProps = {
+export type StackTabProps = {
   stackId: string;
   stackName: string;
 };
 
-export const StackHome = (props: StackHomeProps): JSX.Element => {
+export const StackTab = (props: StackTabProps): JSX.Element => {
   return (
     <ContentLayout header={<Header variant="h1">{props.stackName}</Header>}>
       <Container
