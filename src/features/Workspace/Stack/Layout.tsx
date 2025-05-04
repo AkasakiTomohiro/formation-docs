@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import {
   AppLayout,
   BreadcrumbGroup,
-  Link,
   SideNavigation,
   SpaceBetween,
   TextFilter,
@@ -78,9 +77,6 @@ export const StackLayout = (): JSX.Element => {
           items={items}
           itemsControl={
             <SpaceBetween direction="vertical" size="m">
-              <Link href="#" variant="primary">
-                Home
-              </Link>
               <StyledLink href="#">Home</StyledLink>
               <TextFilter
                 filteringText={searchValue}
