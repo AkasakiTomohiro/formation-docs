@@ -1,17 +1,17 @@
-import { useOutletContext } from 'react-router';
-
 import {
   Container,
   ContentLayout,
   Header,
 } from '@cloudscape-design/components';
 
-import type { StackLayoutContext } from '../Layout';
+export type StackHomeProps = {
+  stackId: string;
+  stackName: string;
+};
 
-export const StackHome = (): JSX.Element => {
-  const context = useOutletContext<StackLayoutContext>();
+export const StackHome = (props: StackHomeProps): JSX.Element => {
   return (
-    <ContentLayout header={<Header variant="h1">{context.stack.name}</Header>}>
+    <ContentLayout header={<Header variant="h1">{props.stackName}</Header>}>
       <Container
         header={
           <Header variant="h2" description="Container description">
@@ -20,6 +20,7 @@ export const StackHome = (): JSX.Element => {
         }
       >
         <div className="contentPlaceholder" />
+        <p>{props.stackId}</p>
       </Container>
     </ContentLayout>
   );

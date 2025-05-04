@@ -17,7 +17,13 @@ export const filterSideMenu = (
   for (const item of sideMenu.sort((a, b) =>
     a.stackName.localeCompare(b.stackName),
   )) {
-    const newChildren: SectionGroupItem[] = [];
+    const newChildren: SectionGroupItem[] = [
+      {
+        type: 'link',
+        text: 'Detail',
+        href: `${item.id}/${item.stackName}`,
+      },
+    ];
     if (item.stackName.toLowerCase().includes(searchValue.toLowerCase())) {
       // スタック名に検索文字が含まれている場合はすべてのリソースを表示する
       for (const resource of item.resources.sort((a, b) =>

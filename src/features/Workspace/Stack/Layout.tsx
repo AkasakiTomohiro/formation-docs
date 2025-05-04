@@ -1,10 +1,5 @@
 import { useState } from 'react';
-import {
-  Outlet,
-  useLoaderData,
-  useNavigate,
-  useOutletContext,
-} from 'react-router';
+import { useNavigate, useOutletContext } from 'react-router';
 import styled from 'styled-components';
 
 import {
@@ -12,17 +7,15 @@ import {
   BreadcrumbGroup,
   SideNavigation,
   SpaceBetween,
+  Tabs,
   TextFilter,
 } from '@cloudscape-design/components';
 
 import { useTemplates } from './hooks/useTemplates';
 import { filterSideMenu } from './lib/FilterSideMenu';
-
-import type { SideNavigationProps } from '@cloudscape-design/components';
+import { StackHome } from './pages';
 
 import type { WorkspaceLayoutContext } from '../Layout';
-import type { StackLayoutLoaderData } from './Loader';
-export type StackLayoutContext = WorkspaceLayoutContext & StackLayoutLoaderData;
 
 const StyledLink = styled.a`
   color: #424650; /* ホバーしていない時の色 */
@@ -33,33 +26,27 @@ const StyledLink = styled.a`
   }
 `;
 
+export type ResourceInfo = {
+  type: 'detail';
+  tabId: string;
+  stackId: string;
+  stackName: string;
+};
+
 export const StackLayout = (): JSX.Element => {
   const workspace = useOutletContext<WorkspaceLayoutContext>();
-  const stackLoader = useLoaderData<StackLayoutLoaderData>();
   const navigate = useNavigate();
   const { sideMenu } = useTemplates();
   const [searchValue, setSearchValue] = useState<string>('');
-  console.log('sideMenu', sideMenu);
-
-  const outletContext: StackLayoutContext = {
-    ...workspace,
-    ...stackLoader,
-  };
-
-  const items: SideNavigationProps.Item[] = filterSideMenu(
-    sideMenu,
-    searchValue,
-  );
+  const [resourceTabs, setResourceTabs] = useState<ResourceInfo[]>([]);
+  const [activeTabId, setActiveTabId] = useState<string | undefined>(undefined);
 
   return (
     <AppLayout
       toolsHide
       breadcrumbs={
         <BreadcrumbGroup
-          items={[
-            { text: workspace.name, href: '#' },
-            { text: stackLoader.stack.name, href: '#' },
-          ]}
+          items={[{ text: workspace.name, href: '#' }]}
           onClick={(e) => {
             if (e.detail.text === workspace.name) {
               navigate(`/workspaces/${workspace.id}`);
@@ -74,7 +61,7 @@ export const StackLayout = (): JSX.Element => {
             href: '#',
             text: workspace.name,
           }}
-          items={items}
+          items={filterSideMenu(sideMenu, searchValue)}
           itemsControl={
             <SpaceBetween direction="vertical" size="m">
               <StyledLink href="#">Home</StyledLink>
@@ -86,6 +73,30 @@ export const StackLayout = (): JSX.Element => {
               />
             </SpaceBetween>
           }
+          onFollow={(event) => {
+            event.preventDefault();
+            console.log('onFollow', event.detail);
+            const { href, text } = event.detail;
+            if (text === 'Detail') {
+              const [stackId, stackName] = href.split('/');
+              const newTab: ResourceInfo = {
+                type: 'detail',
+                tabId: href,
+                stackId: stackId,
+                stackName: stackName,
+              };
+              setActiveTabId(newTab.tabId);
+              setResourceTabs((prev) => {
+                const existingTab = prev.find(
+                  (tab) => tab.tabId === newTab.tabId,
+                );
+                if (existingTab) {
+                  return prev;
+                }
+                return [...prev, newTab];
+              });
+            }
+          }}
         />
       }
       // notifications={
@@ -100,7 +111,31 @@ export const StackLayout = (): JSX.Element => {
       //     ]}
       //   />
       // }
-      content={<Outlet context={outletContext} />}
+      content={
+        activeTabId !== undefined && (
+          <Tabs
+            activeTabId={activeTabId}
+            tabs={resourceTabs.map((tab) => {
+              return {
+                id: tab.tabId,
+                label: tab.stackName,
+                content: (
+                  <StackHome stackId={tab.stackId} stackName={tab.stackName} />
+                ),
+                dismissible: true,
+                onDismiss: () => {
+                  setResourceTabs((prev) =>
+                    prev.filter((t) => t.tabId !== tab.tabId),
+                  );
+                },
+              };
+            })}
+            onChange={(event) => {
+              setActiveTabId(event.detail.activeTabId);
+            }}
+          />
+        )
+      }
     />
   );
 };
