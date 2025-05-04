@@ -13,7 +13,7 @@ import {
 
 import { useTemplates } from './hooks/useTemplates';
 import { filterSideMenu } from './lib/FilterSideMenu';
-import { StackTab } from './pages';
+import { ResourceTab, StackTab } from './pages';
 
 import type { WorkspaceLayoutContext } from '../Layout';
 
@@ -26,12 +26,21 @@ const StyledLink = styled.a`
   }
 `;
 
-export type ResourceInfo = {
-  type: 'detail';
-  tabId: string;
-  stackId: string;
-  stackName: string;
-};
+export type ResourceInfo =
+  | {
+      type: 'detail';
+      tabId: string;
+      stackId: string;
+      stackName: string;
+    }
+  | {
+      type: 'resource';
+      tabId: string;
+      stackId: string;
+      stackName: string;
+      serviceName: string;
+      resourceName: string;
+    };
 
 export const StackLayout = (): JSX.Element => {
   const workspace = useOutletContext<WorkspaceLayoutContext>();
@@ -77,25 +86,26 @@ export const StackLayout = (): JSX.Element => {
             event.preventDefault();
             console.log('onFollow', event.detail);
             const { href, text } = event.detail;
-            if (text === 'Detail') {
-              const [stackId, stackName] = href.split('/');
-              const newTab: ResourceInfo = {
-                type: 'detail',
-                tabId: href,
-                stackId: stackId,
-                stackName: stackName,
-              };
-              setActiveTabId(newTab.tabId);
-              setResourceTabs((prev) => {
-                const existingTab = prev.find(
-                  (tab) => tab.tabId === newTab.tabId,
-                );
-                if (existingTab) {
-                  return prev;
-                }
-                return [...prev, newTab];
-              });
-            }
+            const [stackId, stackName, serviceName, resourceType] =
+              href.split('/');
+            const newTab: ResourceInfo = {
+              type: text === 'Detail' ? 'detail' : 'resource',
+              tabId: href,
+              stackId: stackId,
+              stackName: stackName,
+              serviceName: serviceName,
+              resourceName: resourceType,
+            };
+            setActiveTabId(newTab.tabId);
+            setResourceTabs((prev) => {
+              const existingTab = prev.find(
+                (tab) => tab.tabId === newTab.tabId,
+              );
+              if (existingTab) {
+                return prev;
+              }
+              return [...prev, newTab];
+            });
           }}
         />
       }
@@ -116,11 +126,31 @@ export const StackLayout = (): JSX.Element => {
           <Tabs
             activeTabId={activeTabId}
             tabs={resourceTabs.map((tab) => {
+              if (tab.type === 'detail') {
+                return {
+                  id: tab.tabId,
+                  label: tab.stackName,
+                  content: (
+                    <StackTab stackId={tab.stackId} stackName={tab.stackName} />
+                  ),
+                  dismissible: true,
+                  onDismiss: () => {
+                    setResourceTabs((prev) =>
+                      prev.filter((t) => t.tabId !== tab.tabId),
+                    );
+                  },
+                };
+              }
               return {
                 id: tab.tabId,
-                label: tab.stackName,
+                label: `${tab.stackName} - ${tab.serviceName} - ${tab.resourceName}`,
                 content: (
-                  <StackTab stackId={tab.stackId} stackName={tab.stackName} />
+                  <ResourceTab
+                    stackId={tab.stackId}
+                    stackName={tab.stackName}
+                    serviceName={tab.serviceName}
+                    resourceName={tab.resourceName}
+                  />
                 ),
                 dismissible: true,
                 onDismiss: () => {

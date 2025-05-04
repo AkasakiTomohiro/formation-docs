@@ -37,7 +37,7 @@ export const filterSideMenu = (
             .map((rType) => ({
               type: 'link',
               text: rType,
-              href: '#',
+              href: `${item.id}/${item.stackName}/${resource.serviceName}/${rType}`,
             })),
         });
       }
@@ -58,7 +58,7 @@ export const filterSideMenu = (
               .map((rType) => ({
                 type: 'link',
                 text: rType,
-                href: '#',
+                href: `${item.id}/${item.stackName}/${resource.serviceName}/${rType}`,
               })),
           });
         } else {
@@ -74,7 +74,7 @@ export const filterSideMenu = (
               .map((rType) => ({
                 type: 'link',
                 text: rType,
-                href: '#',
+                href: `${item.id}/${item.stackName}/${resource.serviceName}/${rType}`,
               })),
           };
           if (newResource.items.length > 0) {
