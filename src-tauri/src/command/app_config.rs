@@ -68,6 +68,8 @@ pub async fn read_app_config() -> Result<AppConfig, AppConfigError> {
             // Create the app config directory if it doesn't exist
             let app_config = AppConfig::new();
             let app_config_json = serde_json::to_string(&app_config)?;
+            let app_config_parent_path = app_config_path.parent().unwrap();
+            fs::create_dir_all(app_config_parent_path).await?;
             fs::write(app_config_path, app_config_json).await?;
             return Ok(app_config);
         }
