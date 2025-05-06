@@ -4,13 +4,16 @@ import styled from 'styled-components';
 
 import {
   AppLayout,
+  Input,
   SideNavigation,
   SpaceBetween,
-  TextFilter,
+  TokenGroup,
 } from '@cloudscape-design/components';
 
 import { useTemplates } from './hooks/useTemplates';
 import { filterSideMenu } from './lib/FilterSideMenu';
+
+import type { TokenGroupProps } from '@cloudscape-design/components';
 
 import type { Dispatch, SetStateAction } from 'react';
 import type { WorkspaceLayoutLoaderData } from './Loader';
@@ -50,6 +53,7 @@ export const WorkspaceLayout = (): JSX.Element => {
   const navigate = useNavigate();
   const { sideMenu } = useTemplates();
   const [searchValue, setSearchValue] = useState<string>('');
+  const [tokenGroup, setTokenGroup] = useState<TokenGroupProps.Item[]>([]);
   const [resourceTabs, setResourceTabs] = useState<ResourceInfo[]>([]);
 
   const context: WorkspaceLayoutContext = {
@@ -80,12 +84,33 @@ export const WorkspaceLayout = (): JSX.Element => {
               >
                 Home
               </StyledLink>
-              <TextFilter
-                filteringText={searchValue}
-                filteringPlaceholder="Search Resource"
-                filteringAriaLabel="Search Resource"
-                onChange={({ detail }) => setSearchValue(detail.filteringText)}
-              />
+              <div>
+                <Input
+                  type="search"
+                  value={searchValue}
+                  placeholder="Search Resource"
+                  ariaLabel="Search Resource"
+                  onChange={({ detail }) => setSearchValue(detail.value)}
+                  onKeyDown={({ detail }) => {
+                    if (detail.key === 'Enter') {
+                      setTokenGroup((prev) => [
+                        ...prev,
+                        { label: searchValue },
+                      ]);
+                      setSearchValue('');
+                    }
+                  }}
+                />
+                <TokenGroup
+                  onDismiss={({ detail: { itemIndex } }) => {
+                    setTokenGroup([
+                      ...tokenGroup.slice(0, itemIndex),
+                      ...tokenGroup.slice(itemIndex + 1),
+                    ]);
+                  }}
+                  items={tokenGroup}
+                />
+              </div>
             </SpaceBetween>
           }
           onFollow={(event) => {
