@@ -1,156 +1,58 @@
-import { useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router';
-import styled from 'styled-components';
+import { useEffect, useState } from 'react';
+import { useLocation, useOutletContext } from 'react-router';
 
-import {
-  AppLayout,
-  BreadcrumbGroup,
-  SideNavigation,
-  SpaceBetween,
-  Tabs,
-  TextFilter,
-} from '@cloudscape-design/components';
+import { Tabs } from '@cloudscape-design/components';
 
-import { useTemplates } from './hooks/useTemplates';
-import { filterSideMenu } from './lib/FilterSideMenu';
 import { ResourceTab, StackTab } from './pages';
 
-import type { WorkspaceLayoutContext } from '../Layout';
-
-const StyledLink = styled.a`
-  color: #424650; /* ホバーしていない時の色 */
-  text-decoration: none;
-
-  &:hover {
-    color: #006ce0; /* ホバー時の色 */
-  }
-`;
-
-export type ResourceInfo =
-  | {
-      type: 'detail';
-      tabId: string;
-      stackId: string;
-      stackName: string;
-    }
-  | {
-      type: 'resource';
-      tabId: string;
-      stackId: string;
-      stackName: string;
-      serviceName: string;
-      resourceName: string;
-    };
+import type { ResourceInfo, WorkspaceLayoutContext } from '../Layout';
 
 export const StackLayout = (): JSX.Element => {
-  const workspace = useOutletContext<WorkspaceLayoutContext>();
-  const navigate = useNavigate();
-  const { sideMenu } = useTemplates();
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [resourceTabs, setResourceTabs] = useState<ResourceInfo[]>([]);
+  const location = useLocation();
+  const { resourceTabs, setResourceTabs } =
+    useOutletContext<WorkspaceLayoutContext>();
+
   const [activeTabId, setActiveTabId] = useState<string | undefined>(undefined);
 
+  useEffect(() => {
+    setResourceTabs(resourceTabs);
+    setActiveTabId(resourceTabs[resourceTabs.length - 1]?.tabId);
+  }, [resourceTabs, setResourceTabs]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    const stackId = location.state.selectedStackId;
+    const stackName = location.state.selectedStackName;
+    if (stackId && stackName) {
+      const newTab: ResourceInfo = {
+        type: 'detail',
+        tabId: `${stackId}/${stackName}`,
+        stackId,
+        stackName,
+      };
+      setResourceTabs((prev) => {
+        const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
+        if (existingTab) {
+          return prev;
+        }
+        return [...prev, newTab];
+      });
+      setActiveTabId(`${stackId}/${stackName}`);
+    }
+  }, []);
+
   return (
-    <AppLayout
-      toolsHide
-      breadcrumbs={
-        <BreadcrumbGroup
-          items={[{ text: workspace.name, href: '#' }]}
-          onClick={(e) => {
-            if (e.detail.text === workspace.name) {
-              navigate(`/workspaces/${workspace.id}`);
-            }
-          }}
-        />
-      }
-      navigationOpen={true}
-      navigation={
-        <SideNavigation
-          header={{
-            href: '#',
-            text: workspace.name,
-          }}
-          items={filterSideMenu(sideMenu, searchValue)}
-          itemsControl={
-            <SpaceBetween direction="vertical" size="m">
-              <StyledLink href="#">Home</StyledLink>
-              <TextFilter
-                filteringText={searchValue}
-                filteringPlaceholder="Search Resource"
-                filteringAriaLabel="Search Resource"
-                onChange={({ detail }) => setSearchValue(detail.filteringText)}
-              />
-            </SpaceBetween>
-          }
-          onFollow={(event) => {
-            event.preventDefault();
-            console.log('onFollow', event.detail);
-            const { href, text } = event.detail;
-            const [stackId, stackName, serviceName, resourceType] =
-              href.split('/');
-            const newTab: ResourceInfo = {
-              type: text === 'Detail' ? 'detail' : 'resource',
-              tabId: href,
-              stackId: stackId,
-              stackName: stackName,
-              serviceName: serviceName,
-              resourceName: resourceType,
-            };
-            setActiveTabId(newTab.tabId);
-            setResourceTabs((prev) => {
-              const existingTab = prev.find(
-                (tab) => tab.tabId === newTab.tabId,
-              );
-              if (existingTab) {
-                return prev;
-              }
-              return [...prev, newTab];
-            });
-          }}
-        />
-      }
-      // notifications={
-      //   <Flashbar
-      //     items={[
-      //       {
-      //         type: 'info',
-      //         dismissible: true,
-      //         content: 'This is an info flash message.',
-      //         id: 'message_1',
-      //       },
-      //     ]}
-      //   />
-      // }
-      content={
-        activeTabId !== undefined && (
-          <Tabs
-            activeTabId={activeTabId}
-            tabs={resourceTabs.map((tab) => {
-              if (tab.type === 'detail') {
-                return {
-                  id: tab.tabId,
-                  label: tab.stackName,
-                  content: (
-                    <StackTab stackId={tab.stackId} stackName={tab.stackName} />
-                  ),
-                  dismissible: true,
-                  onDismiss: () => {
-                    setResourceTabs((prev) =>
-                      prev.filter((t) => t.tabId !== tab.tabId),
-                    );
-                  },
-                };
-              }
+    <>
+      {activeTabId !== undefined && (
+        <Tabs
+          activeTabId={activeTabId}
+          tabs={resourceTabs.map((tab) => {
+            if (tab.type === 'detail') {
               return {
                 id: tab.tabId,
-                label: `${tab.stackName} - ${tab.serviceName} - ${tab.resourceName}`,
+                label: tab.stackName,
                 content: (
-                  <ResourceTab
-                    stackId={tab.stackId}
-                    stackName={tab.stackName}
-                    serviceName={tab.serviceName}
-                    resourceName={tab.resourceName}
-                  />
+                  <StackTab stackId={tab.stackId} stackName={tab.stackName} />
                 ),
                 dismissible: true,
                 onDismiss: () => {
@@ -159,13 +61,31 @@ export const StackLayout = (): JSX.Element => {
                   );
                 },
               };
-            })}
-            onChange={(event) => {
-              setActiveTabId(event.detail.activeTabId);
-            }}
-          />
-        )
-      }
-    />
+            }
+            return {
+              id: tab.tabId,
+              label: `${tab.stackName} - ${tab.serviceName} - ${tab.resourceName}`,
+              content: (
+                <ResourceTab
+                  stackId={tab.stackId}
+                  stackName={tab.stackName}
+                  serviceName={tab.serviceName}
+                  resourceName={tab.resourceName}
+                />
+              ),
+              dismissible: true,
+              onDismiss: () => {
+                setResourceTabs((prev) =>
+                  prev.filter((t) => t.tabId !== tab.tabId),
+                );
+              },
+            };
+          })}
+          onChange={(event) => {
+            setActiveTabId(event.detail.activeTabId);
+          }}
+        />
+      )}
+    </>
   );
 };

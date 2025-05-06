@@ -126,7 +126,12 @@ export const WorkspaceHome = (): JSX.Element => {
             cell: (e) => (
               <Link
                 onClick={() =>
-                  navigate(`/workspaces/${workspace.id}/stacks/${e.id}`)
+                  navigate(`/workspaces/${workspace.id}/resources`, {
+                    state: {
+                      selectedStackId: e.id,
+                      selectedStackName: e.name,
+                    },
+                  })
                 }
               >
                 {e.name}

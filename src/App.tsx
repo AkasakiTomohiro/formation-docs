@@ -46,7 +46,7 @@ const router = createBrowserRouter([
         element: <WorkspaceEdit />,
       },
       {
-        path: 'stacks/:stackId',
+        path: 'resources',
         element: <StackLayout />,
       },
     ],
