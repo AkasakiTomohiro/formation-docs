@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidV4 } from 'uuid';
 
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import { Link } from '@cloudscape-design/components';
@@ -17,8 +17,8 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { useStacks } from './hooks/useStacks';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
-import type { StackInfo } from '../../../invoke/Stack';
-import type { WorkspaceLayoutContext } from '../Layout';
+import type { StackInfo } from '../../../../invoke/Stack';
+import type { WorkspaceLayoutContext } from '../../Layout';
 
 export const WorkspaceHome = (): JSX.Element => {
   const workspace = useOutletContext<WorkspaceLayoutContext>();
@@ -52,7 +52,7 @@ export const WorkspaceHome = (): JSX.Element => {
       importStack(selectedFile)
         .then(loadStacks)
         .catch((error) => {
-          const id = uuidv4();
+          const id = uuidV4();
           setFlashbarItems([
             ...flashbarItems,
             {
@@ -74,7 +74,7 @@ export const WorkspaceHome = (): JSX.Element => {
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     loadStacks().catch((error) => {
-      const id = uuidv4();
+      const id = uuidV4();
       console.error('Error loading stacks:', error);
       setFlashbarItems([
         ...flashbarItems,

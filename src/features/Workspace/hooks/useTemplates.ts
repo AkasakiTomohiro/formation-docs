@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { loadTemplateSummary } from '../../../../invoke/Stack';
+import { loadTemplateSummary } from '../../../invoke/Stack';
 
-import type { TemplateSummary } from '../../../../invoke/Stack';
+import type { TemplateSummary } from '../../../invoke/Stack';
 
 export type UseTemplatesResult = {
   sideMenu: TemplateSummary[];

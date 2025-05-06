@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidV4 } from 'uuid';
 
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import Box from '@cloudscape-design/components/box';
@@ -55,7 +55,7 @@ export const Workspaces = (): JSX.Element => {
         });
         console.log({ result, workspace });
         if (!result) {
-          const id = uuidv4();
+          const id = uuidV4();
           setFlashbarItems([
             ...flashbarItems,
             {
@@ -86,7 +86,7 @@ export const Workspaces = (): JSX.Element => {
       createWorkspace({ directory: selectedDir })
         .then((workspace) => openWorkspace(workspace))
         .catch((error) => {
-          const id = uuidv4();
+          const id = uuidV4();
           setFlashbarItems([
             ...flashbarItems,
             {
@@ -112,7 +112,7 @@ export const Workspaces = (): JSX.Element => {
       return;
     }
     loadWorkspaces().catch((error) => {
-      const id = uuidv4();
+      const id = uuidV4();
       setFlashbarItems([
         ...flashbarItems,
         {

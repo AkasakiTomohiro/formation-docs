@@ -3,10 +3,10 @@ import { RouterProvider, createBrowserRouter } from 'react-router';
 import { Header } from './components/Header';
 import { AppSetup } from './features/AppSetup';
 import {
-  StackLayout,
   WorkspaceEdit,
   WorkspaceHome,
   WorkspaceLayout,
+  WorkspaceResource,
   workspaceLoader,
 } from './features/Workspace';
 import { Workspaces } from './features/Workspaces';
@@ -47,7 +47,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'resources',
-        element: <StackLayout />,
+        element: <WorkspaceResource />,
       },
     ],
   },

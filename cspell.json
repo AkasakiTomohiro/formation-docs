@@ -17,7 +17,8 @@
     "serde",
     "staticlib",
     "tauri",
-    "thiserror"
+    "thiserror",
+    "revalidator"
   ],
   "ignoreWords": [],
   "import": []

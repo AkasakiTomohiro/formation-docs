@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate, useOutletContext, useRevalidator } from 'react-router';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidV4 } from 'uuid';
 import { z } from 'zod';
 
 import {
@@ -17,11 +17,11 @@ import {
 } from '@cloudscape-design/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { updateWorkspace } from '../../../invoke/Workspace';
+import { updateWorkspace } from '../../../../invoke/Workspace';
+
+import type { WorkspaceLayoutContext } from '../../Layout';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
-import type { WorkspaceLayoutContext } from '../Layout';
-
 const workspaceEditValidator = z.object({
   name: z.string().min(1).max(256),
   description: z.string().max(256),
@@ -57,7 +57,7 @@ export const WorkspaceEdit = (): JSX.Element => {
 
       navigate(`/workspaces/${workspace.id}`);
     } catch (error) {
-      const id = uuidv4();
+      const id = uuidV4();
       setFlashbarItems([
         ...flashbarItems,
         {

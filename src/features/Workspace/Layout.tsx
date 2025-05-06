@@ -9,8 +9,8 @@ import {
   TextFilter,
 } from '@cloudscape-design/components';
 
-import { useTemplates } from './Stack/hooks/useTemplates';
-import { filterSideMenu } from './Stack/lib/FilterSideMenu';
+import { useTemplates } from './hooks/useTemplates';
+import { filterSideMenu } from './lib/FilterSideMenu';
 
 import type { Dispatch, SetStateAction } from 'react';
 import type { WorkspaceLayoutLoaderData } from './Loader';

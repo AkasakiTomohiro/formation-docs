@@ -3,11 +3,11 @@ import { useLocation, useOutletContext } from 'react-router';
 
 import { Tabs } from '@cloudscape-design/components';
 
-import { ResourceTab, StackTab } from './pages';
+import { ResourceTab, StackTab } from './components';
 
-import type { ResourceInfo, WorkspaceLayoutContext } from '../Layout';
+import type { ResourceInfo, WorkspaceLayoutContext } from '../../Layout';
 
-export const StackLayout = (): JSX.Element => {
+export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
   const { resourceTabs, setResourceTabs } =
     useOutletContext<WorkspaceLayoutContext>();
