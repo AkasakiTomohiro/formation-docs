@@ -21,23 +21,25 @@ export const WorkspaceResource = (): JSX.Element => {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    const stackId = location.state.selectedStackId;
-    const stackName = location.state.selectedStackName;
-    if (stackId && stackName) {
-      const newTab: ResourceInfo = {
-        type: 'detail',
-        tabId: `${stackId}/${stackName}`,
-        stackId,
-        stackName,
-      };
-      setResourceTabs((prev) => {
-        const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
-        if (existingTab) {
-          return prev;
-        }
-        return [...prev, newTab];
-      });
-      setActiveTabId(`${stackId}/${stackName}`);
+    if (location.state) {
+      const stackId = location.state.selectedStackId;
+      const stackName = location.state.selectedStackName;
+      if (stackId && stackName) {
+        const newTab: ResourceInfo = {
+          type: 'detail',
+          tabId: `${stackId}/${stackName}`,
+          stackId,
+          stackName,
+        };
+        setResourceTabs((prev) => {
+          const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
+          if (existingTab) {
+            return prev;
+          }
+          return [...prev, newTab];
+        });
+        setActiveTabId(`${stackId}/${stackName}`);
+      }
     }
   }, []);
 
