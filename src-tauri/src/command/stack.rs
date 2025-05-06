@@ -14,7 +14,7 @@ use uuid::Uuid;
 
 use super::workspace::load_workspace;
 use super::workspace::update_workspace;
-use super::workspace::Workspace;
+use super::workspace::WorkspaceUpdate;
 
 // フロントで利用する形
 #[derive(Debug, Serialize, Deserialize)]
@@ -109,7 +109,15 @@ async fn delete_stack(workspace_directory: &str, stack_id: &str) -> Result<(), S
             ))?;
             // workspace.jsonのstacksから削除する
             workspace.stacks.remove(stack_id);
-            update_workspace(workspace_directory, workspace).await?;
+            update_workspace(
+                workspace_directory,
+                WorkspaceUpdate {
+                    name: None,
+                    description: None,
+                    stacks: Some(workspace.stacks.clone()),
+                },
+            )
+            .await?;
         }
         None => return Err(StackError::App(AppError::new("Stack not found"))),
     };
@@ -148,12 +156,15 @@ async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Resul
     let workspace = load_workspace(workspace_directory).await?;
     let mut stacks = workspace.stacks.clone();
     stacks.insert(Uuid::new_v4().to_string(), filename.to_string());
-    let workspace = Workspace {
-        name: workspace.name,
-        description: workspace.description,
-        stacks,
-    };
-    update_workspace(workspace_directory, workspace).await?;
+    update_workspace(
+        workspace_directory,
+        WorkspaceUpdate {
+            name: None,
+            description: None,
+            stacks: Some(stacks.clone()),
+        },
+    )
+    .await?;
 
     return Ok(());
 }

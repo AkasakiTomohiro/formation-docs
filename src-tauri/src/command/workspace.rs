@@ -39,6 +39,13 @@ pub struct WorkspaceMergeInfo {
     pub stacks: HashMap<String, String>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct WorkspaceUpdate {
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub stacks: Option<HashMap<String, String>>,
+}
+
 #[derive(Debug, Error)]
 pub enum WorkspaceError {
     #[error("app error: {0}")]
@@ -137,10 +144,17 @@ async fn load_workspaces() -> Result<Vec<WorkspaceMergeInfo>, WorkspaceError> {
 
 pub async fn update_workspace(
     workspace_directory: &str,
-    workspace: Workspace,
+    update_config: WorkspaceUpdate,
 ) -> Result<(), WorkspaceError> {
+    let workspace = load_workspace(workspace_directory).await?;
+    let new_workspace = Workspace {
+        name: update_config.name.unwrap_or(workspace.name),
+        description: update_config.description.unwrap_or(workspace.description),
+        stacks: update_config.stacks.unwrap_or(workspace.stacks),
+    };
+
     let workspace_path = PathBuf::from(workspace_directory).join(WORKSPACE_FILE_NAME);
-    let workspace_json = serde_json::to_string(&workspace).unwrap();
+    let workspace_json = serde_json::to_string(&new_workspace).unwrap();
     fs::write(&workspace_path, workspace_json).await?;
     return Ok(());
 }
@@ -212,7 +226,7 @@ pub async fn load_workspaces_command(
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_workspace_command(
     window: tauri::Window,
-    workspace: Workspace,
+    workspace: WorkspaceUpdate,
 ) -> Result<CommandResult<()>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
