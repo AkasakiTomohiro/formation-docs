@@ -20,7 +20,7 @@ import { useWorkspaces } from '../../hooks/useWorkspaces';
 import type { FlashbarProps } from '@cloudscape-design/components';
 import type { WorkspaceExpand } from '../../invoke/Workspace';
 
-export const Workspaces = (): JSX.Element => {
+export const AppHome = (): JSX.Element => {
   const isFirstRender = useRef(true);
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]

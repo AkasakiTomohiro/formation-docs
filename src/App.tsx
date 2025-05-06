@@ -1,6 +1,7 @@
 import { RouterProvider, createBrowserRouter } from 'react-router';
 
 import { Header } from './components/Header';
+import { AppHome } from './features/AppHome';
 import { AppSetup } from './features/AppSetup';
 import {
   WorkspaceEdit,
@@ -9,7 +10,6 @@ import {
   WorkspaceResource,
   workspaceLoader,
 } from './features/Workspace';
-import { Workspaces } from './features/Workspaces';
 
 const router = createBrowserRouter([
   {
@@ -24,7 +24,7 @@ const router = createBrowserRouter([
     path: 'workspaces',
     element: (
       <Header>
-        <Workspaces />
+        <AppHome />
       </Header>
     ),
   },
