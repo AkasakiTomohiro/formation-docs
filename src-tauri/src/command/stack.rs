@@ -266,6 +266,7 @@ async fn load_template_summary(
             .unwrap_or(&serde_json::Map::new())
             .iter()
         {
+            // TODO: AWSリソースのみを対象とする
             let type_value = resource_value["Type"].clone();
             let parts: Vec<&str> = type_value.as_str().unwrap().split("::").collect();
             let (_, service_name, resource_type): (&str, &str, &str) = match parts[..] {
@@ -300,6 +301,39 @@ async fn load_template_summary(
     }
 
     return Ok(templates);
+}
+
+async fn get_stack_resource_list(
+    workspace_directory: &str,
+    stack_id: &str,
+    service_name: &str,
+    resource_name: &str,
+) -> Result<Vec<String>, StackError> {
+    let workspace = load_workspace(workspace_directory).await?;
+    let stack_file_name = match workspace.stacks.get(stack_id) {
+        Some(stack_file_name) => stack_file_name,
+        None => {
+            return Err(StackError::App(AppError::new("Stack not found")));
+        }
+    };
+    let template_path = format!("{}/{}", workspace_directory, stack_file_name);
+    let template_json = fs::read_to_string(&template_path)?;
+    let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
+    let resources_json = template_json["Resources"].clone();
+    let mut result: Vec<String> = Vec::new();
+    let resource_type = format!("AWS::{}::{}", service_name, resource_name);
+    for (resource_id, resource_value) in resources_json
+        .as_object()
+        .unwrap_or(&serde_json::Map::new())
+        .iter()
+    {
+        let tmp_resource_type = resource_value["Type"].as_str().unwrap_or_default();
+        if tmp_resource_type == resource_type {
+            result.push(resource_id.to_string());
+        }
+    }
+
+    return Ok(result);
 }
 
 #[tauri::command]
@@ -381,6 +415,32 @@ pub async fn load_template_summary_command(
     };
     return match load_template_summary(window_state.workspace_directory.as_str()).await {
         Ok(templates) => Ok(CommandResult::success(templates)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_stack_resource_list_command(
+    window: tauri::Window,
+    stack_id: &str,
+    service_name: &str,
+    resource_name: &str,
+) -> Result<CommandResult<Vec<String>>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match get_stack_resource_list(
+        window_state.workspace_directory.as_str(),
+        stack_id,
+        service_name,
+        resource_name,
+    )
+    .await
+    {
+        Ok(resources) => Ok(CommandResult::success(resources)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
