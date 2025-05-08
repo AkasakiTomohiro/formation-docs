@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Outlet, useLoaderData, useNavigate } from 'react-router';
 import styled from 'styled-components';
 
@@ -10,10 +10,11 @@ import {
   TokenGroup,
 } from '@cloudscape-design/components';
 
-import { useTemplates } from './hooks/useTemplates';
+import { loadTemplateSummary } from '../../invoke/Stack';
 import { filterSideMenu } from './lib/FilterSideMenu';
 
 import type { TokenGroupProps } from '@cloudscape-design/components';
+import type { TemplateSummary } from '../../invoke/Stack';
 
 import type { Dispatch, SetStateAction } from 'react';
 import type { WorkspaceLayoutLoaderData } from './Loader';
@@ -37,6 +38,7 @@ export type ResourceInfo =
 export type WorkspaceLayoutContext = WorkspaceLayoutLoaderData & {
   resourceTabs: ResourceInfo[];
   setResourceTabs: Dispatch<SetStateAction<ResourceInfo[]>>;
+  loadTemplateSummaryWrap: () => Promise<void>;
 };
 
 const StyledLink = styled.a`
@@ -51,15 +53,27 @@ const StyledLink = styled.a`
 export const WorkspaceLayout = (): JSX.Element => {
   const workspace = useLoaderData<WorkspaceLayoutLoaderData>();
   const navigate = useNavigate();
-  const { sideMenu } = useTemplates();
   const [searchValue, setSearchValue] = useState<string>('');
   const [tokenGroup, setTokenGroup] = useState<TokenGroupProps.Item[]>([]);
   const [resourceTabs, setResourceTabs] = useState<ResourceInfo[]>([]);
+  const [sideMenu, setSideMenu] = useState<TemplateSummary[]>([]);
+
+  const loadTemplateSummaryWrap = useCallback(() => {
+    return loadTemplateSummary().then((summary) => {
+      setSideMenu(summary);
+    });
+  }, []);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    loadTemplateSummaryWrap();
+  }, []);
 
   const context: WorkspaceLayoutContext = {
     ...workspace,
     resourceTabs,
     setResourceTabs,
+    loadTemplateSummaryWrap,
   };
 
   return (
@@ -79,6 +93,7 @@ export const WorkspaceLayout = (): JSX.Element => {
                 href="#"
                 onClick={(event) => {
                   event.preventDefault();
+                  setResourceTabs([]);
                   navigate(`/workspaces/${workspace.id}`);
                 }}
               >
@@ -117,6 +132,11 @@ export const WorkspaceLayout = (): JSX.Element => {
             event.preventDefault();
             console.log('onFollow', event.detail);
             const { href, text } = event.detail;
+            if (href === '#') {
+              // ワークスペース名をクリックしたとき
+              navigate(`/workspaces/${workspace.id}`);
+              return;
+            }
             const [stackId, stackName, serviceName, resourceType] =
               href.split('/');
             const newTab: ResourceInfo = {

@@ -50,7 +50,10 @@ export const WorkspaceHome = (): JSX.Element => {
     console.log('Selected file:', selectedFile);
     if (selectedFile !== null) {
       importStack(selectedFile)
-        .then(loadStacks)
+        .then(async () => {
+          await loadStacks();
+          await workspace.loadTemplateSummaryWrap();
+        })
         .catch((error) => {
           const id = uuidV4();
           setFlashbarItems([
