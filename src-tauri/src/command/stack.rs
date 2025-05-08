@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
+use std::io::ErrorKind;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -99,14 +100,38 @@ async fn delete_stack(workspace_directory: &str, stack_id: &str) -> Result<(), S
     match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => {
             // スタックファイルとメタデータファイルを削除する
-            fs::remove_file(format!("{}/{}", workspace_directory, stack_file_name))?;
-            fs::remove_file(format!(
+            if let Err(err) =
+                fs::remove_file(format!("{}/{}", workspace_directory, stack_file_name))
+            {
+                match err.kind() {
+                    ErrorKind::NotFound => {
+                        // ファイルが見つからない場合は無視する
+                    }
+                    _ => {
+                        return Err(StackError::App(AppError::new(
+                            "Failed to delete stack file",
+                        )));
+                    }
+                }
+            };
+            if let Err(err) = fs::remove_file(format!(
                 "{}/{}",
                 workspace_directory,
                 stack_file_name
                     .clone()
                     .replace(".template.json", ".meta.json")
-            ))?;
+            )) {
+                match err.kind() {
+                    ErrorKind::NotFound => {
+                        // ファイルが見つからない場合は無視する
+                    }
+                    _ => {
+                        return Err(StackError::App(AppError::new(
+                            "Failed to delete stack file",
+                        )));
+                    }
+                }
+            };
             // workspace.jsonのstacksから削除する
             workspace.stacks.remove(stack_id);
             update_workspace(
