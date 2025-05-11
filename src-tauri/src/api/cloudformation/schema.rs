@@ -36,7 +36,7 @@ fn get_resource_provider_save_path(region: &str) -> Result<PathBuf, DlSchemaErro
     };
 }
 
-fn get_resource_provider_save_dir(region: &str) -> Result<PathBuf, DlSchemaError> {
+pub fn get_resource_provider_save_dir(region: &str) -> Result<PathBuf, DlSchemaError> {
     return match config_local_dir() {
         Some(dir) => Ok(dir
             .join(APP_CONFIG_DIRECTORY_NAME)

@@ -12,6 +12,7 @@ import {
   TextFilter,
 } from '@cloudscape-design/components';
 
+import { getCloudFormationSchema } from '../../../../../invoke/CloudFormationSchema';
 import { getStackResourceList } from '../../../../../invoke/Stack';
 
 type ResourceTabProps = {
@@ -23,6 +24,9 @@ type ResourceTabProps = {
 
 export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
+  const [schema, setSchema] = useState<CloudFormationSchema | undefined>(
+    undefined,
+  );
   const [resourceList, setResourceList] = useState<string[]>([]);
   const [filterText, setFilterText] = useState<string>('');
   const [isOpen, setIsOpen] = useState(true);
@@ -30,15 +34,19 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
     string | undefined
   >(undefined);
   console.log('resourceList', resourceList);
+  console.log('schema', schema);
 
   useEffect(() => {
-    getStackResourceList({
-      stack_id: props.stackId,
-      service_name: props.serviceName,
-      resource_name: props.resourceName,
-    })
-      .then((list) => setResourceList(list))
-      .finally(() => setIsLoading(false));
+    Promise.all([
+      getCloudFormationSchema(props.serviceName, props.resourceName).then(
+        (schemaStr) => setSchema(JSON.parse(schemaStr)),
+      ),
+      getStackResourceList({
+        stack_id: props.stackId,
+        service_name: props.serviceName,
+        resource_name: props.resourceName,
+      }).then((list) => setResourceList(list)),
+    ]).finally(() => setIsLoading(false));
   }, [props]);
 
   return (
