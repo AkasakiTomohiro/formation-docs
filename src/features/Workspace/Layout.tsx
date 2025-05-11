@@ -134,6 +134,7 @@ export const WorkspaceLayout = (): JSX.Element => {
             const { href, text } = event.detail;
             if (href === '#') {
               // ワークスペース名をクリックしたとき
+              setResourceTabs([]);
               navigate(`/workspaces/${workspace.id}`);
               return;
             }
