@@ -8,7 +8,26 @@ interface Tagging {
   tagProperty: string; // assuming JSON Pointer is a string
 }
 
-type Property = Record<'description' | 'type' | (string & {}), string>;
+type ReferenceProperty = {
+  $ref: `#/definitions/${string}`;
+};
+type ReferencePropertyWithDescription = ReferenceProperty & {
+  description: string;
+};
+
+type Property =
+  | {
+      description: string;
+      type: string | string[];
+      items?:
+        | ReferenceProperty
+        | {
+            type: string;
+            enum: string[];
+          };
+      enum?: string[];
+    }
+  | ReferencePropertyWithDescription;
 
 interface Handler {
   permissions: string[];
@@ -30,6 +49,14 @@ interface ResourceLink {
   mappings: string; // assuming JSON Pointer is a string
 }
 
+interface Definition {
+  type: 'object';
+  additionalProperties: boolean;
+  properties: Record<string, Property>;
+  required: string[];
+  description: string;
+}
+
 interface CloudFormationSchema {
   typeName: string;
   description: string;
@@ -38,8 +65,7 @@ interface CloudFormationSchema {
   replacementStrategy: ReplacementStrategy;
   taggable: boolean;
   tagging: Tagging;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  definitions: Record<string, any>;
+  definitions?: Record<string, Definition>;
   properties: Record<string, Property>;
   required: string[];
   propertyTransform: Record<string, string>;
