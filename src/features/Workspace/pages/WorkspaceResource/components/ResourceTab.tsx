@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react';
 
 import {
   Box,
+  Button,
+  Container,
+  ContentLayout,
+  Header,
   Link,
   SpaceBetween,
   Table,
@@ -21,6 +25,10 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
   const [resourceList, setResourceList] = useState<string[]>([]);
   const [filterText, setFilterText] = useState<string>('');
+  const [isOpen, setIsOpen] = useState(true);
+  const [selectedLogicalId, setSelectedLogicalId] = useState<
+    string | undefined
+  >(undefined);
   console.log('resourceList', resourceList);
 
   useEffect(() => {
@@ -34,37 +42,101 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   }, [props]);
 
   return (
-    <Table
-      columnDefinitions={[
-        {
-          id: 'logicalId',
-          header: 'logical id',
-          cell: (item) => <Link href="#">{item}</Link>,
-          sortingField: 'name',
-          isRowHeader: true,
-        },
-      ]}
-      enableKeyboardNavigation
-      items={resourceList.filter((item) =>
-        item.toLowerCase().includes(filterText.toLowerCase()),
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+      }}
+    >
+      {isOpen ? (
+        <div
+          style={{
+            width: selectedLogicalId !== undefined ? '300px' : '100%',
+            height: '100%',
+          }}
+        >
+          <Table
+            columnDefinitions={[
+              {
+                id: 'logicalId',
+                header: 'logical id',
+                cell: (item) => (
+                  <Link
+                    href="#"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSelectedLogicalId(item);
+                    }}
+                  >
+                    {item}
+                  </Link>
+                ),
+                sortingField: 'name',
+                isRowHeader: true,
+              },
+            ]}
+            enableKeyboardNavigation
+            items={resourceList.filter((item) =>
+              item.toLowerCase().includes(filterText.toLowerCase()),
+            )}
+            loadingText="Loading resources"
+            loading={isLoading}
+            sortingDisabled
+            empty={
+              <Box
+                margin={{ vertical: 'xs' }}
+                textAlign="center"
+                color="inherit"
+              >
+                <SpaceBetween size="m">
+                  <b>No resources</b>
+                </SpaceBetween>
+              </Box>
+            }
+            filter={
+              <TextFilter
+                filteringPlaceholder="Search Resource"
+                filteringText={filterText}
+                onChange={({ detail }) => setFilterText(detail.filteringText)}
+              />
+            }
+            header={
+              <Header
+                actions={
+                  selectedLogicalId === undefined ? undefined : (
+                    <SpaceBetween direction="horizontal" size="xs">
+                      <Button
+                        iconName={isOpen ? 'angle-left' : 'angle-right'}
+                        variant="icon"
+                        onClick={() => setIsOpen(!isOpen)}
+                      />
+                    </SpaceBetween>
+                  )
+                }
+              >
+                リソース
+              </Header>
+            }
+          />
+        </div>
+      ) : (
+        <Container>
+          <Button
+            iconName="angle-right"
+            variant="icon"
+            onClick={() => setIsOpen(!isOpen)}
+          />
+        </Container>
       )}
-      loadingText="Loading resources"
-      loading={isLoading}
-      sortingDisabled
-      empty={
-        <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
-          <SpaceBetween size="m">
-            <b>No resources</b>
-          </SpaceBetween>
-        </Box>
-      }
-      filter={
-        <TextFilter
-          filteringPlaceholder="Search Resource"
-          filteringText={filterText}
-          onChange={({ detail }) => setFilterText(detail.filteringText)}
-        />
-      }
-    />
+      {selectedLogicalId !== undefined && (
+        <ContentLayout
+          defaultPadding
+          header={<Header>{selectedLogicalId}</Header>}
+        >
+          <Container>sample</Container>
+        </ContentLayout>
+      )}
+    </div>
   );
 };
