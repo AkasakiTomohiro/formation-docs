@@ -199,9 +199,11 @@ function isIntrinsicFunction(
   const intrinsicFunctions = [
     'Fn::Base64',
     'Fn::Cidr',
-    'Fn::If',
+    'Fn::And',
     'Fn::Equals',
+    'Fn::If',
     'Fn::Not',
+    'Fn::Or',
     'Fn::FindInMap',
     'Fn::ForEach',
     'Fn::GetAtt',
