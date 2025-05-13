@@ -17,8 +17,9 @@ import { getCloudFormationSchema } from '../../../../../invoke/CloudFormationSch
 import { getStackResourceList } from '../../../../../invoke/Stack';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
-import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
+import type { CloudFormationSchema } from './types/CloudFormationSchema';
 
+import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
 type ResourceTabProps = {
   stackId: string;
   stackName: string;

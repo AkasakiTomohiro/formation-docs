@@ -1,3 +1,12 @@
+import { isJsonSchemaPrimitiveType } from '../components/types/CloudFormationSchema';
+
+import type {
+  CloudFormationSchema,
+  DefinedProperty,
+  ReferenceProperty,
+  ReferencePropertyWithDescription,
+} from '../components/types/CloudFormationSchema';
+
 export type ResourceTableItem = {
   id: string;
   property: string;
@@ -15,50 +24,139 @@ export const createResourceTableItems = (
     if (schema.readOnlyProperties.includes(`/properties/${key}`)) {
       continue;
     }
-    const itemType = covertType(value);
-    const item: ResourceTableItem = {
-      id: `/properties/${key}`,
-      property: key,
-      type: itemType,
-      description: value.description || '',
-      value: '',
-    };
-
-    if (value.items) {
-      item.children = [];
-      if ('$ref' in value.items && schema.definitions) {
-        const definition = value.items.$ref.replace('#/definitions/', '');
-        const definitionSchema = schema.definitions[definition];
-        for (const [definitionKey, definitionValue] of Object.entries(
-          definitionSchema.properties,
-        )) {
-          const childType = covertType(definitionValue);
-          const child: ResourceTableItem = {
-            id: `/properties/${key}/${definitionKey}`,
-            property: definitionKey,
-            type: childType,
-            description: definitionValue.description || '',
-            value: '',
-          };
-          item.children.push(child);
-        }
-      } else {
+    if ('$ref' in value) {
+      const refItem = parseReferencePropertyToTableItem(
+        '/properties',
+        key,
+        value,
+        schema.definitions,
+      );
+      if (refItem) {
+        items.push(refItem);
       }
+    } else {
+      const definedItem = parseDefinedPropertyToTableItem(
+        '/properties',
+        key,
+        value,
+        schema.definitions,
+      );
+      items.push(definedItem);
     }
-
-    items.push(item);
   }
   return items;
 };
 
-function covertType(property: Property): string {
-  console.log('property', property);
-  if (typeof property.type === 'string') {
+function parseDefinedPropertyToTableItem(
+  parentId: string,
+  propertyKey: string,
+  property: DefinedProperty,
+  definitions?: CloudFormationSchema['definitions'],
+): ResourceTableItem {
+  const result: ResourceTableItem = {
+    id: `${parentId}/${propertyKey}`,
+    property: propertyKey,
+    type: covertType(property),
+    description: property.description || '',
+    value: '',
+  };
+  if (property.type === 'object' && property.properties) {
+    result.children = [];
+    for (const [definitionKey, definitionValue] of Object.entries(
+      property.properties,
+    )) {
+      if ('$ref' in definitionValue) {
+        const childItem = parseReferencePropertyToTableItem(
+          `${parentId}/${propertyKey}`,
+          definitionKey,
+          definitionValue,
+          definitions,
+        );
+        if (childItem) {
+          result.children.push(childItem);
+        }
+      } else {
+        const childItem = parseDefinedPropertyToTableItem(
+          `${parentId}/${propertyKey}`,
+          definitionKey,
+          definitionValue,
+          definitions,
+        );
+        result.children.push(childItem);
+      }
+    }
+  }
+  return result;
+}
+
+function parseReferencePropertyToTableItem(
+  parentId: string,
+  propertyKey: string,
+  property: ReferenceProperty | ReferencePropertyWithDescription,
+  definitions?: CloudFormationSchema['definitions'],
+): ResourceTableItem | undefined {
+  if (definitions === undefined) {
+    return undefined;
+  }
+
+  const definitionKey = property.$ref.replace('#/definitions/', '');
+  const definition = definitions[definitionKey];
+  const result: ResourceTableItem = {
+    id: `${parentId}/${propertyKey}`,
+    property: propertyKey,
+    type: covertType(definition),
+    description: 'description' in property ? property.description || '' : '',
+    value: '',
+  };
+  if (definition.type === 'object') {
+    result.children = [];
+    for (const [definitionKey, definitionValue] of Object.entries(
+      definition.properties,
+    )) {
+      if ('$ref' in definitionValue) {
+        const childItem = parseReferencePropertyToTableItem(
+          `${parentId}/${propertyKey}`,
+          definitionKey,
+          definitionValue,
+          definitions,
+        );
+        if (childItem) {
+          result.children.push(childItem);
+        }
+        continue;
+      }
+      const childItem = parseDefinedPropertyToTableItem(
+        `${parentId}/${propertyKey}`,
+        definitionKey,
+        definitionValue,
+        definitions,
+      );
+      result.children.push(childItem);
+    }
+  }
+
+  return result;
+}
+
+function covertType(property: DefinedProperty): string {
+  if (Array.isArray(property.type)) {
+    return property.type.join(' | ');
+  }
+  if (property.type === 'string') {
     if (property.enum) {
       return property.enum.map((item) => item.toString()).join(' | ');
     }
-    return property.type;
   }
-  console.log('property.type', typeof property.type, property.type);
-  return property.type.join(' | ');
+  if (property.type === 'array') {
+    if (property.items && !('$ref' in property.items)) {
+      if (isJsonSchemaPrimitiveType(property.items.type)) {
+        const type = covertType(property.items);
+        if (type.includes(' | ')) {
+          return `( ${type} )[]`;
+        }
+        return `${type}[]`;
+      }
+    }
+  }
+  return property.type;
 }
