@@ -1,4 +1,7 @@
-import { isJsonSchemaPrimitiveType } from '../components/types/CloudFormationSchema';
+import {
+  intrinsicFunctions,
+  isJsonSchemaPrimitiveType,
+} from '../components/types/CloudFormationSchema';
 
 import type {
   CloudFormationSchema,
@@ -196,28 +199,6 @@ function isIntrinsicFunction(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
 ): boolean {
-  const intrinsicFunctions = [
-    'Fn::Base64',
-    'Fn::Cidr',
-    'Fn::And',
-    'Fn::Equals',
-    'Fn::If',
-    'Fn::Not',
-    'Fn::Or',
-    'Fn::FindInMap',
-    'Fn::ForEach',
-    'Fn::GetAtt',
-    'Fn::GetAZs',
-    'Fn::ImportValue',
-    'Fn::Join',
-    'Fn::Length',
-    'Fn::Select',
-    'Fn::Split',
-    'Fn::Sub',
-    'Fn::ToJsonString',
-    'Fn::Transform',
-    'Ref',
-  ];
   const objKeys = Object.keys(actualProperty);
   return intrinsicFunctions.some((intrinsicFunction) => {
     return objKeys.includes(intrinsicFunction);

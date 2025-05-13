@@ -121,3 +121,27 @@ export interface CloudFormationSchema {
   typeConfiguration?: Record<string, any>;
   resourceLink?: ResourceLink;
 }
+
+export const intrinsicFunctions = [
+  'Fn::Base64',
+  'Fn::Cidr',
+  'Fn::And',
+  'Fn::Equals',
+  'Fn::If',
+  'Fn::Not',
+  'Fn::Or',
+  'Fn::FindInMap',
+  'Fn::ForEach',
+  'Fn::GetAtt',
+  'Fn::GetAZs',
+  'Fn::ImportValue',
+  'Fn::Join',
+  'Fn::Length',
+  'Fn::Select',
+  'Fn::Split',
+  'Fn::Sub',
+  'Fn::ToJsonString',
+  'Fn::Transform',
+  'Ref',
+] as const;
+export type IntrinsicFunction = (typeof intrinsicFunctions)[number];
