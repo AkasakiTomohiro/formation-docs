@@ -14,7 +14,10 @@ import {
 } from '@cloudscape-design/components';
 
 import { getCloudFormationSchema } from '../../../../../invoke/CloudFormationSchema';
-import { getStackResourceList } from '../../../../../invoke/Stack';
+import {
+  getStackResourceList,
+  getStackResourceProperties,
+} from '../../../../../invoke/Stack';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
 import type { CloudFormationSchema } from './types/CloudFormationSchema';
@@ -61,8 +64,14 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
     if (selectedLogicalId === undefined || schema === undefined) {
       return;
     }
-    setItems(createResourceTableItems(schema));
-  }, [selectedLogicalId, schema]);
+    getStackResourceProperties({
+      stack_id: props.stackId,
+      logical_id: selectedLogicalId,
+    }).then((properties) => {
+      console.log('properties', properties);
+      setItems(createResourceTableItems(schema, properties));
+    });
+  }, [props.stackId, selectedLogicalId, schema]);
 
   return (
     <div
