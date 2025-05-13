@@ -166,85 +166,83 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
           defaultPadding
           header={<Header>{selectedLogicalId}</Header>}
         >
-          <Container>
-            <Table
-              renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
-                `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
-              }
-              renderLoaderPending={() => (
-                <Button variant="inline-link" iconName="add-plus">
-                  Show more
-                </Button>
-              )}
-              renderLoaderLoading={() => (
-                <StatusIndicator type="loading">Loading items</StatusIndicator>
-              )}
-              renderLoaderError={() => (
-                <StatusIndicator type="error">Loading error</StatusIndicator>
-              )}
-              renderLoaderEmpty={() => <Box>No resources found</Box>}
-              expandableRows={{
-                getItemChildren: (item) => item.children ?? [],
-                isItemExpandable: (item) => Boolean(item.children),
-                expandedItems: expandedItems,
-                onExpandableItemToggle: ({ detail }) =>
-                  setExpandedItems((prev: ResourceTableItem[] | undefined) => {
-                    const next = new Set((prev ?? []).map((item) => item.id));
-                    detail.expanded
-                      ? next.add(detail.item.id)
-                      : next.delete(detail.item.id);
-                    return [...next].map((id) => ({ id }));
-                  }),
-              }}
-              columnDefinitions={[
-                {
-                  id: 'property',
-                  header: 'Property',
-                  cell: (e) => e.property,
-                  isRowHeader: true,
-                },
-                {
-                  id: 'type',
-                  header: 'Type',
-                  cell: (e) => e.type,
-                },
-                {
-                  id: 'description',
-                  header: 'Description',
-                  cell: (e) => e.description,
-                },
-                {
-                  id: 'value',
-                  header: 'Value',
-                  cell: (e) => e.value,
-                },
-              ]}
-              enableKeyboardNavigation
-              items={items}
-              loadingText="Loading resources"
-              trackBy="name"
-              empty={
-                <Box
-                  margin={{ vertical: 'xs' }}
-                  textAlign="center"
-                  color="inherit"
-                >
-                  <SpaceBetween size="m">
-                    <b>No resources</b>
-                    <Button>Create resource</Button>
-                  </SpaceBetween>
-                </Box>
-              }
-              filter={
-                <TextFilter
-                  filteringPlaceholder="Find resources"
-                  filteringText=""
-                  countText="0 matches"
-                />
-              }
-              header={<Header>Table with expandable rows</Header>}
-            />
-          </Container>
+          <Table
+            renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
+              `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
+            }
+            renderLoaderPending={() => (
+              <Button variant="inline-link" iconName="add-plus">
+                Show more
+              </Button>
+            )}
+            renderLoaderLoading={() => (
+              <StatusIndicator type="loading">Loading items</StatusIndicator>
+            )}
+            renderLoaderError={() => (
+              <StatusIndicator type="error">Loading error</StatusIndicator>
+            )}
+            renderLoaderEmpty={() => <Box>No resources found</Box>}
+            expandableRows={{
+              getItemChildren: (item) => item.children ?? [],
+              isItemExpandable: (item) => Boolean(item.children),
+              expandedItems: expandedItems,
+              onExpandableItemToggle: ({ detail }) =>
+                setExpandedItems((prev: ResourceTableItem[] | undefined) => {
+                  const next = new Set((prev ?? []).map((item) => item.id));
+                  detail.expanded
+                    ? next.add(detail.item.id)
+                    : next.delete(detail.item.id);
+                  return [...next].map((id) => ({ id }));
+                }),
+            }}
+            columnDefinitions={[
+              {
+                id: 'property',
+                header: 'Property',
+                cell: (e) => e.property,
+                isRowHeader: true,
+              },
+              {
+                id: 'type',
+                header: 'Type',
+                cell: (e) => e.type,
+              },
+              {
+                id: 'description',
+                header: 'Description',
+                cell: (e) => e.description,
+              },
+              {
+                id: 'value',
+                header: 'Value',
+                cell: (e) => e.value,
+              },
+            ]}
+            enableKeyboardNavigation
+            items={items}
+            loadingText="Loading resources"
+            trackBy="name"
+            empty={
+              <Box
+                margin={{ vertical: 'xs' }}
+                textAlign="center"
+                color="inherit"
+              >
+                <SpaceBetween size="m">
+                  <b>No resources</b>
+                  <Button>Create resource</Button>
+                </SpaceBetween>
+              </Box>
+            }
+            filter={
+              <TextFilter
+                filteringPlaceholder="Find resources"
+                filteringText=""
+                countText="0 matches"
+              />
+            }
+            header={<Header>Table with expandable rows</Header>}
+          />
         </ContentLayout>
       )}
     </div>
