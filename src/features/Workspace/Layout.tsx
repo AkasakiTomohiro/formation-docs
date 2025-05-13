@@ -79,6 +79,7 @@ export const WorkspaceLayout = (): JSX.Element => {
   return (
     <AppLayout
       toolsHide
+      disableContentPaddings
       navigationOpen={true}
       navigation={
         <SideNavigation
@@ -173,7 +174,11 @@ export const WorkspaceLayout = (): JSX.Element => {
       //     ]}
       //   />
       // }
-      content={<Outlet context={context} />}
+      content={
+        <div key="sample" style={{ margin: '16px' }}>
+          <Outlet context={context} />
+        </div>
+      }
     />
   );
 };
