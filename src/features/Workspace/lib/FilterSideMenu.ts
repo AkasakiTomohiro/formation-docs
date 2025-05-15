@@ -9,7 +9,7 @@ type SectionGroupItem =
 
 export const filterSideMenu = (
   sideMenu: TemplateSummary[],
-  searchValue: string,
+  searchValues: string[],
 ): SideNavigationProps.Item[] => {
   const items: SideNavigationProps.Item[] = [];
 
@@ -23,11 +23,27 @@ export const filterSideMenu = (
         href: `${item.id}/${item.stackName}`,
       },
     ];
-    if (item.stackName.toLowerCase().includes(searchValue.toLowerCase())) {
-      // スタック名に検索文字が含まれている場合はすべてのリソースを表示する
-      for (const resource of item.resources.sort((a, b) =>
-        a.serviceName.localeCompare(b.serviceName),
-      )) {
+
+    // スタック名に含まれている検索文字を取り除く
+    const remainingSearchValuesStack = searchValues.filter(
+      (searchValue) =>
+        item.stackName.toLowerCase().includes(searchValue.toLowerCase()) ===
+        false,
+    );
+
+    for (const resource of item.resources.sort((a, b) =>
+      a.serviceName.localeCompare(b.serviceName),
+    )) {
+      // サービス名に含まれている検索文字を取り除く
+      const remainingSearchValues = remainingSearchValuesStack.filter(
+        (searchValue) =>
+          resource.serviceName
+            .toLowerCase()
+            .includes(searchValue.toLowerCase()) === false,
+      );
+
+      if (remainingSearchValues.length === 0) {
+        // スタック名もしくはサービス名に検索文字が含まれている場合は、すべてのリソースを表示する
         newChildren.push({
           type: 'section',
           text: resource.serviceName,
@@ -39,46 +55,26 @@ export const filterSideMenu = (
               href: `${item.id}/${item.stackName}/${resource.serviceName}/${rType}`,
             })),
         });
-      }
-    } else {
-      // スタック名に検索文字が含まれていない場合は、サービス名もしくはリソース名に検索文字が含まれているものを表示する
-      for (const resource of item.resources.sort((a, b) =>
-        a.serviceName.localeCompare(b.serviceName),
-      )) {
-        if (
-          resource.serviceName.toLowerCase().includes(searchValue.toLowerCase())
-        ) {
-          // サービス名に検索文字が含まれている場合は、すべてのリソースを表示する
-          newChildren.push({
-            type: 'section',
-            text: resource.serviceName,
-            items: resource.recourseType
-              .sort((a, b) => a.localeCompare(b))
-              .map((rType) => ({
-                type: 'link',
-                text: rType,
-                href: `${item.id}/${item.stackName}/${resource.serviceName}/${rType}`,
-              })),
-          });
-        } else {
-          // サービス名に検索文字が含まれていない場合は、リソース名に検索文字が含まれているものを表示する
-          const newResource: SideNavigationProps.Section = {
-            type: 'section',
-            text: resource.serviceName,
-            items: resource.recourseType
-              .sort((a, b) => a.localeCompare(b))
-              .filter((rType) =>
+      } else {
+        // スタック名もしくはサービス名に検索文字が含まれていない場合は、リソース名に検索文字が含まれているものを表示する
+        const newResource: SideNavigationProps.Section = {
+          type: 'section',
+          text: resource.serviceName,
+          items: resource.recourseType
+            .sort((a, b) => a.localeCompare(b))
+            .filter((rType) =>
+              remainingSearchValues.every((searchValue) =>
                 rType.toLowerCase().includes(searchValue.toLowerCase()),
-              )
-              .map((rType) => ({
-                type: 'link',
-                text: rType,
-                href: `${item.id}/${item.stackName}/${resource.serviceName}/${rType}`,
-              })),
-          };
-          if (newResource.items.length > 0) {
-            newChildren.push(newResource);
-          }
+              ),
+            )
+            .map((rType) => ({
+              type: 'link',
+              text: rType,
+              href: `${item.id}/${item.stackName}/${resource.serviceName}/${rType}`,
+            })),
+        };
+        if (newResource.items.length > 0) {
+          newChildren.push(newResource);
         }
       }
     }
