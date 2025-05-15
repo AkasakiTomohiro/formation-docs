@@ -32,6 +32,7 @@ export class SampleFuncStack extends Stack {
       vpcSubnets: {
         subnets: vpc.privateSubnets,
       },
+      architecture: lambda.Architecture.ARM_64,
     });
   }
 }
