@@ -372,7 +372,7 @@ function covertValue(
   if (isJsonSchemaPrimitiveType(property.type)) {
     return actualProperty;
   }
-  if (Array.isArray(actualProperty)) {
+  if (typeof actualProperty === 'object') {
     return '';
   }
   return JSON.stringify(actualProperty, undefined, 2);
