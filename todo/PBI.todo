@@ -28,7 +28,29 @@
         ☐ 指定したリソースのCDKパラメータを表示
             ☐ CloudFormationの組み込み関数を利用した値の表示
                 たとえば、Fn::Joinだったら文字列結合を行う。組み込み関数を用いた値は編集不可とする。
-            ☐ Refはリソースタイプごとに参照できるものが異なり、JSONなどで機械的に参照可能な形で公開されていないためサポート方式は未定。
+                ☐ Fn::Base64
+                ☐ Fn::Cidr
+                ☐ Fn::And
+                ☐ Fn::Equals
+                ☐ Fn::If
+                ☐ Fn::Not
+                ☐ Fn::Or
+                ☐ Fn::FindInMap
+                ☐ Fn::ForEach
+                ☐ Fn::GetAtt
+                ☐ Fn::GetAZs
+                ☐ Fn::ImportValue
+                ☐ Fn::Join
+                ☐ Fn::Length
+                ☐ Fn::Select
+                ☐ Fn::Split
+                ☐ Fn::Sub
+                ☐ Fn::ToJsonString
+                ☐ Fn::Transform
+                ☐ Ref関数を利用した値の表示
+                    ☐ Parameter
+                    ☐ 論理ID(リソースタイプごとに参照できるものが異なり、JSONなどで機械的に参照可能な形で公開されていないためサポート方式は未定。) 
+                    ✔ 疑似パラメータ @done(25-05-15 22:31)
         ☐ リソースのパラメータの説明表示（英語）
             ☐ CloudFormationのリソースごとのデータ構造を管理するjson
                 https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/resource-type-schemas.html

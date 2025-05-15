@@ -145,3 +145,15 @@ export const intrinsicFunctions = [
   'Ref',
 ] as const;
 export type IntrinsicFunction = (typeof intrinsicFunctions)[number];
+
+export const pseudoProperties = [
+  'AWS::AccountId',
+  'AWS::NotificationARNs',
+  'AWS::NoValue',
+  'AWS::Partition',
+  'AWS::Region',
+  'AWS::StackId',
+  'AWS::StackName',
+  'AWS::URLSuffix',
+] as const;
+export type PseudoProperty = (typeof pseudoProperties)[number];

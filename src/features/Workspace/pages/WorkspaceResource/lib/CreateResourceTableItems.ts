@@ -1,11 +1,14 @@
 import {
   intrinsicFunctions,
   isJsonSchemaPrimitiveType,
+  pseudoProperties,
 } from '../components/types/CloudFormationSchema';
 
 import type {
   CloudFormationSchema,
   DefinedProperty,
+  IntrinsicFunction,
+  PseudoProperty,
   ReferenceProperty,
   ReferencePropertyWithDescription,
 } from '../components/types/CloudFormationSchema';
@@ -195,14 +198,115 @@ function getActualProperties(
   return undefined;
 }
 
+function isPseudoProperty(property: string): PseudoProperty | undefined {
+  for (const pseudo of pseudoProperties) {
+    if (property === pseudo) {
+      return pseudo as PseudoProperty;
+    }
+  }
+  return undefined;
+}
+
 function isIntrinsicFunction(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
-): boolean {
+): IntrinsicFunction | undefined {
   const objKeys = Object.keys(actualProperty);
-  return intrinsicFunctions.some((intrinsicFunction) => {
-    return objKeys.includes(intrinsicFunction);
-  });
+  for (const intrinsic of intrinsicFunctions) {
+    if (objKeys.includes(intrinsic)) {
+      return intrinsic as IntrinsicFunction;
+    }
+  }
+  return undefined;
+}
+
+function convertIntrinsicFunctionValue(
+  intrinsic: IntrinsicFunction,
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  actualProperty: any,
+): string {
+  switch (intrinsic) {
+    case 'Fn::Base64': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::Cidr': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::And': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::Equals': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::If': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::Not': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::Or': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::FindInMap': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::ForEach': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::GetAtt': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::GetAZs': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::ImportValue': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::Join': {
+      const delimiter = actualProperty['Fn::Join'][0];
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      const pieces = actualProperty['Fn::Join'][1].map((value: any) => {
+        const intrinsic = isIntrinsicFunction(value);
+        if (intrinsic !== undefined) {
+          return convertIntrinsicFunctionValue(intrinsic, value);
+        }
+        return value;
+      });
+      return pieces.join(delimiter);
+    }
+    case 'Fn::Length': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::Select': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::Split': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::Sub': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::ToJsonString': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Fn::Transform': {
+      return JSON.stringify(actualProperty, undefined, 2);
+    }
+    case 'Ref': {
+      let value = actualProperty.Ref;
+      const intrinsic = isIntrinsicFunction(value);
+      if (intrinsic !== undefined) {
+        value = convertIntrinsicFunctionValue(intrinsic, value);
+      }
+      const pseudo = isPseudoProperty(value);
+      if (pseudo !== undefined) {
+        // 疑似パラメータ：<疑似パラメータ>
+        return `<${pseudo}>`;
+      }
+      // 疑似パラメータ以外：<Ref: 論理ID or Parameter>
+      return `<Ref: ${value}>`;
+    }
+  }
 }
 
 function covertValue(
@@ -213,13 +317,14 @@ function covertValue(
   if (actualProperty === undefined) {
     return '';
   }
-  if (isIntrinsicFunction(actualProperty)) {
-    return '';
+  const intrinsic = isIntrinsicFunction(actualProperty);
+  if (intrinsic !== undefined) {
+    return convertIntrinsicFunctionValue(intrinsic, actualProperty);
   }
   if (isJsonSchemaPrimitiveType(property.type)) {
     return actualProperty;
   }
-  return '';
+  return JSON.stringify(actualProperty, undefined, 2);
 }
 
 /**
