@@ -105,7 +105,7 @@ function parseDefinedPropertyToTableItem(
       const childItem: ResourceTableItem = {
         id: `${parentId}/${propertyKey}/${index}`,
         property: index,
-        type: '',
+        type: 'object',
         description: '',
         value: '',
       };
@@ -371,6 +371,14 @@ function covertValue(
   }
   if (isJsonSchemaPrimitiveType(property.type)) {
     return actualProperty;
+  }
+  if (Array.isArray(actualProperty)) {
+    if (actualProperty.length !== 0) {
+      const firstItemType = typeof actualProperty[0];
+      if (firstItemType !== 'object' && firstItemType !== 'function') {
+        return `[ ${actualProperty.join(', ')} ]`;
+      }
+    }
   }
   if (typeof actualProperty === 'object') {
     return '';
