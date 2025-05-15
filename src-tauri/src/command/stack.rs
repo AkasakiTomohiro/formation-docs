@@ -377,6 +377,9 @@ async fn get_stack_resource_properties(
     let template_json = fs::read_to_string(&template_path)?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
     let properties_json = template_json["Resources"][logical_id]["Properties"].clone();
+    if properties_json.is_null() {
+        return Ok(Value::Object(serde_json::Map::new()));
+    }
     return Ok(properties_json);
 }
 
