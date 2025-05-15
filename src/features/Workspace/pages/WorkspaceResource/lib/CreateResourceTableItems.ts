@@ -189,10 +189,10 @@ function getActualProperties(
   actualProperties: any,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 ): any {
-  if (actualProperties === undefined || actualProperties === null) {
-    return {};
+  if (typeof actualProperties === 'object' && propertyKey in actualProperties) {
+    return actualProperties[propertyKey];
   }
-  return actualProperties[propertyKey];
+  return undefined;
 }
 
 function isIntrinsicFunction(
@@ -210,7 +210,7 @@ function covertValue(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
 ): string {
-  if (actualProperty === undefined || actualProperty === null) {
+  if (actualProperty === undefined) {
     return '';
   }
   if (isIntrinsicFunction(actualProperty)) {
