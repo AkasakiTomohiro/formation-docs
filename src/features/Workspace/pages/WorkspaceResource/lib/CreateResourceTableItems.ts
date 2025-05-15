@@ -90,6 +90,54 @@ function parseDefinedPropertyToTableItem(
       getActualProperties(propertyKey, actualProperties),
     ),
   };
+  if (
+    definitions !== undefined &&
+    property.type === 'array' &&
+    property.items !== undefined &&
+    '$ref' in property.items
+  ) {
+    const definitionKey = property.items.$ref.replace('#/definitions/', '');
+    const definition = definitions[definitionKey];
+    const propertyList =
+      getActualProperties(propertyKey, actualProperties) ?? [];
+    result.children = [];
+    for (const [index, property] of Object.entries(propertyList)) {
+      const childItem: ResourceTableItem = {
+        id: `${parentId}/${propertyKey}/${index}`,
+        property: index,
+        type: '',
+        description: '',
+        value: '',
+      };
+      childItem.children = [];
+      for (const [definitionKey, definitionValue] of Object.entries(
+        definition.properties,
+      )) {
+        if ('$ref' in definitionValue) {
+          const grandChildItem = parseReferencePropertyToTableItem(
+            `${parentId}/${propertyKey}`,
+            definitionKey,
+            definitionValue,
+            property,
+            definitions,
+          );
+          if (grandChildItem) {
+            childItem.children.push(grandChildItem);
+          }
+          continue;
+        }
+        const grandChildItem = parseDefinedPropertyToTableItem(
+          `${parentId}/${propertyKey}/${index}`,
+          definitionKey,
+          definitionValue,
+          property,
+          definitions,
+        );
+        childItem.children.push(grandChildItem);
+      }
+      result.children.push(childItem);
+    }
+  }
   if (property.type === 'object' && property.properties) {
     result.children = [];
     for (const [definitionKey, definitionValue] of Object.entries(
@@ -323,6 +371,9 @@ function covertValue(
   }
   if (isJsonSchemaPrimitiveType(property.type)) {
     return actualProperty;
+  }
+  if (Array.isArray(actualProperty)) {
+    return '';
   }
   return JSON.stringify(actualProperty, undefined, 2);
 }
