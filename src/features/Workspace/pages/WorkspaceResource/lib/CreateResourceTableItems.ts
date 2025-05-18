@@ -8,6 +8,7 @@ import type {
   CloudFormationSchema,
   DefinedProperty,
   IntrinsicFunction,
+  Property,
   ReferenceProperty,
   ReferencePropertyWithDescription,
 } from '../components/types/CloudFormationSchema';
@@ -89,6 +90,8 @@ function parseDefinedPropertyToTableItem(
       getActualProperties(propertyKey, actualProperties),
     ),
   };
+
+  // プロパティが配列かつ、itemsが定義されている場合は、子要素を取得する
   if (
     definitions !== undefined &&
     property.type === 'array' &&
@@ -100,78 +103,39 @@ function parseDefinedPropertyToTableItem(
     const propertyList =
       getActualProperties(propertyKey, actualProperties) ?? [];
     result.children = [];
+
+    // 配列のIndex番号ごとに子要素を作成する
     for (const [index, property] of Object.entries(propertyList)) {
       const childItem: ResourceTableItem = {
-        id: `${parentId}/${propertyKey}/${index}`,
+        id: `${result.id}/${index}`,
         property: index,
         type: 'object',
         description: '',
         value: '',
       };
-      childItem.children = [];
-      for (const [definitionKey, definitionValue] of Object.entries(
+      childItem.children = parseChildrenPropertyToTableItem(
         definition.properties,
-      )) {
-        if ('$ref' in definitionValue) {
-          const grandChildItem = parseReferencePropertyToTableItem(
-            `${parentId}/${propertyKey}/${index}`,
-            definitionKey,
-            definitionValue,
-            property,
-            definitions,
-          );
-          if (grandChildItem) {
-            childItem.children.push(grandChildItem);
-          }
-          continue;
-        }
-        const grandChildItem = parseDefinedPropertyToTableItem(
-          `${parentId}/${propertyKey}/${index}`,
-          definitionKey,
-          definitionValue,
-          property,
-          definitions,
-        );
-        childItem.children.push(grandChildItem);
-      }
+        childItem.id,
+        property,
+        definitions,
+      );
       result.children.push(childItem);
     }
   }
+
+  // プロパティがオブジェクトかつpropertiesが定義されている場合は、子要素を取得する
   if (property.type === 'object' && property.properties) {
-    result.children = [];
-    for (const [definitionKey, definitionValue] of Object.entries(
+    result.children = parseChildrenPropertyToTableItem(
       property.properties,
-    )) {
-      if ('$ref' in definitionValue) {
-        const childItem = parseReferencePropertyToTableItem(
-          `${parentId}/${propertyKey}`,
-          definitionKey,
-          definitionValue,
-          getActualProperties(propertyKey, actualProperties),
-          definitions,
-        );
-        if (childItem) {
-          result.children.push(childItem);
-        }
-      } else {
-        const childItem = parseDefinedPropertyToTableItem(
-          `${parentId}/${propertyKey}`,
-          definitionKey,
-          definitionValue,
-          getActualProperties(propertyKey, actualProperties),
-          definitions,
-        );
-        result.children.push(childItem);
-      }
-    }
+      result.id,
+      getActualProperties(propertyKey, actualProperties),
+      definitions,
+    );
   }
 
-  // 子要素がある場合はvalueを空にし、ない場合はchildrenを削除する
+  // 子要素がある場合はvalueを空文字にする
   if (result.children !== undefined) {
-    if (result.children.length === 0) {
-      // biome-ignore lint/performance/noDelete: <explanation>
-      delete result.children;
-    } else {
+    if (result.children.length !== 0) {
       result.value = '';
     }
   }
@@ -215,50 +179,69 @@ function parseReferencePropertyToTableItem(
 
   // プロパティがオブジェクトの場合は、子要素を取得する
   if (definition.type === 'object') {
-    result.children = [];
-
-    // definitionに定義されるプロパティを取得する
-    for (const [definitionKey, definitionValue] of Object.entries(
+    result.children = parseChildrenPropertyToTableItem(
       definition.properties,
-    )) {
-      // $refを含む場合は再帰的に処理する
-      if ('$ref' in definitionValue) {
-        const childItem = parseReferencePropertyToTableItem(
-          `${parentId}/${propertyKey}`,
-          definitionKey,
-          definitionValue,
-          getActualProperties(propertyKey, actualProperties),
-          definitions,
-        );
-        if (childItem) {
-          result.children.push(childItem);
-        }
-        continue;
-      }
-
-      // $refを含まない場合は、定義されたプロパティを取得する
-      const childItem = parseDefinedPropertyToTableItem(
-        `${parentId}/${propertyKey}`,
-        definitionKey,
-        definitionValue,
-        getActualProperties(propertyKey, actualProperties),
-        definitions,
-      );
-      result.children.push(childItem);
-    }
+      result.id,
+      getActualProperties(propertyKey, actualProperties),
+      definitions,
+    );
   }
 
-  // 子要素がある場合はvalueを空にし、ない場合はchildrenを削除する
+  // 子要素がある場合はvalueを空文字にする
   if (result.children !== undefined) {
-    if (result.children.length === 0) {
-      // biome-ignore lint/performance/noDelete: <explanation>
-      delete result.children;
-    } else {
+    if (result.children.length !== 0) {
       result.value = '';
     }
   }
 
   return result;
+}
+
+/**
+ * `CloudFormationSchema.properties`の子要素をテーブルアイテムに変換する
+ * @param childrenProperties 子要素のプロパティ
+ * @param parentId 親の`id`
+ * @param actualProperties 実際のテンプレートに定義されているプロパティ
+ * @param definitions `CloudFormationSchema.definitions`
+ * @return テーブルアイテム
+ */
+function parseChildrenPropertyToTableItem(
+  childrenProperties: Record<string, Property>,
+  parentId: string,
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  actualProperties: any,
+  definitions: CloudFormationSchema['definitions'] | undefined,
+): ResourceTableItem[] | undefined {
+  const result: ResourceTableItem[] = [];
+  for (const [definitionKey, definitionValue] of Object.entries(
+    childrenProperties,
+  )) {
+    // $refを含む場合は、参照プロパティを取得する
+    if ('$ref' in definitionValue) {
+      const childItem = parseReferencePropertyToTableItem(
+        parentId,
+        definitionKey,
+        definitionValue,
+        actualProperties,
+        definitions,
+      );
+      if (childItem) {
+        result.push(childItem);
+      }
+      continue;
+    }
+
+    // $refを含まない場合は、定義されたプロパティを取得する
+    const childItem = parseDefinedPropertyToTableItem(
+      parentId,
+      definitionKey,
+      definitionValue,
+      actualProperties,
+      definitions,
+    );
+    result.push(childItem);
+  }
+  return result.length === 0 ? undefined : result;
 }
 
 /**
