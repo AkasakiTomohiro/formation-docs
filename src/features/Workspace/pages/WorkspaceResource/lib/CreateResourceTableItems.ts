@@ -8,7 +8,6 @@ import type {
   CloudFormationSchema,
   DefinedProperty,
   IntrinsicFunction,
-  PseudoProperty,
   ReferenceProperty,
   ReferencePropertyWithDescription,
 } from '../components/types/CloudFormationSchema';
@@ -166,6 +165,8 @@ function parseDefinedPropertyToTableItem(
       }
     }
   }
+
+  // 子要素がある場合はvalueを空にし、ない場合はchildrenを削除する
   if (result.children !== undefined) {
     if (result.children.length === 0) {
       // biome-ignore lint/performance/noDelete: <explanation>
@@ -194,6 +195,7 @@ function parseReferencePropertyToTableItem(
   actualProperties: any,
   definitions: CloudFormationSchema['definitions'] | undefined,
 ): ResourceTableItem | undefined {
+  // ReferenceProperty場合はdefinitionsがundefinedになりえないため。処理を中断する
   if (definitions === undefined) {
     return undefined;
   }
@@ -210,11 +212,16 @@ function parseReferencePropertyToTableItem(
       getActualProperties(propertyKey, actualProperties),
     ),
   };
+
+  // プロパティがオブジェクトの場合は、子要素を取得する
   if (definition.type === 'object') {
     result.children = [];
+
+    // definitionに定義されるプロパティを取得する
     for (const [definitionKey, definitionValue] of Object.entries(
       definition.properties,
     )) {
+      // $refを含む場合は再帰的に処理する
       if ('$ref' in definitionValue) {
         const childItem = parseReferencePropertyToTableItem(
           `${parentId}/${propertyKey}`,
@@ -228,6 +235,8 @@ function parseReferencePropertyToTableItem(
         }
         continue;
       }
+
+      // $refを含まない場合は、定義されたプロパティを取得する
       const childItem = parseDefinedPropertyToTableItem(
         `${parentId}/${propertyKey}`,
         definitionKey,
@@ -238,6 +247,8 @@ function parseReferencePropertyToTableItem(
       result.children.push(childItem);
     }
   }
+
+  // 子要素がある場合はvalueを空にし、ない場合はchildrenを削除する
   if (result.children !== undefined) {
     if (result.children.length === 0) {
       // biome-ignore lint/performance/noDelete: <explanation>
@@ -250,6 +261,12 @@ function parseReferencePropertyToTableItem(
   return result;
 }
 
+/**
+ * 実際のプロパティを取得する
+ * @param propertyKey プロパティのキー名
+ * @param actualProperties 実際のテンプレートに定義されているプロパティ
+ * @returns プロパティの実際の値
+ */
 function getActualProperties(
   propertyKey: string,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -262,15 +279,20 @@ function getActualProperties(
   return undefined;
 }
 
-function isPseudoProperty(property: string): PseudoProperty | undefined {
-  for (const pseudo of pseudoProperties) {
-    if (property === pseudo) {
-      return pseudo as PseudoProperty;
-    }
-  }
-  return undefined;
+/**
+ * 疑似プロパティかどうかを判定する
+ * @param property プロパティ名
+ */
+function isPseudoProperty(property: string): boolean {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  return pseudoProperties.includes(property as any);
 }
 
+/**
+ * 組込み関数かどうかを判定する
+ * @param actualProperty 実際のテンプレートに定義されているプロパティ
+ * @returns 組込み関数の名前
+ */
 function isIntrinsicFunction(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
@@ -284,6 +306,12 @@ function isIntrinsicFunction(
   return undefined;
 }
 
+/**
+ * 組込み関数の値を文字列化する
+ * @param intrinsic 組込み関数
+ * @param actualProperty 実際のテンプレートに定義されているプロパティ
+ * @returns 文字列化されたプロパティの値
+ */
 function convertIntrinsicFunctionValue(
   intrinsic: IntrinsicFunction,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -330,6 +358,7 @@ function convertIntrinsicFunctionValue(
       const delimiter = actualProperty['Fn::Join'][0];
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       const pieces = actualProperty['Fn::Join'][1].map((value: any) => {
+        // 文字列結合する要素の中にも組込み関数が含まれる場合があるので、再帰的に処理する
         const intrinsic = isIntrinsicFunction(value);
         if (intrinsic !== undefined) {
           return convertIntrinsicFunctionValue(intrinsic, value);
@@ -358,14 +387,16 @@ function convertIntrinsicFunctionValue(
     }
     case 'Ref': {
       let value = actualProperty.Ref;
+
+      // Refの値が組込み関数の場合は、再帰的に処理する
       const intrinsic = isIntrinsicFunction(value);
       if (intrinsic !== undefined) {
         value = convertIntrinsicFunctionValue(intrinsic, value);
       }
-      const pseudo = isPseudoProperty(value);
-      if (pseudo !== undefined) {
+
+      if (isPseudoProperty(value)) {
         // 疑似パラメータ：<疑似パラメータ>
-        return `<${pseudo}>`;
+        return `<${value}>`;
       }
       // 疑似パラメータ以外：<Ref: 論理ID or Parameter>
       return `<Ref: ${value}>`;
@@ -373,6 +404,12 @@ function convertIntrinsicFunctionValue(
   }
 }
 
+/**
+ * propertyに応じた値を文字列化する
+ * @param property プロパティ定義
+ * @param actualProperty 実際のテンプレートに定義されているプロパティ
+ * @returns 文字列化されたプロパティの値
+ */
 function covertValue(
   property: DefinedProperty,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -381,13 +418,19 @@ function covertValue(
   if (actualProperty === undefined) {
     return '';
   }
+
+  // プロパティが組込み関数の場合
   const intrinsic = isIntrinsicFunction(actualProperty);
   if (intrinsic !== undefined) {
     return convertIntrinsicFunctionValue(intrinsic, actualProperty);
   }
+
+  // プロパティがプリミティブな型の場合はそのまま返す
   if (isJsonSchemaPrimitiveType(property.type)) {
     return actualProperty;
   }
+
+  // プロパティが配列かつ、値がプリミティブな場合
   if (Array.isArray(actualProperty)) {
     if (actualProperty.length !== 0) {
       const firstItemType = typeof actualProperty[0];
@@ -407,16 +450,21 @@ function covertValue(
  * @returns 型の文字列
  */
 function covertType(property: DefinedProperty): string {
+  // タイプが配列の場合は、配列要素を結合する
   if (Array.isArray(property.type)) {
     return property.type.join(' | ');
   }
+
+  // タイプが文字列結でかつenumが定義されている場合は、enumの値を結合する
   if (property.type === 'string') {
     if (property.enum) {
       return property.enum.map((item) => item.toString()).join(' | ');
     }
   }
   if (property.type === 'array') {
+    // プロパティが配列で、itemsが定義されている場合
     if (property.items && !('$ref' in property.items)) {
+      // itemsが配列の場合は、子要素のタイプを再帰的に変換し結合する
       if (isJsonSchemaPrimitiveType(property.items.type)) {
         const type = covertType(property.items);
         if (type.includes(' | ')) {
