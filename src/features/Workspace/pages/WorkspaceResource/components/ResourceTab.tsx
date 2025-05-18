@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
+  CollectionPreferences,
   Container,
   ContentLayout,
   Header,
@@ -44,6 +45,15 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [items, setItems] = useState<ResourceTableItem[]>([]);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const [expandedItems, setExpandedItems] = useState<any>();
+  const [preferences, setPreferences] = useState({
+    contentDisplay: [
+      { id: 'property', visible: true },
+      { id: 'type', visible: true },
+      { id: 'description', visible: true },
+      { id: 'value', visible: true },
+    ],
+  });
+
   console.log('resourceList', resourceList);
   console.log('schema', schema);
 
@@ -195,6 +205,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                   return [...next].map((id) => ({ id }));
                 }),
             }}
+            resizableColumns
             columnDefinitions={[
               {
                 id: 'property',
@@ -255,6 +266,35 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
               />
             }
             header={<Header>Table with expandable rows</Header>}
+            preferences={
+              <CollectionPreferences
+                title="Preferences"
+                confirmLabel="Confirm"
+                cancelLabel="Cancel"
+                preferences={preferences}
+                onConfirm={({ detail }) =>
+                  setPreferences({
+                    contentDisplay: detail.contentDisplay
+                      ? [...detail.contentDisplay]
+                      : [],
+                  })
+                }
+                contentDisplayPreference={{
+                  description:
+                    'Customize the visibility and order of the columns.',
+                  options: [
+                    {
+                      id: 'property',
+                      label: 'Property',
+                      alwaysVisible: true,
+                    },
+                    { id: 'type', label: 'Type' },
+                    { id: 'description', label: 'Description' },
+                    { id: 'value', label: 'Value' },
+                  ],
+                }}
+              />
+            }
           />
         </ContentLayout>
       )}
