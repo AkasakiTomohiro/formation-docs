@@ -201,27 +201,40 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                 header: 'Property',
                 cell: (e) => e.property,
                 isRowHeader: true,
+                width: 250,
+                minWidth: 150,
               },
               {
                 id: 'type',
                 header: 'Type',
-                cell: (e) => e.type,
+                cell: (e) => (
+                  <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>
+                ),
+                width: 150,
+                minWidth: 100,
               },
               {
                 id: 'description',
                 header: 'Description',
-                cell: (e) => e.description,
+                cell: (e) => (
+                  <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>
+                ),
+                width: 500,
               },
               {
                 id: 'value',
                 header: 'Value',
-                cell: (e) => e.value,
+                cell: (e) => (
+                  <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>
+                ),
               },
             ]}
+            columnDisplay={preferences.contentDisplay}
+            stickyHeader
             enableKeyboardNavigation
             items={items}
             loadingText="Loading resources"
-            trackBy="name"
+            trackBy="id"
             empty={
               <Box
                 margin={{ vertical: 'xs' }}

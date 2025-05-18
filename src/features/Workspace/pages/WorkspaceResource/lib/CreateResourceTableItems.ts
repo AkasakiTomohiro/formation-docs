@@ -121,6 +121,9 @@ function parseDefinedPropertyToTableItem(
       );
       result.children.push(childItem);
     }
+    if (result.children.length === 0) {
+      result.children = undefined;
+    }
   }
 
   // プロパティがオブジェクトかつpropertiesが定義されている場合は、子要素を取得する
@@ -302,40 +305,40 @@ function convertIntrinsicFunctionValue(
 ): string {
   switch (intrinsic) {
     case 'Fn::Base64': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::Cidr': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::And': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::Equals': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::If': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::Not': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::Or': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::FindInMap': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::ForEach': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::GetAtt': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::GetAZs': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::ImportValue': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::Join': {
       const delimiter = actualProperty['Fn::Join'][0];
@@ -351,22 +354,22 @@ function convertIntrinsicFunctionValue(
       return pieces.join(delimiter);
     }
     case 'Fn::Length': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::Select': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::Split': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::Sub': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::ToJsonString': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Fn::Transform': {
-      return JSON.stringify(actualProperty, undefined, 2);
+      return JSON.stringify(actualProperty, undefined, '　');
     }
     case 'Ref': {
       let value = actualProperty.Ref;
@@ -424,7 +427,7 @@ function covertValue(
   }
 
   // これから以外の場合はJSON.stringifyで文字列化する
-  return JSON.stringify(actualProperty, undefined, 2);
+  return JSON.stringify(actualProperty, undefined, '　');
 }
 
 /**
@@ -435,13 +438,13 @@ function covertValue(
 function covertType(property: DefinedProperty): string {
   // タイプが配列の場合は、配列要素を結合する
   if (Array.isArray(property.type)) {
-    return property.type.join(' | ');
+    return property.type.join('\n');
   }
 
   // タイプが文字列結でかつenumが定義されている場合は、enumの値を結合する
   if (property.type === 'string') {
     if (property.enum) {
-      return property.enum.map((item) => item.toString()).join(' | ');
+      return property.enum.map((item) => item.toString()).join('\n');
     }
   }
   if (property.type === 'array') {
@@ -450,8 +453,8 @@ function covertType(property: DefinedProperty): string {
       // itemsが配列の場合は、子要素のタイプを再帰的に変換し結合する
       if (isJsonSchemaPrimitiveType(property.items.type)) {
         const type = covertType(property.items);
-        if (type.includes(' | ')) {
-          return `( ${type} )[]`;
+        if (type.includes('\n')) {
+          return `( \n　${type.split('\n').join('\n　')}\n) []`;
         }
         return `${type}[]`;
       }
