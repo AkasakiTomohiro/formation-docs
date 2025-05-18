@@ -114,7 +114,7 @@ function parseDefinedPropertyToTableItem(
       )) {
         if ('$ref' in definitionValue) {
           const grandChildItem = parseReferencePropertyToTableItem(
-            `${parentId}/${propertyKey}`,
+            `${parentId}/${propertyKey}/${index}`,
             definitionKey,
             definitionValue,
             property,
