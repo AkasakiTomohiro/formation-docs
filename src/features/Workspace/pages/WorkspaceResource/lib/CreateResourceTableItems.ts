@@ -166,6 +166,14 @@ function parseDefinedPropertyToTableItem(
       }
     }
   }
+  if (result.children !== undefined) {
+    if (result.children.length === 0) {
+      // biome-ignore lint/performance/noDelete: <explanation>
+      delete result.children;
+    } else {
+      result.value = '';
+    }
+  }
   return result;
 }
 
@@ -228,6 +236,14 @@ function parseReferencePropertyToTableItem(
         definitions,
       );
       result.children.push(childItem);
+    }
+  }
+  if (result.children !== undefined) {
+    if (result.children.length === 0) {
+      // biome-ignore lint/performance/noDelete: <explanation>
+      delete result.children;
+    } else {
+      result.value = '';
     }
   }
 
@@ -380,9 +396,8 @@ function covertValue(
       }
     }
   }
-  if (typeof actualProperty === 'object') {
-    return '';
-  }
+
+  // これから以外の場合はJSON.stringifyで文字列化する
   return JSON.stringify(actualProperty, undefined, 2);
 }
 
