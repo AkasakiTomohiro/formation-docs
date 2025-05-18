@@ -79,7 +79,9 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
       logical_id: selectedLogicalId,
     }).then((properties) => {
       console.log('properties', properties);
-      setItems(createResourceTableItems(schema, properties));
+      const resourceTableItems = createResourceTableItems(schema, properties);
+      setItems(resourceTableItems);
+      setExpandedItems(createExpandedItems(resourceTableItems));
     });
   }, [props.stackId, selectedLogicalId, schema]);
 
@@ -301,3 +303,19 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
     </div>
   );
 };
+
+/**
+ * リソーステーブル用の展開済みアイテムを作成する
+ * @param items
+ * @returns
+ */
+function createExpandedItems(items: ResourceTableItem[]): ResourceTableItem[] {
+  const expandedItems: ResourceTableItem[] = [];
+  for (const item of items) {
+    if (item.children !== undefined) {
+      expandedItems.push(item);
+      expandedItems.push(...createExpandedItems(item.children));
+    }
+  }
+  return expandedItems;
+}
