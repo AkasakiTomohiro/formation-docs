@@ -87,7 +87,6 @@ export const WorkspaceLayout = (): JSX.Element => {
             text: workspace.name,
           }}
           items={filterSideMenu(sideMenu, [
-            searchValue,
             ...tokenGroup.map((t) => (t.label ? t.label : '')),
           ])}
           itemsControl={
