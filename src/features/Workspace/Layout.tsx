@@ -38,6 +38,8 @@ export type ResourceInfo =
 export type WorkspaceLayoutContext = WorkspaceLayoutLoaderData & {
   resourceTabs: ResourceInfo[];
   setResourceTabs: Dispatch<SetStateAction<ResourceInfo[]>>;
+  activeTabId: string | undefined;
+  setActiveTabId: Dispatch<SetStateAction<string | undefined>>;
   loadTemplateSummaryWrap: () => Promise<void>;
 };
 
@@ -56,6 +58,7 @@ export const WorkspaceLayout = (): JSX.Element => {
   const [searchValue, setSearchValue] = useState<string>('');
   const [tokenGroup, setTokenGroup] = useState<TokenGroupProps.Item[]>([]);
   const [resourceTabs, setResourceTabs] = useState<ResourceInfo[]>([]);
+  const [activeTabId, setActiveTabId] = useState<string | undefined>(undefined);
   const [sideMenu, setSideMenu] = useState<TemplateSummary[]>([]);
 
   const loadTemplateSummaryWrap = useCallback(() => {
@@ -73,6 +76,8 @@ export const WorkspaceLayout = (): JSX.Element => {
     ...workspace,
     resourceTabs,
     setResourceTabs,
+    activeTabId,
+    setActiveTabId,
     loadTemplateSummaryWrap,
   };
 
@@ -158,6 +163,7 @@ export const WorkspaceLayout = (): JSX.Element => {
               }
               return [...prev, newTab];
             });
+            setActiveTabId(href);
             navigate(`/workspaces/${workspace.id}/resources`);
           }}
         />

@@ -9,15 +9,13 @@ import type { ResourceInfo, WorkspaceLayoutContext } from '../../Layout';
 
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
-  const { resourceTabs, setResourceTabs } =
+  const { resourceTabs, setResourceTabs, activeTabId, setActiveTabId } =
     useOutletContext<WorkspaceLayoutContext>();
-
-  const [activeTabId, setActiveTabId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setResourceTabs(resourceTabs);
     setActiveTabId(resourceTabs[resourceTabs.length - 1]?.tabId);
-  }, [resourceTabs, setResourceTabs]);
+  }, [resourceTabs, setResourceTabs, setActiveTabId]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
