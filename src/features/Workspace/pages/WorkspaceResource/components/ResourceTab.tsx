@@ -51,6 +51,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
       { id: 'type', visible: true },
       { id: 'description', visible: true },
       { id: 'value', visible: true },
+      { id: 'reason', visible: true },
     ],
   });
   const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
@@ -251,6 +252,13 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                   <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>
                 ),
               },
+              {
+                id: 'reason',
+                header: 'Reason',
+                cell: (e) => (
+                  <div style={{ whiteSpace: 'pre-line' }}>{e.reason}</div>
+                ),
+              },
             ]}
             columnDisplay={preferences.contentDisplay}
             stickyHeader
@@ -303,6 +311,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     { id: 'type', label: 'Type' },
                     { id: 'description', label: 'Description' },
                     { id: 'value', label: 'Value' },
+                    { id: 'reason', label: 'Reason' },
                   ],
                 }}
               />
