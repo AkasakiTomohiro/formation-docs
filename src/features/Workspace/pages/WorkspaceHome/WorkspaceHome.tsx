@@ -173,9 +173,10 @@ export const WorkspaceHome = (): JSX.Element => {
             actions={
               <SpaceBetween direction="horizontal" size="xs">
                 <Button
-                  onClick={() => {
+                  onClick={async () => {
                     deleteStack(selectedItems[0]);
                     setSelectedItems([]);
+                    await workspace.loadTemplateSummaryWrap();
                   }}
                   disabled={selectedItems.length === 0}
                 >

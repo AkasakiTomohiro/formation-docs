@@ -92,7 +92,10 @@ export const WorkspaceLayout = (): JSX.Element => {
             href: '#',
             text: workspace.name,
           }}
-          items={filterSideMenu(sideMenu, searchValue)}
+          items={filterSideMenu(sideMenu, [
+            searchValue,
+            ...tokenGroup.map((t) => (t.label ? t.label : '')),
+          ])}
           itemsControl={
             <SpaceBetween direction="vertical" size="m">
               <StyledLink
@@ -114,6 +117,9 @@ export const WorkspaceLayout = (): JSX.Element => {
                   onChange={({ detail }) => setSearchValue(detail.value)}
                   onKeyDown={({ detail }) => {
                     if (detail.key === 'Enter') {
+                      if (searchValue === '') {
+                        return;
+                      }
                       setTokenGroup((prev) => [
                         ...prev,
                         { label: searchValue },
