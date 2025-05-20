@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router';
 
 import {
   Box,
@@ -21,6 +22,7 @@ import {
 } from '../../../../../invoke/Stack';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
+import type { WorkspaceLayoutContext } from '../../../Layout';
 import type { CloudFormationSchema } from './types/CloudFormationSchema';
 
 import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
@@ -29,6 +31,7 @@ type ResourceTabProps = {
   stackName: string;
   serviceName: string;
   resourceName: string;
+  selectedLogicalId?: string;
 };
 
 export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
@@ -39,9 +42,6 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [resourceList, setResourceList] = useState<string[]>([]);
   const [filterText, setFilterText] = useState<string>('');
   const [isOpen, setIsOpen] = useState(true);
-  const [selectedLogicalId, setSelectedLogicalId] = useState<
-    string | undefined
-  >(undefined);
   const [items, setItems] = useState<ResourceTableItem[]>([]);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const [expandedItems, setExpandedItems] = useState<any>();
@@ -53,6 +53,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
       { id: 'value', visible: true },
     ],
   });
+  const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
 
   console.log('resourceList', resourceList);
   console.log('schema', schema);
@@ -71,19 +72,19 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   }, [props]);
 
   useEffect(() => {
-    if (selectedLogicalId === undefined || schema === undefined) {
+    if (props.selectedLogicalId === undefined || schema === undefined) {
       return;
     }
     getStackResourceProperties({
       stack_id: props.stackId,
-      logical_id: selectedLogicalId,
+      logical_id: props.selectedLogicalId,
     }).then((properties) => {
       console.log('properties', properties);
       const resourceTableItems = createResourceTableItems(schema, properties);
       setItems(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
     });
-  }, [props.stackId, selectedLogicalId, schema]);
+  }, [props.stackId, props.selectedLogicalId, schema]);
 
   return (
     <div
@@ -96,7 +97,8 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
       {isOpen ? (
         <div
           style={{
-            width: selectedLogicalId !== undefined ? '300px' : '100%',
+            width: props.selectedLogicalId === undefined ? '100%' : '300px',
+            minWidth: '300px',
             height: '100%',
           }}
         >
@@ -110,7 +112,15 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     href="#"
                     onClick={(event) => {
                       event.stopPropagation();
-                      setSelectedLogicalId(item);
+                      setResourceTabs((prev) => {
+                        return [
+                          ...prev.slice(0, prev.length - 1),
+                          {
+                            ...prev[prev.length - 1],
+                            selectedLogicalId: item,
+                          },
+                        ];
+                      });
                     }}
                   >
                     {item}
@@ -148,7 +158,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
             header={
               <Header
                 actions={
-                  selectedLogicalId === undefined ? undefined : (
+                  props.selectedLogicalId === undefined ? undefined : (
                     <SpaceBetween direction="horizontal" size="xs">
                       <Button
                         iconName={isOpen ? 'angle-left' : 'angle-right'}
@@ -173,10 +183,10 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
           />
         </Container>
       )}
-      {selectedLogicalId !== undefined && (
+      {props.selectedLogicalId !== undefined && (
         <ContentLayout
           defaultPadding
-          header={<Header>{selectedLogicalId}</Header>}
+          header={<Header>{props.selectedLogicalId}</Header>}
         >
           <Table
             renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>

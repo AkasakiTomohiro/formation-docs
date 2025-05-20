@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useLocation, useOutletContext } from 'react-router';
 
 import { Tabs } from '@cloudscape-design/components';
@@ -11,11 +11,6 @@ export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
   const { resourceTabs, setResourceTabs, activeTabId, setActiveTabId } =
     useOutletContext<WorkspaceLayoutContext>();
-
-  useEffect(() => {
-    setResourceTabs(resourceTabs);
-    setActiveTabId(resourceTabs[resourceTabs.length - 1]?.tabId);
-  }, [resourceTabs, setResourceTabs, setActiveTabId]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -71,6 +66,7 @@ export const WorkspaceResource = (): JSX.Element => {
                   stackName={tab.stackName}
                   serviceName={tab.serviceName}
                   resourceName={tab.resourceName}
+                  selectedLogicalId={tab.selectedLogicalId}
                 />
               ),
               dismissible: true,

@@ -33,6 +33,7 @@ export type ResourceInfo =
       stackName: string;
       serviceName: string;
       resourceName: string;
+      selectedLogicalId?: string;
     };
 
 export type WorkspaceLayoutContext = WorkspaceLayoutLoaderData & {
