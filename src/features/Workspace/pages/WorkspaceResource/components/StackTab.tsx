@@ -1,7 +1,9 @@
 import {
+  Button,
   Container,
   ContentLayout,
   Header,
+  SpaceBetween,
 } from '@cloudscape-design/components';
 
 export type StackTabProps = {
@@ -11,7 +13,23 @@ export type StackTabProps = {
 
 export const StackTab = (props: StackTabProps): JSX.Element => {
   return (
-    <ContentLayout header={<Header variant="h1">{props.stackName}</Header>}>
+    <ContentLayout
+      header={
+        <SpaceBetween size="m">
+          <Header
+            variant="h1"
+            actions={
+              <Button variant="normal" onClick={() => {}}>
+                編集
+              </Button>
+            }
+          >
+            {props.stackName}
+          </Header>
+          {/* <Flashbar items={flashbarItems} /> */}
+        </SpaceBetween>
+      }
+    >
       <Container
         header={
           <Header variant="h2" description="Container description">
