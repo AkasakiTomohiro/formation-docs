@@ -13,12 +13,14 @@ import {
   StatusIndicator,
   Table,
   TextFilter,
+  Textarea,
 } from '@cloudscape-design/components';
 
 import { getCloudFormationSchema } from '../../../../../invoke/CloudFormationSchema';
 import {
   getStackResourceList,
   getStackResourceProperties,
+  updateStackMeta,
 } from '../../../../../invoke/Stack';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
@@ -54,6 +56,11 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
       { id: 'reason', visible: true },
     ],
   });
+  const [isEdit, setIsEdit] = useState(false);
+  const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [editingReasons, setEditingReasons] = useState<Record<string, string>>(
+    {},
+  );
   const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
 
   console.log('resourceList', resourceList);
@@ -187,7 +194,51 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
       {props.selectedLogicalId !== undefined && (
         <ContentLayout
           defaultPadding
-          header={<Header>{props.selectedLogicalId}</Header>}
+          header={
+            <Header
+              actions={
+                <SpaceBetween direction="horizontal" size="xs">
+                  {!isEdit && (
+                    <Button
+                      onClick={() => {
+                        setEditingReasons(reasons);
+                        setIsEdit(!isEdit);
+                      }}
+                    >
+                      編集
+                    </Button>
+                  )}
+                  {isEdit && (
+                    <Button
+                      onClick={() => {
+                        setEditingReasons(reasons);
+                        setIsEdit(!isEdit);
+                      }}
+                    >
+                      キャンセル
+                    </Button>
+                  )}
+                  {isEdit && (
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        setReasons(editingReasons);
+                        setIsEdit(!isEdit);
+                        updateStackMeta({
+                          stack_id: props.stackId,
+                          reasons: editingReasons,
+                        });
+                      }}
+                    >
+                      保存
+                    </Button>
+                  )}
+                </SpaceBetween>
+              }
+            >
+              {props.selectedLogicalId}
+            </Header>
+          }
         >
           <Table
             renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
@@ -255,9 +306,26 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
               {
                 id: 'reason',
                 header: 'Reason',
-                cell: (e) => (
-                  <div style={{ whiteSpace: 'pre-line' }}>{e.reason}</div>
-                ),
+                cell: (e) => {
+                  if (isEdit) {
+                    return (
+                      <Textarea
+                        onChange={({ detail }) =>
+                          setEditingReasons((prev) => ({
+                            ...prev,
+                            [e.id]: detail.value,
+                          }))
+                        }
+                        value={editingReasons[e.id] ?? ''}
+                      />
+                    );
+                  }
+                  return (
+                    <div style={{ whiteSpace: 'pre-line' }}>
+                      {reasons[e.id]}
+                    </div>
+                  );
+                },
               },
             ]}
             columnDisplay={preferences.contentDisplay}

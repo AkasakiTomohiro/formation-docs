@@ -19,7 +19,6 @@ export type ResourceTableItem = {
   type: string;
   description: string;
   value: string;
-  reason: string;
   children?: ResourceTableItem[];
 };
 
@@ -90,7 +89,6 @@ function parseDefinedPropertyToTableItem(
       property,
       getActualProperties(propertyKey, actualProperties),
     ),
-    reason: '',
   };
 
   // プロパティが配列かつ、itemsが定義されている場合は、子要素を取得する
@@ -114,7 +112,6 @@ function parseDefinedPropertyToTableItem(
         type: 'object',
         description: '',
         value: '',
-        reason: '',
       };
       childItem.children = parseChildrenPropertyToTableItem(
         definition.properties,
@@ -181,7 +178,6 @@ function parseReferencePropertyToTableItem(
       definition,
       getActualProperties(propertyKey, actualProperties),
     ),
-    reason: '',
   };
 
   // プロパティがオブジェクトの場合は、子要素を取得する
