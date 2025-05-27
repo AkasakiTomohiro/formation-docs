@@ -43,7 +43,7 @@ export const WorkspaceHome = (): JSX.Element => {
       filters: [
         {
           name: 'Template files',
-          extensions: ['template.json', 'template.yaml', 'template.yml'],
+          extensions: ['json', 'yaml', 'yml'],
         },
       ],
     });
