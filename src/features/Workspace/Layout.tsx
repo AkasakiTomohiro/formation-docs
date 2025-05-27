@@ -33,11 +33,14 @@ export type ResourceInfo =
       stackName: string;
       serviceName: string;
       resourceName: string;
+      selectedLogicalId?: string;
     };
 
 export type WorkspaceLayoutContext = WorkspaceLayoutLoaderData & {
   resourceTabs: ResourceInfo[];
   setResourceTabs: Dispatch<SetStateAction<ResourceInfo[]>>;
+  activeTabId: string | undefined;
+  setActiveTabId: Dispatch<SetStateAction<string | undefined>>;
   loadTemplateSummaryWrap: () => Promise<void>;
 };
 
@@ -56,6 +59,7 @@ export const WorkspaceLayout = (): JSX.Element => {
   const [searchValue, setSearchValue] = useState<string>('');
   const [tokenGroup, setTokenGroup] = useState<TokenGroupProps.Item[]>([]);
   const [resourceTabs, setResourceTabs] = useState<ResourceInfo[]>([]);
+  const [activeTabId, setActiveTabId] = useState<string | undefined>(undefined);
   const [sideMenu, setSideMenu] = useState<TemplateSummary[]>([]);
 
   const loadTemplateSummaryWrap = useCallback(() => {
@@ -73,12 +77,15 @@ export const WorkspaceLayout = (): JSX.Element => {
     ...workspace,
     resourceTabs,
     setResourceTabs,
+    activeTabId,
+    setActiveTabId,
     loadTemplateSummaryWrap,
   };
 
   return (
     <AppLayout
       toolsHide
+      disableContentPaddings
       navigationOpen={true}
       navigation={
         <SideNavigation
@@ -162,6 +169,7 @@ export const WorkspaceLayout = (): JSX.Element => {
               }
               return [...prev, newTab];
             });
+            setActiveTabId(href);
             navigate(`/workspaces/${workspace.id}/resources`);
           }}
         />
@@ -178,7 +186,11 @@ export const WorkspaceLayout = (): JSX.Element => {
       //     ]}
       //   />
       // }
-      content={<Outlet context={context} />}
+      content={
+        <div key="sample" style={{ margin: '16px' }}>
+          <Outlet context={context} />
+        </div>
+      }
     />
   );
 };

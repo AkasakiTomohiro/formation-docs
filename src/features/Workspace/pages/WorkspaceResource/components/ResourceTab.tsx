@@ -1,25 +1,40 @@
 import { useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router';
 
 import {
   Box,
   Button,
+  CollectionPreferences,
   Container,
   ContentLayout,
   Header,
   Link,
   SpaceBetween,
+  StatusIndicator,
   Table,
   TextFilter,
+  Textarea,
 } from '@cloudscape-design/components';
 
 import { getCloudFormationSchema } from '../../../../../invoke/CloudFormationSchema';
-import { getStackResourceList } from '../../../../../invoke/Stack';
+import {
+  getStackResourceList,
+  getStackResourceProperties,
+  getStackResourcePropertiesReasons,
+  updateStackMeta,
+} from '../../../../../invoke/Stack';
+import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
+import type { WorkspaceLayoutContext } from '../../../Layout';
+import type { CloudFormationSchema } from './types/CloudFormationSchema';
+
+import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
 type ResourceTabProps = {
   stackId: string;
   stackName: string;
   serviceName: string;
   resourceName: string;
+  selectedLogicalId?: string;
 };
 
 export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
@@ -30,9 +45,25 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [resourceList, setResourceList] = useState<string[]>([]);
   const [filterText, setFilterText] = useState<string>('');
   const [isOpen, setIsOpen] = useState(true);
-  const [selectedLogicalId, setSelectedLogicalId] = useState<
-    string | undefined
-  >(undefined);
+  const [items, setItems] = useState<ResourceTableItem[]>([]);
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const [expandedItems, setExpandedItems] = useState<any>();
+  const [preferences, setPreferences] = useState({
+    contentDisplay: [
+      { id: 'property', visible: true },
+      { id: 'type', visible: true },
+      { id: 'description', visible: true },
+      { id: 'value', visible: true },
+      { id: 'reason', visible: true },
+    ],
+  });
+  const [isEdit, setIsEdit] = useState(false);
+  const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [editingReasons, setEditingReasons] = useState<Record<string, string>>(
+    {},
+  );
+  const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
+
   console.log('resourceList', resourceList);
   console.log('schema', schema);
 
@@ -49,6 +80,29 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
     ]).finally(() => setIsLoading(false));
   }, [props]);
 
+  useEffect(() => {
+    if (props.selectedLogicalId === undefined || schema === undefined) {
+      return;
+    }
+    Promise.all([
+      getStackResourceProperties({
+        stack_id: props.stackId,
+        logical_id: props.selectedLogicalId,
+      }),
+      getStackResourcePropertiesReasons({
+        stack_id: props.stackId,
+        logical_id: props.selectedLogicalId,
+      }),
+    ]).then(([properties, reasons]) => {
+      console.log('properties', properties);
+      console.log('reasons', reasons);
+      const resourceTableItems = createResourceTableItems(schema, properties);
+      setItems(resourceTableItems);
+      setExpandedItems(createExpandedItems(resourceTableItems));
+      setReasons(reasons);
+    });
+  }, [props.stackId, props.selectedLogicalId, schema]);
+
   return (
     <div
       style={{
@@ -60,7 +114,8 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
       {isOpen ? (
         <div
           style={{
-            width: selectedLogicalId !== undefined ? '300px' : '100%',
+            width: props.selectedLogicalId === undefined ? '100%' : '300px',
+            minWidth: '300px',
             height: '100%',
           }}
         >
@@ -74,7 +129,15 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     href="#"
                     onClick={(event) => {
                       event.stopPropagation();
-                      setSelectedLogicalId(item);
+                      setResourceTabs((prev) => {
+                        return [
+                          ...prev.slice(0, prev.length - 1),
+                          {
+                            ...prev[prev.length - 1],
+                            selectedLogicalId: item,
+                          },
+                        ];
+                      });
                     }}
                   >
                     {item}
@@ -112,7 +175,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
             header={
               <Header
                 actions={
-                  selectedLogicalId === undefined ? undefined : (
+                  props.selectedLogicalId === undefined ? undefined : (
                     <SpaceBetween direction="horizontal" size="xs">
                       <Button
                         iconName={isOpen ? 'angle-left' : 'angle-right'}
@@ -137,14 +200,219 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
           />
         </Container>
       )}
-      {selectedLogicalId !== undefined && (
+      {props.selectedLogicalId !== undefined && (
         <ContentLayout
           defaultPadding
-          header={<Header>{selectedLogicalId}</Header>}
+          header={
+            <Header
+              actions={
+                <SpaceBetween direction="horizontal" size="xs">
+                  {!isEdit && (
+                    <Button
+                      onClick={() => {
+                        setEditingReasons(reasons);
+                        setIsEdit(!isEdit);
+                      }}
+                    >
+                      編集
+                    </Button>
+                  )}
+                  {isEdit && (
+                    <Button
+                      onClick={() => {
+                        setEditingReasons(reasons);
+                        setIsEdit(!isEdit);
+                      }}
+                    >
+                      キャンセル
+                    </Button>
+                  )}
+                  {isEdit && (
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        setReasons(editingReasons);
+                        setIsEdit(!isEdit);
+                        updateStackMeta({
+                          stack_id: props.stackId,
+                          logical_id: props.selectedLogicalId as string,
+                          reasons: editingReasons,
+                        });
+                      }}
+                    >
+                      保存
+                    </Button>
+                  )}
+                </SpaceBetween>
+              }
+            >
+              {props.selectedLogicalId}
+            </Header>
+          }
         >
-          <Container>sample</Container>
+          <Table
+            renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
+              `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
+            }
+            renderLoaderPending={() => (
+              <Button variant="inline-link" iconName="add-plus">
+                Show more
+              </Button>
+            )}
+            renderLoaderLoading={() => (
+              <StatusIndicator type="loading">Loading items</StatusIndicator>
+            )}
+            renderLoaderError={() => (
+              <StatusIndicator type="error">Loading error</StatusIndicator>
+            )}
+            renderLoaderEmpty={() => <Box>No resources found</Box>}
+            expandableRows={{
+              getItemChildren: (item) => item.children ?? [],
+              isItemExpandable: (item) => Boolean(item.children),
+              expandedItems: expandedItems,
+              onExpandableItemToggle: ({ detail }) =>
+                setExpandedItems((prev: ResourceTableItem[] | undefined) => {
+                  const next = new Set((prev ?? []).map((item) => item.id));
+                  detail.expanded
+                    ? next.add(detail.item.id)
+                    : next.delete(detail.item.id);
+                  return [...next].map((id) => ({ id }));
+                }),
+            }}
+            resizableColumns
+            columnDefinitions={[
+              {
+                id: 'property',
+                header: 'Property',
+                cell: (e) => e.property,
+                isRowHeader: true,
+                width: 250,
+                minWidth: 150,
+              },
+              {
+                id: 'type',
+                header: 'Type',
+                cell: (e) => (
+                  <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>
+                ),
+                width: 150,
+                minWidth: 100,
+              },
+              {
+                id: 'description',
+                header: 'Description',
+                cell: (e) => (
+                  <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>
+                ),
+                width: 500,
+              },
+              {
+                id: 'value',
+                header: 'Value',
+                cell: (e) => (
+                  <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>
+                ),
+              },
+              {
+                id: 'reason',
+                header: 'Reason',
+                cell: (e) => {
+                  if (isEdit) {
+                    return (
+                      <Textarea
+                        onChange={({ detail }) =>
+                          setEditingReasons((prev) => ({
+                            ...prev,
+                            [e.id]: detail.value,
+                          }))
+                        }
+                        value={editingReasons[e.id] ?? ''}
+                      />
+                    );
+                  }
+                  return (
+                    <div style={{ whiteSpace: 'pre-line' }}>
+                      {reasons[e.id]}
+                    </div>
+                  );
+                },
+              },
+            ]}
+            columnDisplay={preferences.contentDisplay}
+            stickyHeader
+            enableKeyboardNavigation
+            items={items}
+            loadingText="Loading resources"
+            trackBy="id"
+            empty={
+              <Box
+                margin={{ vertical: 'xs' }}
+                textAlign="center"
+                color="inherit"
+              >
+                <SpaceBetween size="m">
+                  <b>No resources</b>
+                  <Button>Create resource</Button>
+                </SpaceBetween>
+              </Box>
+            }
+            filter={
+              <TextFilter
+                filteringPlaceholder="Find resources"
+                filteringText=""
+                countText="0 matches"
+              />
+            }
+            header={<Header>Table with expandable rows</Header>}
+            preferences={
+              <CollectionPreferences
+                title="Preferences"
+                confirmLabel="Confirm"
+                cancelLabel="Cancel"
+                preferences={preferences}
+                onConfirm={({ detail }) =>
+                  setPreferences({
+                    contentDisplay: detail.contentDisplay
+                      ? [...detail.contentDisplay]
+                      : [],
+                  })
+                }
+                contentDisplayPreference={{
+                  description:
+                    'Customize the visibility and order of the columns.',
+                  options: [
+                    {
+                      id: 'property',
+                      label: 'Property',
+                      alwaysVisible: true,
+                    },
+                    { id: 'type', label: 'Type' },
+                    { id: 'description', label: 'Description' },
+                    { id: 'value', label: 'Value' },
+                    { id: 'reason', label: 'Reason' },
+                  ],
+                }}
+              />
+            }
+          />
         </ContentLayout>
       )}
     </div>
   );
 };
+
+/**
+ * リソーステーブル用の展開済みアイテムを作成する
+ * @param items
+ * @returns
+ */
+function createExpandedItems(items: ResourceTableItem[]): ResourceTableItem[] {
+  const expandedItems: ResourceTableItem[] = [];
+  for (const item of items) {
+    if (item.children !== undefined) {
+      expandedItems.push(item);
+      expandedItems.push(...createExpandedItems(item.children));
+    }
+  }
+  return expandedItems;
+}

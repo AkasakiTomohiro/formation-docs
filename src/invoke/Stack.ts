@@ -86,3 +86,61 @@ export async function getStackResourceList(
   }
   return result.value;
 }
+
+export type GetStackResourcePropertiesProps = {
+  stack_id: string;
+  logical_id: string;
+};
+
+export async function getStackResourceProperties(
+  props: GetStackResourcePropertiesProps,
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+): Promise<any> {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const result = await invoke<CommandResult<any>>(
+    'get_stack_resource_properties_command',
+    props,
+  );
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}
+
+export type GetStackResourcePropertiesReasonsProps = {
+  stack_id: string;
+  logical_id: string;
+};
+
+export async function getStackResourcePropertiesReasons(
+  props: GetStackResourcePropertiesReasonsProps,
+): Promise<Record<string, string>> {
+  const result = await invoke<CommandResult<Record<string, string>>>(
+    'get_stack_resource_properties_reasons_command',
+    props,
+  );
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}
+
+export type UpdateStackMetaProps = {
+  stack_id: string;
+  logical_id: string;
+  reasons: Record<string, string>;
+};
+export async function updateStackMeta(
+  props: UpdateStackMetaProps,
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+): Promise<any> {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const result = await invoke<CommandResult<any>>(
+    'update_stack_meta_command',
+    props,
+  );
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}
