@@ -89,7 +89,10 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
         stack_id: props.stackId,
         logical_id: props.selectedLogicalId,
       }),
-      getStackResourcePropertiesReasons(props.stackId),
+      getStackResourcePropertiesReasons({
+        stack_id: props.stackId,
+        logical_id: props.selectedLogicalId,
+      }),
     ]).then(([properties, reasons]) => {
       console.log('properties', properties);
       console.log('reasons', reasons);
@@ -232,6 +235,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                         setIsEdit(!isEdit);
                         updateStackMeta({
                           stack_id: props.stackId,
+                          logical_id: props.selectedLogicalId as string,
                           reasons: editingReasons,
                         });
                       }}

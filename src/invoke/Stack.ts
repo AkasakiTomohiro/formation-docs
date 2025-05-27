@@ -107,12 +107,17 @@ export async function getStackResourceProperties(
   return result.value;
 }
 
+export type GetStackResourcePropertiesReasonsProps = {
+  stack_id: string;
+  logical_id: string;
+};
+
 export async function getStackResourcePropertiesReasons(
-  stack_id: string,
+  props: GetStackResourcePropertiesReasonsProps,
 ): Promise<Record<string, string>> {
   const result = await invoke<CommandResult<Record<string, string>>>(
     'get_stack_resource_properties_reasons_command',
-    { stack_id },
+    props,
   );
   if (!result.success) {
     throw new Error(result.value);
@@ -122,6 +127,7 @@ export async function getStackResourcePropertiesReasons(
 
 export type UpdateStackMetaProps = {
   stack_id: string;
+  logical_id: string;
   reasons: Record<string, string>;
 };
 export async function updateStackMeta(

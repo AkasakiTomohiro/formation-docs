@@ -31,6 +31,12 @@ pub struct Stack {
 pub struct StackMeta {
     pub name: String,
     pub description: String,
+    pub reasons: HashMap<String, HashMap<String, String>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct StackMetaReasonsUpdate {
+    pub logical_id: String,
     pub reasons: HashMap<String, String>,
 }
 
@@ -38,7 +44,7 @@ pub struct StackMeta {
 pub struct StackMetaUpdate {
     pub name: Option<String>,
     pub description: Option<String>,
-    pub reasons: Option<HashMap<String, String>>,
+    pub reasons: Option<StackMetaReasonsUpdate>,
 }
 
 #[derive(Debug, Error)]
@@ -398,6 +404,7 @@ async fn get_stack_resource_properties(
 async fn get_stack_resource_properties_reasons(
     workspace_directory: &str,
     stack_id: &str,
+    logical_id: &str,
 ) -> Result<Value, StackError> {
     let workspace = load_workspace(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
@@ -413,7 +420,10 @@ async fn get_stack_resource_properties_reasons(
     );
     let meta_json = fs::read_to_string(&meta_path)?;
     let meta_json: Value = serde_json::from_str(&meta_json).unwrap_or_default();
-    let reasons_json = meta_json["reasons"].clone();
+    let reasons_json = meta_json["reasons"][logical_id].clone();
+    if reasons_json.is_null() {
+        return Ok(Value::Object(serde_json::Map::new()));
+    }
     return Ok(reasons_json);
 }
 
@@ -435,7 +445,14 @@ async fn update_stack_meta(
         description: update_stack_meta
             .description
             .unwrap_or(stack_meta.description),
-        reasons: update_stack_meta.reasons.unwrap_or(stack_meta.reasons),
+        reasons: match update_stack_meta.reasons {
+            Some(update_meta) => {
+                let mut new_reasons = stack_meta.reasons.clone();
+                new_reasons.insert(update_meta.logical_id, update_meta.reasons);
+                new_reasons
+            }
+            None => stack_meta.reasons,
+        },
     };
     let stack_meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
     let stack_meta_json = serde_json::to_string(&new_stack_meta).unwrap();
@@ -580,6 +597,7 @@ pub async fn get_stack_resource_properties_command(
 pub async fn update_stack_meta_command(
     window: tauri::Window,
     stack_id: &str,
+    logical_id: &str,
     reasons: HashMap<String, String>,
 ) -> Result<CommandResult<()>, CommandResult> {
     let window_state = match get_window_state(window) {
@@ -594,7 +612,10 @@ pub async fn update_stack_meta_command(
         StackMetaUpdate {
             name: None,
             description: None,
-            reasons: Some(reasons),
+            reasons: Some(StackMetaReasonsUpdate {
+                logical_id: logical_id.to_string(),
+                reasons: reasons,
+            }),
         },
     )
     .await
@@ -608,6 +629,7 @@ pub async fn update_stack_meta_command(
 pub async fn get_stack_resource_properties_reasons_command(
     window: tauri::Window,
     stack_id: &str,
+    logical_id: &str,
 ) -> Result<CommandResult<Value>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
@@ -618,6 +640,7 @@ pub async fn get_stack_resource_properties_reasons_command(
     return match get_stack_resource_properties_reasons(
         window_state.workspace_directory.as_str(),
         stack_id,
+        logical_id,
     )
     .await
     {
