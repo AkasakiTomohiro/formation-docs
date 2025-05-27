@@ -107,6 +107,19 @@ export async function getStackResourceProperties(
   return result.value;
 }
 
+export async function getStackResourcePropertiesReasons(
+  stack_id: string,
+): Promise<Record<string, string>> {
+  const result = await invoke<CommandResult<Record<string, string>>>(
+    'get_stack_resource_properties_reasons_command',
+    { stack_id },
+  );
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}
+
 export type UpdateStackMetaProps = {
   stack_id: string;
   reasons: Record<string, string>;

@@ -20,6 +20,7 @@ import { getCloudFormationSchema } from '../../../../../invoke/CloudFormationSch
 import {
   getStackResourceList,
   getStackResourceProperties,
+  getStackResourcePropertiesReasons,
   updateStackMeta,
 } from '../../../../../invoke/Stack';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
@@ -83,14 +84,19 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
     if (props.selectedLogicalId === undefined || schema === undefined) {
       return;
     }
-    getStackResourceProperties({
-      stack_id: props.stackId,
-      logical_id: props.selectedLogicalId,
-    }).then((properties) => {
+    Promise.all([
+      getStackResourceProperties({
+        stack_id: props.stackId,
+        logical_id: props.selectedLogicalId,
+      }),
+      getStackResourcePropertiesReasons(props.stackId),
+    ]).then(([properties, reasons]) => {
       console.log('properties', properties);
+      console.log('reasons', reasons);
       const resourceTableItems = createResourceTableItems(schema, properties);
       setItems(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
+      setReasons(reasons);
     });
   }, [props.stackId, props.selectedLogicalId, schema]);
 

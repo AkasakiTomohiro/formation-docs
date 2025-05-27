@@ -63,7 +63,12 @@ fn load_stack_meta(workspace_directory: &str, stack_name: &str) -> Result<StackM
         // ${スタック名}.meta.jsonを作成する
         fs::File::create(&meta_path)?;
         // 空のJSONを作成
-        let empty_json = format!("{{\"name\":\"{}\"}}", stack_name);
+        let empty_json = StackMeta {
+            name: stack_name.to_string(),
+            description: String::new(),
+            reasons: HashMap::new(),
+        };
+        let empty_json = serde_json::to_string(&empty_json).unwrap();
         fs::write(&meta_path, empty_json)?;
     }
 
@@ -390,11 +395,10 @@ async fn get_stack_resource_properties(
     return Ok(properties_json);
 }
 
-async fn update_stack_meta(
+async fn get_stack_resource_properties_reasons(
     workspace_directory: &str,
     stack_id: &str,
-    update_stack_meta: StackMetaUpdate,
-) -> Result<(), StackError> {
+) -> Result<Value, StackError> {
     let workspace = load_workspace(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
@@ -402,7 +406,30 @@ async fn update_stack_meta(
             return Err(StackError::App(AppError::new("Stack not found")));
         }
     };
-    let stack_meta = load_stack_meta(workspace_directory, stack_file_name)?;
+    let meta_path = format!(
+        "{}/{}.meta.json",
+        workspace_directory,
+        stack_file_name.replace(".template.json", "")
+    );
+    let meta_json = fs::read_to_string(&meta_path)?;
+    let meta_json: Value = serde_json::from_str(&meta_json).unwrap_or_default();
+    let reasons_json = meta_json["reasons"].clone();
+    return Ok(reasons_json);
+}
+
+async fn update_stack_meta(
+    workspace_directory: &str,
+    stack_id: &str,
+    update_stack_meta: StackMetaUpdate,
+) -> Result<(), StackError> {
+    let workspace = load_workspace(workspace_directory).await?;
+    let stack_name = match workspace.stacks.get(stack_id) {
+        Some(stack_file_name) => stack_file_name.replace(".template.json", ""),
+        None => {
+            return Err(StackError::App(AppError::new("Stack not found")));
+        }
+    };
+    let stack_meta = load_stack_meta(workspace_directory, &stack_name)?;
     let new_stack_meta = StackMeta {
         name: update_stack_meta.name.unwrap_or(stack_meta.name),
         description: update_stack_meta
@@ -410,7 +437,7 @@ async fn update_stack_meta(
             .unwrap_or(stack_meta.description),
         reasons: update_stack_meta.reasons.unwrap_or(stack_meta.reasons),
     };
-    let stack_meta_path = format!("{}/{}.meta.json", workspace_directory, stack_file_name);
+    let stack_meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
     let stack_meta_json = serde_json::to_string(&new_stack_meta).unwrap();
     fs::write(&stack_meta_path, stack_meta_json)?;
     return Ok(());
@@ -573,6 +600,28 @@ pub async fn update_stack_meta_command(
     .await
     {
         Ok(_) => Ok(CommandResult::success(())),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_stack_resource_properties_reasons_command(
+    window: tauri::Window,
+    stack_id: &str,
+) -> Result<CommandResult<Value>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match get_stack_resource_properties_reasons(
+        window_state.workspace_directory.as_str(),
+        stack_id,
+    )
+    .await
+    {
+        Ok(reasons) => Ok(CommandResult::success(reasons)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
