@@ -100,6 +100,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
       setItems(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
       setReasons(reasons);
+      setIsEdit(false);
     });
   }, [props.stackId, props.selectedLogicalId, schema]);
 
@@ -309,9 +310,14 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
               {
                 id: 'value',
                 header: 'Value',
-                cell: (e) => (
-                  <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>
-                ),
+                cell: (e) => {
+                  if (isEdit && !e.readonly) {
+                    return <Textarea onChange={() => {}} value={e.value} />;
+                  }
+                  return (
+                    <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>
+                  );
+                },
               },
               {
                 id: 'reason',

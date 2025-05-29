@@ -19,6 +19,7 @@ export type ResourceTableItem = {
   type: string;
   description: string;
   value: string;
+  readonly?: boolean;
   children?: ResourceTableItem[];
 };
 
@@ -80,15 +81,17 @@ function parseDefinedPropertyToTableItem(
   actualProperties: any,
   definitions: CloudFormationSchema['definitions'] | undefined,
 ): ResourceTableItem {
+  const convertedValue = convertValue(
+    property,
+    getActualProperties(propertyKey, actualProperties),
+  );
   const result: ResourceTableItem = {
     id: `${parentId}/${propertyKey}`,
     property: propertyKey,
-    type: covertType(property),
+    type: convertType(property),
     description: property.description || '',
-    value: covertValue(
-      property,
-      getActualProperties(propertyKey, actualProperties),
-    ),
+    value: convertedValue.value,
+    readonly: convertedValue.readonly,
   };
 
   // プロパティが配列かつ、itemsが定義されている場合は、子要素を取得する
@@ -112,6 +115,7 @@ function parseDefinedPropertyToTableItem(
         type: 'object',
         description: '',
         value: '',
+        readonly: true,
       };
       childItem.children = parseChildrenPropertyToTableItem(
         definition.properties,
@@ -140,6 +144,7 @@ function parseDefinedPropertyToTableItem(
   if (result.children !== undefined) {
     if (result.children.length !== 0) {
       result.value = '';
+      result.readonly = true;
     }
   }
   return result;
@@ -169,15 +174,17 @@ function parseReferencePropertyToTableItem(
 
   const definitionKey = property.$ref.replace('#/definitions/', '');
   const definition = definitions[definitionKey];
+  const convertedValue = convertValue(
+    definition,
+    getActualProperties(propertyKey, actualProperties),
+  );
   const result: ResourceTableItem = {
     id: `${parentId}/${propertyKey}`,
     property: propertyKey,
-    type: covertType(definition),
+    type: convertType(definition),
     description: 'description' in property ? property.description || '' : '',
-    value: covertValue(
-      definition,
-      getActualProperties(propertyKey, actualProperties),
-    ),
+    value: convertedValue.value,
+    readonly: convertedValue.readonly,
   };
 
   // プロパティがオブジェクトの場合は、子要素を取得する
@@ -194,6 +201,7 @@ function parseReferencePropertyToTableItem(
   if (result.children !== undefined) {
     if (result.children.length !== 0) {
       result.value = '';
+      result.readonly = true;
     }
   }
 
@@ -396,19 +404,25 @@ function convertIntrinsicFunctionValue(
  * @param actualProperty 実際のテンプレートに定義されているプロパティ
  * @returns 文字列化されたプロパティの値
  */
-function covertValue(
+function convertValue(
   property: DefinedProperty,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
-): string {
+): { value: string; readonly: boolean } {
   if (actualProperty === undefined) {
-    return '';
+    return {
+      value: '',
+      readonly: false,
+    };
   }
 
   // プロパティが組込み関数の場合
   const intrinsic = isIntrinsicFunction(actualProperty);
   if (intrinsic !== undefined) {
-    return convertIntrinsicFunctionValue(intrinsic, actualProperty);
+    return {
+      value: convertIntrinsicFunctionValue(intrinsic, actualProperty),
+      readonly: true,
+    };
   }
 
   // プロパティがプリミティブな型の場合はそのまま返す
@@ -421,13 +435,19 @@ function covertValue(
     if (actualProperty.length !== 0) {
       const firstItemType = typeof actualProperty[0];
       if (firstItemType !== 'object' && firstItemType !== 'function') {
-        return `[ ${actualProperty.join(', ')} ]`;
+        return {
+          value: `[ ${actualProperty.join(', ')} ]`,
+          readonly: true,
+        };
       }
     }
   }
 
   // これから以外の場合はJSON.stringifyで文字列化する
-  return JSON.stringify(actualProperty, undefined, '　');
+  return {
+    value: JSON.stringify(actualProperty, undefined, '　'),
+    readonly: false,
+  };
 }
 
 /**
@@ -435,7 +455,7 @@ function covertValue(
  * @param property `$ref`を含まないプロパティ
  * @returns 型の文字列
  */
-function covertType(property: DefinedProperty): string {
+function convertType(property: DefinedProperty): string {
   // タイプが配列の場合は、配列要素を結合する
   if (Array.isArray(property.type)) {
     return property.type.join('\n');
@@ -452,7 +472,7 @@ function covertType(property: DefinedProperty): string {
     if (property.items && !('$ref' in property.items)) {
       // itemsが配列の場合は、子要素のタイプを再帰的に変換し結合する
       if (isJsonSchemaPrimitiveType(property.items.type)) {
-        const type = covertType(property.items);
+        const type = convertType(property.items);
         if (type.includes('\n')) {
           return `( \n　${type.split('\n').join('\n　')}\n) []`;
         }
