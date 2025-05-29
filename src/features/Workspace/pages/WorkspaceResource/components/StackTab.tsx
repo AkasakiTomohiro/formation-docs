@@ -14,6 +14,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import {
+  UpdateStackDetailProps,
+  updateStackDetail,
+} from '../../../../../invoke/Stack';
 
 export type StackTabProps = {
   stackId: string;
@@ -34,8 +38,10 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
     <ContentLayout
       header={
         <SpaceBetween size="m">
+          {/* TODO: ファイルから読み込んだ値をdescriptionとする */}
           <Header
             variant="h1"
+            description={'description'}
             actions={
               <Button variant="normal" onClick={() => setIsEdit(true)}>
                 編集
@@ -73,7 +79,20 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
     });
 
     // TODO: RustでStackの情報を更新する関数を実装し呼び出す
-    const onSave = async () => {};
+    const onSave = async (stackDetailProps: StackEditType) => {
+      try {
+        await updateStackDetail({
+          stack_id: props.stackId,
+          name: stackDetailProps.name,
+          description: stackDetailProps.description,
+        });
+
+        // Stack詳細表示画面に戻る
+        setIsEdit(false);
+      } catch (error) {
+        // TODO: フラッシュバー出現の処理を記述
+      }
+    };
 
     return (
       <ContentLayout

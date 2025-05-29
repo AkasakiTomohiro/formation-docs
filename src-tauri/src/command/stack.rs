@@ -460,6 +460,39 @@ async fn update_stack_meta(
     return Ok(());
 }
 
+async fn update_stack_detail(
+    workspace_directory: &str,
+    stack_id: &str,
+    update_stack_meta: StackMetaUpdate,
+) -> Result<(), StackError> {
+    let workspace = load_workspace(workspace_directory).await?;
+    let stack_name = match workspace.stacks.get(stack_id) {
+        Some(stack_file_name) => stack_file_name.replace(".template.json", ""),
+        None => {
+            return Err(StackError::App(AppError::new("Stack not found")));
+        }
+    };
+    let stack_meta = load_stack_meta(workspace_directory, &stack_name)?;
+    let new_stack_meta = StackMeta {
+        name: update_stack_meta.name.unwrap_or(stack_meta.name),
+        description: update_stack_meta
+            .description
+            .unwrap_or(stack_meta.description),
+        reasons: match update_stack_meta.reasons {
+            Some(update_meta) => {
+                let mut new_reasons = stack_meta.reasons.clone();
+                new_reasons.insert(update_meta.logical_id, update_meta.reasons);
+                new_reasons
+            }
+            None => stack_meta.reasons,
+        },
+    };
+    let stack_meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
+    let stack_meta_json = serde_json::to_string(&new_stack_meta).unwrap();
+    fs::write(&stack_meta_path, stack_meta_json)?;
+    return Ok(());
+}
+
 #[tauri::command]
 pub async fn load_stacks_command(
     window: tauri::Window,
@@ -645,6 +678,35 @@ pub async fn get_stack_resource_properties_reasons_command(
     .await
     {
         Ok(reasons) => Ok(CommandResult::success(reasons)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn update_stack_detail_command(
+    window: tauri::Window,
+    stack_id: &str,
+    name: &str,
+    description: &str,
+) -> Result<CommandResult<()>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match update_stack_detail(
+        window_state.workspace_directory.as_str(),
+        stack_id,
+        StackMetaUpdate {
+            name: Some(name.to_string()),
+            description: Some(description.to_string()),
+            reasons: None,
+        },
+    )
+    .await
+    {
+        Ok(_) => Ok(CommandResult::success(())),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }

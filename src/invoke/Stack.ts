@@ -5,7 +5,7 @@ import type { CommandResult } from '../lib/CommandResult';
 export interface StackInfo {
   id: string;
   name: string;
-  description_from_meta?: string;
+  description_from_meta: string;
   description_from_stack?: string;
 }
 
@@ -137,6 +137,26 @@ export async function updateStackMeta(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const result = await invoke<CommandResult<any>>(
     'update_stack_meta_command',
+    props,
+  );
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}
+
+export type UpdateStackDetailProps = {
+  stack_id: string;
+  name: string;
+  description: string;
+};
+export async function updateStackDetail(
+  props: UpdateStackDetailProps,
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+): Promise<any> {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const result = await invoke<CommandResult<any>>(
+    'update_stack_detail_command',
     props,
   );
   if (!result.success) {
