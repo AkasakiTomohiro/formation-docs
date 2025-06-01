@@ -4,24 +4,23 @@ import {
   Container,
   ContentLayout,
   Flashbar,
-  FlashbarProps,
+  type FlashbarProps,
   FormField,
   Header,
   Input,
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useOutletContext } from 'react-router';
+import { v4 as uuidV4 } from 'uuid';
 import { z } from 'zod';
-import {
-  UpdateStackDetailProps,
-  updateStackDetail,
-} from '../../../../../invoke/Stack';
+import { loadStack, updateStackDetail } from '../../../../../invoke/Stack';
+import type { ResourceInfo, WorkspaceLayoutContext } from '../../../Layout';
 
 export type StackTabProps = {
   stackId: string;
-  stackName: string;
 };
 
 const stackEditValidator = z.object({
@@ -32,25 +31,85 @@ const stackEditValidator = z.object({
 export type StackEditType = z.infer<typeof stackEditValidator>;
 
 export const StackTab = (props: StackTabProps): JSX.Element => {
-  const [isEdit, setIsEdit] = useState(false);
+  const { resourceTabs, setResourceTabs } =
+    useOutletContext<WorkspaceLayoutContext>();
+  const [flashbarItems, setFlashbarItems] = useState<
+    FlashbarProps.MessageDefinition[]
+  >([]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    const stackId = props.stackId;
+
+    loadStack(stackId).then((stackDetail) => {
+      const stackName = stackDetail.name;
+      const description = stackDetail.description_from_meta;
+
+      // 取得したスタック情報を更新
+      setResourceTabs((prev) => {
+        return prev.map((tab) => {
+          if (tab.stackId === stackId) {
+            return {
+              ...tab,
+              stackName: stackName,
+              description: description,
+            };
+          }
+          return tab;
+        });
+      });
+    });
+  }, []);
+
+  const resourceTab = resourceTabs.find((tab) => tab.stackId === props.stackId);
+
+  const setIsEdit = (isEdit: boolean) => {
+    // 編集モードに入る場合、リソースタブの情報を更新
+    setResourceTabs((prev) =>
+      prev.map((tab) => {
+        if (tab.stackId === props.stackId) {
+          return {
+            ...tab,
+            isEdit: isEdit,
+          };
+        }
+        return tab;
+      }),
+    );
+  };
+
+  // リソースタブのオブジェクトを取得
+  const getResourceDetailTab = (resourceTab: ResourceInfo | undefined) => {
+    if (resourceTab) {
+      if (resourceTab.type === 'detail') {
+        return resourceTab;
+      }
+    }
+    return undefined;
+  };
 
   const StackContent = (): JSX.Element => (
     <ContentLayout
       header={
         <SpaceBetween size="m">
-          {/* TODO: ファイルから読み込んだ値をdescriptionとする */}
           <Header
             variant="h1"
-            description={'description'}
+            description={
+              resourceTab
+                ? resourceTab.type === 'detail'
+                  ? resourceTab.description
+                  : ''
+                : ''
+            }
             actions={
               <Button variant="normal" onClick={() => setIsEdit(true)}>
                 編集
               </Button>
             }
           >
-            {props.stackName}
+            {resourceTab ? resourceTab.stackName : ''}
           </Header>
-          {/* <Flashbar items={flashbarItems} /> */}
+          <Flashbar items={flashbarItems} />
         </SpaceBetween>
       }
     >
@@ -72,13 +131,16 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
       mode: 'onChange',
       resolver: zodResolver(stackEditValidator),
       defaultValues: {
-        name: props.stackName,
-        // TODO: stackの説明を初期状態で表示する方法を考える
-        description: '',
+        name: resourceTab ? resourceTab.stackName : '',
+        description: resourceTab
+          ? resourceTab.type === 'detail'
+            ? resourceTab.description
+            : ''
+          : '',
       },
     });
+    const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
 
-    // TODO: RustでStackの情報を更新する関数を実装し呼び出す
     const onSave = async (stackDetailProps: StackEditType) => {
       try {
         await updateStackDetail({
@@ -87,10 +149,36 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
           description: stackDetailProps.description,
         });
 
+        // 保存したスタックの情報を更新
+        setResourceTabs((prev) =>
+          prev.map((tab) =>
+            tab.stackId === props.stackId
+              ? {
+                  ...tab,
+                  stackName: stackDetailProps.name,
+                  description: stackDetailProps.description,
+                }
+              : tab,
+          ),
+        );
         // Stack詳細表示画面に戻る
         setIsEdit(false);
       } catch (error) {
-        // TODO: フラッシュバー出現の処理を記述
+        const id = uuidV4();
+        setFlashbarItems(() => [
+          ...flashbarItems,
+          {
+            type: 'error',
+            header: '保存に失敗しました',
+            content: typeof error === 'string' ? error : undefined,
+            dismissible: true,
+            dismissLabel: 'close',
+            id: id,
+            onDismiss: () => {
+              flashbarItems.filter((itemId) => itemId !== id);
+            },
+          },
+        ]);
       }
     };
 
@@ -100,7 +188,7 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
         header={
           <SpaceBetween size="m">
             <Header>Stackの編集</Header>
-            {/* TODO: フラッシュバーを追加 */}
+            <Flashbar items={flashbarItems} />
           </SpaceBetween>
         }
       >
@@ -164,5 +252,9 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
     );
   };
 
-  return isEdit ? <StackEditContent /> : <StackContent />;
+  return getResourceDetailTab(resourceTab)?.isEdit ? (
+    <StackEditContent />
+  ) : (
+    <StackContent />
+  );
 };

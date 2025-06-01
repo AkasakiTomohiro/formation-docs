@@ -25,6 +25,8 @@ export type ResourceInfo =
       tabId: string;
       stackId: string;
       stackName: string;
+      description: string;
+      isEdit?: boolean;
     }
   | {
       type: 'resource';
@@ -152,14 +154,23 @@ export const WorkspaceLayout = (): JSX.Element => {
             }
             const [stackId, stackName, serviceName, resourceType] =
               href.split('/');
-            const newTab: ResourceInfo = {
-              type: text === 'Detail' ? 'detail' : 'resource',
-              tabId: href,
-              stackId: stackId,
-              stackName: stackName,
-              serviceName: serviceName,
-              resourceName: resourceType,
-            };
+            const newTab: ResourceInfo =
+              text === 'Detail'
+                ? {
+                    type: 'detail',
+                    tabId: href,
+                    stackId: stackId,
+                    stackName: stackName,
+                    description: '',
+                  }
+                : {
+                    type: 'resource',
+                    tabId: href,
+                    stackId: stackId,
+                    stackName: stackName,
+                    serviceName: serviceName,
+                    resourceName: resourceType,
+                  };
             setResourceTabs((prev) => {
               const existingTab = prev.find(
                 (tab) => tab.tabId === newTab.tabId,
