@@ -144,3 +144,23 @@ export async function updateStackMeta(
   }
   return result.value;
 }
+
+export type UpdateStackProperties = {
+  stack_id: string;
+  logical_id: string;
+  properties: Record<string, string>;
+};
+
+export async function updateStackProperties(
+  props: UpdateStackProperties,
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+): Promise<any> {
+  const result = await invoke<CommandResult<Record<string, string>>>(
+    'update_stack_properties_command',
+    props,
+  );
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}

@@ -36,6 +36,7 @@ pub fn run() {
             command::stack::get_stack_resource_properties_command,
             command::stack::update_stack_meta_command,
             command::stack::get_stack_resource_properties_reasons_command,
+            command::stack::update_stack_properties_command,
             command::cloudformation_schema::get_cloudformation_schema_command,
         ])
         .run(tauri::generate_context!())

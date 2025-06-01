@@ -33,7 +33,7 @@ export interface Tagging {
   tagProperty?: string; // assuming JSON Pointer is a string
 }
 
-export type PropertyPath = `/properties/${string}`;
+export type PropertyPath = `/Properties/${string}`;
 
 export type ReferenceProperty = {
   $ref: `#/definitions/${string}`;

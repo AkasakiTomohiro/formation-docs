@@ -47,6 +47,12 @@ pub struct StackMetaUpdate {
     pub reasons: Option<StackMetaReasonsUpdate>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct StackPropertiesUpdate {
+    pub logical_id: String,
+    pub properties: HashMap<String, String>,
+}
+
 #[derive(Debug, Error)]
 enum StackError {
     #[error("app error: {0}")]
@@ -460,6 +466,43 @@ async fn update_stack_meta(
     return Ok(());
 }
 
+async fn update_stack_properties(
+    workspace_directory: &str,
+    stack_id: &str,
+    update_stack_data: StackPropertiesUpdate,
+) -> Result<HashMap<String, String>, StackError> {
+    // 特定の論理IDの Properties を取得
+    let workspace = load_workspace(workspace_directory).await?;
+    let stack_file_name = match workspace.stacks.get(stack_id) {
+        Some(stack_file_name) => stack_file_name,
+        None => {
+            return Err(StackError::App(AppError::new("Stack not found")));
+        }
+    };
+    let template_path = format!("{}/{}", workspace_directory, stack_file_name);
+    let template_json = fs::read_to_string(&template_path)?;
+    let mut template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
+
+    // 取得した Properties を update_stack_data.properties で更新
+    let mut failed_values = HashMap::new();
+    for (id, value) in update_stack_data.properties.iter() {
+        if let Some(original_value) =
+            template_json["Resources"][&update_stack_data.logical_id].pointer_mut(id)
+        {
+            // FIXME: String 型以外にも対応
+            *original_value = Value::String(value.to_string());
+        } else {
+            failed_values.insert(id.clone(), value.clone());
+        }
+    }
+
+    // 更新した Properties をファイルに書き込む
+    let stack_json = serde_json::to_string(&template_json).unwrap();
+    fs::write(&template_path, stack_json)?;
+
+    return Ok(failed_values);
+}
+
 #[tauri::command]
 pub async fn load_stacks_command(
     window: tauri::Window,
@@ -645,6 +688,34 @@ pub async fn get_stack_resource_properties_reasons_command(
     .await
     {
         Ok(reasons) => Ok(CommandResult::success(reasons)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn update_stack_properties_command(
+    window: tauri::Window,
+    stack_id: &str,
+    logical_id: &str,
+    properties: HashMap<String, String>,
+) -> Result<CommandResult<HashMap<String, String>>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match update_stack_properties(
+        window_state.workspace_directory.as_str(),
+        stack_id,
+        StackPropertiesUpdate {
+            logical_id: logical_id.to_string(),
+            properties,
+        },
+    )
+    .await
+    {
+        Ok(failed_values) => Ok(CommandResult::success(failed_values)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }

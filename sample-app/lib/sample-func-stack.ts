@@ -22,6 +22,7 @@ export class SampleFuncStack extends Stack {
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromBucket(asset.bucket, asset.s3ObjectKey),
+      description: 'Sample Lambda Function',
       filesystem: {
         config: {
           arn: '',

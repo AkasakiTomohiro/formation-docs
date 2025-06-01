@@ -36,12 +36,12 @@ export const createResourceTableItems = (
 ): ResourceTableItem[] => {
   const items: ResourceTableItem[] = [];
   for (const [key, value] of Object.entries(schema.properties)) {
-    if (schema.readOnlyProperties.includes(`/properties/${key}`)) {
+    if (schema.readOnlyProperties.includes(`/Properties/${key}`)) {
       continue;
     }
     if ('$ref' in value) {
       const refItem = parseReferencePropertyToTableItem(
-        '/properties',
+        '/Properties',
         key,
         value,
         actualProperties,
@@ -52,7 +52,7 @@ export const createResourceTableItems = (
       }
     } else {
       const definedItem = parseDefinedPropertyToTableItem(
-        '/properties',
+        '/Properties',
         key,
         value,
         actualProperties,
@@ -427,7 +427,10 @@ function convertValue(
 
   // プロパティがプリミティブな型の場合はそのまま返す
   if (isJsonSchemaPrimitiveType(property.type)) {
-    return actualProperty;
+    return {
+      value: actualProperty,
+      readonly: false,
+    };
   }
 
   // プロパティが配列かつ、値がプリミティブな場合

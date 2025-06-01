@@ -22,6 +22,7 @@ import {
   getStackResourceProperties,
   getStackResourcePropertiesReasons,
   updateStackMeta,
+  updateStackProperties,
 } from '../../../../../invoke/Stack';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
@@ -60,6 +61,9 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [isEdit, setIsEdit] = useState(false);
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [editingReasons, setEditingReasons] = useState<Record<string, string>>(
+    {},
+  );
+  const [editingValues, setEditingValues] = useState<Record<string, string>>(
     {},
   );
   const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
@@ -131,6 +135,10 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     onClick={(event) => {
                       event.stopPropagation();
                       setResourceTabs((prev) => {
+                        // FIXME:
+                        // prev.map(tab => {
+                        //   if(tab.id === props.)
+                        // })
                         return [
                           ...prev.slice(0, prev.length - 1),
                           {
@@ -222,6 +230,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     <Button
                       onClick={() => {
                         setEditingReasons(reasons);
+                        setEditingValues({});
                         setIsEdit(!isEdit);
                       }}
                     >
@@ -231,7 +240,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                   {isEdit && (
                     <Button
                       variant="primary"
-                      onClick={() => {
+                      onClick={async () => {
                         setReasons(editingReasons);
                         setIsEdit(!isEdit);
                         updateStackMeta({
@@ -239,6 +248,12 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                           logical_id: props.selectedLogicalId as string,
                           reasons: editingReasons,
                         });
+                        const failed = await updateStackProperties({
+                          stack_id: props.stackId,
+                          logical_id: props.selectedLogicalId as string,
+                          properties: editingValues,
+                        });
+                        console.log('Update failed:', failed);
                       }}
                     >
                       保存
@@ -312,7 +327,17 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                 header: 'Value',
                 cell: (e) => {
                   if (isEdit && !e.readonly) {
-                    return <Textarea onChange={() => {}} value={e.value} />;
+                    return (
+                      <Textarea
+                        onChange={({ detail }) =>
+                          setEditingValues((prev) => ({
+                            ...prev,
+                            [e.id]: detail.value,
+                          }))
+                        }
+                        value={editingValues[e.id] ?? e.value}
+                      />
+                    );
                   }
                   return (
                     <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>
