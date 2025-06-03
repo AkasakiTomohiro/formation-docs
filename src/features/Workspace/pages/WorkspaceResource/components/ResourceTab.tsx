@@ -254,6 +254,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                           logical_id: props.selectedLogicalId as string,
                           properties: editingValues,
                         });
+                        setEditingValues({});
                         console.log('Update failed:', failed);
 
                         if (Object.keys(failed).length > 0) {
@@ -268,8 +269,8 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                               dismissLabel: 'close',
                               id: id,
                               onDismiss: () => {
-                                setFlashbarItems(
-                                  flashbarItems.filter((e) => e.id !== id),
+                                setFlashbarItems((items) =>
+                                  items.filter((e) => e.id !== id),
                                 );
                               },
                             },
