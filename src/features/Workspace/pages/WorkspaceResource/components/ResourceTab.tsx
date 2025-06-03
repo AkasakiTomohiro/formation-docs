@@ -66,7 +66,8 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [editingValues, setEditingValues] = useState<Record<string, string>>(
     {},
   );
-  const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
+  const { setResourceTabs, activeTabId } =
+    useOutletContext<WorkspaceLayoutContext>();
 
   console.log('resourceList', resourceList);
   console.log('schema', schema);
@@ -135,17 +136,16 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     onClick={(event) => {
                       event.stopPropagation();
                       setResourceTabs((prev) => {
-                        // FIXME:
-                        // prev.map(tab => {
-                        //   if(tab.id === props.)
-                        // })
-                        return [
-                          ...prev.slice(0, prev.length - 1),
-                          {
-                            ...prev[prev.length - 1],
-                            selectedLogicalId: item,
-                          },
-                        ];
+                        const resourceTabs = prev.map((tab) => {
+                          if (
+                            tab.tabId === activeTabId &&
+                            tab.type === 'resource'
+                          ) {
+                            tab.selectedLogicalId = item;
+                          }
+                          return tab;
+                        });
+                        return resourceTabs;
                       });
                     }}
                   >
