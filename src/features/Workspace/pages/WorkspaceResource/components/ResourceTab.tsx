@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router';
+import { v4 as uuidV4 } from 'uuid';
 
 import {
   Box,
@@ -66,7 +67,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [editingValues, setEditingValues] = useState<Record<string, string>>(
     {},
   );
-  const { setResourceTabs, activeTabId } =
+  const { setResourceTabs, activeTabId, flashbarItems, setFlashbarItems } =
     useOutletContext<WorkspaceLayoutContext>();
 
   console.log('resourceList', resourceList);
@@ -254,6 +255,26 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                           properties: editingValues,
                         });
                         console.log('Update failed:', failed);
+
+                        if (Object.keys(failed).length > 0) {
+                          const id = uuidV4();
+                          setFlashbarItems([
+                            ...flashbarItems,
+                            {
+                              type: 'error',
+                              header: '以下のプロパティの更新に失敗しました',
+                              content: JSON.stringify(failed, null, 2),
+                              dismissible: true,
+                              dismissLabel: 'close',
+                              id: id,
+                              onDismiss: () => {
+                                setFlashbarItems(
+                                  flashbarItems.filter((e) => e.id !== id),
+                                );
+                              },
+                            },
+                          ]);
+                        }
 
                         getStackResourceProperties({
                           stack_id: props.stackId,

@@ -4,6 +4,7 @@ import styled from 'styled-components';
 
 import {
   AppLayout,
+  Flashbar,
   Input,
   SideNavigation,
   SpaceBetween,
@@ -13,7 +14,10 @@ import {
 import { loadTemplateSummary } from '../../invoke/Stack';
 import { filterSideMenu } from './lib/FilterSideMenu';
 
-import type { TokenGroupProps } from '@cloudscape-design/components';
+import type {
+  FlashbarProps,
+  TokenGroupProps,
+} from '@cloudscape-design/components';
 import type { TemplateSummary } from '../../invoke/Stack';
 
 import type { Dispatch, SetStateAction } from 'react';
@@ -42,6 +46,8 @@ export type WorkspaceLayoutContext = WorkspaceLayoutLoaderData & {
   activeTabId: string | undefined;
   setActiveTabId: Dispatch<SetStateAction<string | undefined>>;
   loadTemplateSummaryWrap: () => Promise<void>;
+  flashbarItems: FlashbarProps.MessageDefinition[];
+  setFlashbarItems: Dispatch<SetStateAction<FlashbarProps.MessageDefinition[]>>;
 };
 
 const StyledLink = styled.a`
@@ -61,6 +67,9 @@ export const WorkspaceLayout = (): JSX.Element => {
   const [resourceTabs, setResourceTabs] = useState<ResourceInfo[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | undefined>(undefined);
   const [sideMenu, setSideMenu] = useState<TemplateSummary[]>([]);
+  const [flashbarItems, setFlashbarItems] = useState<
+    FlashbarProps.MessageDefinition[]
+  >([]);
 
   const loadTemplateSummaryWrap = useCallback(() => {
     return loadTemplateSummary().then((summary) => {
@@ -80,6 +89,8 @@ export const WorkspaceLayout = (): JSX.Element => {
     activeTabId,
     setActiveTabId,
     loadTemplateSummaryWrap,
+    flashbarItems,
+    setFlashbarItems,
   };
 
   return (
@@ -189,7 +200,10 @@ export const WorkspaceLayout = (): JSX.Element => {
       // }
       content={
         <div key="sample" style={{ margin: '16px' }}>
-          <Outlet context={context} />
+          <SpaceBetween size="m">
+            <Flashbar items={flashbarItems} />
+            <Outlet context={context} />
+          </SpaceBetween>
         </div>
       }
     />

@@ -153,8 +153,7 @@ export type UpdateStackProperties = {
 
 export async function updateStackProperties(
   props: UpdateStackProperties,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-): Promise<any> {
+): Promise<Record<string, string>> {
   const result = await invoke<CommandResult<Record<string, string>>>(
     'update_stack_properties_command',
     props,
