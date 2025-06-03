@@ -376,6 +376,8 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>
                   );
                 },
+                width: 300,
+                minWidth: 100,
               },
               {
                 id: 'reason',
@@ -400,6 +402,8 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     </div>
                   );
                 },
+                width: 300,
+                minWidth: 200,
               },
             ]}
             columnDisplay={preferences.contentDisplay}
