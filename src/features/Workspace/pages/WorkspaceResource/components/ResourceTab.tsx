@@ -254,6 +254,17 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                           properties: editingValues,
                         });
                         console.log('Update failed:', failed);
+
+                        getStackResourceProperties({
+                          stack_id: props.stackId,
+                          logical_id: props.selectedLogicalId as string,
+                        }).then((properties) => {
+                          const resourceTableItems = createResourceTableItems(
+                            schema as CloudFormationSchema,
+                            properties,
+                          );
+                          setItems(resourceTableItems);
+                        });
                       }}
                     >
                       保存
