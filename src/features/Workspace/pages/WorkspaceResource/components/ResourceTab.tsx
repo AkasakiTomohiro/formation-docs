@@ -11,6 +11,7 @@ import {
   Header,
   Input,
   Link,
+  Select,
   SpaceBetween,
   StatusIndicator,
   Table,
@@ -387,6 +388,29 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                             value={`${editingValues[e.id] ?? e.value}`}
                             inputMode="numeric"
                             type="number"
+                          />
+                        );
+                      }
+                      case 'enum': {
+                        return (
+                          <Select
+                            selectedOption={{
+                              label: `${editingValues[e.id] ?? e.value}`,
+                              value: `${editingValues[e.id] ?? e.value}`,
+                            }}
+                            onChange={({ detail }) => {
+                              const selectedValue = detail.selectedOption.value;
+                              if (selectedValue) {
+                                setEditingValues((prev) => ({
+                                  ...prev,
+                                  [e.id]: selectedValue,
+                                }));
+                              }
+                            }}
+                            options={e.type
+                              .split('\n')
+                              .map((value) => ({ label: value, value }))}
+                            expandToViewport
                           />
                         );
                       }

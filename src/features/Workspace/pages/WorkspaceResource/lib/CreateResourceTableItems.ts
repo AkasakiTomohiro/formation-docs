@@ -19,7 +19,7 @@ export type ResourceTableItem = {
   type: string;
   description: string;
   value: string;
-  editMode: 'readonly' | 'string' | 'number'; // FIXME:
+  editMode: 'readonly' | 'string' | 'number' | 'enum'; // FIXME:
   children?: ResourceTableItem[];
 };
 
@@ -493,7 +493,10 @@ function convertType(property: DefinedProperty): string {
  */
 function getEditMode(property: DefinedProperty): ResourceTableItem['editMode'] {
   if (isJsonSchemaPrimitiveType(property.type)) {
-    if (property.type === 'string' && !property.enum) {
+    if (property.type === 'string') {
+      if (property.enum) {
+        return 'enum';
+      }
       return 'string';
     }
     if (property.type === 'number' || property.type === 'integer') {

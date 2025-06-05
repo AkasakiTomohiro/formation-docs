@@ -35,6 +35,8 @@ export class SampleFuncStack extends Stack {
       },
       architecture: lambda.Architecture.ARM_64,
       timeout: Duration.seconds(10),
+      loggingFormat: lambda.LoggingFormat.JSON,
+      systemLogLevelV2: lambda.SystemLogLevel.INFO,
     });
   }
 }
