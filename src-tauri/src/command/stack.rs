@@ -50,7 +50,7 @@ pub struct StackMetaUpdate {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StackPropertiesUpdate {
     pub logical_id: String,
-    pub properties: HashMap<String, String>,
+    pub properties: HashMap<String, Value>,
 }
 
 #[derive(Debug, Error)]
@@ -470,7 +470,7 @@ async fn update_stack_properties(
     workspace_directory: &str,
     stack_id: &str,
     update_stack_data: StackPropertiesUpdate,
-) -> Result<HashMap<String, String>, StackError> {
+) -> Result<HashMap<String, Value>, StackError> {
     // 特定の論理IDの Properties を取得
     let workspace = load_workspace(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
@@ -489,8 +489,7 @@ async fn update_stack_properties(
         if let Some(original_value) =
             template_json["Resources"][&update_stack_data.logical_id].pointer_mut(id)
         {
-            // FIXME: String 型以外にも対応
-            *original_value = Value::String(value.to_string());
+            *original_value = value.clone();
         } else {
             failed_values.insert(id.clone(), value.clone());
         }
@@ -697,8 +696,8 @@ pub async fn update_stack_properties_command(
     window: tauri::Window,
     stack_id: &str,
     logical_id: &str,
-    properties: HashMap<String, String>,
-) -> Result<CommandResult<HashMap<String, String>>, CommandResult> {
+    properties: HashMap<String, Value>,
+) -> Result<CommandResult<HashMap<String, Value>>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
         None => {

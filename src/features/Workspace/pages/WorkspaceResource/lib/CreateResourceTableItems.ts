@@ -19,7 +19,7 @@ export type ResourceTableItem = {
   type: string;
   description: string;
   value: string;
-  readonly?: boolean;
+  editMode: 'readonly' | 'string' | 'number'; // FIXME:
   children?: ResourceTableItem[];
 };
 
@@ -91,7 +91,7 @@ function parseDefinedPropertyToTableItem(
     type: convertType(property),
     description: property.description || '',
     value: convertedValue.value,
-    readonly: convertedValue.readonly,
+    editMode: getEditMode(property),
   };
 
   // プロパティが配列かつ、itemsが定義されている場合は、子要素を取得する
@@ -115,7 +115,7 @@ function parseDefinedPropertyToTableItem(
         type: 'object',
         description: '',
         value: '',
-        readonly: true,
+        editMode: 'readonly',
       };
       childItem.children = parseChildrenPropertyToTableItem(
         definition.properties,
@@ -144,7 +144,7 @@ function parseDefinedPropertyToTableItem(
   if (result.children !== undefined) {
     if (result.children.length !== 0) {
       result.value = '';
-      result.readonly = true;
+      result.editMode = 'readonly';
     }
   }
   return result;
@@ -184,7 +184,7 @@ function parseReferencePropertyToTableItem(
     type: convertType(definition),
     description: 'description' in property ? property.description || '' : '',
     value: convertedValue.value,
-    readonly: convertedValue.readonly,
+    editMode: getEditMode(definition),
   };
 
   // プロパティがオブジェクトの場合は、子要素を取得する
@@ -201,7 +201,7 @@ function parseReferencePropertyToTableItem(
   if (result.children !== undefined) {
     if (result.children.length !== 0) {
       result.value = '';
-      result.readonly = true;
+      result.editMode = 'readonly';
     }
   }
 
@@ -484,4 +484,21 @@ function convertType(property: DefinedProperty): string {
     }
   }
   return property.type;
+}
+
+/**
+ * 編集モードを取得する
+ * @param property `$ref`を含まないプロパティ
+ * @returns 編集モード
+ */
+function getEditMode(property: DefinedProperty): ResourceTableItem['editMode'] {
+  if (isJsonSchemaPrimitiveType(property.type)) {
+    if (property.type === 'string' && !property.enum) {
+      return 'string';
+    }
+    if (property.type === 'number' || property.type === 'integer') {
+      return 'number';
+    }
+  }
+  return 'readonly';
 }

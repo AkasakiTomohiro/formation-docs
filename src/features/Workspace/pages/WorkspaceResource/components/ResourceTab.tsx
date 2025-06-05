@@ -9,6 +9,7 @@ import {
   Container,
   ContentLayout,
   Header,
+  Input,
   Link,
   SpaceBetween,
   StatusIndicator,
@@ -64,9 +65,9 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [editingReasons, setEditingReasons] = useState<Record<string, string>>(
     {},
   );
-  const [editingValues, setEditingValues] = useState<Record<string, string>>(
-    {},
-  );
+  const [editingValues, setEditingValues] = useState<
+    Record<string, string | number>
+  >({});
   const { setResourceTabs, activeTabId, flashbarItems, setFlashbarItems } =
     useOutletContext<WorkspaceLayoutContext>();
 
@@ -359,18 +360,37 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                 id: 'value',
                 header: 'Value',
                 cell: (e) => {
-                  if (isEdit && !e.readonly) {
-                    return (
-                      <Textarea
-                        onChange={({ detail }) =>
-                          setEditingValues((prev) => ({
-                            ...prev,
-                            [e.id]: detail.value,
-                          }))
-                        }
-                        value={editingValues[e.id] ?? e.value}
-                      />
-                    );
+                  if (isEdit && e.editMode !== 'readonly') {
+                    switch (e.editMode) {
+                      case 'string': {
+                        return (
+                          <Textarea
+                            onChange={({ detail }) =>
+                              setEditingValues((prev) => ({
+                                ...prev,
+                                [e.id]: detail.value,
+                              }))
+                            }
+                            value={`${editingValues[e.id] ?? e.value}`}
+                          />
+                        );
+                      }
+                      case 'number': {
+                        return (
+                          <Input
+                            onChange={({ detail }) =>
+                              setEditingValues((prev) => ({
+                                ...prev,
+                                [e.id]: Number(detail.value),
+                              }))
+                            }
+                            value={`${editingValues[e.id] ?? e.value}`}
+                            inputMode="numeric"
+                            type="number"
+                          />
+                        );
+                      }
+                    }
                   }
                   return (
                     <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>

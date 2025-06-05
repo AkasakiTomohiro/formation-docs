@@ -148,12 +148,12 @@ export async function updateStackMeta(
 export type UpdateStackProperties = {
   stack_id: string;
   logical_id: string;
-  properties: Record<string, string>;
+  properties: Record<string, string | number>;
 };
 
 export async function updateStackProperties(
   props: UpdateStackProperties,
-): Promise<Record<string, string>> {
+): Promise<Record<string, string | number>> {
   const result = await invoke<CommandResult<Record<string, string>>>(
     'update_stack_properties_command',
     props,
