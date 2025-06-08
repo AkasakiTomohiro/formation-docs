@@ -408,11 +408,10 @@ function convertValue(
   property: DefinedProperty,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
-): { value: string | undefined; readonly: boolean } {
+): { value: string | undefined } {
   if (actualProperty === undefined) {
     return {
       value: undefined,
-      readonly: false,
     };
   }
 
@@ -421,7 +420,6 @@ function convertValue(
   if (intrinsic !== undefined) {
     return {
       value: convertIntrinsicFunctionValue(intrinsic, actualProperty),
-      readonly: true,
     };
   }
 
@@ -429,7 +427,6 @@ function convertValue(
   if (isJsonSchemaPrimitiveType(property.type)) {
     return {
       value: actualProperty,
-      readonly: false,
     };
   }
 
@@ -440,7 +437,6 @@ function convertValue(
       if (firstItemType !== 'object' && firstItemType !== 'function') {
         return {
           value: `[ ${actualProperty.join(', ')} ]`,
-          readonly: true,
         };
       }
     }
@@ -449,7 +445,6 @@ function convertValue(
   // これから以外の場合はJSON.stringifyで文字列化する
   return {
     value: JSON.stringify(actualProperty, undefined, '　'),
-    readonly: false,
   };
 }
 
