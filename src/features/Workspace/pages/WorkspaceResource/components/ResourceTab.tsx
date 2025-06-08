@@ -67,7 +67,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
     {},
   );
   const [editingValues, setEditingValues] = useState<
-    Record<string, string | number | null>
+    Record<string, string | number | null | boolean>
   >({});
   const { setResourceTabs, activeTabId, flashbarItems, setFlashbarItems } =
     useOutletContext<WorkspaceLayoutContext>();
@@ -422,11 +422,42 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                           />
                         );
                       }
+                      case 'boolean': {
+                        return (
+                          <Select
+                            selectedOption={{
+                              label: `${
+                                Object.hasOwn(editingValues, e.id)
+                                  ? (editingValues[e.id] ?? '未選択')
+                                  : (e.value ?? '未選択')
+                              }`,
+                              value: Object.hasOwn(editingValues, e.id)
+                                ? `${editingValues[e.id]}`
+                                : e.value,
+                            }}
+                            onChange={({ detail }) => {
+                              setEditingValues((prev) => ({
+                                ...prev,
+                                [e.id]:
+                                  detail.selectedOption.value === undefined
+                                    ? null
+                                    : detail.selectedOption.value === 'true',
+                              }));
+                            }}
+                            options={[
+                              { label: '未選択', value: undefined },
+                              { label: 'false', value: 'false' },
+                              { label: 'true', value: 'true' },
+                            ]}
+                            expandToViewport
+                          />
+                        );
+                      }
                     }
                   }
                   return (
                     <div style={{ whiteSpace: 'pre-line' }}>
-                      {e.value ?? ''}
+                      {e.value === undefined ? '' : `${e.value}`}
                     </div>
                   );
                 },

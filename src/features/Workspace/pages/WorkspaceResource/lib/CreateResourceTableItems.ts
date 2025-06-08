@@ -19,7 +19,7 @@ export type ResourceTableItem = {
   type: string;
   description: string;
   value: string | undefined;
-  editMode: 'readonly' | 'string' | 'number' | 'enum'; // FIXME:
+  editMode: 'readonly' | 'string' | 'number' | 'enum' | 'boolean'; // FIXME:
   children?: ResourceTableItem[];
 };
 
@@ -501,6 +501,9 @@ function getEditMode(property: DefinedProperty): ResourceTableItem['editMode'] {
     }
     if (property.type === 'number' || property.type === 'integer') {
       return 'number';
+    }
+    if (property.type === 'boolean') {
+      return 'boolean';
     }
   }
   return 'readonly';

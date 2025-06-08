@@ -148,7 +148,7 @@ export async function updateStackMeta(
 export type UpdateStackProperties = {
   stack_id: string;
   logical_id: string;
-  properties: Record<string, string | number | null>;
+  properties: Record<string, string | number | null | boolean>;
 };
 
 export async function updateStackProperties(
