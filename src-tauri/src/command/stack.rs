@@ -508,7 +508,8 @@ async fn update_stack_properties(
                 *original_value = value.clone();
             }
         } else {
-            failed_values.insert(id.clone(), value.clone());
+            // failed_values.insert(id.clone(), value.clone());
+            // split_exist_parent_path(template_json, id.clone());
         }
     }
 
@@ -517,6 +518,23 @@ async fn update_stack_properties(
     fs::write(&template_path, stack_json)?;
 
     return Ok(failed_values);
+}
+
+fn split_exist_parent_path(
+    template_json: Value,
+    logical_id: String,
+    path: String,
+) -> (String, String) {
+    let mut check_path = path.clone();
+    let mut no_exit_path: Vec<String> = Vec::new();
+
+    while let Some((parent, child)) = check_path.rsplit_once("/") {
+        no_exit_path.push(child.to_string());
+        check_path = parent.to_string();
+        // FIXME: テンプレートにcheck_pathが存在するか確認する
+    }
+    no_exit_path.reverse();
+    return (check_path, no_exit_path.join("/"));
 }
 
 #[tauri::command]
