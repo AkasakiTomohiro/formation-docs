@@ -489,7 +489,24 @@ async fn update_stack_properties(
         if let Some(original_value) =
             template_json["Resources"][&update_stack_data.logical_id].pointer_mut(id)
         {
-            *original_value = value.clone();
+            if value.is_null() {
+                if let Some((parent_key, child_key)) = id.rsplit_once("/") {
+                    if let Some(original_value) = template_json["Resources"]
+                        [&update_stack_data.logical_id]
+                        .pointer_mut(parent_key)
+                    {
+                        if original_value.is_object() {
+                            original_value.as_object_mut().unwrap().remove(child_key);
+                        }
+                    } else {
+                        failed_values.insert(id.clone(), value.clone());
+                    }
+                } else {
+                    failed_values.insert(id.clone(), value.clone());
+                }
+            } else {
+                *original_value = value.clone();
+            }
         } else {
             failed_values.insert(id.clone(), value.clone());
         }

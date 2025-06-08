@@ -18,7 +18,7 @@ export type ResourceTableItem = {
   property: string;
   type: string;
   description: string;
-  value: string;
+  value: string | undefined;
   editMode: 'readonly' | 'string' | 'number' | 'enum'; // FIXME:
   children?: ResourceTableItem[];
 };
@@ -408,10 +408,10 @@ function convertValue(
   property: DefinedProperty,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
-): { value: string; readonly: boolean } {
+): { value: string | undefined; readonly: boolean } {
   if (actualProperty === undefined) {
     return {
-      value: '',
+      value: undefined,
       readonly: false,
     };
   }

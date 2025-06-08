@@ -67,7 +67,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
     {},
   );
   const [editingValues, setEditingValues] = useState<
-    Record<string, string | number>
+    Record<string, string | number | null>
   >({});
   const { setResourceTabs, activeTabId, flashbarItems, setFlashbarItems } =
     useOutletContext<WorkspaceLayoutContext>();
@@ -395,21 +395,29 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                         return (
                           <Select
                             selectedOption={{
-                              label: `${editingValues[e.id] ?? e.value}`,
-                              value: `${editingValues[e.id] ?? e.value}`,
+                              label: `${
+                                Object.hasOwn(editingValues, e.id)
+                                  ? (editingValues[e.id] ?? '未選択')
+                                  : (e.value ?? '未選択')
+                              }`,
+                              value: `${
+                                Object.hasOwn(editingValues, e.id)
+                                  ? editingValues[e.id]
+                                  : (e.value ?? null)
+                              }`,
                             }}
                             onChange={({ detail }) => {
-                              const selectedValue = detail.selectedOption.value;
-                              if (selectedValue) {
-                                setEditingValues((prev) => ({
-                                  ...prev,
-                                  [e.id]: selectedValue,
-                                }));
-                              }
+                              setEditingValues((prev) => ({
+                                ...prev,
+                                [e.id]: detail.selectedOption.value ?? null,
+                              }));
                             }}
-                            options={e.type
-                              .split('\n')
-                              .map((value) => ({ label: value, value }))}
+                            options={[
+                              { label: '未選択', value: undefined },
+                              ...e.type
+                                .split('\n')
+                                .map((value) => ({ label: value, value })),
+                            ]}
                             expandToViewport
                           />
                         );
@@ -417,7 +425,9 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     }
                   }
                   return (
-                    <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>
+                    <div style={{ whiteSpace: 'pre-line' }}>
+                      {e.value ?? ''}
+                    </div>
                   );
                 },
                 width: 300,
