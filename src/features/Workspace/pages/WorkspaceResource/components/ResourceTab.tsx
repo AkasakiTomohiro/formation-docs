@@ -372,7 +372,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                                 [e.id]: detail.value,
                               }))
                             }
-                            value={`${editingValues[e.id] ?? e.value}`}
+                            value={`${editingValues[e.id] ?? e.value ?? ''}`}
                           />
                         );
                       }
@@ -400,11 +400,11 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                                   ? (editingValues[e.id] ?? '未選択')
                                   : (e.value ?? '未選択')
                               }`,
-                              value: `${
-                                Object.hasOwn(editingValues, e.id)
-                                  ? editingValues[e.id]
-                                  : (e.value ?? null)
-                              }`,
+                              value: Object.hasOwn(editingValues, e.id)
+                                ? editingValues[e.id] === undefined
+                                  ? undefined
+                                  : `${editingValues[e.id]}`
+                                : e.value,
                             }}
                             onChange={({ detail }) => {
                               setEditingValues((prev) => ({
