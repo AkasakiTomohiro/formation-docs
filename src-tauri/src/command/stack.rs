@@ -9,6 +9,7 @@ use crate::utils::get_window_state;
 use crate::utils::AppError;
 use crate::utils::CommandResult;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use serde_json::Value;
 use thiserror::Error;
 use uuid::Uuid;
@@ -508,8 +509,16 @@ async fn update_stack_properties(
                 *original_value = value.clone();
             }
         } else {
-            // failed_values.insert(id.clone(), value.clone());
-            // split_exist_parent_path(template_json, id.clone());
+            let (parent_path, no_exit_path) = split_path_by_existing_parent(
+                &template_json,
+                &update_stack_data.logical_id,
+                id.clone(),
+            );
+            let (parent_key, child_value) = get_value_from_path(no_exit_path, value.clone());
+            let parent_value = template_json["Resources"][&update_stack_data.logical_id]
+                .pointer_mut(parent_path.as_str())
+                .unwrap(); // split_path_by_existing_parentでparent_pathが存在することが保証されているためunwrapしても問題ない
+            parent_value[parent_key] = child_value;
         }
     }
 
@@ -520,21 +529,57 @@ async fn update_stack_properties(
     return Ok(failed_values);
 }
 
-fn split_exist_parent_path(
-    template_json: Value,
-    logical_id: String,
+/// 指定されたパスのうち、存在する親パスと存在しない残りのパスに分割する。
+///
+/// # Example
+///
+/// たとえば、下記のようなJSONがある場合にpathに`/Properties/LoggingConfig/LogFormat`を指定したときに、
+/// 存在する親パス（`/Properties`）と、存在しない残りのパス（`LoggingConfig/LogFormat`）に分割する。
+/// 後段に呼び出す関数で利用するため、存在しないパスはVec<String>（"LogFormat", "LoggingConfig"）の形で返す。
+/// ```json
+/// {
+///   "Resources": {
+///     "MyResource": {
+///       "Properties": {
+///         "FunctionName": "MyFunction"
+///       }
+///     }
+///   }
+/// }
+/// ```
+///
+fn split_path_by_existing_parent(
+    template_json: &Value,
+    logical_id: &str,
     path: String,
-) -> (String, String) {
+) -> (String, Vec<String>) {
     let mut check_path = path.clone();
     let mut no_exit_path: Vec<String> = Vec::new();
 
     while let Some((parent, child)) = check_path.rsplit_once("/") {
         no_exit_path.push(child.to_string());
         check_path = parent.to_string();
-        // FIXME: テンプレートにcheck_pathが存在するか確認する
+        if let Some(_) = template_json["Resources"][logical_id].pointer(check_path.as_str()) {
+            break;
+        }
     }
-    no_exit_path.reverse();
-    return (check_path, no_exit_path.join("/"));
+    return (check_path, no_exit_path.clone());
+}
+
+/// パスの配列を受け取り、一階層目のキーとその値のタプルを返す
+///
+/// 例えば、`path`が`["LogFormat", "LoggingConfig"]`、`value`が`"JSON"`の場合、
+/// `("LoggingConfig", {"LogFormat": "JSON"})`のようなタプルを返す。
+fn get_value_from_path(path: Vec<String>, value: Value) -> (String, Value) {
+    let mut return_value = value.clone();
+    for index in 0..path.len() - 1 {
+        // FIXME: 配列に対応
+        let key: String = path[index].clone();
+        let mut tmp_value = json!({});
+        tmp_value[key] = return_value.clone();
+        return_value = tmp_value;
+    }
+    return (path.last().unwrap().clone(), return_value);
 }
 
 #[tauri::command]
