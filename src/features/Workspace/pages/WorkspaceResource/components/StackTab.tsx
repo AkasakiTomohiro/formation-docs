@@ -1,22 +1,25 @@
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { useOutletContext } from 'react-router';
+import { v4 as uuidV4 } from 'uuid';
+import { z } from 'zod';
+
 import {
   Box,
   Button,
   Container,
   ContentLayout,
   Flashbar,
-  type FlashbarProps,
   FormField,
   Header,
   Input,
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { useOutletContext } from 'react-router';
-import { v4 as uuidV4 } from 'uuid';
-import { z } from 'zod';
+
 import { loadStack, updateStackDetail } from '../../../../../invoke/Stack';
+
+import type { FlashbarProps } from '@cloudscape-design/components';
 import type { ResourceInfo, WorkspaceLayoutContext } from '../../../Layout';
 
 export type StackTabProps = {
@@ -81,7 +84,7 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
   // リソースタブのオブジェクトを取得
   const getResourceDetailTab = (resourceTab: ResourceInfo | undefined) => {
     if (resourceTab) {
-      if (resourceTab.type === 'detail') {
+      if (resourceTab.type === 'overview') {
         return resourceTab;
       }
     }

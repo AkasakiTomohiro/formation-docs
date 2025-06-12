@@ -25,7 +25,7 @@ import type { WorkspaceLayoutLoaderData } from './Loader';
 
 export type ResourceInfo =
   | {
-      type: 'detail';
+      type: 'overview';
       tabId: string;
       stackId: string;
       stackName: string;
@@ -166,9 +166,9 @@ export const WorkspaceLayout = (): JSX.Element => {
             const [stackId, stackName, serviceName, resourceType] =
               href.split('/');
             const newTab: ResourceInfo =
-              text === 'Detail'
+              text === 'Overview'
                 ? {
-                    type: 'detail',
+                    type: 'overview',
                     tabId: href,
                     stackId: stackId,
                     stackName: stackName,

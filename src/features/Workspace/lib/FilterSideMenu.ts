@@ -19,7 +19,7 @@ export const filterSideMenu = (
     const newChildren: SectionGroupItem[] = [
       {
         type: 'link',
-        text: 'Detail',
+        text: 'Overview',
         href: `${item.id}/${item.stackName}`,
       },
     ];
