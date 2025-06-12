@@ -145,6 +145,25 @@ export async function updateStackMeta(
   return result.value;
 }
 
+export type UpdateStackProperties = {
+  stack_id: string;
+  logical_id: string;
+  properties: Record<string, string | number | null | boolean>;
+};
+
+export async function updateStackProperties(
+  props: UpdateStackProperties,
+): Promise<Record<string, string | number>> {
+  const result = await invoke<CommandResult<Record<string, string>>>(
+    'update_stack_properties_command',
+    props,
+  );
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}
+
 export type UpdateStackDetailProps = {
   stack_id: string;
   name: string;

@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { Stack } from 'aws-cdk-lib';
+import { Duration, Stack } from 'aws-cdk-lib';
 import { Vpc } from 'aws-cdk-lib/aws-ec2';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Asset } from 'aws-cdk-lib/aws-s3-assets';
@@ -22,6 +22,7 @@ export class SampleFuncStack extends Stack {
       runtime: lambda.Runtime.NODEJS_22_X,
       handler: 'index.handler',
       code: lambda.Code.fromBucket(asset.bucket, asset.s3ObjectKey),
+      description: 'Sample Lambda Function',
       filesystem: {
         config: {
           arn: '',
@@ -33,6 +34,9 @@ export class SampleFuncStack extends Stack {
         subnets: vpc.privateSubnets,
       },
       architecture: lambda.Architecture.ARM_64,
+      timeout: Duration.seconds(10),
+      loggingFormat: lambda.LoggingFormat.JSON,
+      systemLogLevelV2: lambda.SystemLogLevel.INFO,
     });
   }
 }

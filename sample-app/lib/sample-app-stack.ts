@@ -12,6 +12,7 @@ export class SampleAppStack extends Stack {
 
     const queue = new sqs.Queue(this, 'SampleAppQueue', {
       visibilityTimeout: Duration.seconds(300),
+      fifo: true,
     });
 
     const topic = new sns.Topic(this, 'SampleAppTopic');

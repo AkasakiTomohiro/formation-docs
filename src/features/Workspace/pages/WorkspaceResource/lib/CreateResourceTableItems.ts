@@ -18,7 +18,8 @@ export type ResourceTableItem = {
   property: string;
   type: string;
   description: string;
-  value: string;
+  value: string | undefined;
+  editMode: 'readonly' | 'string' | 'number' | 'enum' | 'boolean'; // FIXME:
   children?: ResourceTableItem[];
 };
 
@@ -35,12 +36,12 @@ export const createResourceTableItems = (
 ): ResourceTableItem[] => {
   const items: ResourceTableItem[] = [];
   for (const [key, value] of Object.entries(schema.properties)) {
-    if (schema.readOnlyProperties.includes(`/properties/${key}`)) {
+    if (schema.readOnlyProperties.includes(`/Properties/${key}`)) {
       continue;
     }
     if ('$ref' in value) {
       const refItem = parseReferencePropertyToTableItem(
-        '/properties',
+        '/Properties',
         key,
         value,
         actualProperties,
@@ -51,7 +52,7 @@ export const createResourceTableItems = (
       }
     } else {
       const definedItem = parseDefinedPropertyToTableItem(
-        '/properties',
+        '/Properties',
         key,
         value,
         actualProperties,
@@ -80,15 +81,17 @@ function parseDefinedPropertyToTableItem(
   actualProperties: any,
   definitions: CloudFormationSchema['definitions'] | undefined,
 ): ResourceTableItem {
+  const convertedValue = convertValue(
+    property,
+    getActualProperties(propertyKey, actualProperties),
+  );
   const result: ResourceTableItem = {
     id: `${parentId}/${propertyKey}`,
     property: propertyKey,
-    type: covertType(property),
+    type: convertType(property),
     description: property.description || '',
-    value: covertValue(
-      property,
-      getActualProperties(propertyKey, actualProperties),
-    ),
+    value: convertedValue.value,
+    editMode: getEditMode(property),
   };
 
   // プロパティが配列かつ、itemsが定義されている場合は、子要素を取得する
@@ -112,6 +115,7 @@ function parseDefinedPropertyToTableItem(
         type: 'object',
         description: '',
         value: '',
+        editMode: 'readonly',
       };
       childItem.children = parseChildrenPropertyToTableItem(
         definition.properties,
@@ -140,6 +144,7 @@ function parseDefinedPropertyToTableItem(
   if (result.children !== undefined) {
     if (result.children.length !== 0) {
       result.value = '';
+      result.editMode = 'readonly';
     }
   }
   return result;
@@ -169,15 +174,17 @@ function parseReferencePropertyToTableItem(
 
   const definitionKey = property.$ref.replace('#/definitions/', '');
   const definition = definitions[definitionKey];
+  const convertedValue = convertValue(
+    definition,
+    getActualProperties(propertyKey, actualProperties),
+  );
   const result: ResourceTableItem = {
     id: `${parentId}/${propertyKey}`,
     property: propertyKey,
-    type: covertType(definition),
+    type: convertType(definition),
     description: 'description' in property ? property.description || '' : '',
-    value: covertValue(
-      definition,
-      getActualProperties(propertyKey, actualProperties),
-    ),
+    value: convertedValue.value,
+    editMode: getEditMode(definition),
   };
 
   // プロパティがオブジェクトの場合は、子要素を取得する
@@ -194,6 +201,7 @@ function parseReferencePropertyToTableItem(
   if (result.children !== undefined) {
     if (result.children.length !== 0) {
       result.value = '';
+      result.editMode = 'readonly';
     }
   }
 
@@ -396,24 +404,30 @@ function convertIntrinsicFunctionValue(
  * @param actualProperty 実際のテンプレートに定義されているプロパティ
  * @returns 文字列化されたプロパティの値
  */
-function covertValue(
+function convertValue(
   property: DefinedProperty,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
-): string {
+): { value: string | undefined } {
   if (actualProperty === undefined) {
-    return '';
+    return {
+      value: undefined,
+    };
   }
 
   // プロパティが組込み関数の場合
   const intrinsic = isIntrinsicFunction(actualProperty);
   if (intrinsic !== undefined) {
-    return convertIntrinsicFunctionValue(intrinsic, actualProperty);
+    return {
+      value: convertIntrinsicFunctionValue(intrinsic, actualProperty),
+    };
   }
 
   // プロパティがプリミティブな型の場合はそのまま返す
   if (isJsonSchemaPrimitiveType(property.type)) {
-    return actualProperty;
+    return {
+      value: actualProperty,
+    };
   }
 
   // プロパティが配列かつ、値がプリミティブな場合
@@ -421,13 +435,17 @@ function covertValue(
     if (actualProperty.length !== 0) {
       const firstItemType = typeof actualProperty[0];
       if (firstItemType !== 'object' && firstItemType !== 'function') {
-        return `[ ${actualProperty.join(', ')} ]`;
+        return {
+          value: `[ ${actualProperty.join(', ')} ]`,
+        };
       }
     }
   }
 
   // これから以外の場合はJSON.stringifyで文字列化する
-  return JSON.stringify(actualProperty, undefined, '　');
+  return {
+    value: JSON.stringify(actualProperty, undefined, '　'),
+  };
 }
 
 /**
@@ -435,7 +453,7 @@ function covertValue(
  * @param property `$ref`を含まないプロパティ
  * @returns 型の文字列
  */
-function covertType(property: DefinedProperty): string {
+function convertType(property: DefinedProperty): string {
   // タイプが配列の場合は、配列要素を結合する
   if (Array.isArray(property.type)) {
     return property.type.join('\n');
@@ -452,7 +470,7 @@ function covertType(property: DefinedProperty): string {
     if (property.items && !('$ref' in property.items)) {
       // itemsが配列の場合は、子要素のタイプを再帰的に変換し結合する
       if (isJsonSchemaPrimitiveType(property.items.type)) {
-        const type = covertType(property.items);
+        const type = convertType(property.items);
         if (type.includes('\n')) {
           return `( \n　${type.split('\n').join('\n　')}\n) []`;
         }
@@ -461,4 +479,27 @@ function covertType(property: DefinedProperty): string {
     }
   }
   return property.type;
+}
+
+/**
+ * 編集モードを取得する
+ * @param property `$ref`を含まないプロパティ
+ * @returns 編集モード
+ */
+function getEditMode(property: DefinedProperty): ResourceTableItem['editMode'] {
+  if (isJsonSchemaPrimitiveType(property.type)) {
+    if (property.type === 'string') {
+      if (property.enum) {
+        return 'enum';
+      }
+      return 'string';
+    }
+    if (property.type === 'number' || property.type === 'integer') {
+      return 'number';
+    }
+    if (property.type === 'boolean') {
+      return 'boolean';
+    }
+  }
+  return 'readonly';
 }

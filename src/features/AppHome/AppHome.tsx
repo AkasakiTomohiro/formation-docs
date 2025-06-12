@@ -66,7 +66,7 @@ export const AppHome = (): JSX.Element => {
               dismissLabel: 'close',
               id: id,
               onDismiss: () => {
-                setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+                setFlashbarItems((items) => items.filter((e) => e.id !== id));
               },
             },
           ]);
@@ -97,7 +97,7 @@ export const AppHome = (): JSX.Element => {
               dismissLabel: 'close',
               id: id,
               onDismiss: () => {
-                setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+                setFlashbarItems((items) => items.filter((e) => e.id !== id));
               },
             },
           ]);
@@ -123,7 +123,7 @@ export const AppHome = (): JSX.Element => {
           dismissLabel: 'close',
           id: id,
           onDismiss: () => {
-            setFlashbarItems(flashbarItems.filter((e) => e.id !== id));
+            setFlashbarItems((items) => items.filter((e) => e.id !== id));
           },
         },
       ]);
