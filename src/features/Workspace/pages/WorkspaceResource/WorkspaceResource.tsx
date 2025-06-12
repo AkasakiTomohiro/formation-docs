@@ -19,7 +19,7 @@ export const WorkspaceResource = (): JSX.Element => {
       const stackName = location.state.selectedStackName;
       if (stackId && stackName) {
         const newTab: ResourceInfo = {
-          type: 'detail',
+          type: 'overview',
           tabId: `${stackId}/${stackName}`,
           stackId,
           stackName,
@@ -42,7 +42,7 @@ export const WorkspaceResource = (): JSX.Element => {
         <Tabs
           activeTabId={activeTabId}
           tabs={resourceTabs.map((tab) => {
-            if (tab.type === 'detail') {
+            if (tab.type === 'overview') {
               return {
                 id: tab.tabId,
                 label: tab.stackName,
