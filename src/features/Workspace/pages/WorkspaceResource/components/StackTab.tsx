@@ -81,17 +81,34 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
     );
   };
 
-  // リソースタブのオブジェクトを取得
-  const getResourceDetailTab = (resourceTab: ResourceInfo | undefined) => {
-    if (resourceTab) {
-      if (resourceTab.type === 'overview') {
-        return resourceTab;
-      }
-    }
-    return undefined;
-  };
+  return getResourceDetailTab(resourceTab)?.isEdit ? (
+    <StackEditContent
+      resourceTab={resourceTab}
+      stackId={props.stackId}
+      setIsEdit={setIsEdit}
+      flashbarItems={flashbarItems}
+      setFlashbarItems={setFlashbarItems}
+    />
+  ) : (
+    <StackContent
+      flashbarItems={flashbarItems}
+      resourceTab={resourceTab}
+      setIsEdit={setIsEdit}
+      stackId={props.stackId}
+    />
+  );
+};
 
-  const StackContent = (): JSX.Element => (
+type StackContentProps = {
+  resourceTab: ResourceInfo | undefined;
+  setIsEdit: (isEdit: boolean) => void;
+  flashbarItems: FlashbarProps.MessageDefinition[];
+  stackId: string;
+};
+
+const StackContent = (props: StackContentProps): JSX.Element => {
+  const { resourceTab, setIsEdit, flashbarItems, stackId } = props;
+  return (
     <ContentLayout
       header={
         <SpaceBetween size="m">
@@ -124,140 +141,153 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
         }
       >
         <div className="contentPlaceholder" />
-        <p>{props.stackId}</p>
+        <p>{stackId}</p>
       </Container>
     </ContentLayout>
   );
+};
 
-  const StackEditContent = (): JSX.Element => {
-    const { control, handleSubmit } = useForm<StackEditType>({
-      mode: 'onChange',
-      resolver: zodResolver(stackEditValidator),
-      defaultValues: {
-        name: resourceTab ? resourceTab.stackName : '',
-        description: resourceTab
-          ? resourceTab.type === 'overview'
-            ? resourceTab.description
-            : ''
-          : '',
-      },
-    });
-    const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
+export type StackEditContentProps = {
+  resourceTab: ResourceInfo | undefined;
+  stackId: string;
+  setIsEdit: (isEdit: boolean) => void;
+  flashbarItems: FlashbarProps.MessageDefinition[];
+  setFlashbarItems: React.Dispatch<
+    React.SetStateAction<FlashbarProps.MessageDefinition[]>
+  >;
+};
 
-    const onSave = async (stackDetailProps: StackEditType) => {
-      try {
-        await updateStackDetail({
-          stack_id: props.stackId,
-          name: stackDetailProps.name,
-          description: stackDetailProps.description,
-        });
+const StackEditContent = (props: StackEditContentProps): JSX.Element => {
+  const { control, handleSubmit } = useForm<StackEditType>({
+    mode: 'onChange',
+    resolver: zodResolver(stackEditValidator),
+    defaultValues: {
+      name: props.resourceTab ? props.resourceTab.stackName : '',
+      description: props.resourceTab
+        ? props.resourceTab.type === 'overview'
+          ? props.resourceTab.description
+          : ''
+        : '',
+    },
+  });
+  const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
 
-        // 保存したスタックの情報を更新
-        setResourceTabs((prev) =>
-          prev.map((tab) =>
-            tab.stackId === props.stackId
-              ? {
-                  ...tab,
-                  stackName: stackDetailProps.name,
-                  description: stackDetailProps.description,
-                }
-              : tab,
-          ),
-        );
-        // Stack詳細表示画面に戻る
-        setIsEdit(false);
-      } catch (error) {
-        const id = uuidV4();
-        setFlashbarItems(() => [
-          ...flashbarItems,
-          {
-            type: 'error',
-            header: '保存に失敗しました',
-            content: typeof error === 'string' ? error : undefined,
-            dismissible: true,
-            dismissLabel: 'close',
-            id: id,
-            onDismiss: () => {
-              flashbarItems.filter((itemId) => itemId !== id);
-            },
+  const onSave = async (stackDetailProps: StackEditType) => {
+    try {
+      await updateStackDetail({
+        stack_id: props.stackId,
+        name: stackDetailProps.name,
+        description: stackDetailProps.description,
+      });
+
+      // 保存したスタックの情報を更新
+      setResourceTabs((prev) =>
+        prev.map((tab) =>
+          tab.stackId === props.stackId
+            ? {
+                ...tab,
+                stackName: stackDetailProps.name,
+                description: stackDetailProps.description,
+              }
+            : tab,
+        ),
+      );
+      // Stack詳細表示画面に戻る
+      props.setIsEdit(false);
+    } catch (error) {
+      const id = uuidV4();
+      props.setFlashbarItems(() => [
+        ...props.flashbarItems,
+        {
+          type: 'error',
+          header: '保存に失敗しました',
+          content: typeof error === 'string' ? error : undefined,
+          dismissible: true,
+          dismissLabel: 'close',
+          id: id,
+          onDismiss: () => {
+            props.flashbarItems.filter((itemId) => itemId !== id);
           },
-        ]);
-      }
-    };
-
-    return (
-      <ContentLayout
-        defaultPadding
-        header={
-          <SpaceBetween size="m">
-            <Header>Stackの編集</Header>
-            <Flashbar items={flashbarItems} />
-          </SpaceBetween>
-        }
-      >
-        <form onSubmit={handleSubmit(onSave)}>
-          <SpaceBetween direction="vertical" size="m">
-            <Container>
-              <SpaceBetween direction="vertical" size="m">
-                <Controller
-                  name="name"
-                  control={control}
-                  render={({ field, fieldState: { invalid } }) => (
-                    <FormField
-                      label="Stack name"
-                      errorText={
-                        invalid
-                          ? '1文字以上256文字以下で入力してください'
-                          : undefined
-                      }
-                    >
-                      <Input
-                        {...field}
-                        onChange={(event) => field.onChange(event.detail.value)}
-                        invalid={invalid}
-                      />
-                    </FormField>
-                  )}
-                />
-                <Controller
-                  name="description"
-                  control={control}
-                  render={({ field, fieldState: { invalid } }) => (
-                    <FormField
-                      label="Stack description"
-                      errorText={
-                        invalid ? '256文字以下で入力してください' : undefined
-                      }
-                    >
-                      <Input
-                        {...field}
-                        onChange={(event) => field.onChange(event.detail.value)}
-                        invalid={invalid}
-                      />
-                    </FormField>
-                  )}
-                />
-              </SpaceBetween>
-            </Container>
-            <Box float="right">
-              <SpaceBetween direction="horizontal" size="xs">
-                <Button variant="normal" onClick={() => setIsEdit(false)}>
-                  キャンセル
-                </Button>
-                <Button variant="primary" formAction="submit">
-                  保存
-                </Button>
-              </SpaceBetween>
-            </Box>
-          </SpaceBetween>
-        </form>
-      </ContentLayout>
-    );
+        },
+      ]);
+    }
   };
 
-  return getResourceDetailTab(resourceTab)?.isEdit ? (
-    <StackEditContent />
-  ) : (
-    <StackContent />
+  return (
+    <ContentLayout
+      header={
+        <SpaceBetween size="m">
+          <Header>Stackの編集</Header>
+          <Flashbar items={props.flashbarItems} />
+        </SpaceBetween>
+      }
+    >
+      <form onSubmit={handleSubmit(onSave)}>
+        <SpaceBetween direction="vertical" size="m">
+          <Container>
+            <SpaceBetween direction="vertical" size="m">
+              <Controller
+                name="name"
+                control={control}
+                render={({ field, fieldState: { invalid } }) => (
+                  <FormField
+                    label="Stack name"
+                    errorText={
+                      invalid
+                        ? '1文字以上256文字以下で入力してください'
+                        : undefined
+                    }
+                  >
+                    <Input
+                      {...field}
+                      onChange={(event) => field.onChange(event.detail.value)}
+                      invalid={invalid}
+                    />
+                  </FormField>
+                )}
+              />
+              <Controller
+                name="description"
+                control={control}
+                render={({ field, fieldState: { invalid } }) => (
+                  <FormField
+                    label="Stack description"
+                    errorText={
+                      invalid ? '256文字以下で入力してください' : undefined
+                    }
+                  >
+                    <Input
+                      {...field}
+                      onChange={(event) => field.onChange(event.detail.value)}
+                      invalid={invalid}
+                    />
+                  </FormField>
+                )}
+              />
+            </SpaceBetween>
+          </Container>
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button variant="normal" onClick={() => props.setIsEdit(false)}>
+                キャンセル
+              </Button>
+              <Button variant="primary" formAction="submit">
+                保存
+              </Button>
+            </SpaceBetween>
+          </Box>
+        </SpaceBetween>
+      </form>
+    </ContentLayout>
   );
+};
+
+// リソースタブのオブジェクトを取得
+const getResourceDetailTab = (resourceTab: ResourceInfo | undefined) => {
+  if (resourceTab) {
+    if (resourceTab.type === 'overview') {
+      return resourceTab;
+    }
+  }
+  return undefined;
 };
