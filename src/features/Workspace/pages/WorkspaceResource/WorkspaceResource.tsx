@@ -23,6 +23,7 @@ export const WorkspaceResource = (): JSX.Element => {
           tabId: `${stackId}/${stackName}`,
           stackId,
           stackName,
+          description: '',
         };
         setResourceTabs((prev) => {
           const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
@@ -46,9 +47,7 @@ export const WorkspaceResource = (): JSX.Element => {
               return {
                 id: tab.tabId,
                 label: tab.stackName,
-                content: (
-                  <StackTab stackId={tab.stackId} stackName={tab.stackName} />
-                ),
+                content: <StackTab stackId={tab.stackId} />,
                 dismissible: true,
                 onDismiss: () => {
                   setResourceTabs((prev) =>
