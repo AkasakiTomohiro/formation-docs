@@ -78,7 +78,8 @@ export const filterSideMenu = (
         }
       }
     }
-    if (newChildren.length === 0) {
+    // overviewの要素が初期に追加されているため、検索結果が1件もない場合配列の要素は1つ
+    if (newChildren.length <= 1) {
       continue;
     }
     const newItem: SideNavigationProps.SectionGroup = {
