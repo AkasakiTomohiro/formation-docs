@@ -99,7 +99,7 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
             variant="h1"
             description={
               resourceTab
-                ? resourceTab.type === 'detail'
+                ? resourceTab.type === 'overview'
                   ? resourceTab.description
                   : ''
                 : ''
@@ -136,7 +136,7 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
       defaultValues: {
         name: resourceTab ? resourceTab.stackName : '',
         description: resourceTab
-          ? resourceTab.type === 'detail'
+          ? resourceTab.type === 'overview'
             ? resourceTab.description
             : ''
           : '',
