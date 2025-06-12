@@ -290,7 +290,7 @@ pub struct Resource {
 #[serde(rename_all = "camelCase")]
 pub struct TemplateSummary {
     pub id: String,
-    pub stack_name: String,
+    pub section_group_name: String,
     pub resources: Vec<Resource>,
 }
 
@@ -335,7 +335,7 @@ async fn load_template_summary(
 
         templates.push(TemplateSummary {
             id: id.to_string(),
-            stack_name: meta.name,
+            section_group_name: meta.name,
             resources: resources
                 .iter()
                 .map(|(key, value)| {

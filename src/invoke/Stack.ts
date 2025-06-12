@@ -51,7 +51,7 @@ export async function loadStack(stackName: string): Promise<StackInfo> {
 
 export type TemplateSummary = {
   id: string;
-  stackName: string;
+  sectionGroupName: string;
   resources: {
     serviceName: string;
     recourseType: string[];
