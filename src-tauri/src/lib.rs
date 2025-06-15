@@ -39,6 +39,7 @@ pub fn run() {
             command::stack::get_stack_resource_properties_reasons_command,
             command::stack::update_stack_properties_command,
             command::cloudformation_schema::get_cloudformation_schema_command,
+            command::cloudformation_schema::get_aws_service_list_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
