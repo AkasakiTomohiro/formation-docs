@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { v4 as uuidV4 } from 'uuid';
 import { z } from 'zod';
 
 import { useCollection } from '@cloudscape-design/collection-hooks';
@@ -24,6 +23,7 @@ import { getAWSServiceList } from '../../../../../invoke/CloudFormationSchema';
 import type { AWSService } from '../../../../../invoke/CloudFormationSchema';
 
 import type { SelectProps } from '@cloudscape-design/components';
+
 export type ManualManagementTabProps = {
   stackId: 'manualManagement';
   sectionGroupName: string;
@@ -36,7 +36,7 @@ type ManualManagementResource = {
 };
 
 const resourceEditValidator = z.object({
-  resourceId: z.string().min(1).max(256),
+  resourceId: z.string().regex(/^[A-Za-z0-9]{1,256}$/),
   serviceName: z.string().min(1).max(256),
   resourceName: z.string().min(1).max(256),
 });
@@ -62,7 +62,9 @@ export const ManualManagementTab = (
     mode: 'onChange',
     resolver: zodResolver(resourceEditValidator),
     defaultValues: {
-      resourceId: uuidV4(),
+      resourceId: '',
+      serviceName: '',
+      resourceName: '',
     },
   });
 
@@ -159,7 +161,7 @@ export const ManualManagementTab = (
                       label="Resource ID"
                       errorText={
                         invalid
-                          ? '1文字以上256文字以下で入力してください'
+                          ? '1文字以上256文字以下の半角英数字で入力してください'
                           : undefined
                       }
                     >
