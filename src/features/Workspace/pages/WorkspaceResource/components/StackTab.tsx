@@ -14,6 +14,7 @@ import {
   Header,
   Input,
   SpaceBetween,
+  Table,
 } from '@cloudscape-design/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -133,16 +134,63 @@ const StackContent = (props: StackContentProps): JSX.Element => {
         </SpaceBetween>
       }
     >
-      <Container
-        header={
-          <Header variant="h2" description="Container description">
-            Container header
-          </Header>
+      <Table
+        resizableColumns
+        columnDefinitions={[
+          {
+            id: 'parameterName',
+            header: 'Parameter Name',
+            cell: (e) => e.name,
+            isRowHeader: true,
+            width: 250,
+            minWidth: 150,
+          },
+          {
+            id: 'type',
+            header: 'Type',
+            cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>,
+            width: 150,
+            minWidth: 100,
+          },
+          {
+            id: 'description',
+            header: 'Description',
+            cell: (e) => (
+              <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>
+            ),
+            width: 500,
+          },
+        ]}
+        stickyHeader
+        enableKeyboardNavigation
+        items={[
+          {
+            name: 'Parameter1',
+            type: 'String',
+            description: 'This is a sample parameter',
+          },
+          {
+            name: 'Parameter2',
+            type: 'Number',
+            description: 'This is another sample parameter',
+          },
+          {
+            name: 'Parameter3',
+            type: 'Boolean',
+            description: 'This is yet another sample parameter',
+          },
+        ]}
+        loadingText="Loading resources"
+        trackBy="name"
+        empty={
+          <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
+            <SpaceBetween size="m">
+              <b>No Parameters</b>
+            </SpaceBetween>
+          </Box>
         }
-      >
-        <div className="contentPlaceholder" />
-        <p>{stackId}</p>
-      </Container>
+        header={<Header>Parameter</Header>}
+      />
     </ContentLayout>
   );
 };
