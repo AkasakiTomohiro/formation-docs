@@ -14,21 +14,22 @@ export const filterSideMenu = (
   const items: SideNavigationProps.Item[] = [];
 
   for (const item of sideMenu.sort((a, b) =>
-    a.stackName.localeCompare(b.stackName),
+    a.sectionGroupName.localeCompare(b.sectionGroupName),
   )) {
     const newChildren: SectionGroupItem[] = [
       {
         type: 'link',
         text: 'Overview',
-        href: `${item.id}/${item.stackName}`,
+        href: `${item.id}/${item.sectionGroupName}`,
       },
     ];
 
     // スタック名に含まれている検索文字を取り除く
     const remainingSearchValuesStack = searchValues.filter(
       (searchValue) =>
-        item.stackName.toLowerCase().includes(searchValue.toLowerCase()) ===
-        false,
+        item.sectionGroupName
+          .toLowerCase()
+          .includes(searchValue.toLowerCase()) === false,
     );
 
     for (const resource of item.resources.sort((a, b) =>
@@ -52,7 +53,7 @@ export const filterSideMenu = (
             .map((rType) => ({
               type: 'link',
               text: rType,
-              href: `${item.id}/${item.stackName}/${resource.serviceName}/${rType}`,
+              href: `${item.id}/${item.sectionGroupName}/${resource.serviceName}/${rType}`,
             })),
         });
       } else {
@@ -70,7 +71,7 @@ export const filterSideMenu = (
             .map((rType) => ({
               type: 'link',
               text: rType,
-              href: `${item.id}/${item.stackName}/${resource.serviceName}/${rType}`,
+              href: `${item.id}/${item.sectionGroupName}/${resource.serviceName}/${rType}`,
             })),
         };
         if (newResource.items.length > 0) {
@@ -84,7 +85,7 @@ export const filterSideMenu = (
     }
     const newItem: SideNavigationProps.SectionGroup = {
       type: 'section-group',
-      title: item.stackName,
+      title: item.sectionGroupName,
       items: newChildren,
     };
     items.push(newItem);

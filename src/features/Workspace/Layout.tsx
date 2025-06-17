@@ -75,7 +75,14 @@ export const WorkspaceLayout = (): JSX.Element => {
 
   const loadTemplateSummaryWrap = useCallback(() => {
     return loadTemplateSummary().then((summary) => {
-      setSideMenu(summary);
+      setSideMenu([
+        ...summary,
+        {
+          id: 'manualManagement',
+          sectionGroupName: '手動管理リソース',
+          resources: [],
+        },
+      ]);
     });
   }, []);
 
