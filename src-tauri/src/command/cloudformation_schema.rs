@@ -16,7 +16,7 @@ pub enum CloudFormationSchemaError {
     Cloudformation(#[from] super::super::api::cloudformation::schema::DlSchemaError),
 }
 
-fn get_cloudformation_schema(
+pub fn get_cloudformation_schema(
     service_name: &str,
     resource_name: &str,
 ) -> Result<String, CloudFormationSchemaError> {

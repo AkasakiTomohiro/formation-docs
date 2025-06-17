@@ -40,6 +40,7 @@ pub fn run() {
             command::stack::update_stack_properties_command,
             command::cloudformation_schema::get_cloudformation_schema_command,
             command::cloudformation_schema::get_aws_service_list_command,
+            command::manual_management_resource::new_manual_management_resource_command
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

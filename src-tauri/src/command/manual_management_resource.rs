@@ -1,0 +1,168 @@
+use crate::command::cloudformation_schema::get_cloudformation_schema;
+use crate::utils::get_window_state;
+use crate::utils::AppError;
+use crate::utils::CommandResult;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::{collections::HashMap, path::Path};
+use thiserror::Error;
+use tokio::fs;
+
+/// 手動管理リソースのJSONファイル名
+const MANUAL_MANAGEMENT_RESOURCES_FILE: &str = "manual_management_resources.json";
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ManualManagementResource {
+    pub description: String,
+    pub r#type: String,
+    pub properties: HashMap<String, Value>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ManualManagementResources {
+    pub resources: HashMap<String, ManualManagementResource>,
+}
+
+#[derive(Debug, Error)]
+enum ManualManagementResourceError {
+    #[error("app error: {0}")]
+    App(#[from] AppError),
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("json error: {0}")]
+    Json(#[from] serde_json::Error),
+    #[error("cloud formation schema error: {0}")]
+    CloudFormationSchemaError(
+        #[from] crate::command::cloudformation_schema::CloudFormationSchemaError,
+    ),
+}
+
+/// ワークスペース内にある手動管理リソース用のJSONファイルを読み込む
+///
+/// 対象のJSONファイルが存在しない場合は新規にファイルを作成してから読み込む
+///
+/// - `workspace_directory` - ワークスペースのディレクトリパス
+async fn get_manual_management_resources(
+    workspace_directory: &str,
+) -> Result<ManualManagementResources, ManualManagementResourceError> {
+    let manual_management_resources_path = format!(
+        "{}/{}",
+        workspace_directory, MANUAL_MANAGEMENT_RESOURCES_FILE
+    );
+    let manual_management_resources_path = Path::new(&manual_management_resources_path);
+
+    if !manual_management_resources_path.exists() {
+        // ファイルが存在しない場合は新規に作成
+        let initial_data = ManualManagementResources {
+            resources: HashMap::new(),
+        };
+        let initial_json = serde_json::to_string(&initial_data)?;
+        fs::write(&manual_management_resources_path, initial_json).await?;
+    }
+
+    // JSONファイルを読み込む
+    let template_json = fs::read_to_string(&manual_management_resources_path).await?;
+    let template_json = serde_json::from_str(&template_json)?;
+
+    return Ok(template_json);
+}
+
+/// 手動管理リソースのJSONファイルを保存する
+///
+/// - `workspace_directory` - ワークスペースのディレクトリパス
+/// - `manual_management_resources` - 保存する手動管理リソースのデータ
+async fn save_manual_management_resources(
+    workspace_directory: &str,
+    manual_management_resources: &ManualManagementResources,
+) -> Result<(), ManualManagementResourceError> {
+    let manual_management_resources_path = format!(
+        "{}/{}",
+        workspace_directory, MANUAL_MANAGEMENT_RESOURCES_FILE
+    );
+    let manual_management_resources_path = Path::new(&manual_management_resources_path);
+    let updated_json = serde_json::to_string(&manual_management_resources)?;
+    fs::write(&manual_management_resources_path, updated_json).await?;
+    Ok(())
+}
+
+/// 新しい手動管理リソースを作成する
+///
+/// - `workspace_directory` - ワークスペースのディレクトリパス
+/// - `resource_id` - リソースID
+/// - `service_name` - サービス名(すべて小文字)
+/// - `resource_name` - リソース名(すべて小文字)
+async fn new_manual_management_resource(
+    workspace_directory: &str,
+    resource_id: &str,
+    service_name: &str,
+    resource_name: &str,
+) -> Result<(), ManualManagementResourceError> {
+    // 指定されたサービス名とリソース名に基づいてCloudFormationのスキーマを取得
+    let resource_schema = get_cloudformation_schema(service_name, resource_name)?;
+    let resource_schema: Value = serde_json::from_str(&resource_schema)?;
+    if resource_schema.is_object() == false {
+        return Err(ManualManagementResourceError::App(AppError::new(
+            "Invalid resource schema format. Expected an object.",
+        )));
+    }
+
+    // 指定されたサービス名とリソース名に基づいてCloudFormationにおけるリソースのタイプ名を取得
+    let type_name = resource_schema["typeName"].as_str();
+    if type_name.is_none() {
+        return Err(ManualManagementResourceError::App(AppError::new(
+            "Resource schema does not contain 'typeName'.",
+        )));
+    }
+    let type_name = type_name.unwrap().to_string();
+
+    // 手動管理リソースのJSONファイルを取得し、リソースIDが既に存在しないことを確認してから新しいリソースを追加
+    let mut manual_management_resources =
+        get_manual_management_resources(workspace_directory).await?;
+    if manual_management_resources
+        .resources
+        .contains_key(resource_id)
+    {
+        return Err(ManualManagementResourceError::App(AppError::new(
+            "Resource ID already exists.",
+        )));
+    }
+    manual_management_resources.resources.insert(
+        resource_id.to_string(),
+        ManualManagementResource {
+            description: String::new(),
+            r#type: type_name,
+            properties: HashMap::new(),
+        },
+    );
+
+    // 更新された手動管理リソースのJSONファイルを保存
+    save_manual_management_resources(workspace_directory, &manual_management_resources).await?;
+
+    return Ok(());
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn new_manual_management_resource_command(
+    window: tauri::Window,
+    resource_id: &str,
+    service_name: &str,
+    resource_name: &str,
+) -> Result<CommandResult<()>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match new_manual_management_resource(
+        window_state.workspace_directory.as_str(),
+        resource_id,
+        service_name,
+        resource_name,
+    )
+    .await
+    {
+        Ok(_) => Ok(CommandResult::success(())),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
