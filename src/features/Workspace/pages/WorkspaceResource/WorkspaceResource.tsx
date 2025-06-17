@@ -4,9 +4,9 @@ import { useLocation, useOutletContext } from 'react-router';
 import { Tabs } from '@cloudscape-design/components';
 
 import { ResourceTab, StackTab } from './components';
+import { ManualManagementTab } from './components/ManualManagementTab';
 
 import type { ResourceInfo, WorkspaceLayoutContext } from '../../Layout';
-
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
   const { resourceTabs, setResourceTabs, activeTabId, setActiveTabId } =
@@ -47,7 +47,15 @@ export const WorkspaceResource = (): JSX.Element => {
               return {
                 id: tab.tabId,
                 label: tab.stackName,
-                content: <StackTab stackId={tab.stackId} />,
+                content:
+                  tab.stackId === 'manualManagement' ? (
+                    <ManualManagementTab
+                      stackId={tab.stackId}
+                      sectionGroupName={tab.stackName}
+                    />
+                  ) : (
+                    <StackTab stackId={tab.stackId} />
+                  ),
                 dismissible: true,
                 onDismiss: () => {
                   setResourceTabs((prev) =>
