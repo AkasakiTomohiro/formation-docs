@@ -158,14 +158,17 @@ export type StackEditContentProps = {
 };
 
 const StackEditContent = (props: StackEditContentProps): JSX.Element => {
+  const { flashbarItems, resourceTab, setFlashbarItems, setIsEdit, stackId } =
+    props;
+
   const { control, handleSubmit } = useForm<StackEditType>({
     mode: 'onChange',
     resolver: zodResolver(stackEditValidator),
     defaultValues: {
-      name: props.resourceTab ? props.resourceTab.stackName : '',
-      description: props.resourceTab
-        ? props.resourceTab.type === 'overview'
-          ? props.resourceTab.description
+      name: resourceTab ? resourceTab.stackName : '',
+      description: resourceTab
+        ? resourceTab.type === 'overview'
+          ? resourceTab.description
           : ''
         : '',
     },
@@ -175,7 +178,7 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
   const onSave = async (stackDetailProps: StackEditType) => {
     try {
       await updateStackDetail({
-        stack_id: props.stackId,
+        stack_id: stackId,
         name: stackDetailProps.name,
         description: stackDetailProps.description,
       });
@@ -183,7 +186,7 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
       // 保存したスタックの情報を更新
       setResourceTabs((prev) =>
         prev.map((tab) =>
-          tab.stackId === props.stackId
+          tab.stackId === stackId
             ? {
                 ...tab,
                 stackName: stackDetailProps.name,
@@ -193,11 +196,11 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
         ),
       );
       // Stack詳細表示画面に戻る
-      props.setIsEdit(false);
+      setIsEdit(false);
     } catch (error) {
       const id = uuidV4();
-      props.setFlashbarItems(() => [
-        ...props.flashbarItems,
+      setFlashbarItems(() => [
+        ...flashbarItems,
         {
           type: 'error',
           header: '保存に失敗しました',
@@ -206,7 +209,7 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
           dismissLabel: 'close',
           id: id,
           onDismiss: () => {
-            props.flashbarItems.filter((itemId) => itemId !== id);
+            setFlashbarItems((items) => items.filter((e) => e.id !== id));
           },
         },
       ]);
@@ -218,7 +221,7 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
       header={
         <SpaceBetween size="m">
           <Header>Stackの編集</Header>
-          <Flashbar items={props.flashbarItems} />
+          <Flashbar items={flashbarItems} />
         </SpaceBetween>
       }
     >
@@ -268,7 +271,7 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
           </Container>
           <Box float="right">
             <SpaceBetween direction="horizontal" size="xs">
-              <Button variant="normal" onClick={() => props.setIsEdit(false)}>
+              <Button variant="normal" onClick={() => setIsEdit(false)}>
                 キャンセル
               </Button>
               <Button variant="primary" formAction="submit">
