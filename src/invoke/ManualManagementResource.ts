@@ -22,3 +22,22 @@ export async function newManualManagementResource(
   }
   return result.value;
 }
+
+export type ManualManagementResource = {
+  resourceId: string;
+  type: string;
+  description: string;
+};
+
+export async function getManualManagementResourceList(): Promise<
+  ManualManagementResource[]
+> {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const result = await invoke<CommandResult<any>>(
+    'get_manual_management_resource_list_command',
+  );
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}

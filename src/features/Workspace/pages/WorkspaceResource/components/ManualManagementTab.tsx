@@ -21,7 +21,12 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { getAWSServiceList } from '../../../../../invoke/CloudFormationSchema';
-import { newManualManagementResource } from '../../../../../invoke/ManualManagementResource';
+import {
+  getManualManagementResourceList,
+  newManualManagementResource,
+} from '../../../../../invoke/ManualManagementResource';
+
+import type { ManualManagementResource } from '../../../../../invoke/ManualManagementResource';
 
 import type { WorkspaceLayoutContext } from '../../../Layout';
 
@@ -31,12 +36,6 @@ import type { SelectProps } from '@cloudscape-design/components';
 export type ManualManagementTabProps = {
   stackId: 'manualManagement';
   sectionGroupName: string;
-};
-
-type ManualManagementResource = {
-  serviceName: string;
-  resourceName: string;
-  resourceId: string;
 };
 
 const resourceEditValidator = z.object({
@@ -50,6 +49,7 @@ type WorkspaceEditType = z.infer<typeof resourceEditValidator>;
 export const ManualManagementTab = (
   props: ManualManagementTabProps,
 ): JSX.Element => {
+  const [isLoading, setIsLoading] = useState(true);
   const [resources, setResources] = useState<ManualManagementResource[]>([]);
   const { items, collectionProps, paginationProps } = useCollection(resources, {
     pagination: { pageSize: 10 },
@@ -76,9 +76,14 @@ export const ManualManagementTab = (
     useOutletContext<WorkspaceLayoutContext>();
 
   useEffect(() => {
-    getAWSServiceList().then((services) => {
-      setServices(services);
-    });
+    Promise.all([
+      getAWSServiceList().then((services) => {
+        setServices(services);
+      }),
+      getManualManagementResourceList().then((resources) => {
+        setResources(resources);
+      }),
+    ]).finally(() => setIsLoading(false));
   }, []);
 
   const onSave = async (data: WorkspaceEditType) => {
@@ -258,19 +263,20 @@ export const ManualManagementTab = (
               isRowHeader: true,
             },
             {
-              id: 'serviceName',
-              header: 'Service name',
-              cell: (e) => e.serviceName,
+              id: 'resourceType',
+              header: 'Resource Type',
+              cell: (e) => e.type,
             },
             {
-              id: 'resourceName',
-              header: 'Resource name',
-              cell: (e) => e.resourceName,
+              id: 'description',
+              header: 'Description',
+              cell: (e) => e.description,
             },
           ]}
           selectionType="single"
           items={items}
           loadingText="Loading workspace"
+          loading={isLoading}
           trackBy="name"
           empty={
             <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">

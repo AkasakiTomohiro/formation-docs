@@ -143,6 +143,34 @@ async fn new_manual_management_resource(
     return Ok(());
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ManualManagementResourceSummary {
+    pub resource_id: String,
+    pub r#type: String,
+    pub description: String,
+}
+
+/// 手動管理リソースの一覧を取得する
+///
+/// - `workspace_directory` - ワークスペースのディレクトリパス
+async fn get_manual_management_resource_list(
+    workspace_directory: &str,
+) -> Result<Vec<ManualManagementResourceSummary>, ManualManagementResourceError> {
+    let manual_management_resources = get_manual_management_resources(workspace_directory).await?;
+    let mut result: Vec<ManualManagementResourceSummary> = Vec::new();
+
+    for (resource_id, manual_management_resource) in manual_management_resources.resources.iter() {
+        result.push(ManualManagementResourceSummary {
+            resource_id: resource_id.clone(),
+            r#type: manual_management_resource.r#type.clone(),
+            description: manual_management_resource.description.clone(),
+        })
+    }
+
+    return Ok(result);
+}
+
 #[tauri::command(rename_all = "snake_case")]
 pub async fn new_manual_management_resource_command(
     window: tauri::Window,
@@ -165,6 +193,24 @@ pub async fn new_manual_management_resource_command(
     .await
     {
         Ok(_) => Ok(CommandResult::success(())),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_manual_management_resource_list_command(
+    window: tauri::Window,
+) -> Result<CommandResult<Vec<ManualManagementResourceSummary>>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match get_manual_management_resource_list(window_state.workspace_directory.as_str())
+        .await
+    {
+        Ok(list) => Ok(CommandResult::success(list)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
