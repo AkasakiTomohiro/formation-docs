@@ -12,6 +12,7 @@ use tokio::fs;
 const MANUAL_MANAGEMENT_RESOURCES_FILE: &str = "manual_management_resources.json";
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct ManualManagementResource {
     pub description: String,
     pub r#type: String,
@@ -19,6 +20,7 @@ pub struct ManualManagementResource {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct ManualManagementResources {
     pub resources: HashMap<String, ManualManagementResource>,
 }

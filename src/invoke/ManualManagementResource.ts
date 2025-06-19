@@ -14,7 +14,7 @@ export async function newManualManagementResource(
 ): Promise<any> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const result = await invoke<CommandResult<any>>(
-    'update_stack_properties_command',
+    'new_manual_management_resource_command',
     props,
   );
   if (!result.success) {

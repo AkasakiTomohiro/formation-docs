@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { useOutletContext } from 'react-router';
+import { v4 as uuidV4 } from 'uuid';
 import { z } from 'zod';
 
 import { useCollection } from '@cloudscape-design/collection-hooks';
@@ -19,11 +21,13 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { getAWSServiceList } from '../../../../../invoke/CloudFormationSchema';
+import { newManualManagementResource } from '../../../../../invoke/ManualManagementResource';
+
+import type { WorkspaceLayoutContext } from '../../../Layout';
 
 import type { AWSService } from '../../../../../invoke/CloudFormationSchema';
 
 import type { SelectProps } from '@cloudscape-design/components';
-
 export type ManualManagementTabProps = {
   stackId: 'manualManagement';
   sectionGroupName: string;
@@ -58,15 +62,18 @@ export const ManualManagementTab = (
     useState<SelectProps.Option | null>(null);
   const [selectedResource, setSelectedResource] =
     useState<SelectProps.Option | null>(null);
-  const { control, setValue, handleSubmit } = useForm<WorkspaceEditType>({
-    mode: 'onChange',
-    resolver: zodResolver(resourceEditValidator),
-    defaultValues: {
-      resourceId: '',
-      serviceName: '',
-      resourceName: '',
-    },
-  });
+  const { control, setValue, handleSubmit, setError } =
+    useForm<WorkspaceEditType>({
+      mode: 'onChange',
+      resolver: zodResolver(resourceEditValidator),
+      defaultValues: {
+        resourceId: '',
+        serviceName: '',
+        resourceName: '',
+      },
+    });
+  const { flashbarItems, setFlashbarItems } =
+    useOutletContext<WorkspaceLayoutContext>();
 
   useEffect(() => {
     getAWSServiceList().then((services) => {
@@ -75,9 +82,45 @@ export const ManualManagementTab = (
   }, []);
 
   const onSave = async (data: WorkspaceEditType) => {
-    // TODO: 選択したリソースをプロパティ空のJSONで保存する
-    console.log('Saving resource:', data);
-    setRegistering(null);
+    // 選択したリソースをプロパティ空のJSONで保存する
+    newManualManagementResource({
+      resource_id: data.resourceId,
+      service_name: data.serviceName,
+      resource_name: data.resourceName,
+    })
+      .then(() => {
+        setRegistering(null);
+        setSelectedService(null);
+        setSelectedResource(null);
+      })
+      .catch((error) => {
+        const id = uuidV4();
+        console.error('Error Saving resource:', error);
+
+        if (error.value.includes('already exists')) {
+          setError('resourceId', {
+            type: 'already_exists',
+          });
+        } else {
+          setFlashbarItems([
+            ...flashbarItems,
+            {
+              type: 'error',
+              header: '保存に失敗しました',
+              content: error.value,
+              dismissible: true,
+              dismissLabel: 'close',
+              id: id,
+              onDismiss: () => {
+                setFlashbarItems((items) => items.filter((e) => e.id !== id));
+              },
+            },
+          ]);
+          setRegistering(null);
+          setSelectedService(null);
+          setSelectedResource(null);
+        }
+      });
   };
 
   return (
@@ -156,22 +199,28 @@ export const ManualManagementTab = (
                 <Controller
                   name="resourceId"
                   control={control}
-                  render={({ field, fieldState: { invalid } }) => (
-                    <FormField
-                      label="Resource ID"
-                      errorText={
-                        invalid
-                          ? '1文字以上256文字以下の半角英数字で入力してください'
-                          : undefined
-                      }
-                    >
-                      <Input
-                        {...field}
-                        onChange={(event) => field.onChange(event.detail.value)}
-                        invalid={invalid}
-                      />
-                    </FormField>
-                  )}
+                  render={({ field, fieldState: { invalid, error } }) => {
+                    return (
+                      <FormField
+                        label="Resource ID"
+                        errorText={
+                          invalid
+                            ? error?.type === 'already_exists'
+                              ? 'このResource IDはすでに存在します'
+                              : '1文字以上256文字以下の半角英数字で入力してください'
+                            : undefined
+                        }
+                      >
+                        <Input
+                          {...field}
+                          onChange={(event) =>
+                            field.onChange(event.detail.value)
+                          }
+                          invalid={invalid}
+                        />
+                      </FormField>
+                    );
+                  }}
                 />
               </SpaceBetween>
             </Container>
