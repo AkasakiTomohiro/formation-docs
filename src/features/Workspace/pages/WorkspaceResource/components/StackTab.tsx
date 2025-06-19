@@ -18,7 +18,11 @@ import {
 } from '@cloudscape-design/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { loadStack, updateStackDetail } from '../../../../../invoke/Stack';
+import {
+  getStackParameters,
+  loadStack,
+  updateStackDetail,
+} from '../../../../../invoke/Stack';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
 import type { ResourceInfo, WorkspaceLayoutContext } from '../../../Layout';
@@ -32,6 +36,12 @@ const stackEditValidator = z.object({
   description: z.string().max(256),
 });
 
+type stackParametersDisplayProps = {
+  name: string;
+  type: string;
+  description: string;
+};
+
 export type StackEditType = z.infer<typeof stackEditValidator>;
 
 export const StackTab = (props: StackTabProps): JSX.Element => {
@@ -39,6 +49,9 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
     useOutletContext<WorkspaceLayoutContext>();
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
+  >([]);
+  const [stackParameters, setStackParameters] = useState<
+    stackParametersDisplayProps[]
   >([]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -62,6 +75,19 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
           return tab;
         });
       });
+    });
+
+    // スタックパラメータを取得し、表中に表示する
+    getStackParameters({ stack_id: stackId }).then((stackParameters) => {
+      const keys = Object.keys(stackParameters);
+      const parameters: stackParametersDisplayProps[] = keys.map((key) => {
+        return {
+          name: key,
+          type: stackParameters[key].Type,
+          description: stackParameters[key].Description,
+        };
+      });
+      setStackParameters(parameters);
     });
   }, []);
 
@@ -95,7 +121,7 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
       flashbarItems={flashbarItems}
       resourceTab={resourceTab}
       setIsEdit={setIsEdit}
-      stackId={props.stackId}
+      stackParameters={stackParameters}
     />
   );
 };
@@ -104,11 +130,11 @@ type StackContentProps = {
   resourceTab: ResourceInfo | undefined;
   setIsEdit: (isEdit: boolean) => void;
   flashbarItems: FlashbarProps.MessageDefinition[];
-  stackId: string;
+  stackParameters: stackParametersDisplayProps[];
 };
 
 const StackContent = (props: StackContentProps): JSX.Element => {
-  const { resourceTab, setIsEdit, flashbarItems, stackId } = props;
+  const { resourceTab, setIsEdit, flashbarItems, stackParameters } = props;
   return (
     <ContentLayout
       header={
@@ -163,23 +189,7 @@ const StackContent = (props: StackContentProps): JSX.Element => {
         ]}
         stickyHeader
         enableKeyboardNavigation
-        items={[
-          {
-            name: 'Parameter1',
-            type: 'String',
-            description: 'This is a sample parameter',
-          },
-          {
-            name: 'Parameter2',
-            type: 'Number',
-            description: 'This is another sample parameter',
-          },
-          {
-            name: 'Parameter3',
-            type: 'Boolean',
-            description: 'This is yet another sample parameter',
-          },
-        ]}
+        items={stackParameters}
         loadingText="Loading resources"
         trackBy="name"
         empty={
