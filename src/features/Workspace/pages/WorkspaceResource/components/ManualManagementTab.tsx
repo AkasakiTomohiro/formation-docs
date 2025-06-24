@@ -17,6 +17,7 @@ import {
   Select,
   SpaceBetween,
   Table,
+  Textarea,
 } from '@cloudscape-design/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -40,6 +41,7 @@ export type ManualManagementTabProps = {
 
 const resourceEditValidator = z.object({
   resourceId: z.string().regex(/^[A-Za-z0-9]{1,256}$/),
+  description: z.string().max(256),
   serviceName: z.string().min(1).max(256),
   resourceName: z.string().min(1).max(256),
 });
@@ -62,12 +64,13 @@ export const ManualManagementTab = (
     useState<SelectProps.Option | null>(null);
   const [selectedResource, setSelectedResource] =
     useState<SelectProps.Option | null>(null);
-  const { control, setValue, handleSubmit, setError } =
+  const { control, setValue, handleSubmit, setError, reset } =
     useForm<WorkspaceEditType>({
       mode: 'onChange',
       resolver: zodResolver(resourceEditValidator),
       defaultValues: {
         resourceId: '',
+        description: '',
         serviceName: '',
         resourceName: '',
       },
@@ -90,13 +93,19 @@ export const ManualManagementTab = (
     // 選択したリソースをプロパティ空のJSONで保存する
     newManualManagementResource({
       resource_id: data.resourceId,
+      description: data.description,
       service_name: data.serviceName,
       resource_name: data.resourceName,
     })
-      .then(() => {
+      .then(async () => {
         setRegistering(null);
         setSelectedService(null);
         setSelectedResource(null);
+        reset();
+
+        // リソース一覧を更新
+        const updatedResources = await getManualManagementResourceList();
+        setResources(updatedResources);
       })
       .catch((error) => {
         const id = uuidV4();
@@ -217,6 +226,26 @@ export const ManualManagementTab = (
                         }
                       >
                         <Input
+                          {...field}
+                          onChange={(event) =>
+                            field.onChange(event.detail.value)
+                          }
+                          invalid={invalid}
+                        />
+                      </FormField>
+                    );
+                  }}
+                />
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field, fieldState: { invalid } }) => {
+                    return (
+                      <FormField
+                        label="Description"
+                        errorText={invalid && '256文字以下で入力してください'}
+                      >
+                        <Textarea
                           {...field}
                           onChange={(event) =>
                             field.onChange(event.detail.value)

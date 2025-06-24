@@ -4,6 +4,7 @@ import type { CommandResult } from '../lib/CommandResult';
 
 export type NewManualManagementResourceProperties = {
   resource_id: string;
+  description: string;
   service_name: string;
   resource_name: string;
 };

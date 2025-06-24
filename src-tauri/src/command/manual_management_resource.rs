@@ -91,11 +91,13 @@ async fn save_manual_management_resources(
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 /// - `resource_id` - リソースID
+/// - `description` - リソースの説明
 /// - `service_name` - サービス名(すべて小文字)
 /// - `resource_name` - リソース名(すべて小文字)
 async fn new_manual_management_resource(
     workspace_directory: &str,
     resource_id: &str,
+    description: &str,
     service_name: &str,
     resource_name: &str,
 ) -> Result<(), ManualManagementResourceError> {
@@ -131,7 +133,7 @@ async fn new_manual_management_resource(
     manual_management_resources.resources.insert(
         resource_id.to_string(),
         ManualManagementResource {
-            description: String::new(),
+            description: description.to_string(),
             r#type: type_name,
             properties: HashMap::new(),
         },
@@ -175,6 +177,7 @@ async fn get_manual_management_resource_list(
 pub async fn new_manual_management_resource_command(
     window: tauri::Window,
     resource_id: &str,
+    description: &str,
     service_name: &str,
     resource_name: &str,
 ) -> Result<CommandResult<()>, CommandResult> {
@@ -187,6 +190,7 @@ pub async fn new_manual_management_resource_command(
     return match new_manual_management_resource(
         window_state.workspace_directory.as_str(),
         resource_id,
+        description,
         service_name,
         resource_name,
     )
