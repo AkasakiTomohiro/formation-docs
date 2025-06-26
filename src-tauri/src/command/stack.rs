@@ -434,6 +434,27 @@ async fn get_stack_resource_properties_reasons(
     return Ok(reasons_json);
 }
 
+async fn get_stack_parameters(
+    workspace_directory: &str,
+    stack_id: &str,
+) -> Result<Value, StackError> {
+    let workspace = load_workspace(workspace_directory).await?;
+    let stack_file_name = match workspace.stacks.get(stack_id) {
+        Some(stack_file_name) => stack_file_name,
+        None => {
+            return Err(StackError::App(AppError::new("Stack not found")));
+        }
+    };
+    let template_path = format!("{}/{}", workspace_directory, stack_file_name);
+    let template_json = fs::read_to_string(&template_path)?;
+    let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
+    let parameters_json = template_json["Parameters"].clone();
+    if parameters_json.is_null() {
+        return Ok(Value::Object(serde_json::Map::new()));
+    }
+    return Ok(parameters_json);
+}
+
 async fn update_stack_meta(
     workspace_directory: &str,
     stack_id: &str,
@@ -744,6 +765,23 @@ pub async fn get_stack_resource_properties_command(
     .await
     {
         Ok(properties) => Ok(CommandResult::success(properties)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_stack_parameters_command(
+    window: tauri::Window,
+    stack_id: &str,
+) -> Result<CommandResult<Value>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match get_stack_parameters(window_state.workspace_directory.as_str(), stack_id).await {
+        Ok(parameters) => Ok(CommandResult::success(parameters)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
