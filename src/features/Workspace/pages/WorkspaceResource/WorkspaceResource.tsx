@@ -47,6 +47,7 @@ export const WorkspaceResource = (): JSX.Element => {
               return {
                 id: tab.tabId,
                 label: tab.stackName,
+                // FIXME:
                 content:
                   tab.stackId === 'manualManagement' ? (
                     <ManualManagementTab

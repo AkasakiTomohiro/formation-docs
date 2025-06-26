@@ -42,3 +42,21 @@ export async function getManualManagementResourceList(): Promise<
   }
   return result.value;
 }
+
+export type ManualManagementResourceSummary = {
+  serviceName: string;
+  recourseType: string[];
+};
+
+export async function loadManualManagementResourceSummary(): Promise<
+  ManualManagementResourceSummary[]
+> {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const result = await invoke<CommandResult<any>>(
+    'load_manual_management_resource_summary_command',
+  );
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}

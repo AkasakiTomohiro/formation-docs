@@ -7,6 +7,8 @@ type SectionGroupItem =
   | SideNavigationProps.LinkGroup
   | SideNavigationProps.ExpandableLinkGroup;
 
+export const ManualManagementId = 'manualManagement';
+
 export const filterSideMenu = (
   sideMenu: TemplateSummary[],
   searchValues: string[],
@@ -20,7 +22,16 @@ export const filterSideMenu = (
       {
         type: 'link',
         text: 'Overview',
-        href: `${item.id}/${item.sectionGroupName}`,
+        href:
+          item.id === ManualManagementId
+            ? hrefBuilder({
+                type: 'manualOverview',
+              })
+            : hrefBuilder({
+                type: 'overview',
+                stackId: item.id,
+                sectionGroupName: item.sectionGroupName,
+              }),
       },
     ];
 
@@ -53,7 +64,20 @@ export const filterSideMenu = (
             .map((rType) => ({
               type: 'link',
               text: rType,
-              href: `${item.id}/${item.sectionGroupName}/${resource.serviceName}/${rType}`,
+              href:
+                item.id === ManualManagementId
+                  ? hrefBuilder({
+                      type: 'manual',
+                      serviceName: resource.serviceName,
+                      resourceType: rType,
+                    })
+                  : hrefBuilder({
+                      type: 'resource',
+                      stackId: item.id,
+                      sectionGroupName: item.sectionGroupName,
+                      serviceName: resource.serviceName,
+                      resourceType: rType,
+                    }),
             })),
         });
       } else {
@@ -71,9 +95,23 @@ export const filterSideMenu = (
             .map((rType) => ({
               type: 'link',
               text: rType,
-              href: `${item.id}/${item.sectionGroupName}/${resource.serviceName}/${rType}`,
+              href:
+                item.id === ManualManagementId
+                  ? hrefBuilder({
+                      type: 'manual',
+                      serviceName: resource.serviceName,
+                      resourceType: rType,
+                    })
+                  : hrefBuilder({
+                      type: 'resource',
+                      stackId: item.id,
+                      sectionGroupName: item.sectionGroupName,
+                      serviceName: resource.serviceName,
+                      resourceType: rType,
+                    }),
             })),
         };
+
         if (newResource.items.length > 0) {
           newChildren.push(newResource);
         }
@@ -92,4 +130,82 @@ export const filterSideMenu = (
   }
 
   return items;
+};
+
+export type HrefType =
+  | {
+      type: 'overview';
+      stackId: string;
+      sectionGroupName: string;
+    }
+  | {
+      type: 'resource';
+      stackId: string;
+      sectionGroupName: string;
+      serviceName: string;
+      resourceType: string;
+    }
+  | {
+      type: 'manualOverview';
+    }
+  | {
+      type: 'manual';
+      serviceName: string;
+      resourceType: string;
+    };
+
+const hrefBuilder = (props: HrefType): string => {
+  switch (props.type) {
+    case 'overview':
+      return `overview:${props.stackId}/${props.sectionGroupName}`;
+    case 'resource':
+      return `resource:${props.stackId}/${props.sectionGroupName}/${props.serviceName}/${props.resourceType}`;
+    case 'manualOverview':
+      return 'manualOverview:';
+    case 'manual':
+      return `manual:${props.serviceName}/${props.resourceType}`;
+  }
+};
+
+export const hrefParser = (href: string): HrefType => {
+  // hrefを:より前と:より後ろに分割
+  const [type, rest] = href.split(':');
+
+  switch (type) {
+    case 'overview': {
+      // hrefの:より後ろの部分を/で分割
+      const [stackId, sectionGroupName] = rest.split('/');
+      return {
+        type: 'overview',
+        stackId: stackId,
+        sectionGroupName: sectionGroupName,
+      };
+    }
+    case 'resource': {
+      // hrefの:より後ろの部分を/で分割
+      const [stackId, sectionGroupName, serviceName, resourceType] =
+        rest.split('/');
+      return {
+        type: 'resource',
+        stackId: stackId,
+        sectionGroupName: sectionGroupName,
+        serviceName: serviceName,
+        resourceType: resourceType,
+      };
+    }
+    case 'manualOverview': {
+      return { type: 'manualOverview' };
+    }
+    case 'manual': {
+      // hrefの:より後ろの部分を/で分割
+      const [serviceName, resourceType] = rest.split('/');
+      return {
+        type: 'manual',
+        serviceName: serviceName,
+        resourceType: resourceType,
+      };
+    }
+    default:
+      throw new Error(`Unknown href type: ${type}`);
+  }
 };

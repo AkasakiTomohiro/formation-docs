@@ -1,9 +1,11 @@
 use crate::command::cloudformation_schema::get_cloudformation_schema;
+use crate::command::stack::Resource;
 use crate::utils::get_window_state;
 use crate::utils::AppError;
 use crate::utils::CommandResult;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::HashSet;
 use std::{collections::HashMap, path::Path};
 use thiserror::Error;
 use tokio::fs;
@@ -173,6 +175,44 @@ async fn get_manual_management_resource_list(
     return Ok(result);
 }
 
+/// サイドメニューに表示する手動管理リソース用のサービス名とリソース種別の一覧を取得
+///
+/// - `workspace_directory` - ワークスペースのディレクトリパス
+async fn load_manual_management_resource_summary(
+    workspace_directory: &str,
+) -> Result<Vec<Resource>, ManualManagementResourceError> {
+    let manual_management_resources = get_manual_management_resources(workspace_directory).await?;
+    let mut resources = HashMap::<String, HashSet<String>>::new();
+    for (_, manual_management_resource) in manual_management_resources.resources.iter() {
+        let parts: Vec<&str> = manual_management_resource.r#type.split("::").collect();
+        let (_, service_name, resource_type): (&str, &str, &str) = match parts[..] {
+            [a, b, c] => (a, b, c),
+            _ => continue,
+        };
+
+        if let Some(original) = resources.get_mut(service_name) {
+            original.insert(resource_type.to_string());
+        } else {
+            let mut resource_types = HashSet::new();
+            resource_types.insert(resource_type.to_string());
+            resources.insert(service_name.to_string(), resource_types);
+        }
+    }
+    let result = resources
+        .iter()
+        .map(|(key, value)| {
+            let service_name = key.to_string();
+            let resource_types = value.clone();
+            Resource {
+                service_name,
+                recourse_type: resource_types.iter().map(|v| v.to_string()).collect(),
+            }
+        })
+        .collect();
+
+    return Ok(result);
+}
+
 #[tauri::command(rename_all = "snake_case")]
 pub async fn new_manual_management_resource_command(
     window: tauri::Window,
@@ -215,6 +255,24 @@ pub async fn get_manual_management_resource_list_command(
         .await
     {
         Ok(list) => Ok(CommandResult::success(list)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn load_manual_management_resource_summary_command(
+    window: tauri::Window,
+) -> Result<CommandResult<Vec<Resource>>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match load_manual_management_resource_summary(window_state.workspace_directory.as_str())
+        .await
+    {
+        Ok(summary) => Ok(CommandResult::success(summary)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }

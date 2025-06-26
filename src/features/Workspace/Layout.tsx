@@ -11,8 +11,13 @@ import {
   TokenGroup,
 } from '@cloudscape-design/components';
 
+import { loadManualManagementResourceSummary } from '../../invoke/ManualManagementResource';
 import { loadTemplateSummary } from '../../invoke/Stack';
-import { filterSideMenu } from './lib/FilterSideMenu';
+import {
+  ManualManagementId,
+  filterSideMenu,
+  hrefParser,
+} from './lib/FilterSideMenu';
 
 import type {
   FlashbarProps,
@@ -22,7 +27,6 @@ import type { TemplateSummary } from '../../invoke/Stack';
 
 import type { Dispatch, SetStateAction } from 'react';
 import type { WorkspaceLayoutLoaderData } from './Loader';
-
 export type ResourceInfo =
   | {
       type: 'overview';
@@ -74,13 +78,16 @@ export const WorkspaceLayout = (): JSX.Element => {
   >([]);
 
   const loadTemplateSummaryWrap = useCallback(() => {
-    return loadTemplateSummary().then((summary) => {
+    return Promise.all([
+      loadTemplateSummary(),
+      loadManualManagementResourceSummary(),
+    ]).then(([templateSummary, manualManagementSummary]) => {
       setSideMenu([
-        ...summary,
+        ...templateSummary,
         {
-          id: 'manualManagement',
+          id: ManualManagementId,
           sectionGroupName: '手動管理リソース',
-          resources: [],
+          resources: manualManagementSummary,
         },
       ]);
     });
@@ -163,32 +170,60 @@ export const WorkspaceLayout = (): JSX.Element => {
           onFollow={(event) => {
             event.preventDefault();
             console.log('onFollow', event.detail);
-            const { href, text } = event.detail;
+            const { href } = event.detail;
             if (href === '#') {
               // ワークスペース名をクリックしたとき
               setResourceTabs([]);
               navigate(`/workspaces/${workspace.id}`);
               return;
             }
-            const [stackId, stackName, serviceName, resourceType] =
-              href.split('/');
-            const newTab: ResourceInfo =
-              text === 'Overview'
-                ? {
-                    type: 'overview',
-                    tabId: href,
-                    stackId: stackId,
-                    stackName: stackName,
-                    description: '',
-                  }
-                : {
-                    type: 'resource',
-                    tabId: href,
-                    stackId: stackId,
-                    stackName: stackName,
-                    serviceName: serviceName,
-                    resourceName: resourceType,
-                  };
+            const hrefParts = hrefParser(href);
+            let newTab: ResourceInfo;
+            switch (hrefParts.type) {
+              case 'overview': {
+                newTab = {
+                  type: 'overview',
+                  tabId: href,
+                  stackId: hrefParts.stackId,
+                  stackName: hrefParts.sectionGroupName,
+                  description: '',
+                };
+                break;
+              }
+              case 'resource': {
+                newTab = {
+                  type: 'resource',
+                  tabId: href,
+                  stackId: hrefParts.stackId,
+                  stackName: hrefParts.sectionGroupName,
+                  serviceName: hrefParts.serviceName,
+                  resourceName: hrefParts.resourceType,
+                };
+                break;
+              }
+              case 'manualOverview': {
+                newTab = {
+                  type: 'overview', // FIXME:
+                  tabId: href,
+                  stackId: ManualManagementId,
+                  stackName: '手動管理リソース',
+                  description: '',
+                };
+                break;
+              }
+              case 'manual': {
+                newTab = {
+                  type: 'resource', // FIXME:
+                  tabId: href,
+                  stackId: ManualManagementId,
+                  stackName: '手動管理リソース',
+                  serviceName: hrefParts.serviceName,
+                  resourceName: hrefParts.resourceType,
+                };
+                break;
+              }
+            }
+
             setResourceTabs((prev) => {
               const existingTab = prev.find(
                 (tab) => tab.tabId === newTab.tabId,
