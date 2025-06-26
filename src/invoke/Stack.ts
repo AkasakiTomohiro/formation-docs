@@ -107,6 +107,31 @@ export async function getStackResourceProperties(
   return result.value;
 }
 
+export type GetStackParametersProps = {
+  stack_id: string;
+};
+
+export type GetStackParametersResult = Record<
+  string,
+  {
+    Type: string;
+    Description: string;
+  }
+>;
+
+export async function getStackParameters(
+  props: GetStackParametersProps,
+): Promise<GetStackParametersResult> {
+  const result = await invoke<CommandResult<GetStackParametersResult>>(
+    'get_stack_parameters_command',
+    props,
+  );
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}
+
 export type GetStackResourcePropertiesReasonsProps = {
   stack_id: string;
   logical_id: string;
