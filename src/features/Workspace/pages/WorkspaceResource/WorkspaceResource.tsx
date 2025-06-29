@@ -3,8 +3,13 @@ import { useLocation, useOutletContext } from 'react-router';
 
 import { Tabs } from '@cloudscape-design/components';
 
-import { ResourceTab, StackTab } from './components';
-import { ManualManagementTab } from './components/ManualManagementTab';
+import {
+  OverviewTab,
+  ResourceTab,
+  buildOverviewTabName,
+  buildResourceTabName,
+} from './components';
+import { ManualOverviewTab } from './components/ManualOverviewTab';
 
 import type { ResourceInfo, WorkspaceLayoutContext } from '../../Layout';
 export const WorkspaceResource = (): JSX.Element => {
@@ -46,16 +51,16 @@ export const WorkspaceResource = (): JSX.Element => {
             if (tab.type === 'overview') {
               return {
                 id: tab.tabId,
-                label: tab.stackName,
+                label: buildOverviewTabName({ stackName: tab.stackName }),
                 // FIXME:
                 content:
                   tab.stackId === 'manualManagement' ? (
-                    <ManualManagementTab
+                    <ManualOverviewTab
                       stackId={tab.stackId}
                       sectionGroupName={tab.stackName}
                     />
                   ) : (
-                    <StackTab stackId={tab.stackId} />
+                    <OverviewTab {...tab} />
                   ),
                 dismissible: true,
                 onDismiss: () => {
@@ -67,16 +72,12 @@ export const WorkspaceResource = (): JSX.Element => {
             }
             return {
               id: tab.tabId,
-              label: `${tab.stackName} - ${tab.serviceName} - ${tab.resourceName}`,
-              content: (
-                <ResourceTab
-                  stackId={tab.stackId}
-                  stackName={tab.stackName}
-                  serviceName={tab.serviceName}
-                  resourceName={tab.resourceName}
-                  selectedLogicalId={tab.selectedLogicalId}
-                />
-              ),
+              label: buildResourceTabName({
+                stackName: tab.stackName,
+                serviceName: tab.serviceName,
+                resourceName: tab.resourceName,
+              }),
+              content: <ResourceTab {...tab} />,
               dismissible: true,
               onDismiss: () => {
                 setResourceTabs((prev) =>

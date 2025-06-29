@@ -34,7 +34,7 @@ import type { WorkspaceLayoutContext } from '../../../Layout';
 import type { AWSService } from '../../../../../invoke/CloudFormationSchema';
 
 import type { SelectProps } from '@cloudscape-design/components';
-export type ManualManagementTabProps = {
+export type ManualOverviewTabProps = {
   stackId: 'manualManagement';
   sectionGroupName: string;
 };
@@ -48,8 +48,8 @@ const resourceEditValidator = z.object({
 
 type WorkspaceEditType = z.infer<typeof resourceEditValidator>;
 
-export const ManualManagementTab = (
-  props: ManualManagementTabProps,
+export const ManualOverviewTab = (
+  props: ManualOverviewTabProps,
 ): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
   const [resources, setResources] = useState<ManualManagementResource[]>([]);

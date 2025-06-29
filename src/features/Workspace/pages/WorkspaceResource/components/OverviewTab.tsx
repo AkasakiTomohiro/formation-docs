@@ -25,10 +25,14 @@ import {
 } from '../../../../../invoke/Stack';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
-import type { ResourceInfo, WorkspaceLayoutContext } from '../../../Layout';
+import type { WorkspaceLayoutContext } from '../../../Layout';
 
-export type StackTabProps = {
+export type OverviewTabProps = {
+  tabId: string;
   stackId: string;
+  stackName: string;
+  description: string;
+  isEdit?: boolean;
 };
 
 const stackEditValidator = z.object({
@@ -44,9 +48,17 @@ type stackParametersDisplayProps = {
 
 export type StackEditType = z.infer<typeof stackEditValidator>;
 
-export const StackTab = (props: StackTabProps): JSX.Element => {
-  const { resourceTabs, setResourceTabs } =
-    useOutletContext<WorkspaceLayoutContext>();
+export type BuildOverviewTabNameProps = {
+  stackName: string;
+};
+export function buildOverviewTabName({
+  stackName,
+}: BuildOverviewTabNameProps): string {
+  return stackName;
+}
+
+export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
+  const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
   >([]);
@@ -56,16 +68,14 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    const stackId = props.stackId;
-
-    loadStack(stackId).then((stackDetail) => {
+    loadStack(props.stackId).then((stackDetail) => {
       const stackName = stackDetail.name;
       const description = stackDetail.description_from_meta;
 
       // 取得したスタック情報を更新
       setResourceTabs((prev) => {
         return prev.map((tab) => {
-          if (tab.stackId === stackId) {
+          if (tab.tabId === props.tabId) {
             return {
               ...tab,
               stackName: stackName,
@@ -78,7 +88,7 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
     });
 
     // スタックパラメータを取得し、表中に表示する
-    getStackParameters({ stack_id: stackId }).then((stackParameters) => {
+    getStackParameters({ stack_id: props.stackId }).then((stackParameters) => {
       const keys = Object.keys(stackParameters);
       const parameters: stackParametersDisplayProps[] = keys.map((key) => {
         return {
@@ -91,13 +101,11 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
     });
   }, []);
 
-  const resourceTab = resourceTabs.find((tab) => tab.stackId === props.stackId);
-
   const setIsEdit = (isEdit: boolean) => {
     // 編集モードに入る場合、リソースタブの情報を更新
     setResourceTabs((prev) =>
       prev.map((tab) => {
-        if (tab.stackId === props.stackId) {
+        if (tab.tabId === props.tabId) {
           return {
             ...tab,
             isEdit: isEdit,
@@ -108,10 +116,9 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
     );
   };
 
-  return getResourceDetailTab(resourceTab)?.isEdit ? (
+  return props.isEdit ? (
     <StackEditContent
-      resourceTab={resourceTab}
-      stackId={props.stackId}
+      resourceTab={props}
       setIsEdit={setIsEdit}
       flashbarItems={flashbarItems}
       setFlashbarItems={setFlashbarItems}
@@ -119,7 +126,7 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
   ) : (
     <StackContent
       flashbarItems={flashbarItems}
-      resourceTab={resourceTab}
+      resourceTab={props}
       setIsEdit={setIsEdit}
       stackParameters={stackParameters}
     />
@@ -127,7 +134,7 @@ export const StackTab = (props: StackTabProps): JSX.Element => {
 };
 
 type StackContentProps = {
-  resourceTab: ResourceInfo | undefined;
+  resourceTab: OverviewTabProps;
   setIsEdit: (isEdit: boolean) => void;
   flashbarItems: FlashbarProps.MessageDefinition[];
   stackParameters: stackParametersDisplayProps[];
@@ -141,13 +148,7 @@ const StackContent = (props: StackContentProps): JSX.Element => {
         <SpaceBetween size="m">
           <Header
             variant="h1"
-            description={
-              resourceTab
-                ? resourceTab.type === 'overview'
-                  ? resourceTab.description
-                  : ''
-                : ''
-            }
+            description={resourceTab.description}
             actions={
               <Button variant="normal" onClick={() => setIsEdit(true)}>
                 編集
@@ -206,8 +207,7 @@ const StackContent = (props: StackContentProps): JSX.Element => {
 };
 
 export type StackEditContentProps = {
-  resourceTab: ResourceInfo | undefined;
-  stackId: string;
+  resourceTab: OverviewTabProps;
   setIsEdit: (isEdit: boolean) => void;
   flashbarItems: FlashbarProps.MessageDefinition[];
   setFlashbarItems: React.Dispatch<
@@ -216,19 +216,14 @@ export type StackEditContentProps = {
 };
 
 const StackEditContent = (props: StackEditContentProps): JSX.Element => {
-  const { flashbarItems, resourceTab, setFlashbarItems, setIsEdit, stackId } =
-    props;
+  const { flashbarItems, resourceTab, setFlashbarItems, setIsEdit } = props;
 
   const { control, handleSubmit } = useForm<StackEditType>({
     mode: 'onChange',
     resolver: zodResolver(stackEditValidator),
     defaultValues: {
-      name: resourceTab ? resourceTab.stackName : '',
-      description: resourceTab
-        ? resourceTab.type === 'overview'
-          ? resourceTab.description
-          : ''
-        : '',
+      name: resourceTab.stackName,
+      description: resourceTab.description,
     },
   });
   const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
@@ -236,7 +231,7 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
   const onSave = async (stackDetailProps: StackEditType) => {
     try {
       await updateStackDetail({
-        stack_id: stackId,
+        stack_id: resourceTab.stackId,
         name: stackDetailProps.name,
         description: stackDetailProps.description,
       });
@@ -244,7 +239,7 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
       // 保存したスタックの情報を更新
       setResourceTabs((prev) =>
         prev.map((tab) =>
-          tab.stackId === stackId
+          tab.tabId === resourceTab.tabId
             ? {
                 ...tab,
                 stackName: stackDetailProps.name,
@@ -341,14 +336,4 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
       </form>
     </ContentLayout>
   );
-};
-
-// リソースタブのオブジェクトを取得
-const getResourceDetailTab = (resourceTab: ResourceInfo | undefined) => {
-  if (resourceTab) {
-    if (resourceTab.type === 'overview') {
-      return resourceTab;
-    }
-  }
-  return undefined;
 };

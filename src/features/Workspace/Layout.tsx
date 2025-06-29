@@ -19,6 +19,8 @@ import {
   hrefParser,
 } from './lib/FilterSideMenu';
 
+import type { OverviewTabProps, ResourceTabProps } from './pages';
+
 import type {
   FlashbarProps,
   TokenGroupProps,
@@ -27,24 +29,16 @@ import type { TemplateSummary } from '../../invoke/Stack';
 
 import type { Dispatch, SetStateAction } from 'react';
 import type { WorkspaceLayoutLoaderData } from './Loader';
+
 export type ResourceInfo =
-  | {
-      type: 'overview';
-      tabId: string;
-      stackId: string;
-      stackName: string;
-      description: string;
-      isEdit?: boolean;
-    }
-  | {
-      type: 'resource';
-      tabId: string;
-      stackId: string;
-      stackName: string;
-      serviceName: string;
-      resourceName: string;
-      selectedLogicalId?: string;
-    };
+  | ({ type: 'overview' } & OverviewTabProps)
+  | ({ type: 'resource' } & ResourceTabProps);
+// | {
+//     type: 'manualOverview';
+//     tabId: string;
+//     tabName: string;
+//     description: string;
+//   };
 
 export type WorkspaceLayoutContext = WorkspaceLayoutLoaderData & {
   resourceTabs: ResourceInfo[];
@@ -203,15 +197,16 @@ export const WorkspaceLayout = (): JSX.Element => {
               }
               case 'manualOverview': {
                 newTab = {
-                  type: 'overview', // FIXME:
+                  type: 'overview',
                   tabId: href,
+                  // tabName: '手動管理リソース',
                   stackId: ManualManagementId,
                   stackName: '手動管理リソース',
                   description: '',
                 };
                 break;
               }
-              case 'manual': {
+              case 'manualResource': {
                 newTab = {
                   type: 'resource', // FIXME:
                   tabId: href,

@@ -1,2 +1,3 @@
 export * from './ResourceTab';
-export * from './StackTab';
+export * from './OverviewTab';
+export * from './ManualOverviewTab';

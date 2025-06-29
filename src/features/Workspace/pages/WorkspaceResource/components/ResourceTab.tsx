@@ -33,13 +33,28 @@ import type { WorkspaceLayoutContext } from '../../../Layout';
 import type { CloudFormationSchema } from './types/CloudFormationSchema';
 
 import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
-type ResourceTabProps = {
+
+export type ResourceTabProps = {
+  tabId: string;
   stackId: string;
   stackName: string;
   serviceName: string;
   resourceName: string;
   selectedLogicalId?: string;
 };
+
+export type BuildResourceTabNameProps = {
+  stackName: string;
+  serviceName: string;
+  resourceName: string;
+};
+export function buildResourceTabName({
+  stackName,
+  serviceName,
+  resourceName,
+}: BuildResourceTabNameProps): string {
+  return `${stackName} - ${serviceName}::${resourceName}`;
+}
 
 export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
@@ -69,7 +84,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [editingValues, setEditingValues] = useState<
     Record<string, string | number | null | boolean>
   >({});
-  const { setResourceTabs, activeTabId, flashbarItems, setFlashbarItems } =
+  const { setResourceTabs, flashbarItems, setFlashbarItems } =
     useOutletContext<WorkspaceLayoutContext>();
 
   console.log('resourceList', resourceList);
@@ -140,11 +155,11 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                       event.stopPropagation();
                       setResourceTabs((prev) => {
                         const resourceTabs = prev.map((tab) => {
-                          if (
-                            tab.tabId === activeTabId &&
-                            tab.type === 'resource'
-                          ) {
-                            tab.selectedLogicalId = item;
+                          if (tab.tabId === props.tabId) {
+                            return {
+                              ...tab,
+                              selectedLogicalId: item,
+                            };
                           }
                           return tab;
                         });

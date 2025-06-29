@@ -67,7 +67,7 @@ export const filterSideMenu = (
               href:
                 item.id === ManualManagementId
                   ? hrefBuilder({
-                      type: 'manual',
+                      type: 'manualResource',
                       serviceName: resource.serviceName,
                       resourceType: rType,
                     })
@@ -98,7 +98,7 @@ export const filterSideMenu = (
               href:
                 item.id === ManualManagementId
                   ? hrefBuilder({
-                      type: 'manual',
+                      type: 'manualResource',
                       serviceName: resource.serviceName,
                       resourceType: rType,
                     })
@@ -150,7 +150,7 @@ export type HrefType =
       type: 'manualOverview';
     }
   | {
-      type: 'manual';
+      type: 'manualResource';
       serviceName: string;
       resourceType: string;
     };
@@ -163,7 +163,7 @@ const hrefBuilder = (props: HrefType): string => {
       return `resource:${props.stackId}/${props.sectionGroupName}/${props.serviceName}/${props.resourceType}`;
     case 'manualOverview':
       return 'manualOverview:';
-    case 'manual':
+    case 'manualResource':
       return `manual:${props.serviceName}/${props.resourceType}`;
   }
 };
@@ -201,7 +201,7 @@ export const hrefParser = (href: string): HrefType => {
       // hrefの:より後ろの部分を/で分割
       const [serviceName, resourceType] = rest.split('/');
       return {
-        type: 'manual',
+        type: 'manualResource',
         serviceName: serviceName,
         resourceType: resourceType,
       };
