@@ -19,7 +19,7 @@ import {
   hrefParser,
 } from './lib/FilterSideMenu';
 
-import type { OverviewTabProps, ResourceTabProps } from './pages';
+import type { WorkspaceResourceInfo } from './pages';
 
 import type {
   FlashbarProps,
@@ -30,19 +30,9 @@ import type { TemplateSummary } from '../../invoke/Stack';
 import type { Dispatch, SetStateAction } from 'react';
 import type { WorkspaceLayoutLoaderData } from './Loader';
 
-export type ResourceInfo =
-  | ({ type: 'overview' } & OverviewTabProps)
-  | ({ type: 'resource' } & ResourceTabProps);
-// | {
-//     type: 'manualOverview';
-//     tabId: string;
-//     tabName: string;
-//     description: string;
-//   };
-
 export type WorkspaceLayoutContext = WorkspaceLayoutLoaderData & {
-  resourceTabs: ResourceInfo[];
-  setResourceTabs: Dispatch<SetStateAction<ResourceInfo[]>>;
+  resourceTabs: WorkspaceResourceInfo[];
+  setResourceTabs: Dispatch<SetStateAction<WorkspaceResourceInfo[]>>;
   activeTabId: string | undefined;
   setActiveTabId: Dispatch<SetStateAction<string | undefined>>;
   loadTemplateSummaryWrap: () => Promise<void>;
@@ -64,7 +54,7 @@ export const WorkspaceLayout = (): JSX.Element => {
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState<string>('');
   const [tokenGroup, setTokenGroup] = useState<TokenGroupProps.Item[]>([]);
-  const [resourceTabs, setResourceTabs] = useState<ResourceInfo[]>([]);
+  const [resourceTabs, setResourceTabs] = useState<WorkspaceResourceInfo[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | undefined>(undefined);
   const [sideMenu, setSideMenu] = useState<TemplateSummary[]>([]);
   const [flashbarItems, setFlashbarItems] = useState<
@@ -172,7 +162,7 @@ export const WorkspaceLayout = (): JSX.Element => {
               return;
             }
             const hrefParts = hrefParser(href);
-            let newTab: ResourceInfo;
+            let newTab: WorkspaceResourceInfo;
             switch (hrefParts.type) {
               case 'overview': {
                 newTab = {
@@ -197,12 +187,8 @@ export const WorkspaceLayout = (): JSX.Element => {
               }
               case 'manualOverview': {
                 newTab = {
-                  type: 'overview',
+                  type: 'manualOverview',
                   tabId: href,
-                  // tabName: '手動管理リソース',
-                  stackId: ManualManagementId,
-                  stackName: '手動管理リソース',
-                  description: '',
                 };
                 break;
               }

@@ -4,7 +4,6 @@ import { useOutletContext } from 'react-router';
 import { v4 as uuidV4 } from 'uuid';
 import { z } from 'zod';
 
-import { useCollection } from '@cloudscape-design/collection-hooks';
 import {
   Box,
   Button,
@@ -13,31 +12,21 @@ import {
   FormField,
   Header,
   Input,
-  Pagination,
   Select,
   SpaceBetween,
-  Table,
+  TextContent,
   Textarea,
 } from '@cloudscape-design/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { getAWSServiceList } from '../../../../../invoke/CloudFormationSchema';
-import {
-  getManualManagementResourceList,
-  newManualManagementResource,
-} from '../../../../../invoke/ManualManagementResource';
-
-import type { ManualManagementResource } from '../../../../../invoke/ManualManagementResource';
+import { newManualManagementResource } from '../../../../../invoke/ManualManagementResource';
 
 import type { WorkspaceLayoutContext } from '../../../Layout';
 
 import type { AWSService } from '../../../../../invoke/CloudFormationSchema';
 
 import type { SelectProps } from '@cloudscape-design/components';
-export type ManualOverviewTabProps = {
-  stackId: 'manualManagement';
-  sectionGroupName: string;
-};
 
 const resourceEditValidator = z.object({
   resourceId: z.string().regex(/^[A-Za-z0-9]{1,256}$/),
@@ -48,14 +37,11 @@ const resourceEditValidator = z.object({
 
 type WorkspaceEditType = z.infer<typeof resourceEditValidator>;
 
-export const ManualOverviewTab = (
-  props: ManualOverviewTabProps,
-): JSX.Element => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [resources, setResources] = useState<ManualManagementResource[]>([]);
-  const { items, collectionProps, paginationProps } = useCollection(resources, {
-    pagination: { pageSize: 10 },
-  });
+export function buildManualOverviewTabName(): string {
+  return '手動管理リソース';
+}
+
+export const ManualOverviewTab = (): JSX.Element => {
   const [services, setServices] = useState<AWSService[]>([]);
   const [registering, setRegistering] = useState<
     'SELECT_RESOURCE' | 'INPUT_NAME' | null
@@ -79,14 +65,9 @@ export const ManualOverviewTab = (
     useOutletContext<WorkspaceLayoutContext>();
 
   useEffect(() => {
-    Promise.all([
-      getAWSServiceList().then((services) => {
-        setServices(services);
-      }),
-      getManualManagementResourceList().then((resources) => {
-        setResources(resources);
-      }),
-    ]).finally(() => setIsLoading(false));
+    getAWSServiceList().then((services) => {
+      setServices(services);
+    });
   }, []);
 
   const onSave = async (data: WorkspaceEditType) => {
@@ -102,10 +83,6 @@ export const ManualOverviewTab = (
         setSelectedService(null);
         setSelectedResource(null);
         reset();
-
-        // リソース一覧を更新
-        const updatedResources = await getManualManagementResourceList();
-        setResources(updatedResources);
       })
       .catch((error) => {
         const id = uuidV4();
@@ -138,9 +115,7 @@ export const ManualOverviewTab = (
   };
 
   return (
-    <ContentLayout
-      header={<Header variant="h1">{props.sectionGroupName}</Header>}
-    >
+    <ContentLayout header={<Header variant="h1">手動管理リソース</Header>}>
       {/* リソース選択画面 */}
       {registering === 'SELECT_RESOURCE' && (
         <SpaceBetween direction="vertical" size="m">
@@ -280,58 +255,23 @@ export const ManualOverviewTab = (
           </SpaceBetween>
         </form>
       )}
-      {/* リソース一覧 */}
+      {/* Overview */}
       {registering === null && (
-        <Table
-          {...collectionProps}
-          columnDefinitions={[
-            {
-              id: 'resourceId',
-              header: 'Resource ID',
-              cell: (e) => e.resourceId,
-              isRowHeader: true,
-            },
-            {
-              id: 'resourceType',
-              header: 'Resource Type',
-              cell: (e) => e.type,
-            },
-            {
-              id: 'description',
-              header: 'Description',
-              cell: (e) => e.description,
-            },
-          ]}
-          selectionType="single"
-          items={items}
-          loadingText="Loading workspace"
-          loading={isLoading}
-          trackBy="name"
-          empty={
-            <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
-              <SpaceBetween size="m">
-                <b>No resources</b>
-              </SpaceBetween>
-            </Box>
-          }
-          header={
-            <Header
-              actions={
-                <SpaceBetween direction="horizontal" size="xs">
-                  <Button
-                    variant="primary"
-                    onClick={() => setRegistering('SELECT_RESOURCE')}
-                  >
-                    新規リソース
-                  </Button>
-                </SpaceBetween>
-              }
+        <SpaceBetween direction="vertical" size="s">
+          <TextContent>
+            <p>
+              CloudFormationで管理していないAWSリソースの設定を管理する機能です。
+            </p>
+          </TextContent>
+          <Box float="right">
+            <Button
+              variant="primary"
+              onClick={() => setRegistering('SELECT_RESOURCE')}
             >
-              リソース一覧
-            </Header>
-          }
-          pagination={<Pagination {...paginationProps} />}
-        />
+              新規リソース作成
+            </Button>
+          </Box>
+        </SpaceBetween>
       )}
     </ContentLayout>
   );

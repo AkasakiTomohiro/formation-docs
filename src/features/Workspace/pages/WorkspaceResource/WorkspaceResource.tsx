@@ -6,12 +6,26 @@ import { Tabs } from '@cloudscape-design/components';
 import {
   OverviewTab,
   ResourceTab,
+  buildManualOverviewTabName,
   buildOverviewTabName,
   buildResourceTabName,
 } from './components';
 import { ManualOverviewTab } from './components/ManualOverviewTab';
 
-import type { ResourceInfo, WorkspaceLayoutContext } from '../../Layout';
+import type { WorkspaceLayoutContext } from '../../Layout';
+import type { OverviewTabProps, ResourceTabProps } from './components';
+
+type ResourceInfo<
+  TType extends string,
+  T extends { tabId: string } = { tabId: string },
+> = {
+  type: TType;
+} & T;
+export type WorkspaceResourceInfo =
+  | ResourceInfo<'overview', OverviewTabProps>
+  | ResourceInfo<'resource', ResourceTabProps>
+  | ResourceInfo<'manualOverview'>;
+
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
   const { resourceTabs, setResourceTabs, activeTabId, setActiveTabId } =
@@ -23,7 +37,7 @@ export const WorkspaceResource = (): JSX.Element => {
       const stackId = location.state.selectedStackId;
       const stackName = location.state.selectedStackName;
       if (stackId && stackName) {
-        const newTab: ResourceInfo = {
+        const newTab: WorkspaceResourceInfo = {
           type: 'overview',
           tabId: `${stackId}/${stackName}`,
           stackId,
@@ -48,36 +62,33 @@ export const WorkspaceResource = (): JSX.Element => {
         <Tabs
           activeTabId={activeTabId}
           tabs={resourceTabs.map((tab) => {
-            if (tab.type === 'overview') {
-              return {
-                id: tab.tabId,
-                label: buildOverviewTabName({ stackName: tab.stackName }),
-                // FIXME:
-                content:
-                  tab.stackId === 'manualManagement' ? (
-                    <ManualOverviewTab
-                      stackId={tab.stackId}
-                      sectionGroupName={tab.stackName}
-                    />
-                  ) : (
-                    <OverviewTab {...tab} />
-                  ),
-                dismissible: true,
-                onDismiss: () => {
-                  setResourceTabs((prev) =>
-                    prev.filter((t) => t.tabId !== tab.tabId),
-                  );
-                },
-              };
+            let label: string;
+            let content: JSX.Element;
+            switch (tab.type) {
+              case 'overview': {
+                label = buildOverviewTabName({ stackName: tab.stackName });
+                content = <OverviewTab {...tab} />;
+                break;
+              }
+              case 'resource': {
+                label = buildResourceTabName({
+                  stackName: tab.stackName,
+                  serviceName: tab.serviceName,
+                  resourceName: tab.resourceName,
+                });
+                content = <ResourceTab {...tab} />;
+                break;
+              }
+              case 'manualOverview': {
+                label = buildManualOverviewTabName();
+                content = <ManualOverviewTab />;
+                break;
+              }
             }
             return {
               id: tab.tabId,
-              label: buildResourceTabName({
-                stackName: tab.stackName,
-                serviceName: tab.serviceName,
-                resourceName: tab.resourceName,
-              }),
-              content: <ResourceTab {...tab} />,
+              label: label,
+              content: content,
               dismissible: true,
               onDismiss: () => {
                 setResourceTabs((prev) =>
