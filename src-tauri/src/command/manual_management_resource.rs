@@ -35,6 +35,17 @@ pub struct ManualManagementMeta {
     pub reasons: HashMap<String, HashMap<String, String>>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ManualManagementMetaReasonsUpdate {
+    pub resource_id: String,
+    pub reasons: HashMap<String, String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ManualManagementMetaUpdate {
+    pub reasons: Option<ManualManagementMetaReasonsUpdate>,
+}
+
 #[derive(Debug, Error)]
 enum ManualManagementResourceError {
     #[error("app error: {0}")]
@@ -275,6 +286,30 @@ async fn get_manual_resource_reasons(
     }
 }
 
+async fn update_manual_resource_meta(
+    workspace_directory: &str,
+    update_manual_resource_meta: ManualManagementMetaUpdate,
+) -> Result<(), ManualManagementResourceError> {
+    let manual_resource_meta = load_manual_resource_meta(workspace_directory).await?;
+    let new_manual_resource_meta = ManualManagementMeta {
+        reasons: match update_manual_resource_meta.reasons {
+            Some(update_meta) => {
+                let mut new_reasons = manual_resource_meta.reasons.clone();
+                new_reasons.insert(update_meta.resource_id, update_meta.reasons);
+                new_reasons
+            }
+            None => manual_resource_meta.reasons,
+        },
+    };
+    let meta_path = format!(
+        "{}/{}",
+        workspace_directory, MANUAL_MANAGEMENT_RESOURCES_META_FILE
+    );
+    let manual_resource_meta_json = serde_json::to_string(&new_manual_resource_meta).unwrap();
+    fs::write(&meta_path, manual_resource_meta_json).await?;
+    return Ok(());
+}
+
 #[tauri::command(rename_all = "snake_case")]
 pub async fn new_manual_management_resource_command(
     window: tauri::Window,
@@ -376,6 +411,34 @@ pub async fn get_manual_resource_reasons_command(
         .await
     {
         Ok(reasons) => Ok(CommandResult::success(reasons)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn update_manual_resource_meta_command(
+    window: tauri::Window,
+    resource_id: &str,
+    reasons: HashMap<String, String>,
+) -> Result<CommandResult<()>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match update_manual_resource_meta(
+        window_state.workspace_directory.as_str(),
+        ManualManagementMetaUpdate {
+            reasons: Some(ManualManagementMetaReasonsUpdate {
+                resource_id: resource_id.to_string(),
+                reasons,
+            }),
+        },
+    )
+    .await
+    {
+        Ok(_) => Ok(CommandResult::success(())),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
