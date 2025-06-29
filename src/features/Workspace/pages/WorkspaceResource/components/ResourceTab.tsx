@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router';
-import { v4 as uuidV4 } from 'uuid';
 
 import {
   Box,
@@ -9,9 +8,7 @@ import {
   Container,
   ContentLayout,
   Header,
-  Input,
   Link,
-  Select,
   SpaceBetween,
   StatusIndicator,
   Table,
@@ -25,7 +22,6 @@ import {
   getStackResourceProperties,
   getStackResourcePropertiesReasons,
   updateStackMeta,
-  updateStackProperties,
 } from '../../../../../invoke/Stack';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
@@ -81,11 +77,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [editingReasons, setEditingReasons] = useState<Record<string, string>>(
     {},
   );
-  const [editingValues, setEditingValues] = useState<
-    Record<string, string | number | null | boolean>
-  >({});
-  const { setResourceTabs, flashbarItems, setFlashbarItems } =
-    useOutletContext<WorkspaceLayoutContext>();
+  const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
 
   console.log('resourceList', resourceList);
   console.log('schema', schema);
@@ -248,7 +240,6 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     <Button
                       onClick={() => {
                         setEditingReasons(reasons);
-                        setEditingValues({});
                         setIsEdit(!isEdit);
                       }}
                     >
@@ -266,33 +257,6 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                           logical_id: props.selectedLogicalId as string,
                           reasons: editingReasons,
                         });
-                        const failed = await updateStackProperties({
-                          stack_id: props.stackId,
-                          logical_id: props.selectedLogicalId as string,
-                          properties: editingValues,
-                        });
-                        setEditingValues({});
-                        console.log('Update failed:', failed);
-
-                        if (Object.keys(failed).length > 0) {
-                          const id = uuidV4();
-                          setFlashbarItems([
-                            ...flashbarItems,
-                            {
-                              type: 'error',
-                              header: '以下のプロパティの更新に失敗しました',
-                              content: JSON.stringify(failed, null, 2),
-                              dismissible: true,
-                              dismissLabel: 'close',
-                              id: id,
-                              onDismiss: () => {
-                                setFlashbarItems((items) =>
-                                  items.filter((e) => e.id !== id),
-                                );
-                              },
-                            },
-                          ]);
-                        }
 
                         getStackResourceProperties({
                           stack_id: props.stackId,
@@ -375,107 +339,11 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
               {
                 id: 'value',
                 header: 'Value',
-                cell: (e) => {
-                  if (isEdit && e.editMode !== 'readonly') {
-                    switch (e.editMode) {
-                      case 'string': {
-                        return (
-                          <Textarea
-                            onChange={({ detail }) =>
-                              setEditingValues((prev) => ({
-                                ...prev,
-                                [e.id]: detail.value,
-                              }))
-                            }
-                            value={`${editingValues[e.id] ?? e.value ?? ''}`}
-                          />
-                        );
-                      }
-                      case 'number': {
-                        return (
-                          <Input
-                            onChange={({ detail }) =>
-                              setEditingValues((prev) => ({
-                                ...prev,
-                                [e.id]: Number(detail.value),
-                              }))
-                            }
-                            value={`${editingValues[e.id] ?? e.value}`}
-                            inputMode="numeric"
-                            type="number"
-                          />
-                        );
-                      }
-                      case 'enum': {
-                        return (
-                          <Select
-                            selectedOption={{
-                              label: `${
-                                Object.hasOwn(editingValues, e.id)
-                                  ? (editingValues[e.id] ?? '未選択')
-                                  : (e.value ?? '未選択')
-                              }`,
-                              value: Object.hasOwn(editingValues, e.id)
-                                ? editingValues[e.id] === undefined
-                                  ? undefined
-                                  : `${editingValues[e.id]}`
-                                : e.value,
-                            }}
-                            onChange={({ detail }) => {
-                              setEditingValues((prev) => ({
-                                ...prev,
-                                [e.id]: detail.selectedOption.value ?? null,
-                              }));
-                            }}
-                            options={[
-                              { label: '未選択', value: undefined },
-                              ...e.type
-                                .split('\n')
-                                .map((value) => ({ label: value, value })),
-                            ]}
-                            expandToViewport
-                          />
-                        );
-                      }
-                      case 'boolean': {
-                        return (
-                          <Select
-                            selectedOption={{
-                              label: `${
-                                Object.hasOwn(editingValues, e.id)
-                                  ? (editingValues[e.id] ?? '未選択')
-                                  : (e.value ?? '未選択')
-                              }`,
-                              value: Object.hasOwn(editingValues, e.id)
-                                ? `${editingValues[e.id]}`
-                                : e.value,
-                            }}
-                            onChange={({ detail }) => {
-                              setEditingValues((prev) => ({
-                                ...prev,
-                                [e.id]:
-                                  detail.selectedOption.value === undefined
-                                    ? null
-                                    : detail.selectedOption.value === 'true',
-                              }));
-                            }}
-                            options={[
-                              { label: '未選択', value: undefined },
-                              { label: 'false', value: 'false' },
-                              { label: 'true', value: 'true' },
-                            ]}
-                            expandToViewport
-                          />
-                        );
-                      }
-                    }
-                  }
-                  return (
-                    <div style={{ whiteSpace: 'pre-line' }}>
-                      {e.value === undefined ? '' : `${e.value}`}
-                    </div>
-                  );
-                },
+                cell: (e) => (
+                  <div style={{ whiteSpace: 'pre-line' }}>
+                    {e.value === undefined ? '' : `${e.value}`}
+                  </div>
+                ),
                 width: 300,
                 minWidth: 100,
               },

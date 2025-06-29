@@ -9,7 +9,6 @@ use crate::utils::get_window_state;
 use crate::utils::AppError;
 use crate::utils::CommandResult;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use serde_json::Value;
 use thiserror::Error;
 use uuid::Uuid;
@@ -488,121 +487,6 @@ async fn update_stack_meta(
     return Ok(());
 }
 
-async fn update_stack_properties(
-    workspace_directory: &str,
-    stack_id: &str,
-    update_stack_data: StackPropertiesUpdate,
-) -> Result<HashMap<String, Value>, StackError> {
-    // 特定の論理IDの Properties を取得
-    let workspace = load_workspace(workspace_directory).await?;
-    let stack_file_name = match workspace.stacks.get(stack_id) {
-        Some(stack_file_name) => stack_file_name,
-        None => {
-            return Err(StackError::App(AppError::new("Stack not found")));
-        }
-    };
-    let template_path = format!("{}/{}", workspace_directory, stack_file_name);
-    let template_json = fs::read_to_string(&template_path)?;
-    let mut template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
-
-    // 取得した Properties を update_stack_data.properties で更新
-    let mut failed_values = HashMap::new();
-    for (id, value) in update_stack_data.properties.iter() {
-        if let Some(original_value) =
-            template_json["Resources"][&update_stack_data.logical_id].pointer_mut(id)
-        {
-            if value.is_null() {
-                if let Some((parent_key, child_key)) = id.rsplit_once("/") {
-                    if let Some(original_value) = template_json["Resources"]
-                        [&update_stack_data.logical_id]
-                        .pointer_mut(parent_key)
-                    {
-                        if original_value.is_object() {
-                            original_value.as_object_mut().unwrap().remove(child_key);
-                        }
-                    } else {
-                        failed_values.insert(id.clone(), value.clone());
-                    }
-                } else {
-                    failed_values.insert(id.clone(), value.clone());
-                }
-            } else {
-                *original_value = value.clone();
-            }
-        } else {
-            let (parent_path, no_exit_path) = split_path_by_existing_parent(
-                &template_json,
-                &update_stack_data.logical_id,
-                id.clone(),
-            );
-            let (parent_key, child_value) = get_value_from_path(no_exit_path, value.clone());
-            let parent_value = template_json["Resources"][&update_stack_data.logical_id]
-                .pointer_mut(parent_path.as_str())
-                .unwrap(); // split_path_by_existing_parentでparent_pathが存在することが保証されているためunwrapしても問題ない
-            parent_value[parent_key] = child_value;
-        }
-    }
-
-    // 更新した Properties をファイルに書き込む
-    let stack_json = serde_json::to_string(&template_json).unwrap();
-    fs::write(&template_path, stack_json)?;
-
-    return Ok(failed_values);
-}
-
-/// 指定されたパスのうち、存在する親パスと存在しない残りのパスに分割する。
-///
-/// # Example
-///
-/// たとえば、下記のようなJSONがある場合にpathに`/Properties/LoggingConfig/LogFormat`を指定したときに、
-/// 存在する親パス（`/Properties`）と、存在しない残りのパス（`LoggingConfig/LogFormat`）に分割する。
-/// 後段に呼び出す関数で利用するため、存在しないパスはVec<String>（"LogFormat", "LoggingConfig"）の形で返す。
-/// ```json
-/// {
-///   "Resources": {
-///     "MyResource": {
-///       "Properties": {
-///         "FunctionName": "MyFunction"
-///       }
-///     }
-///   }
-/// }
-/// ```
-///
-fn split_path_by_existing_parent(
-    template_json: &Value,
-    logical_id: &str,
-    path: String,
-) -> (String, Vec<String>) {
-    let mut check_path = path.clone();
-    let mut no_exit_path: Vec<String> = Vec::new();
-
-    while let Some((parent, child)) = check_path.rsplit_once("/") {
-        no_exit_path.push(child.to_string());
-        check_path = parent.to_string();
-        if let Some(_) = template_json["Resources"][logical_id].pointer(check_path.as_str()) {
-            break;
-        }
-    }
-    return (check_path, no_exit_path.clone());
-}
-
-/// パスの配列を受け取り、一階層目のキーとその値のタプルを返す
-///
-/// 例えば、`path`が`["LogFormat", "LoggingConfig"]`、`value`が`"JSON"`の場合、
-/// `("LoggingConfig", {"LogFormat": "JSON"})`のようなタプルを返す。
-fn get_value_from_path(path: Vec<String>, value: Value) -> (String, Value) {
-    let mut return_value = value.clone();
-    for index in 0..path.len() - 1 {
-        // FIXME: 配列に対応
-        let key: String = path[index].clone();
-        let mut tmp_value = json!({});
-        tmp_value[key] = return_value.clone();
-        return_value = tmp_value;
-    }
-    return (path.last().unwrap().clone(), return_value);
-}
-
 async fn update_stack_detail(
     workspace_directory: &str,
     stack_id: &str,
@@ -838,34 +722,6 @@ pub async fn get_stack_resource_properties_reasons_command(
     .await
     {
         Ok(reasons) => Ok(CommandResult::success(reasons)),
-        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
-    };
-}
-
-#[tauri::command(rename_all = "snake_case")]
-pub async fn update_stack_properties_command(
-    window: tauri::Window,
-    stack_id: &str,
-    logical_id: &str,
-    properties: HashMap<String, Value>,
-) -> Result<CommandResult<HashMap<String, Value>>, CommandResult> {
-    let window_state = match get_window_state(window) {
-        Some(state) => state,
-        None => {
-            return Err(CommandResult::failed("Window state not found"));
-        }
-    };
-    return match update_stack_properties(
-        window_state.workspace_directory.as_str(),
-        stack_id,
-        StackPropertiesUpdate {
-            logical_id: logical_id.to_string(),
-            properties,
-        },
-    )
-    .await
-    {
-        Ok(failed_values) => Ok(CommandResult::success(failed_values)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
