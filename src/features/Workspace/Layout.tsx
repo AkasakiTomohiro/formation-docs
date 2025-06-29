@@ -194,10 +194,8 @@ export const WorkspaceLayout = (): JSX.Element => {
               }
               case 'manualResource': {
                 newTab = {
-                  type: 'resource', // FIXME:
+                  type: 'manualResource',
                   tabId: href,
-                  stackId: ManualManagementId,
-                  stackName: '手動管理リソース',
                   serviceName: hrefParts.serviceName,
                   resourceName: hrefParts.resourceType,
                 };

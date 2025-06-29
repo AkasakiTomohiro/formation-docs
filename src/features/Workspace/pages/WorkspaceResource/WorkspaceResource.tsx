@@ -11,10 +11,15 @@ import {
   buildResourceTabName,
 } from './components';
 import { ManualOverviewTab } from './components/ManualOverviewTab';
+import {
+  ManualResourceTab,
+  buildManualResourceTabName,
+} from './components/ManualResourceTab';
+
+import type { ManualResourceTabProps } from './components/ManualResourceTab';
 
 import type { WorkspaceLayoutContext } from '../../Layout';
 import type { OverviewTabProps, ResourceTabProps } from './components';
-
 type ResourceInfo<
   TType extends string,
   T extends { tabId: string } = { tabId: string },
@@ -24,7 +29,8 @@ type ResourceInfo<
 export type WorkspaceResourceInfo =
   | ResourceInfo<'overview', OverviewTabProps>
   | ResourceInfo<'resource', ResourceTabProps>
-  | ResourceInfo<'manualOverview'>;
+  | ResourceInfo<'manualOverview'>
+  | ResourceInfo<'manualResource', ManualResourceTabProps>;
 
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
@@ -82,6 +88,14 @@ export const WorkspaceResource = (): JSX.Element => {
               case 'manualOverview': {
                 label = buildManualOverviewTabName();
                 content = <ManualOverviewTab />;
+                break;
+              }
+              case 'manualResource': {
+                label = buildManualResourceTabName({
+                  serviceName: tab.serviceName,
+                  resourceName: tab.resourceName,
+                });
+                content = <ManualResourceTab {...tab} />;
                 break;
               }
             }

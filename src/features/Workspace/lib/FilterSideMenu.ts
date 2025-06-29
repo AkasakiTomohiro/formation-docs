@@ -164,7 +164,7 @@ const hrefBuilder = (props: HrefType): string => {
     case 'manualOverview':
       return 'manualOverview:';
     case 'manualResource':
-      return `manual:${props.serviceName}/${props.resourceType}`;
+      return `manualResource:${props.serviceName}/${props.resourceType}`;
   }
 };
 
@@ -197,7 +197,7 @@ export const hrefParser = (href: string): HrefType => {
     case 'manualOverview': {
       return { type: 'manualOverview' };
     }
-    case 'manual': {
+    case 'manualResource': {
       // hrefの:より後ろの部分を/で分割
       const [serviceName, resourceType] = rest.split('/');
       return {

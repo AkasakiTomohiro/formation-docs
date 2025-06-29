@@ -13,6 +13,9 @@ use tokio::fs;
 /// 手動管理リソースのJSONファイル名
 const MANUAL_MANAGEMENT_RESOURCES_FILE: &str = "manual_management_resources.json";
 
+/// 手動管理リソースのmetaファイル名
+const MANUAL_MANAGEMENT_RESOURCES_META_FILE: &str = "manual_management_resources.meta.json";
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct ManualManagementResource {
@@ -25,6 +28,11 @@ pub struct ManualManagementResource {
 #[serde(rename_all = "PascalCase")]
 pub struct ManualManagementResources {
     pub resources: HashMap<String, ManualManagementResource>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ManualManagementMeta {
+    pub reasons: HashMap<String, HashMap<String, String>>,
 }
 
 #[derive(Debug, Error)]
@@ -213,6 +221,60 @@ async fn load_manual_management_resource_summary(
     return Ok(result);
 }
 
+async fn load_manual_resource_meta(
+    workspace_directory: &str,
+) -> Result<ManualManagementMeta, ManualManagementResourceError> {
+    // 手動管理リソースのmeta.jsonが存在するか確認
+    let meta_path = format!(
+        "{}/{}",
+        workspace_directory, MANUAL_MANAGEMENT_RESOURCES_META_FILE
+    );
+    let meta_path = Path::new(&meta_path);
+    if !meta_path.exists() {
+        // meta.jsonを作成する
+        fs::File::create(&meta_path).await?;
+        // 空のJSONを作成
+        let empty_json = ManualManagementMeta {
+            reasons: HashMap::new(),
+        };
+        let empty_json = serde_json::to_string(&empty_json).unwrap();
+        fs::write(&meta_path, empty_json).await?;
+    }
+
+    // meta.jsonを読み込む
+    let meta_json = fs::read_to_string(&meta_path).await?;
+    let meta_json = serde_json::from_str::<ManualManagementMeta>(&meta_json)?;
+    return Ok(meta_json);
+}
+
+async fn get_manual_resource_properties(
+    workspace_directory: &str,
+    resource_id: &str,
+) -> Result<HashMap<String, Value>, ManualManagementResourceError> {
+    let manual_management_resources = get_manual_management_resources(workspace_directory).await?;
+    let resource = manual_management_resources
+        .resources
+        .get(resource_id)
+        .ok_or(ManualManagementResourceError::App(AppError::new(
+            "Resource ID not found.",
+        )))?;
+    return Ok(resource.properties.clone());
+}
+
+async fn get_manual_resource_reasons(
+    workspace_directory: &str,
+    resource_id: &str,
+) -> Result<Value, ManualManagementResourceError> {
+    let meta_json = load_manual_resource_meta(workspace_directory).await?;
+    if let Some(reasons) = meta_json.reasons.get(resource_id) {
+        // 指定されたリソースIDのreasonsが存在する場合はそのまま返す
+        return Ok(serde_json::to_value(reasons.clone())?);
+    } else {
+        // 指定されたリソースIDのreasonsが存在しない場合は空のオブジェクトを返す
+        return Ok(Value::Object(serde_json::Map::new()));
+    }
+}
+
 #[tauri::command(rename_all = "snake_case")]
 pub async fn new_manual_management_resource_command(
     window: tauri::Window,
@@ -273,6 +335,47 @@ pub async fn load_manual_management_resource_summary_command(
         .await
     {
         Ok(summary) => Ok(CommandResult::success(summary)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_manual_resource_properties_command(
+    window: tauri::Window,
+    resource_id: &str,
+) -> Result<CommandResult<HashMap<String, Value>>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match get_manual_resource_properties(
+        window_state.workspace_directory.as_str(),
+        resource_id,
+    )
+    .await
+    {
+        Ok(properties) => Ok(CommandResult::success(properties)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_manual_resource_reasons_command(
+    window: tauri::Window,
+    resource_id: &str,
+) -> Result<CommandResult<Value>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match get_manual_resource_reasons(window_state.workspace_directory.as_str(), resource_id)
+        .await
+    {
+        Ok(reasons) => Ok(CommandResult::success(reasons)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
