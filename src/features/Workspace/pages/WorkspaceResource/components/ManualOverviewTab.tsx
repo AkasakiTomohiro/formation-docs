@@ -21,13 +21,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { getAWSServiceList } from '../../../../../invoke/CloudFormationSchema';
 import { newManualManagementResource } from '../../../../../invoke/ManualManagementResource';
+import { hrefBuilder } from '../../../lib/FilterSideMenu';
 
 import type { WorkspaceLayoutContext } from '../../../Layout';
 
 import type { AWSService } from '../../../../../invoke/CloudFormationSchema';
 
 import type { SelectProps } from '@cloudscape-design/components';
-
+import type { ResourceInfo } from '../WorkspaceResource';
+import type { ManualResourceTabProps } from './ManualResourceTab';
 const resourceEditValidator = z.object({
   resourceId: z.string().regex(/^[A-Za-z0-9]{1,256}$/),
   description: z.string().max(256),
@@ -61,8 +63,13 @@ export const ManualOverviewTab = (): JSX.Element => {
         resourceName: '',
       },
     });
-  const { flashbarItems, setFlashbarItems } =
-    useOutletContext<WorkspaceLayoutContext>();
+  const {
+    flashbarItems,
+    setFlashbarItems,
+    loadTemplateSummaryWrap,
+    setResourceTabs,
+    setActiveTabId,
+  } = useOutletContext<WorkspaceLayoutContext>();
 
   useEffect(() => {
     getAWSServiceList().then((services) => {
@@ -79,6 +86,28 @@ export const ManualOverviewTab = (): JSX.Element => {
       resource_name: data.resourceName,
     })
       .then(async () => {
+        loadTemplateSummaryWrap();
+        const tabId = hrefBuilder({
+          type: 'manualResource',
+          serviceName: data.serviceName,
+          resourceType: data.resourceName,
+        });
+        const newTab: ResourceInfo<'manualResource', ManualResourceTabProps> = {
+          type: 'manualResource',
+          tabId: tabId,
+          serviceName: data.serviceName,
+          resourceName: data.resourceName,
+          selectedResourceId: data.resourceId,
+        };
+        setResourceTabs((prev) => {
+          const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
+          if (existingTab) {
+            return prev;
+          }
+          return [...prev, newTab];
+        });
+        setActiveTabId(tabId);
+
         setRegistering(null);
         setSelectedService(null);
         setSelectedResource(null);
