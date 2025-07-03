@@ -20,7 +20,7 @@ import type { ManualResourceTabProps } from './components/ManualResourceTab';
 
 import type { WorkspaceLayoutContext } from '../../Layout';
 import type { OverviewTabProps, ResourceTabProps } from './components';
-type ResourceInfo<
+export type ResourceInfo<
   TType extends string,
   T extends { tabId: string } = { tabId: string },
 > = {
