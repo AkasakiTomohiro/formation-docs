@@ -7,6 +7,8 @@ import type { StackProps } from 'aws-cdk-lib';
 import type { Construct } from 'constructs';
 
 export class SampleAppStack extends Stack {
+  public readonly queue: sqs.Queue;
+
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
@@ -14,6 +16,7 @@ export class SampleAppStack extends Stack {
       visibilityTimeout: Duration.seconds(300),
       fifo: true,
     });
+    this.queue = queue;
 
     const topic = new sns.Topic(this, 'SampleAppTopic');
 

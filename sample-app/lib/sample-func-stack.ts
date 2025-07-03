@@ -6,10 +6,16 @@ import { Asset } from 'aws-cdk-lib/aws-s3-assets';
 
 import type { StackProps } from 'aws-cdk-lib';
 import type { Construct } from 'constructs';
+import type { SampleAppStack } from './sample-app-stack';
+
 const __dirname = import.meta.dirname;
 
+interface SampleFuncStackProps extends StackProps {
+  sampleAppStack: SampleAppStack;
+}
+
 export class SampleFuncStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: SampleFuncStackProps) {
     super(scope, id, props);
 
     const asset = new Asset(this, 'SampleFuncCode', {
@@ -32,6 +38,9 @@ export class SampleFuncStack extends Stack {
       vpc: vpc,
       vpcSubnets: {
         subnets: vpc.privateSubnets,
+      },
+      environment: {
+        QUEUE_ARN: props.sampleAppStack.queue.queueArn,
       },
       architecture: lambda.Architecture.ARM_64,
       timeout: Duration.seconds(10),
