@@ -174,21 +174,26 @@ pub struct ManualManagementResourceSummary {
     pub description: String,
 }
 
-/// 手動管理リソースの一覧を取得する
+/// 指定したサービス名・リソースタイプの手動管理リソースの一覧を取得する
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 async fn get_manual_management_resource_list(
     workspace_directory: &str,
+    service_name: &str,
+    resource_name: &str,
 ) -> Result<Vec<ManualManagementResourceSummary>, ManualManagementResourceError> {
     let manual_management_resources = get_manual_management_resources(workspace_directory).await?;
     let mut result: Vec<ManualManagementResourceSummary> = Vec::new();
 
+    let r#type = format!("AWS::{}::{}", service_name, resource_name);
     for (resource_id, manual_management_resource) in manual_management_resources.resources.iter() {
-        result.push(ManualManagementResourceSummary {
-            resource_id: resource_id.clone(),
-            r#type: manual_management_resource.r#type.clone(),
-            description: manual_management_resource.description.clone(),
-        })
+        if manual_management_resource.r#type == r#type {
+            result.push(ManualManagementResourceSummary {
+                resource_id: resource_id.clone(),
+                r#type: manual_management_resource.r#type.clone(),
+                description: manual_management_resource.description.clone(),
+            })
+        }
     }
 
     return Ok(result);
@@ -341,6 +346,8 @@ pub async fn new_manual_management_resource_command(
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_management_resource_list_command(
     window: tauri::Window,
+    service_name: &str,
+    resource_name: &str,
 ) -> Result<CommandResult<Vec<ManualManagementResourceSummary>>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
@@ -348,8 +355,12 @@ pub async fn get_manual_management_resource_list_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_manual_management_resource_list(window_state.workspace_directory.as_str())
-        .await
+    return match get_manual_management_resource_list(
+        window_state.workspace_directory.as_str(),
+        service_name,
+        resource_name,
+    )
+    .await
     {
         Ok(list) => Ok(CommandResult::success(list)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),

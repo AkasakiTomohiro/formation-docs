@@ -82,7 +82,10 @@ export const ManualResourceTab = (
   useEffect(() => {
     Promise.all([
       getCloudFormationSchema(props.serviceName, props.resourceName),
-      getManualManagementResourceList(),
+      getManualManagementResourceList({
+        service_name: props.serviceName,
+        resource_name: props.resourceName,
+      }),
     ])
       .then(([schemaStr, list]) => {
         setSchema(JSON.parse(schemaStr));
