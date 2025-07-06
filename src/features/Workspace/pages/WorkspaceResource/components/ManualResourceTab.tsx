@@ -1,14 +1,24 @@
+import ace from 'ace-builds/src-noconflict/ace';
+
+import 'ace-builds/css/ace.css';
+import 'ace-builds/esm-resolver';
+import 'ace-builds/src-noconflict/ext-language_tools';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/snippets/json';
+import 'ace-builds/src-noconflict/theme-github';
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router';
 
 import {
   Box,
   Button,
+  CodeEditor,
   CollectionPreferences,
   Container,
   ContentLayout,
   Header,
   Link,
+  SegmentedControl,
   SpaceBetween,
   StatusIndicator,
   Table,
@@ -25,11 +35,13 @@ import {
 } from '../../../../../invoke/ManualManagementResource';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
+import type { Dispatch } from 'react';
 import type { ManualManagementResource } from '../../../../../invoke/ManualManagementResource';
 import type { WorkspaceLayoutContext } from '../../../Layout';
 import type { CloudFormationSchema } from './types/CloudFormationSchema';
 
 import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
+
 export type ManualResourceTabProps = {
   tabId: string;
   serviceName: string;
@@ -47,6 +59,45 @@ export function buildManualResourceTabName({
 }: BuildManualResourceTabNameProps): string {
   return `手動管理リソース - ${serviceName}::${resourceName}`;
 }
+
+const i18nStrings = {
+  loadingState: 'Loading code editor',
+  errorState: 'There was an error loading the code editor.',
+  errorStateRecovery: 'Retry',
+
+  editorGroupAriaLabel: 'Code editor',
+  statusBarGroupAriaLabel: 'Status bar',
+
+  cursorPosition: (row: number, column: number) => `Ln ${row}, Col ${column}`,
+  errorsTab: 'Errors',
+  warningsTab: 'Warnings',
+  preferencesButtonAriaLabel: 'Preferences',
+
+  paneCloseButtonAriaLabel: 'Close',
+
+  preferencesModalHeader: 'Preferences',
+  preferencesModalCancel: 'Cancel',
+  preferencesModalConfirm: 'Confirm',
+  preferencesModalWrapLines: 'Wrap lines',
+  preferencesModalTheme: 'Theme',
+  preferencesModalLightThemes: 'Light themes',
+  preferencesModalDarkThemes: 'Dark themes',
+};
+
+const selectModeControl = (
+  mode: 'reason' | 'value',
+  setMode: Dispatch<React.SetStateAction<'value' | 'reason'>>,
+): JSX.Element => (
+  <SegmentedControl
+    selectedId={mode}
+    onChange={({ detail }) => setMode(detail.selectedId as 'reason' | 'value')}
+    label="mode select control"
+    options={[
+      { text: 'Reason', id: 'reason' },
+      { text: 'Value', id: 'value' },
+    ]}
+  />
+);
 
 export const ManualResourceTab = (
   props: ManualResourceTabProps,
@@ -77,7 +128,30 @@ export const ManualResourceTab = (
   const [editingReasons, setEditingReasons] = useState<Record<string, string>>(
     {},
   );
+  const [mode, setMode] = useState<'reason' | 'value'>('reason');
+  const [values, setValues] = useState<string>('{}');
+  // const [ace, setAce] = useState<any>();
+  // const [loading, setLoading] = useState(true);
+  const [acePreferences, setAcePreferences] = useState({});
   const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
+
+  // useEffect(() => {
+  //   async function loadAce() {
+  //     const ace = await import('ace-builds');
+  //     ace.config.set('basePath', './ace/');
+  //     ace.config.set('themePath', './ace/');
+  //     ace.config.set('modePath', './ace/');
+  //     ace.config.set('workerPath', './ace/');
+  //     ace.config.set('useStrictCSP', true);
+  //     return ace;
+  //   }
+
+  //   loadAce()
+  //     .then((ace) => setAce(ace))
+  //     .finally(() => {
+  //       setLoading(false);
+  //     });
+  // }, []);
 
   useEffect(() => {
     Promise.all([
@@ -265,159 +339,192 @@ export const ManualResourceTab = (
             </Header>
           }
         >
-          <Table
-            renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
-              `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
-            }
-            renderLoaderPending={() => (
-              <Button variant="inline-link" iconName="add-plus">
-                Show more
-              </Button>
-            )}
-            renderLoaderLoading={() => (
-              <StatusIndicator type="loading">Loading items</StatusIndicator>
-            )}
-            renderLoaderError={() => (
-              <StatusIndicator type="error">Loading error</StatusIndicator>
-            )}
-            renderLoaderEmpty={() => <Box>No resources found</Box>}
-            expandableRows={{
-              getItemChildren: (item) => item.children ?? [],
-              isItemExpandable: (item) => Boolean(item.children),
-              expandedItems: expandedItems,
-              onExpandableItemToggle: ({ detail }) =>
-                setExpandedItems((prev: ResourceTableItem[] | undefined) => {
-                  const next = new Set((prev ?? []).map((item) => item.id));
-                  detail.expanded
-                    ? next.add(detail.item.id)
-                    : next.delete(detail.item.id);
-                  return [...next].map((id) => ({ id }));
-                }),
-            }}
-            resizableColumns
-            columnDefinitions={[
-              {
-                id: 'property',
-                header: 'Property',
-                cell: (e) => e.property,
-                isRowHeader: true,
-                width: 250,
-                minWidth: 150,
-              },
-              {
-                id: 'type',
-                header: 'Type',
-                cell: (e) => (
-                  <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>
-                ),
-                width: 150,
-                minWidth: 100,
-              },
-              {
-                id: 'description',
-                header: 'Description',
-                cell: (e) => (
-                  <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>
-                ),
-                width: 500,
-              },
-              {
-                id: 'value',
-                header: 'Value',
-                cell: (e) => {
-                  return (
-                    <div style={{ whiteSpace: 'pre-line' }}>
-                      {e.value === undefined ? '' : `${e.value}`}
-                    </div>
-                  );
+          {mode === 'reason' && (
+            <Table
+              renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
+                `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
+              }
+              renderLoaderPending={() => (
+                <Button variant="inline-link" iconName="add-plus">
+                  Show more
+                </Button>
+              )}
+              renderLoaderLoading={() => (
+                <StatusIndicator type="loading">Loading items</StatusIndicator>
+              )}
+              renderLoaderError={() => (
+                <StatusIndicator type="error">Loading error</StatusIndicator>
+              )}
+              renderLoaderEmpty={() => <Box>No resources found</Box>}
+              expandableRows={{
+                getItemChildren: (item) => item.children ?? [],
+                isItemExpandable: (item) => Boolean(item.children),
+                expandedItems: expandedItems,
+                onExpandableItemToggle: ({ detail }) =>
+                  setExpandedItems((prev: ResourceTableItem[] | undefined) => {
+                    const next = new Set((prev ?? []).map((item) => item.id));
+                    detail.expanded
+                      ? next.add(detail.item.id)
+                      : next.delete(detail.item.id);
+                    return [...next].map((id) => ({ id }));
+                  }),
+              }}
+              resizableColumns
+              columnDefinitions={[
+                {
+                  id: 'property',
+                  header: 'Property',
+                  cell: (e) => e.property,
+                  isRowHeader: true,
+                  width: 250,
+                  minWidth: 150,
                 },
-                width: 300,
-                minWidth: 100,
-              },
-              {
-                id: 'reason',
-                header: 'Reason',
-                cell: (e) => {
-                  if (isEdit) {
+                {
+                  id: 'type',
+                  header: 'Type',
+                  cell: (e) => (
+                    <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>
+                  ),
+                  width: 150,
+                  minWidth: 100,
+                },
+                {
+                  id: 'description',
+                  header: 'Description',
+                  cell: (e) => (
+                    <div style={{ whiteSpace: 'pre-line' }}>
+                      {e.description}
+                    </div>
+                  ),
+                  width: 500,
+                },
+                {
+                  id: 'value',
+                  header: 'Value',
+                  cell: (e) => {
                     return (
-                      <Textarea
-                        onChange={({ detail }) =>
-                          setEditingReasons((prev) => ({
-                            ...prev,
-                            [e.id]: detail.value,
-                          }))
-                        }
-                        value={editingReasons[e.id] ?? ''}
-                      />
+                      <div style={{ whiteSpace: 'pre-line' }}>
+                        {e.value === undefined ? '' : `${e.value}`}
+                      </div>
                     );
-                  }
-                  return (
-                    <div style={{ whiteSpace: 'pre-line' }}>
-                      {reasons[e.id]}
-                    </div>
-                  );
+                  },
+                  width: 300,
+                  minWidth: 100,
                 },
-                width: 300,
-                minWidth: 200,
-              },
-            ]}
-            columnDisplay={preferences.contentDisplay}
-            stickyHeader
-            enableKeyboardNavigation
-            items={items}
-            loadingText="Loading resources"
-            trackBy="id"
-            empty={
-              <Box
-                margin={{ vertical: 'xs' }}
-                textAlign="center"
-                color="inherit"
-              >
-                <SpaceBetween size="m">
-                  <b>No resources</b>
-                  <Button>Create resource</Button>
-                </SpaceBetween>
-              </Box>
-            }
-            filter={
-              <TextFilter
-                filteringPlaceholder="Find resources"
-                filteringText=""
-                countText="0 matches"
-              />
-            }
-            header={<Header>Table with expandable rows</Header>}
-            preferences={
-              <CollectionPreferences
-                title="Preferences"
-                confirmLabel="Confirm"
-                cancelLabel="Cancel"
-                preferences={preferences}
-                onConfirm={({ detail }) =>
-                  setPreferences({
-                    contentDisplay: detail.contentDisplay
-                      ? [...detail.contentDisplay]
-                      : [],
-                  })
-                }
-                contentDisplayPreference={{
-                  description:
-                    'Customize the visibility and order of the columns.',
-                  options: [
-                    {
-                      id: 'property',
-                      label: 'Property',
-                      alwaysVisible: true,
-                    },
-                    { id: 'type', label: 'Type' },
-                    { id: 'description', label: 'Description' },
-                    { id: 'value', label: 'Value' },
-                    { id: 'reason', label: 'Reason' },
-                  ],
+                {
+                  id: 'reason',
+                  header: 'Reason',
+                  cell: (e) => {
+                    if (isEdit) {
+                      return (
+                        <Textarea
+                          onChange={({ detail }) =>
+                            setEditingReasons((prev) => ({
+                              ...prev,
+                              [e.id]: detail.value,
+                            }))
+                          }
+                          value={editingReasons[e.id] ?? ''}
+                        />
+                      );
+                    }
+                    return (
+                      <div style={{ whiteSpace: 'pre-line' }}>
+                        {reasons[e.id]}
+                      </div>
+                    );
+                  },
+                  width: 300,
+                  minWidth: 200,
+                },
+              ]}
+              columnDisplay={preferences.contentDisplay}
+              stickyHeader
+              enableKeyboardNavigation
+              items={items}
+              loadingText="Loading resources"
+              trackBy="id"
+              empty={
+                <Box
+                  margin={{ vertical: 'xs' }}
+                  textAlign="center"
+                  color="inherit"
+                >
+                  <SpaceBetween size="m">
+                    <b>No resources</b>
+                    <Button>Create resource</Button>
+                  </SpaceBetween>
+                </Box>
+              }
+              filter={
+                <TextFilter
+                  filteringPlaceholder="Find resources"
+                  filteringText=""
+                  countText="0 matches"
+                />
+              }
+              header={<Header actions={selectModeControl(mode, setMode)} />}
+              preferences={
+                <CollectionPreferences
+                  title="Preferences"
+                  confirmLabel="Confirm"
+                  cancelLabel="Cancel"
+                  preferences={preferences}
+                  onConfirm={({ detail }) =>
+                    setPreferences({
+                      contentDisplay: detail.contentDisplay
+                        ? [...detail.contentDisplay]
+                        : [],
+                    })
+                  }
+                  contentDisplayPreference={{
+                    description:
+                      'Customize the visibility and order of the columns.',
+                    options: [
+                      {
+                        id: 'property',
+                        label: 'Property',
+                        alwaysVisible: true,
+                      },
+                      { id: 'type', label: 'Type' },
+                      { id: 'description', label: 'Description' },
+                      { id: 'value', label: 'Value' },
+                      { id: 'reason', label: 'Reason' },
+                    ],
+                  }}
+                />
+              }
+            />
+          )}
+          {mode === 'value' && (
+            <Container
+              header={
+                <Header
+                  variant="h2"
+                  description="Container description"
+                  actions={selectModeControl(mode, setMode)}
+                />
+              }
+            >
+              <CodeEditor
+                ace={ace}
+                language="json"
+                themes={{ light: ['github'], dark: ['github'] }}
+                value={values}
+                // loading={loading}
+                onValidate={({ detail }) => {
+                  console.log('onValidate', detail.annotations);
                 }}
+                preferences={acePreferences}
+                onPreferencesChange={(event) => {
+                  console.log('onPreferencesChange', event);
+                  setAcePreferences(event.detail);
+                }}
+                onDelayedChange={({ detail }) => setValues(detail.value)}
+                i18nStrings={i18nStrings}
               />
-            }
-          />
+            </Container>
+          )}
         </ContentLayout>
       )}
     </div>
