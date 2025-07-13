@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@cloudscape-design/code-view':
+        specifier: ^3.0.66
+        version: 3.0.66(@cloudscape-design/components@3.0.907(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@cloudscape-design/collection-hooks':
         specifier: ^1.0.62
         version: 1.0.62(react@18.3.1)
@@ -232,6 +235,12 @@ packages:
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
+
+  '@cloudscape-design/code-view@3.0.66':
+    resolution: {integrity: sha512-onj+QcwMqaEVbnq+Hdqf4dK3r3Fb2q1pNWnzNqI64LYUVlCMP67+gQzlWGW458Ptq5Vr9QsRbFr3aFkfF9pdMA==}
+    peerDependencies:
+      '@cloudscape-design/components': ^3
+      react: '>=18.2.0'
 
   '@cloudscape-design/collection-hooks@1.0.62':
     resolution: {integrity: sha512-oj7V5gOW3LA7ierhMfHbJb4bj2BLLXm7ao+L2LaMupHzLzXrWmEw217I/xbOZ+WTP5n1iaEiT5TCdNr1FmHEAw==}
@@ -699,6 +708,10 @@ packages:
 
   ace-builds@1.43.1:
     resolution: {integrity: sha512-n9/n+zBhbbkEJjU0FJ4wWAZBDl5G8WYzg4+uIjSER/U3wSSSSVo52W4sco4Jryg11JAJvorExxMr3GDINqtjdA==}
+
+  ace-code@1.43.1:
+    resolution: {integrity: sha512-Xr2bQ4CoK9VDSumd27o8nLykBOUmF6haj9Xm2gdM4Sh7BQLjOA90mpFQsJtAE3vCbB6KfB7I/Vqjyf3YvFNAew==}
+    engines: {node: '>= 0.6.0'}
 
   anymatch@3.1.3:
     resolution: {integrity: sha512-KMReFUr0B4t+D+OBkjR3KYqvocp2XaSzO55UcB6mgQMd3KbcE+mWTyvVV7D/zsdEbNnV6acZUutkiHQXvTr1Rw==}
@@ -1318,6 +1331,14 @@ snapshots:
   '@biomejs/cli-win32-x64@1.9.4':
     optional: true
 
+  '@cloudscape-design/code-view@3.0.66(@cloudscape-design/components@3.0.907(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@cloudscape-design/component-toolkit': 1.0.0-beta.88
+      '@cloudscape-design/components': 3.0.907(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      ace-code: 1.43.1
+      clsx: 1.2.1
+      react: 18.3.1
+
   '@cloudscape-design/collection-hooks@1.0.62(react@18.3.1)':
     dependencies:
       react: 18.3.1
@@ -1692,6 +1713,8 @@ snapshots:
       - supports-color
 
   ace-builds@1.43.1: {}
+
+  ace-code@1.43.1: {}
 
   anymatch@3.1.3:
     dependencies:

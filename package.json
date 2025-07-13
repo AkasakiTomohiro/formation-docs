@@ -15,6 +15,7 @@
     "@cloudscape-design/collection-hooks": "^1.0.62",
     "@cloudscape-design/components": "^3.0.907",
     "@cloudscape-design/global-styles": "^1.0.37",
+    "@cloudscape-design/code-view": "^3.0.66",
     "@hookform/resolvers": "^5.0.0",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "~2",

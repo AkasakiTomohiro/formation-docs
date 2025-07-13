@@ -9,7 +9,10 @@ import 'ace-builds/src-noconflict/theme-github';
 import jsonWorker from 'ace-builds/src-noconflict/worker-json?url';
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router';
+import { v4 as uuidV4 } from 'uuid';
 
+import CodeView from '@cloudscape-design/code-view/code-view';
+import jsonHighlight from '@cloudscape-design/code-view/highlight/json';
 import {
   Box,
   Button,
@@ -33,6 +36,7 @@ import {
   getManualManagementResourceProperties,
   getManualManagementResourceReasons,
   updateManualResourceMeta,
+  updateManualResourceProperties,
 } from '../../../../../invoke/ManualManagementResource';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
@@ -132,29 +136,12 @@ export const ManualResourceTab = (
     {},
   );
   const [mode, setMode] = useState<'reason' | 'value'>('reason');
-  const [values, setValues] = useState<string>('{}');
-  // const [ace, setAce] = useState<any>();
-  // const [loading, setLoading] = useState(true);
+  const [values, setValues] = useState<string>('');
+  const [editingValues, setEditingValues] = useState<string>('');
   const [acePreferences, setAcePreferences] = useState({});
-  const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
-
-  // useEffect(() => {
-  //   async function loadAce() {
-  //     const ace = await import('ace-builds');
-  //     ace.config.set('basePath', './ace/');
-  //     ace.config.set('themePath', './ace/');
-  //     ace.config.set('modePath', './ace/');
-  //     ace.config.set('workerPath', './ace/');
-  //     ace.config.set('useStrictCSP', true);
-  //     return ace;
-  //   }
-
-  //   loadAce()
-  //     .then((ace) => setAce(ace))
-  //     .finally(() => {
-  //       setLoading(false);
-  //     });
-  // }, []);
+  const { setResourceTabs, setFlashbarItems } =
+    useOutletContext<WorkspaceLayoutContext>();
+  const [isValid, setIsValid] = useState(true);
 
   useEffect(() => {
     Promise.all([
@@ -189,6 +176,8 @@ export const ManualResourceTab = (
       setItems(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
       setReasons(reasons);
+      setValues(JSON.stringify(properties, undefined, 2));
+      setEditingReasons(reasons);
       setIsEdit(false);
     });
   }, [props.selectedResourceId, schema]);
@@ -304,6 +293,7 @@ export const ManualResourceTab = (
                     <Button
                       onClick={() => {
                         setEditingReasons(reasons);
+                        setEditingValues(values);
                         setIsEdit(!isEdit);
                       }}
                     >
@@ -324,12 +314,46 @@ export const ManualResourceTab = (
                     <Button
                       variant="primary"
                       onClick={async () => {
+                        if (!isValid) {
+                          const id = uuidV4();
+                          setFlashbarItems((items) => [
+                            ...items,
+                            {
+                              type: 'error',
+                              header: '保存に失敗しました',
+                              content:
+                                'リソースプロパティのエラーをすべて修正してください',
+                              dismissible: true,
+                              dismissLabel: 'close',
+                              id: id,
+                              onDismiss: () => {
+                                setFlashbarItems((items) =>
+                                  items.filter((e) => e.id !== id),
+                                );
+                              },
+                            },
+                          ]);
+                          return;
+                        }
                         setReasons(editingReasons);
                         setIsEdit(!isEdit);
                         updateManualResourceMeta({
                           resource_id: props.selectedResourceId as string,
                           reasons: editingReasons,
                         });
+                        updateManualResourceProperties({
+                          resource_id: props.selectedResourceId as string,
+                          properties: editingValues,
+                        });
+                        const resourceTableItems = createResourceTableItems(
+                          schema as CloudFormationSchema,
+                          JSON.parse(editingValues),
+                        );
+                        setItems(resourceTableItems);
+                        setExpandedItems(
+                          createExpandedItems(resourceTableItems),
+                        );
+                        setValues(editingValues);
                       }}
                     >
                       保存
@@ -504,28 +528,36 @@ export const ManualResourceTab = (
               header={
                 <Header
                   variant="h2"
-                  description="Container description"
                   actions={selectModeControl(mode, setMode)}
                 />
               }
             >
-              <CodeEditor
-                ace={ace}
-                language="json"
-                themes={{ light: ['github'], dark: ['github'] }}
-                value={values}
-                // loading={loading}
-                onValidate={({ detail }) => {
-                  console.log('onValidate', detail.annotations);
-                }}
-                preferences={acePreferences}
-                onPreferencesChange={(event) => {
-                  console.log('onPreferencesChange', event);
-                  setAcePreferences(event.detail);
-                }}
-                onDelayedChange={({ detail }) => setValues(detail.value)}
-                i18nStrings={i18nStrings}
-              />
+              {isEdit ? (
+                <CodeEditor
+                  ace={ace}
+                  language="json"
+                  themes={{ light: ['github'], dark: ['github'] }}
+                  value={editingValues}
+                  // loading={loading}
+                  onValidate={({ detail }) => {
+                    setIsValid(detail.annotations.length === 0);
+                  }}
+                  preferences={acePreferences}
+                  onPreferencesChange={(event) => {
+                    setAcePreferences(event.detail);
+                  }}
+                  onDelayedChange={({ detail }) =>
+                    setEditingValues(detail.value)
+                  }
+                  i18nStrings={i18nStrings}
+                />
+              ) : (
+                <CodeView
+                  content={values}
+                  lineNumbers
+                  highlight={jsonHighlight}
+                />
+              )}
             </Container>
           )}
         </ContentLayout>
