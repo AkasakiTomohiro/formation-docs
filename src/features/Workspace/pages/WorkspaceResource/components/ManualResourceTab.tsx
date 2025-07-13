@@ -6,6 +6,7 @@ import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/snippets/json';
 import 'ace-builds/src-noconflict/theme-github';
+import jsonWorker from 'ace-builds/src-noconflict/worker-json?url';
 import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router';
 
@@ -34,6 +35,8 @@ import {
   updateManualResourceMeta,
 } from '../../../../../invoke/ManualManagementResource';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
+
+ace.config.setModuleUrl('ace/mode/json_worker', jsonWorker);
 
 import type { Dispatch } from 'react';
 import type { ManualManagementResource } from '../../../../../invoke/ManualManagementResource';
