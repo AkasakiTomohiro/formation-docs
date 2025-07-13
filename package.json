@@ -15,12 +15,14 @@
     "@cloudscape-design/collection-hooks": "^1.0.62",
     "@cloudscape-design/components": "^3.0.907",
     "@cloudscape-design/global-styles": "^1.0.37",
+    "@cloudscape-design/code-view": "^3.0.66",
     "@hookform/resolvers": "^5.0.0",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "~2",
     "@tauri-apps/plugin-http": "~2",
     "@tauri-apps/plugin-log": "~2.2.1",
     "@tauri-apps/plugin-opener": "^2",
+    "ace-builds": "^1.43.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
@@ -38,7 +40,8 @@
     "@vitejs/plugin-react": "^4.3.4",
     "lefthook": "^1.10.10",
     "typescript": "~5.6.2",
-    "vite": "^6.0.3"
+    "vite": "^6.0.3",
+    "vite-plugin-static-copy": "^3.1.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@biomejs/biome", "esbuild", "lefthook"]
