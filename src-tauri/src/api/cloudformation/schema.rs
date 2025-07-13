@@ -1,6 +1,13 @@
 use super::super::super::utils::AppError;
 use crate::command::app_config::APP_CONFIG_DIRECTORY_NAME;
-use std::{io::Cursor, path::PathBuf};
+use regex::Regex;
+use serde_json::Value;
+use std::{
+    collections::{HashMap, HashSet},
+    fs,
+    io::Cursor,
+    path::PathBuf,
+};
 use thiserror::Error;
 use zip::ZipArchive;
 
@@ -16,7 +23,12 @@ pub enum DlSchemaError {
     Io(#[from] std::io::Error),
     #[error("zip error: {0:?}")]
     Zip(#[from] zip::result::ZipError),
+    #[error("json error: {0}")]
+    Json(#[from] serde_json::Error),
 }
+
+/// CloudFormationのサービスとリソース種別のサマリー結果を保存するファイル名
+pub const SUMMARY_SERVICE_LIST_FILE: &str = "summary_service_list.json";
 
 fn get_resource_provider_dl_path(region: &str) -> String {
     return format!(
@@ -34,6 +46,42 @@ fn get_resource_provider_save_path(region: &str) -> Result<PathBuf, DlSchemaErro
             "Failed to get config local dir",
         ))),
     };
+}
+
+pub fn generate_summary_service_list(output_dir: PathBuf) -> Result<(), DlSchemaError> {
+    let mut result_map: HashMap<String, HashSet<String>> = HashMap::new();
+    let re = Regex::new(r"aws-([a-z\d]+)-([a-z\d]+)\.json").unwrap();
+    for entry in fs::read_dir(&output_dir)? {
+        if let Some(entry) = entry?.file_name().to_str() {
+            if re.is_match(entry) {
+                let file_path = output_dir.join(entry);
+                let schema_json = fs::read_to_string(&file_path)?;
+                let schema_json: Value = serde_json::from_str(&schema_json)?;
+                if schema_json.is_object() == true {
+                    let type_name = schema_json["typeName"]
+                        .as_str()
+                        .unwrap_or_default()
+                        .to_string();
+                    let parts: Vec<&str> = type_name.split("::").collect();
+                    let (_, service_name, resource_type): (&str, &str, &str) = match parts[..] {
+                        [a, b, c] => (a, b, c),
+                        _ => continue,
+                    };
+                    if let Some(original) = result_map.get_mut(service_name) {
+                        original.insert(resource_type.to_string());
+                    } else {
+                        let mut resource_types = HashSet::new();
+                        resource_types.insert(resource_type.to_string());
+                        result_map.insert(service_name.to_string(), resource_types);
+                    }
+                }
+            }
+        }
+    }
+    let summary_file_path = output_dir.join(SUMMARY_SERVICE_LIST_FILE);
+    let summary_json = serde_json::to_string(&result_map)?;
+    fs::write(summary_file_path, summary_json)?;
+    return Ok(());
 }
 
 pub fn get_resource_provider_save_dir(region: &str) -> Result<PathBuf, DlSchemaError> {
@@ -77,5 +125,6 @@ pub async fn dl_resource_provider(region: &str) -> Result<(), DlSchemaError> {
             std::io::copy(&mut file, &mut outfile)?;
         }
     }
+    generate_summary_service_list(output_dir)?;
     return Ok(());
 }
