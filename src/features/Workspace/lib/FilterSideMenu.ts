@@ -1,5 +1,5 @@
 import type { SideNavigationProps } from '@cloudscape-design/components';
-import type { TemplateSummary } from '../../../invoke/Stack';
+import type { TemplateSummary } from '../contexts/lib/LoadTemplateSummary';
 
 type SectionGroupItem =
   | SideNavigationProps.Section

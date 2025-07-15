@@ -49,25 +49,6 @@ export async function loadStack(stackName: string): Promise<StackInfo> {
   return result.value;
 }
 
-export type TemplateSummary = {
-  id: string;
-  sectionGroupName: string;
-  resources: {
-    serviceName: string;
-    recourseType: string[];
-  }[];
-};
-
-export async function loadTemplateSummary(): Promise<TemplateSummary[]> {
-  const result = await invoke<CommandResult<TemplateSummary[]>>(
-    'load_template_summary_command',
-  );
-  if (!result.success) {
-    throw new Error(result.value);
-  }
-  return result.value;
-}
-
 export type GetStackResourceListProps = {
   stack_id: string;
   service_name: string;

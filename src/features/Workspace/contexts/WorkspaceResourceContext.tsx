@@ -1,11 +1,11 @@
 import { createContext, useCallback, useContext, useState } from 'react';
 
-import { loadManualManagementResourceSummary } from '../../../invoke/ManualManagementResource';
-import { loadTemplateSummary } from '../../../invoke/Stack';
 import { ManualManagementId } from '../lib/FilterSideMenu';
+import { loadManualManagementResourceSummary } from './lib/LoadManualManagementResourceSummary';
+import { loadTemplateSummary } from './lib/LoadTemplateSummary';
 
-import type { TemplateSummary } from '../../../invoke/Stack';
 import type { WorkspaceResourceInfo } from '../pages';
+import type { TemplateSummary } from './lib/LoadTemplateSummary';
 
 import type { TokenGroupProps } from '@cloudscape-design/components';
 
