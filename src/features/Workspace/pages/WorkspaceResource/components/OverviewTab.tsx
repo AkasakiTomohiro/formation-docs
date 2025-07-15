@@ -19,6 +19,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
+  getStackOutputs,
   getStackParameters,
   loadStack,
   updateStackDetail,
@@ -43,6 +44,12 @@ const stackEditValidator = z.object({
 type stackParametersDisplayProps = {
   name: string;
   type: string;
+  description: string;
+};
+
+type stackOutputsDisplayProps = {
+  output: string;
+  export: string;
   description: string;
 };
 
@@ -99,6 +106,9 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
       });
       setStackParameters(parameters);
     });
+
+    // スタックのoutputを取得し、表中に表示する
+    getStackOutputs({ stack_id: props.stackId }).then((stackOutputs) => {});
   }, []);
 
   const setIsEdit = (isEdit: boolean) => {

@@ -454,6 +454,50 @@ async fn get_stack_parameters(
     return Ok(parameters_json);
 }
 
+async fn get_stack_outputs(workspace_directory: &str, stack_id: &str) -> Result<Value, StackError> {
+    let workspace = load_workspace(workspace_directory).await?;
+    let stack_file_name = match workspace.stacks.get(stack_id) {
+        Some(stack_file_name) => stack_file_name,
+        None => {
+            return Err(StackError::App(AppError::new("Stack not found")));
+        }
+    };
+    let template_path = format!("{}/{}", workspace_directory, stack_file_name);
+    let template_json = fs::read_to_string(&template_path)?;
+    let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
+    let outputs_json = template_json["Outputs"].clone();
+    if outputs_json.is_null() {
+        return Ok(Value::Object(serde_json::Map::new()));
+    }
+
+    // let result_json = if let Value::Object(map) = outputs_json {
+    //     let mut result_map = serde_json::Map::new();
+    //     for (key, value) in map.iter() {
+    //         if let Value::Object(output) = value {
+    //             let value = if let Value::Object(v) = value {
+    //                 serde_json::to_value(v)
+    //             } else {
+    //                 serde_json::to_value(&Value::Null)
+    //             };
+    //             let export = output.get("Export").and_then(|v| v.get("Name"));
+    //             let description = output.get("Description").cloned().unwrap_or(Value::Null);
+    //             result_map.insert(
+    //                 key.clone(),
+    //                 Value::Object(serde_json::Map::from_iter(vec![
+    //                     ("export".to_string(), export.unwrap_or(Value::Null)),
+    //                     ("description".to_string(), description),
+    //                 ])),
+    //             );
+    //         }
+    //     }
+    //     Value::Object(result_map)
+    // } else {
+    //     outputs_json
+    // }
+
+    return Ok(outputs_json);
+}
+
 async fn update_stack_meta(
     workspace_directory: &str,
     stack_id: &str,
@@ -655,6 +699,23 @@ pub async fn get_stack_resource_properties_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_parameters_command(
+    window: tauri::Window,
+    stack_id: &str,
+) -> Result<CommandResult<Value>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match get_stack_parameters(window_state.workspace_directory.as_str(), stack_id).await {
+        Ok(parameters) => Ok(CommandResult::success(parameters)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_stack_output_command(
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<Value>, CommandResult> {
