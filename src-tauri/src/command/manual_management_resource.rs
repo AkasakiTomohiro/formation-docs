@@ -174,21 +174,26 @@ pub struct ManualManagementResourceSummary {
     pub description: String,
 }
 
-/// 手動管理リソースの一覧を取得する
+/// 指定したサービス名・リソースタイプの手動管理リソースの一覧を取得する
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 async fn get_manual_management_resource_list(
     workspace_directory: &str,
+    service_name: &str,
+    resource_name: &str,
 ) -> Result<Vec<ManualManagementResourceSummary>, ManualManagementResourceError> {
     let manual_management_resources = get_manual_management_resources(workspace_directory).await?;
     let mut result: Vec<ManualManagementResourceSummary> = Vec::new();
 
+    let r#type = format!("AWS::{}::{}", service_name, resource_name);
     for (resource_id, manual_management_resource) in manual_management_resources.resources.iter() {
-        result.push(ManualManagementResourceSummary {
-            resource_id: resource_id.clone(),
-            r#type: manual_management_resource.r#type.clone(),
-            description: manual_management_resource.description.clone(),
-        })
+        if manual_management_resource.r#type == r#type {
+            result.push(ManualManagementResourceSummary {
+                resource_id: resource_id.clone(),
+                r#type: manual_management_resource.r#type.clone(),
+                description: manual_management_resource.description.clone(),
+            })
+        }
     }
 
     return Ok(result);
@@ -310,6 +315,36 @@ async fn update_manual_resource_meta(
     return Ok(());
 }
 
+async fn update_manual_resource_properties(
+    workspace_directory: &str,
+    resource_id: &str,
+    properties: String,
+) -> Result<(), ManualManagementResourceError> {
+    let mut manual_management_resources =
+        get_manual_management_resources(workspace_directory).await?;
+    let resource = manual_management_resources
+        .resources
+        .get_mut(resource_id)
+        .ok_or(ManualManagementResourceError::App(AppError::new(
+            "Resource ID not found.",
+        )))?;
+    let parse_properties: Value = serde_json::from_str(&properties)?;
+    if parse_properties.is_object() == false {
+        return Err(ManualManagementResourceError::App(AppError::new(
+            "Invalid properties format. Expected an object.",
+        )));
+    }
+    let parse_properties: HashMap<String, Value> = parse_properties
+        .as_object()
+        .unwrap()
+        .clone()
+        .into_iter()
+        .collect();
+    resource.properties = parse_properties;
+    save_manual_management_resources(workspace_directory, &manual_management_resources).await?;
+    return Ok(());
+}
+
 #[tauri::command(rename_all = "snake_case")]
 pub async fn new_manual_management_resource_command(
     window: tauri::Window,
@@ -341,6 +376,8 @@ pub async fn new_manual_management_resource_command(
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_management_resource_list_command(
     window: tauri::Window,
+    service_name: &str,
+    resource_name: &str,
 ) -> Result<CommandResult<Vec<ManualManagementResourceSummary>>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
@@ -348,8 +385,12 @@ pub async fn get_manual_management_resource_list_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_manual_management_resource_list(window_state.workspace_directory.as_str())
-        .await
+    return match get_manual_management_resource_list(
+        window_state.workspace_directory.as_str(),
+        service_name,
+        resource_name,
+    )
+    .await
     {
         Ok(list) => Ok(CommandResult::success(list)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
@@ -435,6 +476,30 @@ pub async fn update_manual_resource_meta_command(
                 reasons,
             }),
         },
+    )
+    .await
+    {
+        Ok(_) => Ok(CommandResult::success(())),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn update_manual_resource_properties_command(
+    window: tauri::Window,
+    resource_id: &str,
+    properties: String,
+) -> Result<CommandResult<()>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match update_manual_resource_properties(
+        window_state.workspace_directory.as_str(),
+        resource_id,
+        properties,
     )
     .await
     {

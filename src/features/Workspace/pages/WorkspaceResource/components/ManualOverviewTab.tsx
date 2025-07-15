@@ -25,8 +25,6 @@ import { hrefBuilder } from '../../../lib/FilterSideMenu';
 
 import type { WorkspaceLayoutContext } from '../../../Layout';
 
-import type { AWSService } from '../../../../../invoke/CloudFormationSchema';
-
 import type { SelectProps } from '@cloudscape-design/components';
 import type { ResourceInfo } from '../WorkspaceResource';
 import type { ManualResourceTabProps } from './ManualResourceTab';
@@ -38,6 +36,10 @@ const resourceEditValidator = z.object({
 });
 
 type WorkspaceEditType = z.infer<typeof resourceEditValidator>;
+export type AWSService = {
+  service_name: string;
+  resources: string[];
+};
 
 export function buildManualOverviewTabName(): string {
   return '手動管理リソース';
@@ -73,7 +75,14 @@ export const ManualOverviewTab = (): JSX.Element => {
 
   useEffect(() => {
     getAWSServiceList().then((services) => {
-      setServices(services);
+      setServices(
+        Object.entries(services)
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map((m) => ({
+            service_name: m[0],
+            resources: m[1].sort((x, y) => x.localeCompare(y)),
+          })),
+      );
     });
   }, []);
 
