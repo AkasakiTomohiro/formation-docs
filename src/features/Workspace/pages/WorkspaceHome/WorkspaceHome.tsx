@@ -14,12 +14,12 @@ import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 import { open } from '@tauri-apps/plugin-dialog';
 
+import { useWorkspaceResourceContext } from '../../contexts';
 import { useStacks } from './hooks/useStacks';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
 import type { StackInfo } from '../../../../invoke/Stack';
 import type { WorkspaceLayoutContext } from '../../Layout';
-
 export const WorkspaceHome = (): JSX.Element => {
   const workspace = useOutletContext<WorkspaceLayoutContext>();
   const navigate = useNavigate();
@@ -34,6 +34,7 @@ export const WorkspaceHome = (): JSX.Element => {
       pagination: { pageSize: 10 },
     },
   );
+  const { loadSideMenu } = useWorkspaceResourceContext();
 
   const importStackWrap = useCallback(async () => {
     const selectedFile = await open({
@@ -52,7 +53,7 @@ export const WorkspaceHome = (): JSX.Element => {
       importStack(selectedFile)
         .then(async () => {
           await loadStacks();
-          await workspace.loadTemplateSummaryWrap();
+          await loadSideMenu();
         })
         .catch((error) => {
           const id = uuidV4();
@@ -72,7 +73,7 @@ export const WorkspaceHome = (): JSX.Element => {
           ]);
         });
     }
-  }, [workspace, flashbarItems, importStack, loadStacks]);
+  }, [workspace, flashbarItems, importStack, loadStacks, loadSideMenu]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -176,7 +177,7 @@ export const WorkspaceHome = (): JSX.Element => {
                   onClick={async () => {
                     deleteStack(selectedItems[0]);
                     setSelectedItems([]);
-                    await workspace.loadTemplateSummaryWrap();
+                    await loadSideMenu();
                   }}
                   disabled={selectedItems.length === 0}
                 >

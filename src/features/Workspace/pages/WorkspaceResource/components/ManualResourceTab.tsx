@@ -38,6 +38,7 @@ import {
   updateManualResourceMeta,
   updateManualResourceProperties,
 } from '../../../../../invoke/ManualManagementResource';
+import { useWorkspaceResourceContext } from '../../../contexts';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
 ace.config.setModuleUrl('ace/mode/json_worker', jsonWorker);
@@ -139,8 +140,8 @@ export const ManualResourceTab = (
   const [values, setValues] = useState<string>('');
   const [editingValues, setEditingValues] = useState<string>('');
   const [acePreferences, setAcePreferences] = useState({});
-  const { setResourceTabs, setFlashbarItems } =
-    useOutletContext<WorkspaceLayoutContext>();
+  const { setFlashbarItems } = useOutletContext<WorkspaceLayoutContext>();
+  const { setResourceTabs } = useWorkspaceResourceContext();
   const [isValid, setIsValid] = useState(true);
 
   useEffect(() => {

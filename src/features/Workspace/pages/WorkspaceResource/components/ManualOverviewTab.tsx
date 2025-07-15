@@ -21,6 +21,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { getAWSServiceList } from '../../../../../invoke/CloudFormationSchema';
 import { newManualManagementResource } from '../../../../../invoke/ManualManagementResource';
+import { useWorkspaceResourceContext } from '../../../contexts';
 import { hrefBuilder } from '../../../lib/FilterSideMenu';
 
 import type { WorkspaceLayoutContext } from '../../../Layout';
@@ -65,13 +66,9 @@ export const ManualOverviewTab = (): JSX.Element => {
         resourceName: '',
       },
     });
-  const {
-    flashbarItems,
-    setFlashbarItems,
-    loadTemplateSummaryWrap,
-    setResourceTabs,
-    setActiveTabId,
-  } = useOutletContext<WorkspaceLayoutContext>();
+  const { flashbarItems, setFlashbarItems } =
+    useOutletContext<WorkspaceLayoutContext>();
+  const { loadSideMenu, addResourceTab } = useWorkspaceResourceContext();
 
   useEffect(() => {
     getAWSServiceList().then((services) => {
@@ -95,7 +92,7 @@ export const ManualOverviewTab = (): JSX.Element => {
       resource_name: data.resourceName,
     })
       .then(async () => {
-        loadTemplateSummaryWrap();
+        loadSideMenu();
         const tabId = hrefBuilder({
           type: 'manualResource',
           serviceName: data.serviceName,
@@ -108,15 +105,7 @@ export const ManualOverviewTab = (): JSX.Element => {
           resourceName: data.resourceName,
           selectedResourceId: data.resourceId,
         };
-        setResourceTabs((prev) => {
-          const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
-          if (existingTab) {
-            return prev;
-          }
-          return [...prev, newTab];
-        });
-        setActiveTabId(tabId);
-
+        addResourceTab(newTab);
         setRegistering(null);
         setSelectedService(null);
         setSelectedResource(null);
