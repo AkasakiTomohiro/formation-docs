@@ -21,6 +21,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { getAWSServiceList } from '../../../../../invoke/CloudFormationSchema';
 import { newManualManagementResource } from '../../../../../invoke/ManualManagementResource';
+import { useWorkspaceResourceContext } from '../../../contexts';
 import { hrefBuilder } from '../../../lib/FilterSideMenu';
 
 import type { WorkspaceLayoutContext } from '../../../Layout';
@@ -65,13 +66,10 @@ export const ManualOverviewTab = (): JSX.Element => {
         resourceName: '',
       },
     });
-  const {
-    flashbarItems,
-    setFlashbarItems,
-    loadTemplateSummaryWrap,
-    setResourceTabs,
-    setActiveTabId,
-  } = useOutletContext<WorkspaceLayoutContext>();
+  const { flashbarItems, setFlashbarItems } =
+    useOutletContext<WorkspaceLayoutContext>();
+  const { setResourceTabs, setActiveTabId, loadSideMenu } =
+    useWorkspaceResourceContext();
 
   useEffect(() => {
     getAWSServiceList().then((services) => {
@@ -95,7 +93,7 @@ export const ManualOverviewTab = (): JSX.Element => {
       resource_name: data.resourceName,
     })
       .then(async () => {
-        loadTemplateSummaryWrap();
+        loadSideMenu();
         const tabId = hrefBuilder({
           type: 'manualResource',
           serviceName: data.serviceName,

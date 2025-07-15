@@ -10,6 +10,7 @@ import {
   WorkspaceResource,
   workspaceLoader,
 } from './features/Workspace';
+import { WorkspaceResourceProvider } from './features/Workspace/contexts/WorkspaceResourceContext';
 
 const router = createBrowserRouter([
   {
@@ -32,7 +33,9 @@ const router = createBrowserRouter([
     path: 'workspaces/:workspaceId',
     element: (
       <Header>
-        <WorkspaceLayout />
+        <WorkspaceResourceProvider>
+          <WorkspaceLayout />
+        </WorkspaceResourceProvider>
       </Header>
     ),
     loader: workspaceLoader,

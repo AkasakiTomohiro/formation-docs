@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet, useLoaderData, useNavigate } from 'react-router';
 import styled from 'styled-components';
 
@@ -11,31 +11,17 @@ import {
   TokenGroup,
 } from '@cloudscape-design/components';
 
-import { loadManualManagementResourceSummary } from '../../invoke/ManualManagementResource';
-import { loadTemplateSummary } from '../../invoke/Stack';
-import {
-  ManualManagementId,
-  filterSideMenu,
-  hrefParser,
-} from './lib/FilterSideMenu';
+import { useWorkspaceResourceContext } from './contexts/WorkspaceResourceContext';
+import { filterSideMenu, hrefParser } from './lib/FilterSideMenu';
 
 import type { WorkspaceResourceInfo } from './pages';
 
-import type {
-  FlashbarProps,
-  TokenGroupProps,
-} from '@cloudscape-design/components';
-import type { TemplateSummary } from '../../invoke/Stack';
+import type { FlashbarProps } from '@cloudscape-design/components';
 
 import type { Dispatch, SetStateAction } from 'react';
 import type { WorkspaceLayoutLoaderData } from './Loader';
 
 export type WorkspaceLayoutContext = WorkspaceLayoutLoaderData & {
-  resourceTabs: WorkspaceResourceInfo[];
-  setResourceTabs: Dispatch<SetStateAction<WorkspaceResourceInfo[]>>;
-  activeTabId: string | undefined;
-  setActiveTabId: Dispatch<SetStateAction<string | undefined>>;
-  loadTemplateSummaryWrap: () => Promise<void>;
   flashbarItems: FlashbarProps.MessageDefinition[];
   setFlashbarItems: Dispatch<SetStateAction<FlashbarProps.MessageDefinition[]>>;
 };
@@ -52,43 +38,29 @@ const StyledLink = styled.a`
 export const WorkspaceLayout = (): JSX.Element => {
   const workspace = useLoaderData<WorkspaceLayoutLoaderData>();
   const navigate = useNavigate();
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [tokenGroup, setTokenGroup] = useState<TokenGroupProps.Item[]>([]);
-  const [resourceTabs, setResourceTabs] = useState<WorkspaceResourceInfo[]>([]);
-  const [activeTabId, setActiveTabId] = useState<string | undefined>(undefined);
-  const [sideMenu, setSideMenu] = useState<TemplateSummary[]>([]);
+  const {
+    searchValue,
+    setSearchValue,
+    tokenGroup,
+    setTokenGroup,
+    setResourceTabs,
+    setActiveTabId,
+    sideMenu,
+    loadSideMenu,
+  } = useWorkspaceResourceContext();
+
+  // エラー表示
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
   >([]);
 
-  const loadTemplateSummaryWrap = useCallback(() => {
-    return Promise.all([
-      loadTemplateSummary(),
-      loadManualManagementResourceSummary(),
-    ]).then(([templateSummary, manualManagementSummary]) => {
-      setSideMenu([
-        ...templateSummary,
-        {
-          id: ManualManagementId,
-          sectionGroupName: '手動管理リソース',
-          resources: manualManagementSummary,
-        },
-      ]);
-    });
-  }, []);
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    loadTemplateSummaryWrap();
+    loadSideMenu();
   }, []);
 
   const context: WorkspaceLayoutContext = {
     ...workspace,
-    resourceTabs,
-    setResourceTabs,
-    activeTabId,
-    setActiveTabId,
-    loadTemplateSummaryWrap,
     flashbarItems,
     setFlashbarItems,
   };
@@ -217,18 +189,6 @@ export const WorkspaceLayout = (): JSX.Element => {
           }}
         />
       }
-      // notifications={
-      //   <Flashbar
-      //     items={[
-      //       {
-      //         type: 'info',
-      //         dismissible: true,
-      //         content: 'This is an info flash message.',
-      //         id: 'message_1',
-      //       },
-      //     ]}
-      //   />
-      // }
       content={
         <div key="sample" style={{ margin: '16px' }}>
           <SpaceBetween size="m">

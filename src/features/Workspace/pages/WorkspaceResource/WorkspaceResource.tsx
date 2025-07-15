@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { useLocation, useOutletContext } from 'react-router';
+import { useLocation } from 'react-router';
 
 import { Tabs } from '@cloudscape-design/components';
 
+import { useWorkspaceResourceContext } from '../../contexts/WorkspaceResourceContext';
 import {
   OverviewTab,
   ResourceTab,
@@ -18,7 +19,6 @@ import {
 
 import type { ManualResourceTabProps } from './components/ManualResourceTab';
 
-import type { WorkspaceLayoutContext } from '../../Layout';
 import type { OverviewTabProps, ResourceTabProps } from './components';
 export type ResourceInfo<
   TType extends string,
@@ -35,7 +35,7 @@ export type WorkspaceResourceInfo =
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
   const { resourceTabs, setResourceTabs, activeTabId, setActiveTabId } =
-    useOutletContext<WorkspaceLayoutContext>();
+    useWorkspaceResourceContext();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
