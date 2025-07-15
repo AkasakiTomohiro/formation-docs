@@ -31,6 +31,12 @@ export interface WorkspaceResourceContext {
   >;
 
   /**
+   * リソースタブ追加関数
+   * @param tab - 追加するタブ情報
+   */
+  addResourceTab: (tab: WorkspaceResourceInfo) => void;
+
+  /**
    * アクティブタブID
    */
   activeTabId: string | undefined;
@@ -40,7 +46,6 @@ export interface WorkspaceResourceContext {
    * サイドメニュー要素
    */
   sideMenu: TemplateSummary[];
-  setSideMenu: React.Dispatch<React.SetStateAction<TemplateSummary[]>>;
 
   /**
    * サイドメニュー要素取得関数
@@ -61,14 +66,14 @@ const WorkspaceResourceContext = createContext<WorkspaceResourceContext>({
   setResourceTabs: () => {
     throw new Error('setResourceTabs is not implemented');
   },
+  addResourceTab: () => {
+    throw new Error('addResourceTab is not implemented');
+  },
   activeTabId: undefined,
   setActiveTabId: () => {
     throw new Error('setActiveTabId is not implemented');
   },
   sideMenu: [],
-  setSideMenu: () => {
-    throw new Error('setSideMenu is not implemented');
-  },
   loadSideMenu: () => {
     throw new Error('loadSideMenu is not implemented');
   },
@@ -113,6 +118,18 @@ export const WorkspaceResourceProvider = ({
     });
   }, []);
 
+  // リソースタブ追加関数
+  const addResourceTab = useCallback((newTab: WorkspaceResourceInfo) => {
+    setResourceTabs((prev) => {
+      const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
+      if (existingTab) {
+        return prev;
+      }
+      return [...prev, newTab];
+    });
+    setActiveTabId(newTab.tabId);
+  }, []);
+
   return (
     <WorkspaceResourceContext.Provider
       value={{
@@ -122,10 +139,10 @@ export const WorkspaceResourceProvider = ({
         setTokenGroup,
         resourceTabs,
         setResourceTabs,
+        addResourceTab,
         activeTabId,
         setActiveTabId,
         sideMenu,
-        setSideMenu,
         loadSideMenu,
       }}
     >

@@ -68,8 +68,7 @@ export const ManualOverviewTab = (): JSX.Element => {
     });
   const { flashbarItems, setFlashbarItems } =
     useOutletContext<WorkspaceLayoutContext>();
-  const { setResourceTabs, setActiveTabId, loadSideMenu } =
-    useWorkspaceResourceContext();
+  const { loadSideMenu, addResourceTab } = useWorkspaceResourceContext();
 
   useEffect(() => {
     getAWSServiceList().then((services) => {
@@ -106,15 +105,7 @@ export const ManualOverviewTab = (): JSX.Element => {
           resourceName: data.resourceName,
           selectedResourceId: data.resourceId,
         };
-        setResourceTabs((prev) => {
-          const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
-          if (existingTab) {
-            return prev;
-          }
-          return [...prev, newTab];
-        });
-        setActiveTabId(tabId);
-
+        addResourceTab(newTab);
         setRegistering(null);
         setSelectedService(null);
         setSelectedResource(null);

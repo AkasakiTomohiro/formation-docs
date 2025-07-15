@@ -44,7 +44,7 @@ export const WorkspaceLayout = (): JSX.Element => {
     tokenGroup,
     setTokenGroup,
     setResourceTabs,
-    setActiveTabId,
+    addResourceTab,
     sideMenu,
     loadSideMenu,
   } = useWorkspaceResourceContext();
@@ -174,17 +174,7 @@ export const WorkspaceLayout = (): JSX.Element => {
                 break;
               }
             }
-
-            setResourceTabs((prev) => {
-              const existingTab = prev.find(
-                (tab) => tab.tabId === newTab.tabId,
-              );
-              if (existingTab) {
-                return prev;
-              }
-              return [...prev, newTab];
-            });
-            setActiveTabId(href);
+            addResourceTab(newTab);
             navigate(`/workspaces/${workspace.id}/resources`);
           }}
         />

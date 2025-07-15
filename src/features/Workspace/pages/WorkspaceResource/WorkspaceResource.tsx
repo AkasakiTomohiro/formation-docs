@@ -34,8 +34,13 @@ export type WorkspaceResourceInfo =
 
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
-  const { resourceTabs, setResourceTabs, activeTabId, setActiveTabId } =
-    useWorkspaceResourceContext();
+  const {
+    resourceTabs,
+    setResourceTabs,
+    addResourceTab,
+    activeTabId,
+    setActiveTabId,
+  } = useWorkspaceResourceContext();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -50,14 +55,7 @@ export const WorkspaceResource = (): JSX.Element => {
           stackName,
           description: '',
         };
-        setResourceTabs((prev) => {
-          const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
-          if (existingTab) {
-            return prev;
-          }
-          return [...prev, newTab];
-        });
-        setActiveTabId(`${stackId}/${stackName}`);
+        addResourceTab(newTab);
       }
     }
   }, []);
