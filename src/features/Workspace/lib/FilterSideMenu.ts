@@ -118,7 +118,7 @@ export const filterSideMenu = (
       }
     }
     // overviewの要素が初期に追加されているため、検索結果が1件もない場合配列の要素は1つ
-    if (newChildren.length <= 1) {
+    if (newChildren.length <= 1 && item.id !== ManualManagementId) {
       continue;
     }
     const newItem: SideNavigationProps.SectionGroup = {
@@ -155,7 +155,7 @@ export type HrefType =
       resourceType: string;
     };
 
-const hrefBuilder = (props: HrefType): string => {
+export const hrefBuilder = (props: HrefType): string => {
   switch (props.type) {
     case 'overview':
       return `overview:${props.stackId}/${props.sectionGroupName}`;
