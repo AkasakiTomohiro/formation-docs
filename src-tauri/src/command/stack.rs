@@ -728,14 +728,14 @@ pub async fn get_stack_parameters_command(
 pub async fn get_stack_output_command(
     window: tauri::Window,
     stack_id: &str,
-) -> Result<CommandResult<Value>, CommandResult> {
+) -> Result<CommandResult<Vec<StackOutput>>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
         None => {
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_stack_parameters(window_state.workspace_directory.as_str(), stack_id).await {
+    return match get_stack_outputs(window_state.workspace_directory.as_str(), stack_id).await {
         Ok(parameters) => Ok(CommandResult::success(parameters)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
