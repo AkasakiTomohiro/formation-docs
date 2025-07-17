@@ -454,7 +454,25 @@ async fn get_stack_parameters(
     return Ok(parameters_json);
 }
 
-async fn get_stack_outputs(workspace_directory: &str, stack_id: &str) -> Result<Value, StackError> {
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StackOutput {
+    name: String,
+    description: Option<String>,
+    export_name: Option<String>,
+    value: Value,
+}
+
+/// 対象スタックのOutputsを取得する
+///
+/// 対象スタックのOutputsがない場合は、空配列を返す
+///
+/// - `workspace_directory` - ワークスペースのディレクトリパス
+/// - `stack_id` - スタックのID
+async fn get_stack_outputs(
+    workspace_directory: &str,
+    stack_id: &str,
+) -> Result<Vec<StackOutput>, StackError> {
     let workspace = load_workspace(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
@@ -466,36 +484,28 @@ async fn get_stack_outputs(workspace_directory: &str, stack_id: &str) -> Result<
     let template_json = fs::read_to_string(&template_path)?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
     let outputs_json = template_json["Outputs"].clone();
-    if outputs_json.is_null() {
-        return Ok(Value::Object(serde_json::Map::new()));
+
+    let mut result: Vec<StackOutput> = Vec::new();
+    if let Some(outputs) = outputs_json.as_object() {
+        for (key, value) in outputs.iter() {
+            let result_item = StackOutput {
+                name: key.to_string(),
+                description: value
+                    .get("Description")
+                    .and_then(|desc| desc.as_str())
+                    .map(|s| s.to_string()),
+                export_name: value
+                    .get("Export")
+                    .and_then(|export| export.get("Name"))
+                    .and_then(|name| name.as_str())
+                    .map(|str| str.to_string()),
+                value: value["Value"].clone(),
+            };
+            result.push(result_item);
+        }
     }
 
-    // let result_json = if let Value::Object(map) = outputs_json {
-    //     let mut result_map = serde_json::Map::new();
-    //     for (key, value) in map.iter() {
-    //         if let Value::Object(output) = value {
-    //             let value = if let Value::Object(v) = value {
-    //                 serde_json::to_value(v)
-    //             } else {
-    //                 serde_json::to_value(&Value::Null)
-    //             };
-    //             let export = output.get("Export").and_then(|v| v.get("Name"));
-    //             let description = output.get("Description").cloned().unwrap_or(Value::Null);
-    //             result_map.insert(
-    //                 key.clone(),
-    //                 Value::Object(serde_json::Map::from_iter(vec![
-    //                     ("export".to_string(), export.unwrap_or(Value::Null)),
-    //                     ("description".to_string(), description),
-    //                 ])),
-    //             );
-    //         }
-    //     }
-    //     Value::Object(result_map)
-    // } else {
-    //     outputs_json
-    // }
-
-    return Ok(outputs_json);
+    return Ok(result);
 }
 
 async fn update_stack_meta(
