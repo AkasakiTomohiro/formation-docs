@@ -9,6 +9,13 @@ import type { TemplateSummary } from './lib/LoadTemplateSummary';
 
 import type { TokenGroupProps } from '@cloudscape-design/components';
 
+export type TabInfo<
+  TType extends string,
+  T extends { tabId: string } = { tabId: string },
+> = {
+  type: TType;
+} & T;
+
 export interface WorkspaceResourceContext {
   /**
    * 検索ワード
@@ -35,6 +42,16 @@ export interface WorkspaceResourceContext {
    * @param tab - 追加するタブ情報
    */
   addResourceTab: (tab: WorkspaceResourceInfo) => void;
+
+  /**
+   * リソースタブ変更関数
+   * @param tabId - 変更するタブのID
+   * @param modifyFn - タブ情報を変更する関数
+   */
+  modifyResourceTab: <T extends WorkspaceResourceInfo = WorkspaceResourceInfo>(
+    tabId: string,
+    modifyFn: (originTab: T) => T,
+  ) => void;
 
   /**
    * アクティブタブID
@@ -68,6 +85,9 @@ const WorkspaceResourceContext = createContext<WorkspaceResourceContext>({
   },
   addResourceTab: () => {
     throw new Error('addResourceTab is not implemented');
+  },
+  modifyResourceTab: () => {
+    throw new Error('modifyResourceTab is not implemented');
   },
   activeTabId: undefined,
   setActiveTabId: () => {
@@ -130,6 +150,24 @@ export const WorkspaceResourceProvider = ({
     setActiveTabId(newTab.tabId);
   }, []);
 
+  // リソースタブ変更関数
+  const modifyResourceTab = useCallback(
+    <T extends WorkspaceResourceInfo = WorkspaceResourceInfo>(
+      tabId: string,
+      modifyFn: (originTab: T) => T,
+    ) => {
+      setResourceTabs((prev) =>
+        prev.map((tab) => {
+          if (tab.tabId === tabId) {
+            return modifyFn(tab as T);
+          }
+          return tab;
+        }),
+      );
+    },
+    [],
+  );
+
   return (
     <WorkspaceResourceContext.Provider
       value={{
@@ -140,6 +178,7 @@ export const WorkspaceResourceProvider = ({
         resourceTabs,
         setResourceTabs,
         addResourceTab,
+        modifyResourceTab,
         activeTabId,
         setActiveTabId,
         sideMenu,

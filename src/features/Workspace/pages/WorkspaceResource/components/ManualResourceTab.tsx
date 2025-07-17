@@ -41,6 +41,7 @@ import {
 import { useWorkspaceResourceContext } from '../../../contexts';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
+import type { TabInfo } from '../../../contexts';
 ace.config.setModuleUrl('ace/mode/json_worker', jsonWorker);
 
 import type { Dispatch } from 'react';
@@ -56,6 +57,11 @@ export type ManualResourceTabProps = {
   resourceName: string;
   selectedResourceId?: string;
 };
+
+export type ManualResourceTabInfo = TabInfo<
+  'manualResource',
+  ManualResourceTabProps
+>;
 
 export type BuildManualResourceTabNameProps = {
   serviceName: string;
@@ -141,7 +147,7 @@ export const ManualResourceTab = (
   const [editingValues, setEditingValues] = useState<string>('');
   const [acePreferences, setAcePreferences] = useState({});
   const { setFlashbarItems } = useOutletContext<WorkspaceLayoutContext>();
-  const { setResourceTabs } = useWorkspaceResourceContext();
+  const { modifyResourceTab } = useWorkspaceResourceContext();
   const [isValid, setIsValid] = useState(true);
 
   useEffect(() => {
@@ -209,18 +215,15 @@ export const ManualResourceTab = (
                     href="#"
                     onClick={(event) => {
                       event.stopPropagation();
-                      setResourceTabs((prev) => {
-                        const resourceTabs = prev.map((tab) => {
-                          if (tab.tabId === props.tabId) {
-                            return {
-                              ...tab,
-                              selectedResourceId: item.resourceId,
-                            };
-                          }
-                          return tab;
-                        });
-                        return resourceTabs;
-                      });
+                      modifyResourceTab(
+                        props.tabId,
+                        (originTab: ManualResourceTabInfo) => {
+                          return {
+                            ...originTab,
+                            selectedResourceId: item.resourceId,
+                          };
+                        },
+                      );
                     }}
                   >
                     {item.resourceId}

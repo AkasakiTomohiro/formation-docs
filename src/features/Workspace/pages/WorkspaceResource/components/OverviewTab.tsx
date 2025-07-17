@@ -25,6 +25,7 @@ import {
 import { useWorkspaceResourceContext } from '../../../contexts';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
+import type { TabInfo } from '../../../contexts';
 
 export type OverviewTabProps = {
   tabId: string;
@@ -33,6 +34,8 @@ export type OverviewTabProps = {
   description: string;
   isEdit?: boolean;
 };
+
+export type OverviewTabInfo = TabInfo<'overview', OverviewTabProps>;
 
 const stackEditValidator = z.object({
   name: z.string().min(1).max(256),
@@ -57,7 +60,7 @@ export function buildOverviewTabName({
 }
 
 export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
-  const { setResourceTabs } = useWorkspaceResourceContext();
+  const { modifyResourceTab } = useWorkspaceResourceContext();
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
   >([]);
@@ -72,17 +75,12 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
       const description = stackDetail.description_from_meta;
 
       // 取得したスタック情報を更新
-      setResourceTabs((prev) => {
-        return prev.map((tab) => {
-          if (tab.tabId === props.tabId) {
-            return {
-              ...tab,
-              stackName: stackName,
-              description: description,
-            };
-          }
-          return tab;
-        });
+      modifyResourceTab(props.tabId, (originTab: OverviewTabInfo) => {
+        return {
+          ...originTab,
+          stackName: stackName,
+          description: description,
+        };
       });
     });
 
@@ -102,17 +100,12 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
 
   const setIsEdit = (isEdit: boolean) => {
     // 編集モードに入る場合、リソースタブの情報を更新
-    setResourceTabs((prev) =>
-      prev.map((tab) => {
-        if (tab.tabId === props.tabId) {
-          return {
-            ...tab,
-            isEdit: isEdit,
-          };
-        }
-        return tab;
-      }),
-    );
+    modifyResourceTab(props.tabId, (originTab: OverviewTabInfo) => {
+      return {
+        ...originTab,
+        isEdit: isEdit,
+      };
+    });
   };
 
   return props.isEdit ? (
@@ -225,7 +218,7 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
       description: resourceTab.description,
     },
   });
-  const { setResourceTabs } = useWorkspaceResourceContext();
+  const { modifyResourceTab } = useWorkspaceResourceContext();
 
   const onSave = async (stackDetailProps: StackEditType) => {
     try {
@@ -236,17 +229,14 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
       });
 
       // 保存したスタックの情報を更新
-      setResourceTabs((prev) =>
-        prev.map((tab) =>
-          tab.tabId === resourceTab.tabId
-            ? {
-                ...tab,
-                stackName: stackDetailProps.name,
-                description: stackDetailProps.description,
-              }
-            : tab,
-        ),
-      );
+      modifyResourceTab(resourceTab.tabId, (originTab: OverviewTabInfo) => {
+        return {
+          ...originTab,
+          stackName: stackDetailProps.name,
+          description: stackDetailProps.description,
+        };
+      });
+
       // Stack詳細表示画面に戻る
       setIsEdit(false);
     } catch (error) {

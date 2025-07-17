@@ -17,20 +17,19 @@ import {
   buildManualResourceTabName,
 } from './components/ManualResourceTab';
 
-import type { ManualResourceTabProps } from './components/ManualResourceTab';
+import type { ManualResourceTabInfo } from './components/ManualResourceTab';
 
-import type { OverviewTabProps, ResourceTabProps } from './components';
-export type ResourceInfo<
-  TType extends string,
-  T extends { tabId: string } = { tabId: string },
-> = {
-  type: TType;
-} & T;
+import type {
+  ManualOverviewTabInfo,
+  OverviewTabInfo,
+  ResourceTabInfo,
+} from './components';
+
 export type WorkspaceResourceInfo =
-  | ResourceInfo<'overview', OverviewTabProps>
-  | ResourceInfo<'resource', ResourceTabProps>
-  | ResourceInfo<'manualOverview'>
-  | ResourceInfo<'manualResource', ManualResourceTabProps>;
+  | OverviewTabInfo
+  | ResourceTabInfo
+  | ManualOverviewTabInfo
+  | ManualResourceTabInfo;
 
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
