@@ -35,8 +35,8 @@ export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
   const {
     resourceTabs,
-    setResourceTabs,
     addResourceTab,
+    deleteResourceTab,
     activeTabId,
     setActiveTabId,
   } = useWorkspaceResourceContext();
@@ -102,9 +102,7 @@ export const WorkspaceResource = (): JSX.Element => {
               content: content,
               dismissible: true,
               onDismiss: () => {
-                setResourceTabs((prev) =>
-                  prev.filter((t) => t.tabId !== tab.tabId),
-                );
+                deleteResourceTab(tab.tabId);
               },
             };
           })}

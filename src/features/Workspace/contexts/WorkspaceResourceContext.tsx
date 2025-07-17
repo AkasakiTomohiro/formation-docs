@@ -1,9 +1,11 @@
 import { createContext, useCallback, useContext, useState } from 'react';
+import { useLoaderData, useNavigate } from 'react-router';
 
 import { ManualManagementId } from '../lib/FilterSideMenu';
 import { loadManualManagementResourceSummary } from './lib/LoadManualManagementResourceSummary';
 import { loadTemplateSummary } from './lib/LoadTemplateSummary';
 
+import type { WorkspaceLayoutLoaderData } from '../Loader';
 import type { WorkspaceResourceInfo } from '../pages';
 import type { TemplateSummary } from './lib/LoadTemplateSummary';
 
@@ -45,13 +47,24 @@ export interface WorkspaceResourceContext {
 
   /**
    * リソースタブ変更関数
-   * @param tabId - 変更するタブのID
+   * @param tabId - 変更するタブID
    * @param modifyFn - タブ情報を変更する関数
    */
   modifyResourceTab: <T extends WorkspaceResourceInfo = WorkspaceResourceInfo>(
     tabId: string,
     modifyFn: (originTab: T) => T,
   ) => void;
+
+  /**
+   * リソースタブ削除関数
+   * @param tabId - 削除するタブID
+   */
+  deleteResourceTab: (tabId: string) => void;
+
+  /**
+   * リソースタブ全削除関数
+   */
+  deleteAllResourceTabs: () => void;
 
   /**
    * アクティブタブID
@@ -89,6 +102,12 @@ const WorkspaceResourceContext = createContext<WorkspaceResourceContext>({
   modifyResourceTab: () => {
     throw new Error('modifyResourceTab is not implemented');
   },
+  deleteResourceTab: () => {
+    throw new Error('deleteResourceTab is not implemented');
+  },
+  deleteAllResourceTabs: () => {
+    throw new Error('deleteAllResourceTabs is not implemented');
+  },
   activeTabId: undefined,
   setActiveTabId: () => {
     throw new Error('setActiveTabId is not implemented');
@@ -110,6 +129,9 @@ export interface WorkspaceResourceProviderProps {
 export const WorkspaceResourceProvider = ({
   children,
 }: WorkspaceResourceProviderProps): JSX.Element => {
+  const workspace = useLoaderData<WorkspaceLayoutLoaderData>();
+  const navigate = useNavigate();
+
   // 検索
   const [searchValue, setSearchValue] = useState<string>('');
   const [tokenGroup, setTokenGroup] = useState<TokenGroupProps.Item[]>([]);
@@ -168,6 +190,29 @@ export const WorkspaceResourceProvider = ({
     [],
   );
 
+  // リソースタブ削除関数
+  const deleteResourceTab = useCallback(
+    (tabId: string) => {
+      const filteredTabs = resourceTabs.filter((tab) => tab.tabId !== tabId);
+      if (filteredTabs.length === 0) {
+        deleteAllResourceTabs();
+        return;
+      }
+      setResourceTabs(filteredTabs);
+      if (activeTabId === tabId) {
+        setActiveTabId(filteredTabs[filteredTabs.length - 1]?.tabId);
+      }
+    },
+    [resourceTabs, activeTabId],
+  );
+
+  // リソースタブ全削除関数
+  const deleteAllResourceTabs = useCallback(() => {
+    setResourceTabs([]);
+    setActiveTabId(undefined);
+    navigate(`/workspaces/${workspace.id}`);
+  }, [navigate, workspace.id]);
+
   return (
     <WorkspaceResourceContext.Provider
       value={{
@@ -179,6 +224,8 @@ export const WorkspaceResourceProvider = ({
         setResourceTabs,
         addResourceTab,
         modifyResourceTab,
+        deleteResourceTab,
+        deleteAllResourceTabs,
         activeTabId,
         setActiveTabId,
         sideMenu,
