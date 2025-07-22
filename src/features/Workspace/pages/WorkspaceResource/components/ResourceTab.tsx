@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useOutletContext } from 'react-router';
 
 import {
   Box,
@@ -23,13 +22,12 @@ import {
   getStackResourcePropertiesReasons,
   updateStackMeta,
 } from '../../../../../invoke/Stack';
+import { useWorkspaceResourceContext } from '../../../contexts';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
-import type { WorkspaceLayoutContext } from '../../../Layout';
 import type { CloudFormationSchema } from './types/CloudFormationSchema';
 
 import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
-
 export type ResourceTabProps = {
   tabId: string;
   stackId: string;
@@ -77,7 +75,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [editingReasons, setEditingReasons] = useState<Record<string, string>>(
     {},
   );
-  const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
+  const { setResourceTabs } = useWorkspaceResourceContext();
 
   console.log('resourceList', resourceList);
   console.log('schema', schema);

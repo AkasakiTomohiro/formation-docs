@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { useOutletContext } from 'react-router';
 import { v4 as uuidV4 } from 'uuid';
 import { z } from 'zod';
 
@@ -24,9 +23,9 @@ import {
   loadStack,
   updateStackDetail,
 } from '../../../../../invoke/Stack';
+import { useWorkspaceResourceContext } from '../../../contexts';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
-import type { WorkspaceLayoutContext } from '../../../Layout';
 
 export type OverviewTabProps = {
   tabId: string;
@@ -65,7 +64,7 @@ export function buildOverviewTabName({
 }
 
 export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
-  const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
+  const { setResourceTabs } = useWorkspaceResourceContext();
   const [flashbarItems, setFlashbarItems] = useState<
     FlashbarProps.MessageDefinition[]
   >([]);
@@ -283,7 +282,7 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
       description: resourceTab.description,
     },
   });
-  const { setResourceTabs } = useOutletContext<WorkspaceLayoutContext>();
+  const { setResourceTabs } = useWorkspaceResourceContext();
 
   const onSave = async (stackDetailProps: StackEditType) => {
     try {
