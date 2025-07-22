@@ -118,19 +118,17 @@ export type GetStackOutputsProps = {
 };
 
 type GetStackOutputResult = {
-  [outputName: string]: {
-    Value: string;
-    Export?: {
-      Name: string; // エクスポート名
-    };
-    Description?: string;
-  };
+  name: string;
+  description: string | null;
+  exportName: string | null;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  value: any;
 };
 
 export async function getStackOutputs(
   props: GetStackOutputsProps,
-): Promise<GetStackOutputResult> {
-  const result = await invoke<CommandResult<GetStackOutputResult>>(
+): Promise<GetStackOutputResult[]> {
+  const result = await invoke<CommandResult<GetStackOutputResult[]>>(
     'get_stack_outputs_command',
     props,
   );

@@ -725,7 +725,7 @@ pub async fn get_stack_parameters_command(
 }
 
 #[tauri::command(rename_all = "snake_case")]
-pub async fn get_stack_output_command(
+pub async fn get_stack_outputs_command(
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<Vec<StackOutput>>, CommandResult> {
