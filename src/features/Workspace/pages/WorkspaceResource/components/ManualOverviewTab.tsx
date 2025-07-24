@@ -25,13 +25,9 @@ import { useWorkspaceResourceContext } from '../../../contexts';
 import { hrefBuilder } from '../../../lib/FilterSideMenu';
 
 import type { WorkspaceLayoutContext } from '../../../Layout';
-import type { TabInfo } from '../../../contexts';
+import type { ManualResourceTabInfo } from '../../../contexts';
 
 import type { SelectProps } from '@cloudscape-design/components';
-
-import type { ManualResourceTabInfo } from './ManualResourceTab';
-
-export type ManualOverviewTabInfo = TabInfo<'manualOverview'>;
 
 const resourceEditValidator = z.object({
   resourceId: z.string().regex(/^[A-Za-z0-9]{1,256}$/),

@@ -25,17 +25,9 @@ import {
 import { useWorkspaceResourceContext } from '../../../contexts';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
-import type { TabInfo } from '../../../contexts';
+import type { OverviewTabAttr, OverviewTabInfo } from '../../../contexts';
 
-export type OverviewTabProps = {
-  tabId: string;
-  stackId: string;
-  stackName: string;
-  description: string;
-  isEdit?: boolean;
-};
-
-export type OverviewTabInfo = TabInfo<'overview', OverviewTabProps>;
+export type OverviewTabProps = OverviewTabAttr;
 
 const stackEditValidator = z.object({
   name: z.string().min(1).max(256),

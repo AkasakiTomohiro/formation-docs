@@ -25,28 +25,20 @@ import {
 import { useWorkspaceResourceContext } from '../../../contexts';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
-import type { TabInfo } from '../../../contexts';
+import type { ResourceTabAttr, ResourceTabInfo } from '../../../contexts';
 
 import type { CloudFormationSchema } from './types/CloudFormationSchema';
 
 import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
 
-export type ResourceTabProps = {
-  tabId: string;
-  stackId: string;
-  stackName: string;
-  serviceName: string;
-  resourceName: string;
-  selectedLogicalId?: string;
-};
-
-export type ResourceTabInfo = TabInfo<'resource', ResourceTabProps>;
+export type ResourceTabProps = ResourceTabAttr;
 
 export type BuildResourceTabNameProps = {
   stackName: string;
   serviceName: string;
   resourceName: string;
 };
+
 export function buildResourceTabName({
   stackName,
   serviceName,

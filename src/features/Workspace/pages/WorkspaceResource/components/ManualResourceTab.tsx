@@ -41,8 +41,10 @@ import {
 import { useWorkspaceResourceContext } from '../../../contexts';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
-import type { TabInfo } from '../../../contexts';
-ace.config.setModuleUrl('ace/mode/json_worker', jsonWorker);
+import type {
+  ManualResourceTabAttr,
+  ManualResourceTabInfo,
+} from '../../../contexts';
 
 import type { Dispatch } from 'react';
 import type { ManualManagementResource } from '../../../../../invoke/ManualManagementResource';
@@ -51,17 +53,7 @@ import type { CloudFormationSchema } from './types/CloudFormationSchema';
 
 import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
 
-export type ManualResourceTabProps = {
-  tabId: string;
-  serviceName: string;
-  resourceName: string;
-  selectedResourceId?: string;
-};
-
-export type ManualResourceTabInfo = TabInfo<
-  'manualResource',
-  ManualResourceTabProps
->;
+export type ManualResourceTabProps = ManualResourceTabAttr;
 
 export type BuildManualResourceTabNameProps = {
   serviceName: string;
@@ -73,6 +65,8 @@ export function buildManualResourceTabName({
 }: BuildManualResourceTabNameProps): string {
   return `手動管理リソース - ${serviceName}::${resourceName}`;
 }
+
+ace.config.setModuleUrl('ace/mode/json_worker', jsonWorker);
 
 const i18nStrings = {
   loadingState: 'Loading code editor',

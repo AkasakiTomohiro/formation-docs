@@ -17,19 +17,7 @@ import {
   buildManualResourceTabName,
 } from './components/ManualResourceTab';
 
-import type { ManualResourceTabInfo } from './components/ManualResourceTab';
-
-import type {
-  ManualOverviewTabInfo,
-  OverviewTabInfo,
-  ResourceTabInfo,
-} from './components';
-
-export type WorkspaceResourceInfo =
-  | OverviewTabInfo
-  | ResourceTabInfo
-  | ManualOverviewTabInfo
-  | ManualResourceTabInfo;
+import type { WorkspaceTabInfo } from '../../contexts';
 
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
@@ -47,7 +35,7 @@ export const WorkspaceResource = (): JSX.Element => {
       const stackId = location.state.selectedStackId;
       const stackName = location.state.selectedStackName;
       if (stackId && stackName) {
-        const newTab: WorkspaceResourceInfo = {
+        const newTab: WorkspaceTabInfo = {
           type: 'overview',
           tabId: `${stackId}/${stackName}`,
           stackId,

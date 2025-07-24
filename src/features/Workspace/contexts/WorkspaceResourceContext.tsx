@@ -6,17 +6,52 @@ import { loadManualManagementResourceSummary } from './lib/LoadManualManagementR
 import { loadTemplateSummary } from './lib/LoadTemplateSummary';
 
 import type { WorkspaceLayoutLoaderData } from '../Loader';
-import type { WorkspaceResourceInfo } from '../pages';
 import type { TemplateSummary } from './lib/LoadTemplateSummary';
 
 import type { TokenGroupProps } from '@cloudscape-design/components';
 
-export type TabInfo<
+type TabInfo<
   TType extends string,
   T extends { tabId: string } = { tabId: string },
 > = {
   type: TType;
 } & T;
+
+export type OverviewTabAttr = {
+  tabId: string;
+  stackId: string;
+  stackName: string;
+  description: string;
+  isEdit?: boolean;
+};
+export type ResourceTabAttr = {
+  tabId: string;
+  stackId: string;
+  stackName: string;
+  serviceName: string;
+  resourceName: string;
+  selectedLogicalId?: string;
+};
+export type ManualResourceTabAttr = {
+  tabId: string;
+  serviceName: string;
+  resourceName: string;
+  selectedResourceId?: string;
+};
+
+export type OverviewTabInfo = TabInfo<'overview', OverviewTabAttr>;
+export type ResourceTabInfo = TabInfo<'resource', ResourceTabAttr>;
+export type ManualOverviewTabInfo = TabInfo<'manualOverview'>;
+export type ManualResourceTabInfo = TabInfo<
+  'manualResource',
+  ManualResourceTabAttr
+>;
+
+export type WorkspaceTabInfo =
+  | OverviewTabInfo
+  | ResourceTabInfo
+  | ManualOverviewTabInfo
+  | ManualResourceTabInfo;
 
 export interface WorkspaceResourceContext {
   /**
@@ -34,23 +69,21 @@ export interface WorkspaceResourceContext {
   /**
    * リソースタブ
    */
-  resourceTabs: WorkspaceResourceInfo[];
-  setResourceTabs: React.Dispatch<
-    React.SetStateAction<WorkspaceResourceInfo[]>
-  >;
+  resourceTabs: WorkspaceTabInfo[];
+  setResourceTabs: React.Dispatch<React.SetStateAction<WorkspaceTabInfo[]>>;
 
   /**
    * リソースタブ追加関数
    * @param tab - 追加するタブ情報
    */
-  addResourceTab: (tab: WorkspaceResourceInfo) => void;
+  addResourceTab: (tab: WorkspaceTabInfo) => void;
 
   /**
    * リソースタブ変更関数
    * @param tabId - 変更するタブID
    * @param modifyFn - タブ情報を変更する関数
    */
-  modifyResourceTab: <T extends WorkspaceResourceInfo = WorkspaceResourceInfo>(
+  modifyResourceTab: <T extends WorkspaceTabInfo = WorkspaceTabInfo>(
     tabId: string,
     modifyFn: (originTab: T) => T,
   ) => void;
@@ -137,7 +170,7 @@ export const WorkspaceResourceProvider = ({
   const [tokenGroup, setTokenGroup] = useState<TokenGroupProps.Item[]>([]);
 
   // WorkspaceResourceタブ
-  const [resourceTabs, setResourceTabs] = useState<WorkspaceResourceInfo[]>([]);
+  const [resourceTabs, setResourceTabs] = useState<WorkspaceTabInfo[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | undefined>(undefined);
 
   // サイドメニュー
@@ -161,7 +194,7 @@ export const WorkspaceResourceProvider = ({
   }, []);
 
   // リソースタブ追加関数
-  const addResourceTab = useCallback((newTab: WorkspaceResourceInfo) => {
+  const addResourceTab = useCallback((newTab: WorkspaceTabInfo) => {
     setResourceTabs((prev) => {
       const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
       if (existingTab) {
@@ -174,7 +207,7 @@ export const WorkspaceResourceProvider = ({
 
   // リソースタブ変更関数
   const modifyResourceTab = useCallback(
-    <T extends WorkspaceResourceInfo = WorkspaceResourceInfo>(
+    <T extends WorkspaceTabInfo = WorkspaceTabInfo>(
       tabId: string,
       modifyFn: (originTab: T) => T,
     ) => {
