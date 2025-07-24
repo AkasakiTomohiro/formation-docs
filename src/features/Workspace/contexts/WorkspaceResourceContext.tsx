@@ -208,6 +208,13 @@ export const WorkspaceResourceProvider = ({ children }: WorkspaceResourceProvide
     [],
   );
 
+  // リソースタブ全削除関数
+  const deleteAllResourceTabs = useCallback(() => {
+    setResourceTabs([]);
+    setActiveTabId(undefined);
+    navigate(`/workspaces/${workspace.id}`);
+  }, [navigate, workspace.id]);
+
   // リソースタブ削除関数
   const deleteResourceTab = useCallback(
     (tabId: string) => {
@@ -221,15 +228,8 @@ export const WorkspaceResourceProvider = ({ children }: WorkspaceResourceProvide
         setActiveTabId(filteredTabs[filteredTabs.length - 1]?.tabId);
       }
     },
-    [resourceTabs, activeTabId],
+    [resourceTabs, activeTabId, deleteAllResourceTabs],
   );
-
-  // リソースタブ全削除関数
-  const deleteAllResourceTabs = useCallback(() => {
-    setResourceTabs([]);
-    setActiveTabId(undefined);
-    navigate(`/workspaces/${workspace.id}`);
-  }, [navigate, workspace.id]);
 
   return (
     <WorkspaceResourceContext.Provider
