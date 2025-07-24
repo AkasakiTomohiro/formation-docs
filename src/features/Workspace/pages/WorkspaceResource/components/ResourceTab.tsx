@@ -25,23 +25,20 @@ import {
 import { useWorkspaceResourceContext } from '../../../contexts';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
+import type { ResourceTabAttr, ResourceTabInfo } from '../../../contexts';
+
 import type { CloudFormationSchema } from './types/CloudFormationSchema';
 
 import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
-export type ResourceTabProps = {
-  tabId: string;
-  stackId: string;
-  stackName: string;
-  serviceName: string;
-  resourceName: string;
-  selectedLogicalId?: string;
-};
+
+export type ResourceTabProps = ResourceTabAttr;
 
 export type BuildResourceTabNameProps = {
   stackName: string;
   serviceName: string;
   resourceName: string;
 };
+
 export function buildResourceTabName({
   stackName,
   serviceName,
@@ -75,7 +72,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [editingReasons, setEditingReasons] = useState<Record<string, string>>(
     {},
   );
-  const { setResourceTabs } = useWorkspaceResourceContext();
+  const { modifyResourceTab } = useWorkspaceResourceContext();
 
   console.log('resourceList', resourceList);
   console.log('schema', schema);
@@ -143,18 +140,15 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     href="#"
                     onClick={(event) => {
                       event.stopPropagation();
-                      setResourceTabs((prev) => {
-                        const resourceTabs = prev.map((tab) => {
-                          if (tab.tabId === props.tabId) {
-                            return {
-                              ...tab,
-                              selectedLogicalId: item,
-                            };
-                          }
-                          return tab;
-                        });
-                        return resourceTabs;
-                      });
+                      modifyResourceTab(
+                        props.tabId,
+                        (originTab: ResourceTabInfo) => {
+                          return {
+                            ...originTab,
+                            selectedLogicalId: item,
+                          };
+                        },
+                      );
                     }}
                   >
                     {item}

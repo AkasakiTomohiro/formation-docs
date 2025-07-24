@@ -43,8 +43,8 @@ export const WorkspaceLayout = (): JSX.Element => {
     setSearchValue,
     tokenGroup,
     setTokenGroup,
-    setResourceTabs,
     addResourceTab,
+    deleteAllResourceTabs,
     sideMenu,
     loadSideMenu,
   } = useWorkspaceResourceContext();
@@ -85,8 +85,7 @@ export const WorkspaceLayout = (): JSX.Element => {
                 href="#"
                 onClick={(event) => {
                   event.preventDefault();
-                  setResourceTabs([]);
-                  navigate(`/workspaces/${workspace.id}`);
+                  deleteAllResourceTabs();
                 }}
               >
                 Home
@@ -129,8 +128,7 @@ export const WorkspaceLayout = (): JSX.Element => {
             const { href } = event.detail;
             if (href === '#') {
               // ワークスペース名をクリックしたとき
-              setResourceTabs([]);
-              navigate(`/workspaces/${workspace.id}`);
+              deleteAllResourceTabs();
               return;
             }
             const hrefParts = hrefParser(href);

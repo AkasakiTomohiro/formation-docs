@@ -25,10 +25,10 @@ import { useWorkspaceResourceContext } from '../../../contexts';
 import { hrefBuilder } from '../../../lib/FilterSideMenu';
 
 import type { WorkspaceLayoutContext } from '../../../Layout';
+import type { ManualResourceTabInfo } from '../../../contexts';
 
 import type { SelectProps } from '@cloudscape-design/components';
-import type { ResourceInfo } from '../WorkspaceResource';
-import type { ManualResourceTabProps } from './ManualResourceTab';
+
 const resourceEditValidator = z.object({
   resourceId: z.string().regex(/^[A-Za-z0-9]{1,256}$/),
   description: z.string().max(256),
@@ -98,7 +98,7 @@ export const ManualOverviewTab = (): JSX.Element => {
           serviceName: data.serviceName,
           resourceType: data.resourceName,
         });
-        const newTab: ResourceInfo<'manualResource', ManualResourceTabProps> = {
+        const newTab: ManualResourceTabInfo = {
           type: 'manualResource',
           tabId: tabId,
           serviceName: data.serviceName,
