@@ -18,6 +18,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
+  getStackOutputs,
   getStackParameters,
   loadStack,
   updateStackDetail,
@@ -40,6 +41,13 @@ type stackParametersDisplayProps = {
   description: string;
 };
 
+type stackOutputsDisplayProps = {
+  name: string;
+  description: string | null;
+  exportName: string | null;
+  value: string;
+};
+
 export type StackEditType = z.infer<typeof stackEditValidator>;
 
 export type BuildOverviewTabNameProps = {
@@ -59,6 +67,9 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
   const [stackParameters, setStackParameters] = useState<
     stackParametersDisplayProps[]
   >([]);
+  const [stackOutputs, setStackOutputs] = useState<stackOutputsDisplayProps[]>(
+    [],
+  );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -88,6 +99,19 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
       });
       setStackParameters(parameters);
     });
+
+    // スタックのoutputを取得し、表中に表示する
+    getStackOutputs({ stack_id: props.stackId }).then((stackOutputs) => {
+      const outputs = stackOutputs.map((output) => {
+        return {
+          name: output.name,
+          description: output.description,
+          exportName: output.exportName,
+          value: JSON.stringify(output.value), // FIXME: convertIntrinsicFunctionValue関数を使用した文字列を代入する
+        };
+      });
+      setStackOutputs(outputs);
+    });
   }, []);
 
   const setIsEdit = (isEdit: boolean) => {
@@ -113,6 +137,7 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
       resourceTab={props}
       setIsEdit={setIsEdit}
       stackParameters={stackParameters}
+      stackOutputs={stackOutputs}
     />
   );
 };
@@ -122,10 +147,17 @@ type StackContentProps = {
   setIsEdit: (isEdit: boolean) => void;
   flashbarItems: FlashbarProps.MessageDefinition[];
   stackParameters: stackParametersDisplayProps[];
+  stackOutputs: stackOutputsDisplayProps[];
 };
 
 const StackContent = (props: StackContentProps): JSX.Element => {
-  const { resourceTab, setIsEdit, flashbarItems, stackParameters } = props;
+  const {
+    resourceTab,
+    setIsEdit,
+    flashbarItems,
+    stackParameters,
+    stackOutputs,
+  } = props;
   return (
     <ContentLayout
       header={
@@ -145,47 +177,102 @@ const StackContent = (props: StackContentProps): JSX.Element => {
         </SpaceBetween>
       }
     >
-      <Table
-        resizableColumns
-        columnDefinitions={[
-          {
-            id: 'parameterName',
-            header: 'Parameter Name',
-            cell: (e) => e.name,
-            isRowHeader: true,
-            width: 250,
-            minWidth: 150,
-          },
-          {
-            id: 'type',
-            header: 'Type',
-            cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>,
-            width: 150,
-            minWidth: 100,
-          },
-          {
-            id: 'description',
-            header: 'Description',
-            cell: (e) => (
-              <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>
-            ),
-            width: 500,
-          },
-        ]}
-        stickyHeader
-        enableKeyboardNavigation
-        items={stackParameters}
-        loadingText="Loading resources"
-        trackBy="name"
-        empty={
-          <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
-            <SpaceBetween size="m">
-              <b>No Parameters</b>
-            </SpaceBetween>
-          </Box>
-        }
-        header={<Header>Parameter</Header>}
-      />
+      <SpaceBetween size="m">
+        <Table
+          resizableColumns
+          columnDefinitions={[
+            {
+              id: 'parameterName',
+              header: 'Parameter Name',
+              cell: (e) => e.name,
+              isRowHeader: true,
+              width: 250,
+              minWidth: 150,
+            },
+            {
+              id: 'type',
+              header: 'Type',
+              cell: (e) => (
+                <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>
+              ),
+              width: 150,
+              minWidth: 100,
+            },
+            {
+              id: 'description',
+              header: 'Description',
+              cell: (e) => (
+                <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>
+              ),
+              width: 500,
+            },
+          ]}
+          stickyHeader
+          enableKeyboardNavigation
+          items={stackParameters}
+          loadingText="Loading resources"
+          trackBy="name"
+          empty={
+            <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
+              <SpaceBetween size="m">
+                <b>No Parameters</b>
+              </SpaceBetween>
+            </Box>
+          }
+          header={<Header>Parameter</Header>}
+        />
+        <Table
+          resizableColumns
+          columnDefinitions={[
+            {
+              id: 'outputName',
+              header: 'Output Name',
+              cell: (e) => e.name,
+              isRowHeader: true,
+              width: 250,
+              minWidth: 150,
+            },
+            {
+              id: 'export',
+              header: 'Export',
+              cell: (e) => (
+                <div style={{ whiteSpace: 'pre-line' }}>{e.exportName}</div>
+              ),
+              width: 250,
+              minWidth: 150,
+            },
+            {
+              id: 'value',
+              header: 'Value',
+              cell: (e) => (
+                <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>
+              ),
+              width: 250,
+              minWidth: 150,
+            },
+            {
+              id: 'description',
+              header: 'Description',
+              cell: (e) => (
+                <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>
+              ),
+            },
+          ]}
+          stickyHeader
+          enableKeyboardNavigation
+          items={stackOutputs}
+          loadingText="Loading resources"
+          trackBy="name"
+          empty={
+            <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
+              <SpaceBetween size="m">
+                <b>No Outputs</b>
+              </SpaceBetween>
+            </Box>
+          }
+          header={<Header>Outputs</Header>}
+        />
+      </SpaceBetween>
     </ContentLayout>
   );
 };
