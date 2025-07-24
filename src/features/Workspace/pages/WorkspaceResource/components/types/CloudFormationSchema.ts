@@ -1,25 +1,10 @@
-export type JsonSchemaType =
-  | 'array'
-  | 'boolean'
-  | 'integer'
-  | 'null'
-  | 'number'
-  | 'object'
-  | 'string'
-  | (string & {});
+export type JsonSchemaType = 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string' | (string & {});
 
-export function isJsonSchemaPrimitiveType(
-  type: JsonSchemaType | JsonSchemaType[],
-): boolean {
+export function isJsonSchemaPrimitiveType(type: JsonSchemaType | JsonSchemaType[]): boolean {
   if (Array.isArray(type)) {
     return false;
   }
-  return (
-    type === 'boolean' ||
-    type === 'integer' ||
-    type === 'number' ||
-    type === 'string'
-  );
+  return type === 'boolean' || type === 'integer' || type === 'number' || type === 'string';
 }
 
 export type ReplacementStrategy = 'create_then_delete' | 'delete_then_create';
@@ -63,10 +48,7 @@ export type DefinedProperty = {
   enum?: string[];
 };
 
-export type Property =
-  | ReferenceProperty
-  | ReferencePropertyWithDescription
-  | DefinedProperty;
+export type Property = ReferenceProperty | ReferencePropertyWithDescription | DefinedProperty;
 
 export interface Handler {
   permissions: string[];

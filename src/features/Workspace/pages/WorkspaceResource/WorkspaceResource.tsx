@@ -12,22 +12,14 @@ import {
   buildResourceTabName,
 } from './components';
 import { ManualOverviewTab } from './components/ManualOverviewTab';
-import {
-  ManualResourceTab,
-  buildManualResourceTabName,
-} from './components/ManualResourceTab';
+import { ManualResourceTab, buildManualResourceTabName } from './components/ManualResourceTab';
 
 import type { WorkspaceTabInfo } from '../../contexts';
 
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
-  const {
-    resourceTabs,
-    addResourceTab,
-    deleteResourceTab,
-    activeTabId,
-    setActiveTabId,
-  } = useWorkspaceResourceContext();
+  const { resourceTabs, addResourceTab, deleteResourceTab, activeTabId, setActiveTabId } =
+    useWorkspaceResourceContext();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {

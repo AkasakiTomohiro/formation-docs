@@ -48,26 +48,20 @@ export function buildManualOverviewTabName(): string {
 
 export const ManualOverviewTab = (): JSX.Element => {
   const [services, setServices] = useState<AWSService[]>([]);
-  const [registering, setRegistering] = useState<
-    'SELECT_RESOURCE' | 'INPUT_NAME' | null
-  >(null);
-  const [selectedService, setSelectedService] =
-    useState<SelectProps.Option | null>(null);
-  const [selectedResource, setSelectedResource] =
-    useState<SelectProps.Option | null>(null);
-  const { control, setValue, handleSubmit, setError, reset } =
-    useForm<WorkspaceEditType>({
-      mode: 'onChange',
-      resolver: zodResolver(resourceEditValidator),
-      defaultValues: {
-        resourceId: '',
-        description: '',
-        serviceName: '',
-        resourceName: '',
-      },
-    });
-  const { flashbarItems, setFlashbarItems } =
-    useOutletContext<WorkspaceLayoutContext>();
+  const [registering, setRegistering] = useState<'SELECT_RESOURCE' | 'INPUT_NAME' | null>(null);
+  const [selectedService, setSelectedService] = useState<SelectProps.Option | null>(null);
+  const [selectedResource, setSelectedResource] = useState<SelectProps.Option | null>(null);
+  const { control, setValue, handleSubmit, setError, reset } = useForm<WorkspaceEditType>({
+    mode: 'onChange',
+    resolver: zodResolver(resourceEditValidator),
+    defaultValues: {
+      resourceId: '',
+      description: '',
+      serviceName: '',
+      resourceName: '',
+    },
+  });
+  const { flashbarItems, setFlashbarItems } = useOutletContext<WorkspaceLayoutContext>();
   const { loadSideMenu, addResourceTab } = useWorkspaceResourceContext();
 
   useEffect(() => {
@@ -166,14 +160,9 @@ export const ManualOverviewTab = (): JSX.Element => {
                 placeholder="リソース名"
                 disabled={!selectedService}
                 selectedOption={selectedResource}
-                onChange={({ detail }) =>
-                  setSelectedResource(detail.selectedOption)
-                }
+                onChange={({ detail }) => setSelectedResource(detail.selectedOption)}
                 options={services
-                  .find(
-                    (service) =>
-                      service.service_name === selectedService?.value,
-                  )
+                  .find((service) => service.service_name === selectedService?.value)
                   ?.resources.map((resource) => ({ value: resource }))}
                 filteringType="auto"
               />
@@ -227,13 +216,7 @@ export const ManualOverviewTab = (): JSX.Element => {
                             : undefined
                         }
                       >
-                        <Input
-                          {...field}
-                          onChange={(event) =>
-                            field.onChange(event.detail.value)
-                          }
-                          invalid={invalid}
-                        />
+                        <Input {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
                       </FormField>
                     );
                   }}
@@ -243,15 +226,10 @@ export const ManualOverviewTab = (): JSX.Element => {
                   control={control}
                   render={({ field, fieldState: { invalid } }) => {
                     return (
-                      <FormField
-                        label="Description"
-                        errorText={invalid && '256文字以下で入力してください'}
-                      >
+                      <FormField label="Description" errorText={invalid && '256文字以下で入力してください'}>
                         <Textarea
                           {...field}
-                          onChange={(event) =>
-                            field.onChange(event.detail.value)
-                          }
+                          onChange={(event) => field.onChange(event.detail.value)}
                           invalid={invalid}
                         />
                       </FormField>
@@ -271,9 +249,7 @@ export const ManualOverviewTab = (): JSX.Element => {
                 >
                   キャンセル
                 </Button>
-                <Button onClick={() => setRegistering('SELECT_RESOURCE')}>
-                  戻る
-                </Button>
+                <Button onClick={() => setRegistering('SELECT_RESOURCE')}>戻る</Button>
                 <Button variant="primary" formAction="submit">
                   保存
                 </Button>
@@ -286,15 +262,10 @@ export const ManualOverviewTab = (): JSX.Element => {
       {registering === null && (
         <SpaceBetween direction="vertical" size="s">
           <TextContent>
-            <p>
-              CloudFormationで管理していないAWSリソースの設定を管理する機能です。
-            </p>
+            <p>CloudFormationで管理していないAWSリソースの設定を管理する機能です。</p>
           </TextContent>
           <Box float="right">
-            <Button
-              variant="primary"
-              onClick={() => setRegistering('SELECT_RESOURCE')}
-            >
+            <Button variant="primary" onClick={() => setRegistering('SELECT_RESOURCE')}>
               新規リソース作成
             </Button>
           </Box>

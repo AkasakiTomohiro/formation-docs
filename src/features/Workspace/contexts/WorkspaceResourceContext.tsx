@@ -10,10 +10,7 @@ import type { TemplateSummary } from './lib/LoadTemplateSummary';
 
 import type { TokenGroupProps } from '@cloudscape-design/components';
 
-type TabInfo<
-  TType extends string,
-  T extends { tabId: string } = { tabId: string },
-> = {
+type TabInfo<TType extends string, T extends { tabId: string } = { tabId: string }> = {
   type: TType;
 } & T;
 
@@ -42,16 +39,9 @@ export type ManualResourceTabAttr = {
 export type OverviewTabInfo = TabInfo<'overview', OverviewTabAttr>;
 export type ResourceTabInfo = TabInfo<'resource', ResourceTabAttr>;
 export type ManualOverviewTabInfo = TabInfo<'manualOverview'>;
-export type ManualResourceTabInfo = TabInfo<
-  'manualResource',
-  ManualResourceTabAttr
->;
+export type ManualResourceTabInfo = TabInfo<'manualResource', ManualResourceTabAttr>;
 
-export type WorkspaceTabInfo =
-  | OverviewTabInfo
-  | ResourceTabInfo
-  | ManualOverviewTabInfo
-  | ManualResourceTabInfo;
+export type WorkspaceTabInfo = OverviewTabInfo | ResourceTabInfo | ManualOverviewTabInfo | ManualResourceTabInfo;
 
 export interface WorkspaceResourceContext {
   /**
@@ -159,9 +149,7 @@ export interface WorkspaceResourceProviderProps {
   children?: React.ReactNode;
 }
 
-export const WorkspaceResourceProvider = ({
-  children,
-}: WorkspaceResourceProviderProps): JSX.Element => {
+export const WorkspaceResourceProvider = ({ children }: WorkspaceResourceProviderProps): JSX.Element => {
   const workspace = useLoaderData<WorkspaceLayoutLoaderData>();
   const navigate = useNavigate();
 
@@ -178,19 +166,18 @@ export const WorkspaceResourceProvider = ({
 
   // サイドメニュー要素取得関数
   const loadSideMenu = useCallback(() => {
-    return Promise.all([
-      loadTemplateSummary(),
-      loadManualManagementResourceSummary(),
-    ]).then(([templateSummary, manualManagementSummary]) => {
-      setSideMenu([
-        ...templateSummary,
-        {
-          id: ManualManagementId,
-          sectionGroupName: '手動管理リソース',
-          resources: manualManagementSummary,
-        },
-      ]);
-    });
+    return Promise.all([loadTemplateSummary(), loadManualManagementResourceSummary()]).then(
+      ([templateSummary, manualManagementSummary]) => {
+        setSideMenu([
+          ...templateSummary,
+          {
+            id: ManualManagementId,
+            sectionGroupName: '手動管理リソース',
+            resources: manualManagementSummary,
+          },
+        ]);
+      },
+    );
   }, []);
 
   // リソースタブ追加関数
@@ -207,10 +194,7 @@ export const WorkspaceResourceProvider = ({
 
   // リソースタブ変更関数
   const modifyResourceTab = useCallback(
-    <T extends WorkspaceTabInfo = WorkspaceTabInfo>(
-      tabId: string,
-      modifyFn: (originTab: T) => T,
-    ) => {
+    <T extends WorkspaceTabInfo = WorkspaceTabInfo>(tabId: string, modifyFn: (originTab: T) => T) => {
       setResourceTabs((prev) =>
         prev.map((tab) => {
           if (tab.tabId === tabId) {

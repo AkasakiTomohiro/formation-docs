@@ -14,10 +14,7 @@ export async function newManualManagementResource(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 ): Promise<any> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const result = await invoke<CommandResult<any>>(
-    'new_manual_management_resource_command',
-    props,
-  );
+  const result = await invoke<CommandResult<any>>('new_manual_management_resource_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }
@@ -38,10 +35,7 @@ export async function getManualManagementResourceList(
   props: ManualManagementResourceListProps,
 ): Promise<ManualManagementResource[]> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const result = await invoke<CommandResult<any>>(
-    'get_manual_management_resource_list_command',
-    props,
-  );
+  const result = await invoke<CommandResult<any>>('get_manual_management_resource_list_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }
@@ -53,10 +47,7 @@ export async function getManualManagementResourceProperties(props: {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 }): Promise<Record<string, any>> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const result = await invoke<CommandResult<any>>(
-    'get_manual_resource_properties_command',
-    props,
-  );
+  const result = await invoke<CommandResult<any>>('get_manual_resource_properties_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }
@@ -67,10 +58,7 @@ export async function getManualManagementResourceReasons(props: {
   resource_id: string;
 }): Promise<Record<string, string>> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const result = await invoke<CommandResult<any>>(
-    'get_manual_resource_reasons_command',
-    props,
-  );
+  const result = await invoke<CommandResult<any>>('get_manual_resource_reasons_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }
@@ -83,10 +71,7 @@ export async function updateManualResourceMeta(props: {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 }): Promise<any> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const result = await invoke<CommandResult<any>>(
-    'update_manual_resource_meta_command',
-    props,
-  );
+  const result = await invoke<CommandResult<any>>('update_manual_resource_meta_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }
@@ -98,10 +83,7 @@ export async function updateManualResourceProperties(props: {
   properties: string;
 }): Promise<void> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const result = await invoke<CommandResult<any>>(
-    'update_manual_resource_properties_command',
-    props,
-  );
+  const result = await invoke<CommandResult<any>>('update_manual_resource_properties_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }

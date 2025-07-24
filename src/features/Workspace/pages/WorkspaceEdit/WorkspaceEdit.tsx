@@ -33,9 +33,7 @@ export const WorkspaceEdit = (): JSX.Element => {
   const workspace = useOutletContext<WorkspaceLayoutContext>();
   const navigate = useNavigate();
   const revalidator = useRevalidator();
-  const [flashbarItems, setFlashbarItems] = useState<
-    FlashbarProps.MessageDefinition[]
-  >([]);
+  const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
   const { control, handleSubmit } = useForm<WorkspaceEditType>({
     mode: 'onChange',
     resolver: zodResolver(workspaceEditValidator),
@@ -95,17 +93,9 @@ export const WorkspaceEdit = (): JSX.Element => {
                 render={({ field, fieldState: { invalid } }) => (
                   <FormField
                     label="Workspace name"
-                    errorText={
-                      invalid
-                        ? '1文字以上256文字以下で入力してください'
-                        : undefined
-                    }
+                    errorText={invalid ? '1文字以上256文字以下で入力してください' : undefined}
                   >
-                    <Input
-                      {...field}
-                      onChange={(event) => field.onChange(event.detail.value)}
-                      invalid={invalid}
-                    />
+                    <Input {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
                   </FormField>
                 )}
               />
@@ -115,15 +105,9 @@ export const WorkspaceEdit = (): JSX.Element => {
                 render={({ field, fieldState: { invalid } }) => (
                   <FormField
                     label="Workspace description"
-                    errorText={
-                      invalid ? '256文字以下で入力してください' : undefined
-                    }
+                    errorText={invalid ? '256文字以下で入力してください' : undefined}
                   >
-                    <Input
-                      {...field}
-                      onChange={(event) => field.onChange(event.detail.value)}
-                      invalid={invalid}
-                    />
+                    <Input {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
                   </FormField>
                 )}
               />
@@ -131,10 +115,7 @@ export const WorkspaceEdit = (): JSX.Element => {
           </Container>
           <Box float="right">
             <SpaceBetween direction="horizontal" size="xs">
-              <Button
-                variant="normal"
-                onClick={() => navigate(`/workspaces/${workspace.id}`)}
-              >
+              <Button variant="normal" onClick={() => navigate(`/workspaces/${workspace.id}`)}>
                 キャンセル
               </Button>
               <Button variant="primary" formAction="submit">

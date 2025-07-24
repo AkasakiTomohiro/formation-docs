@@ -41,10 +41,7 @@ import {
 import { useWorkspaceResourceContext } from '../../../contexts';
 import { createResourceTableItems } from '../lib/CreateResourceTableItems';
 
-import type {
-  ManualResourceTabAttr,
-  ManualResourceTabInfo,
-} from '../../../contexts';
+import type { ManualResourceTabAttr, ManualResourceTabInfo } from '../../../contexts';
 
 import type { Dispatch } from 'react';
 import type { ManualManagementResource } from '../../../../../invoke/ManualManagementResource';
@@ -59,10 +56,7 @@ export type BuildManualResourceTabNameProps = {
   serviceName: string;
   resourceName: string;
 };
-export function buildManualResourceTabName({
-  serviceName,
-  resourceName,
-}: BuildManualResourceTabNameProps): string {
+export function buildManualResourceTabName({ serviceName, resourceName }: BuildManualResourceTabNameProps): string {
   return `手動管理リソース - ${serviceName}::${resourceName}`;
 }
 
@@ -107,16 +101,10 @@ const selectModeControl = (
   />
 );
 
-export const ManualResourceTab = (
-  props: ManualResourceTabProps,
-): JSX.Element => {
+export const ManualResourceTab = (props: ManualResourceTabProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
-  const [schema, setSchema] = useState<CloudFormationSchema | undefined>(
-    undefined,
-  );
-  const [manualResourceList, setManualResourceList] = useState<
-    ManualManagementResource[]
-  >([]);
+  const [schema, setSchema] = useState<CloudFormationSchema | undefined>(undefined);
+  const [manualResourceList, setManualResourceList] = useState<ManualManagementResource[]>([]);
   const [filterText, setFilterText] = useState<string>('');
   const [isOpen, setIsOpen] = useState(true);
   const [items, setItems] = useState<ResourceTableItem[]>([]);
@@ -133,9 +121,7 @@ export const ManualResourceTab = (
   });
   const [isEdit, setIsEdit] = useState(false);
   const [reasons, setReasons] = useState<Record<string, string>>({});
-  const [editingReasons, setEditingReasons] = useState<Record<string, string>>(
-    {},
-  );
+  const [editingReasons, setEditingReasons] = useState<Record<string, string>>({});
   const [mode, setMode] = useState<'reason' | 'value'>('reason');
   const [values, setValues] = useState<string>('');
   const [editingValues, setEditingValues] = useState<string>('');
@@ -209,15 +195,12 @@ export const ManualResourceTab = (
                     href="#"
                     onClick={(event) => {
                       event.stopPropagation();
-                      modifyResourceTab(
-                        props.tabId,
-                        (originTab: ManualResourceTabInfo) => {
-                          return {
-                            ...originTab,
-                            selectedResourceId: item.resourceId,
-                          };
-                        },
-                      );
+                      modifyResourceTab(props.tabId, (originTab: ManualResourceTabInfo) => {
+                        return {
+                          ...originTab,
+                          selectedResourceId: item.resourceId,
+                        };
+                      });
                     }}
                   >
                     {item.resourceId}
@@ -235,11 +218,7 @@ export const ManualResourceTab = (
             loading={isLoading}
             sortingDisabled
             empty={
-              <Box
-                margin={{ vertical: 'xs' }}
-                textAlign="center"
-                color="inherit"
-              >
+              <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
                 <SpaceBetween size="m">
                   <b>No resources</b>
                 </SpaceBetween>
@@ -273,11 +252,7 @@ export const ManualResourceTab = (
         </div>
       ) : (
         <Container>
-          <Button
-            iconName="angle-right"
-            variant="icon"
-            onClick={() => setIsOpen(!isOpen)}
-          />
+          <Button iconName="angle-right" variant="icon" onClick={() => setIsOpen(!isOpen)} />
         </Container>
       )}
       {props.selectedResourceId !== undefined && (
@@ -319,15 +294,12 @@ export const ManualResourceTab = (
                             {
                               type: 'error',
                               header: '保存に失敗しました',
-                              content:
-                                'リソースプロパティのエラーをすべて修正してください',
+                              content: 'リソースプロパティのエラーをすべて修正してください',
                               dismissible: true,
                               dismissLabel: 'close',
                               id: id,
                               onDismiss: () => {
-                                setFlashbarItems((items) =>
-                                  items.filter((e) => e.id !== id),
-                                );
+                                setFlashbarItems((items) => items.filter((e) => e.id !== id));
                               },
                             },
                           ]);
@@ -348,9 +320,7 @@ export const ManualResourceTab = (
                           JSON.parse(editingValues),
                         );
                         setItems(resourceTableItems);
-                        setExpandedItems(
-                          createExpandedItems(resourceTableItems),
-                        );
+                        setExpandedItems(createExpandedItems(resourceTableItems));
                         setValues(editingValues);
                       }}
                     >
@@ -374,12 +344,8 @@ export const ManualResourceTab = (
                   Show more
                 </Button>
               )}
-              renderLoaderLoading={() => (
-                <StatusIndicator type="loading">Loading items</StatusIndicator>
-              )}
-              renderLoaderError={() => (
-                <StatusIndicator type="error">Loading error</StatusIndicator>
-              )}
+              renderLoaderLoading={() => <StatusIndicator type="loading">Loading items</StatusIndicator>}
+              renderLoaderError={() => <StatusIndicator type="error">Loading error</StatusIndicator>}
               renderLoaderEmpty={() => <Box>No resources found</Box>}
               expandableRows={{
                 getItemChildren: (item) => item.children ?? [],
@@ -388,9 +354,7 @@ export const ManualResourceTab = (
                 onExpandableItemToggle: ({ detail }) =>
                   setExpandedItems((prev: ResourceTableItem[] | undefined) => {
                     const next = new Set((prev ?? []).map((item) => item.id));
-                    detail.expanded
-                      ? next.add(detail.item.id)
-                      : next.delete(detail.item.id);
+                    detail.expanded ? next.add(detail.item.id) : next.delete(detail.item.id);
                     return [...next].map((id) => ({ id }));
                   }),
               }}
@@ -407,31 +371,21 @@ export const ManualResourceTab = (
                 {
                   id: 'type',
                   header: 'Type',
-                  cell: (e) => (
-                    <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>
-                  ),
+                  cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>,
                   width: 150,
                   minWidth: 100,
                 },
                 {
                   id: 'description',
                   header: 'Description',
-                  cell: (e) => (
-                    <div style={{ whiteSpace: 'pre-line' }}>
-                      {e.description}
-                    </div>
-                  ),
+                  cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>,
                   width: 500,
                 },
                 {
                   id: 'value',
                   header: 'Value',
                   cell: (e) => {
-                    return (
-                      <div style={{ whiteSpace: 'pre-line' }}>
-                        {e.value === undefined ? '' : `${e.value}`}
-                      </div>
-                    );
+                    return <div style={{ whiteSpace: 'pre-line' }}>{e.value === undefined ? '' : `${e.value}`}</div>;
                   },
                   width: 300,
                   minWidth: 100,
@@ -453,11 +407,7 @@ export const ManualResourceTab = (
                         />
                       );
                     }
-                    return (
-                      <div style={{ whiteSpace: 'pre-line' }}>
-                        {reasons[e.id]}
-                      </div>
-                    );
+                    return <div style={{ whiteSpace: 'pre-line' }}>{reasons[e.id]}</div>;
                   },
                   width: 300,
                   minWidth: 200,
@@ -470,24 +420,14 @@ export const ManualResourceTab = (
               loadingText="Loading resources"
               trackBy="id"
               empty={
-                <Box
-                  margin={{ vertical: 'xs' }}
-                  textAlign="center"
-                  color="inherit"
-                >
+                <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
                   <SpaceBetween size="m">
                     <b>No resources</b>
                     <Button>Create resource</Button>
                   </SpaceBetween>
                 </Box>
               }
-              filter={
-                <TextFilter
-                  filteringPlaceholder="Find resources"
-                  filteringText=""
-                  countText="0 matches"
-                />
-              }
+              filter={<TextFilter filteringPlaceholder="Find resources" filteringText="" countText="0 matches" />}
               header={<Header actions={selectModeControl(mode, setMode)} />}
               preferences={
                 <CollectionPreferences
@@ -497,14 +437,11 @@ export const ManualResourceTab = (
                   preferences={preferences}
                   onConfirm={({ detail }) =>
                     setPreferences({
-                      contentDisplay: detail.contentDisplay
-                        ? [...detail.contentDisplay]
-                        : [],
+                      contentDisplay: detail.contentDisplay ? [...detail.contentDisplay] : [],
                     })
                   }
                   contentDisplayPreference={{
-                    description:
-                      'Customize the visibility and order of the columns.',
+                    description: 'Customize the visibility and order of the columns.',
                     options: [
                       {
                         id: 'property',
@@ -522,14 +459,7 @@ export const ManualResourceTab = (
             />
           )}
           {mode === 'value' && (
-            <Container
-              header={
-                <Header
-                  variant="h2"
-                  actions={selectModeControl(mode, setMode)}
-                />
-              }
-            >
+            <Container header={<Header variant="h2" actions={selectModeControl(mode, setMode)} />}>
               {isEdit ? (
                 <CodeEditor
                   ace={ace}
@@ -544,17 +474,11 @@ export const ManualResourceTab = (
                   onPreferencesChange={(event) => {
                     setAcePreferences(event.detail);
                   }}
-                  onDelayedChange={({ detail }) =>
-                    setEditingValues(detail.value)
-                  }
+                  onDelayedChange={({ detail }) => setEditingValues(detail.value)}
                   i18nStrings={i18nStrings}
                 />
               ) : (
-                <CodeView
-                  content={values}
-                  lineNumbers
-                  highlight={jsonHighlight}
-                />
+                <CodeView content={values} lineNumbers highlight={jsonHighlight} />
               )}
             </Container>
           )}

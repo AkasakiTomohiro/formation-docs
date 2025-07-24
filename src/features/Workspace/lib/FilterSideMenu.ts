@@ -9,15 +9,10 @@ type SectionGroupItem =
 
 export const ManualManagementId = 'manualManagement';
 
-export const filterSideMenu = (
-  sideMenu: TemplateSummary[],
-  searchValues: string[],
-): SideNavigationProps.Item[] => {
+export const filterSideMenu = (sideMenu: TemplateSummary[], searchValues: string[]): SideNavigationProps.Item[] => {
   const items: SideNavigationProps.Item[] = [];
 
-  for (const item of sideMenu.sort((a, b) =>
-    a.sectionGroupName.localeCompare(b.sectionGroupName),
-  )) {
+  for (const item of sideMenu.sort((a, b) => a.sectionGroupName.localeCompare(b.sectionGroupName))) {
     const newChildren: SectionGroupItem[] = [
       {
         type: 'link',
@@ -37,21 +32,13 @@ export const filterSideMenu = (
 
     // スタック名に含まれている検索文字を取り除く
     const remainingSearchValuesStack = searchValues.filter(
-      (searchValue) =>
-        item.sectionGroupName
-          .toLowerCase()
-          .includes(searchValue.toLowerCase()) === false,
+      (searchValue) => item.sectionGroupName.toLowerCase().includes(searchValue.toLowerCase()) === false,
     );
 
-    for (const resource of item.resources.sort((a, b) =>
-      a.serviceName.localeCompare(b.serviceName),
-    )) {
+    for (const resource of item.resources.sort((a, b) => a.serviceName.localeCompare(b.serviceName))) {
       // サービス名に含まれている検索文字を取り除く
       const remainingSearchValues = remainingSearchValuesStack.filter(
-        (searchValue) =>
-          resource.serviceName
-            .toLowerCase()
-            .includes(searchValue.toLowerCase()) === false,
+        (searchValue) => resource.serviceName.toLowerCase().includes(searchValue.toLowerCase()) === false,
       );
 
       if (remainingSearchValues.length === 0) {
@@ -88,9 +75,7 @@ export const filterSideMenu = (
           items: resource.recourseType
             .sort((a, b) => a.localeCompare(b))
             .filter((rType) =>
-              remainingSearchValues.every((searchValue) =>
-                rType.toLowerCase().includes(searchValue.toLowerCase()),
-              ),
+              remainingSearchValues.every((searchValue) => rType.toLowerCase().includes(searchValue.toLowerCase())),
             )
             .map((rType) => ({
               type: 'link',
@@ -184,8 +169,7 @@ export const hrefParser = (href: string): HrefType => {
     }
     case 'resource': {
       // hrefの:より後ろの部分を/で分割
-      const [stackId, sectionGroupName, serviceName, resourceType] =
-        rest.split('/');
+      const [stackId, sectionGroupName, serviceName, resourceType] = rest.split('/');
       return {
         type: 'resource',
         stackId: stackId,
