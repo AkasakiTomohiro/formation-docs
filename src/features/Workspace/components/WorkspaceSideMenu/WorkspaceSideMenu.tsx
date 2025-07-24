@@ -2,8 +2,8 @@ import { useCallback, useMemo } from 'react';
 import { useLoaderData, useNavigate } from 'react-router';
 
 import { useWorkspaceResourceContext } from '../../contexts';
-import { filterSideMenu, hrefParser } from '../../lib/FilterSideMenu';
 import { WorkspaceSideMenuPresentation } from './WorkspaceSideMenu.presentation';
+import { filterSideMenu, hrefParser } from './lib';
 
 import type { WorkspaceLayoutLoaderData } from '../../Loader';
 import type { WorkspaceTabInfo } from '../../contexts';

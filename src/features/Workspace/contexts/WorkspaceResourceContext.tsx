@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useState } from 'react';
 import { useLoaderData, useNavigate } from 'react-router';
 
-import { ManualManagementId } from '../lib/FilterSideMenu';
 import { loadManualManagementResourceSummary } from './lib/LoadManualManagementResourceSummary';
 import { loadTemplateSummary } from './lib/LoadTemplateSummary';
 
@@ -42,6 +41,8 @@ export type ManualOverviewTabInfo = TabInfo<'manualOverview'>;
 export type ManualResourceTabInfo = TabInfo<'manualResource', ManualResourceTabAttr>;
 
 export type WorkspaceTabInfo = OverviewTabInfo | ResourceTabInfo | ManualOverviewTabInfo | ManualResourceTabInfo;
+
+export const ManualManagementId = 'manualManagement';
 
 export interface WorkspaceResourceContext {
   /**
