@@ -14,9 +14,21 @@
     "indentStyle": "space",
     "indentWidth": 2
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on"
+        }
+      }
+    }
+  },
   "linter": {
     "enabled": true,
+    "domains": {
+      "project": "recommended",
+      "react": "recommended"
+    },
     "rules": {
       "recommended": true,
       "a11y": {
