@@ -39,19 +39,13 @@ export type BuildResourceTabNameProps = {
   resourceName: string;
 };
 
-export function buildResourceTabName({
-  stackName,
-  serviceName,
-  resourceName,
-}: BuildResourceTabNameProps): string {
+export function buildResourceTabName({ stackName, serviceName, resourceName }: BuildResourceTabNameProps): string {
   return `${stackName} - ${serviceName}::${resourceName}`;
 }
 
 export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
-  const [schema, setSchema] = useState<CloudFormationSchema | undefined>(
-    undefined,
-  );
+  const [schema, setSchema] = useState<CloudFormationSchema | undefined>(undefined);
   const [resourceList, setResourceList] = useState<string[]>([]);
   const [filterText, setFilterText] = useState<string>('');
   const [isOpen, setIsOpen] = useState(true);
@@ -69,9 +63,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
   });
   const [isEdit, setIsEdit] = useState(false);
   const [reasons, setReasons] = useState<Record<string, string>>({});
-  const [editingReasons, setEditingReasons] = useState<Record<string, string>>(
-    {},
-  );
+  const [editingReasons, setEditingReasons] = useState<Record<string, string>>({});
   const { modifyResourceTab } = useWorkspaceResourceContext();
 
   console.log('resourceList', resourceList);
@@ -79,8 +71,8 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
 
   useEffect(() => {
     Promise.all([
-      getCloudFormationSchema(props.serviceName, props.resourceName).then(
-        (schemaStr) => setSchema(JSON.parse(schemaStr)),
+      getCloudFormationSchema(props.serviceName, props.resourceName).then((schemaStr) =>
+        setSchema(JSON.parse(schemaStr)),
       ),
       getStackResourceList({
         stack_id: props.stackId,
@@ -140,15 +132,12 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                     href="#"
                     onClick={(event) => {
                       event.stopPropagation();
-                      modifyResourceTab(
-                        props.tabId,
-                        (originTab: ResourceTabInfo) => {
-                          return {
-                            ...originTab,
-                            selectedLogicalId: item,
-                          };
-                        },
-                      );
+                      modifyResourceTab(props.tabId, (originTab: ResourceTabInfo) => {
+                        return {
+                          ...originTab,
+                          selectedLogicalId: item,
+                        };
+                      });
                     }}
                   >
                     {item}
@@ -159,18 +148,12 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
               },
             ]}
             enableKeyboardNavigation
-            items={resourceList.filter((item) =>
-              item.toLowerCase().includes(filterText.toLowerCase()),
-            )}
+            items={resourceList.filter((item) => item.toLowerCase().includes(filterText.toLowerCase()))}
             loadingText="Loading resources"
             loading={isLoading}
             sortingDisabled
             empty={
-              <Box
-                margin={{ vertical: 'xs' }}
-                textAlign="center"
-                color="inherit"
-              >
+              <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
                 <SpaceBetween size="m">
                   <b>No resources</b>
                 </SpaceBetween>
@@ -204,11 +187,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
         </div>
       ) : (
         <Container>
-          <Button
-            iconName="angle-right"
-            variant="icon"
-            onClick={() => setIsOpen(!isOpen)}
-          />
+          <Button iconName="angle-right" variant="icon" onClick={() => setIsOpen(!isOpen)} />
         </Container>
       )}
       {props.selectedLogicalId !== undefined && (
@@ -281,12 +260,8 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                 Show more
               </Button>
             )}
-            renderLoaderLoading={() => (
-              <StatusIndicator type="loading">Loading items</StatusIndicator>
-            )}
-            renderLoaderError={() => (
-              <StatusIndicator type="error">Loading error</StatusIndicator>
-            )}
+            renderLoaderLoading={() => <StatusIndicator type="loading">Loading items</StatusIndicator>}
+            renderLoaderError={() => <StatusIndicator type="error">Loading error</StatusIndicator>}
             renderLoaderEmpty={() => <Box>No resources found</Box>}
             expandableRows={{
               getItemChildren: (item) => item.children ?? [],
@@ -295,9 +270,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
               onExpandableItemToggle: ({ detail }) =>
                 setExpandedItems((prev: ResourceTableItem[] | undefined) => {
                   const next = new Set((prev ?? []).map((item) => item.id));
-                  detail.expanded
-                    ? next.add(detail.item.id)
-                    : next.delete(detail.item.id);
+                  detail.expanded ? next.add(detail.item.id) : next.delete(detail.item.id);
                   return [...next].map((id) => ({ id }));
                 }),
             }}
@@ -314,28 +287,20 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
               {
                 id: 'type',
                 header: 'Type',
-                cell: (e) => (
-                  <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>
-                ),
+                cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>,
                 width: 150,
                 minWidth: 100,
               },
               {
                 id: 'description',
                 header: 'Description',
-                cell: (e) => (
-                  <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>
-                ),
+                cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>,
                 width: 500,
               },
               {
                 id: 'value',
                 header: 'Value',
-                cell: (e) => (
-                  <div style={{ whiteSpace: 'pre-line' }}>
-                    {e.value === undefined ? '' : `${e.value}`}
-                  </div>
-                ),
+                cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.value === undefined ? '' : `${e.value}`}</div>,
                 width: 300,
                 minWidth: 100,
               },
@@ -356,11 +321,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                       />
                     );
                   }
-                  return (
-                    <div style={{ whiteSpace: 'pre-line' }}>
-                      {reasons[e.id]}
-                    </div>
-                  );
+                  return <div style={{ whiteSpace: 'pre-line' }}>{reasons[e.id]}</div>;
                 },
                 width: 300,
                 minWidth: 200,
@@ -373,24 +334,14 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
             loadingText="Loading resources"
             trackBy="id"
             empty={
-              <Box
-                margin={{ vertical: 'xs' }}
-                textAlign="center"
-                color="inherit"
-              >
+              <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
                 <SpaceBetween size="m">
                   <b>No resources</b>
                   <Button>Create resource</Button>
                 </SpaceBetween>
               </Box>
             }
-            filter={
-              <TextFilter
-                filteringPlaceholder="Find resources"
-                filteringText=""
-                countText="0 matches"
-              />
-            }
+            filter={<TextFilter filteringPlaceholder="Find resources" filteringText="" countText="0 matches" />}
             header={<Header>Table with expandable rows</Header>}
             preferences={
               <CollectionPreferences
@@ -400,14 +351,11 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
                 preferences={preferences}
                 onConfirm={({ detail }) =>
                   setPreferences({
-                    contentDisplay: detail.contentDisplay
-                      ? [...detail.contentDisplay]
-                      : [],
+                    contentDisplay: detail.contentDisplay ? [...detail.contentDisplay] : [],
                   })
                 }
                 contentDisplayPreference={{
-                  description:
-                    'Customize the visibility and order of the columns.',
+                  description: 'Customize the visibility and order of the columns.',
                   options: [
                     {
                       id: 'property',

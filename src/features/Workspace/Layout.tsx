@@ -2,14 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, useLoaderData, useNavigate } from 'react-router';
 import styled from 'styled-components';
 
-import {
-  AppLayout,
-  Flashbar,
-  Input,
-  SideNavigation,
-  SpaceBetween,
-  TokenGroup,
-} from '@cloudscape-design/components';
+import { AppLayout, Flashbar, Input, SideNavigation, SpaceBetween, TokenGroup } from '@cloudscape-design/components';
 
 import { useWorkspaceResourceContext } from './contexts/WorkspaceResourceContext';
 import { filterSideMenu, hrefParser } from './lib/FilterSideMenu';
@@ -50,9 +43,7 @@ export const WorkspaceLayout = (): JSX.Element => {
   } = useWorkspaceResourceContext();
 
   // エラー表示
-  const [flashbarItems, setFlashbarItems] = useState<
-    FlashbarProps.MessageDefinition[]
-  >([]);
+  const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -76,9 +67,7 @@ export const WorkspaceLayout = (): JSX.Element => {
             href: '#',
             text: workspace.name,
           }}
-          items={filterSideMenu(sideMenu, [
-            ...tokenGroup.map((t) => (t.label ? t.label : '')),
-          ])}
+          items={filterSideMenu(sideMenu, [...tokenGroup.map((t) => (t.label ? t.label : ''))])}
           itemsControl={
             <SpaceBetween direction="vertical" size="m">
               <StyledLink
@@ -102,20 +91,14 @@ export const WorkspaceLayout = (): JSX.Element => {
                       if (searchValue === '') {
                         return;
                       }
-                      setTokenGroup((prev) => [
-                        ...prev,
-                        { label: searchValue },
-                      ]);
+                      setTokenGroup((prev) => [...prev, { label: searchValue }]);
                       setSearchValue('');
                     }
                   }}
                 />
                 <TokenGroup
                   onDismiss={({ detail: { itemIndex } }) => {
-                    setTokenGroup([
-                      ...tokenGroup.slice(0, itemIndex),
-                      ...tokenGroup.slice(itemIndex + 1),
-                    ]);
+                    setTokenGroup([...tokenGroup.slice(0, itemIndex), ...tokenGroup.slice(itemIndex + 1)]);
                   }}
                   items={tokenGroup}
                 />

@@ -23,17 +23,12 @@ import type { WorkspaceLayoutContext } from '../../Layout';
 export const WorkspaceHome = (): JSX.Element => {
   const workspace = useOutletContext<WorkspaceLayoutContext>();
   const navigate = useNavigate();
-  const [flashbarItems, setFlashbarItems] = useState<
-    FlashbarProps.MessageDefinition[]
-  >([]);
+  const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
   const { state, stacks, importStack, loadStacks, deleteStack } = useStacks();
   const [selectedItems, setSelectedItems] = useState<StackInfo[]>([]);
-  const { items, collectionProps, paginationProps } = useCollection<StackInfo>(
-    stacks,
-    {
-      pagination: { pageSize: 10 },
-    },
-  );
+  const { items, collectionProps, paginationProps } = useCollection<StackInfo>(stacks, {
+    pagination: { pageSize: 10 },
+  });
   const { loadSideMenu } = useWorkspaceResourceContext();
 
   const importStackWrap = useCallback(async () => {
@@ -106,10 +101,7 @@ export const WorkspaceHome = (): JSX.Element => {
             description={workspace.description}
             actions={
               <SpaceBetween size="s">
-                <Button
-                  variant="normal"
-                  onClick={() => navigate(`/workspaces/${workspace.id}/edit`)}
-                >
+                <Button variant="normal" onClick={() => navigate(`/workspaces/${workspace.id}/edit`)}>
                   編集
                 </Button>
               </SpaceBetween>
@@ -156,9 +148,7 @@ export const WorkspaceHome = (): JSX.Element => {
         ]}
         selectionType="single"
         selectedItems={selectedItems}
-        onSelectionChange={({ detail }) =>
-          setSelectedItems(detail.selectedItems)
-        }
+        onSelectionChange={({ detail }) => setSelectedItems(detail.selectedItems)}
         items={items}
         loadingText="Loading workspace"
         trackBy="name"

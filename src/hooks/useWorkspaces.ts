@@ -39,9 +39,7 @@ export function useWorkspaces(): UseWorkspacesResult {
 
   const createWorkspaceWrap = useCallback(
     async (props: CreateWorkspaceInfo): Promise<WorkspaceExpand> => {
-      const findWorkspace = workspaces.find(
-        (w) => w.directory === props.directory,
-      );
+      const findWorkspace = workspaces.find((w) => w.directory === props.directory);
       if (findWorkspace) {
         return findWorkspace;
       }

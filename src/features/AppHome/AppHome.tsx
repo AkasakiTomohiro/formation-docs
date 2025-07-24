@@ -22,29 +22,16 @@ import type { WorkspaceExpand } from '../../invoke/Workspace';
 
 export const AppHome = (): JSX.Element => {
   const isFirstRender = useRef(true);
-  const [flashbarItems, setFlashbarItems] = useState<
-    FlashbarProps.MessageDefinition[]
-  >([]);
-  const {
-    state,
-    workspaces,
-    createWorkspace,
-    loadWorkspaces,
-    deleteWorkspace,
-  } = useWorkspaces();
-  const { items, collectionProps, paginationProps } = useCollection(
-    workspaces,
-    {
-      pagination: { pageSize: 10 },
-    },
-  );
+  const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
+  const { state, workspaces, createWorkspace, loadWorkspaces, deleteWorkspace } = useWorkspaces();
+  const { items, collectionProps, paginationProps } = useCollection(workspaces, {
+    pagination: { pageSize: 10 },
+  });
   const [selectedItems, setSelectedItems] = useState<WorkspaceExpand[]>([]);
 
   const openWorkspace = useCallback(
     async (workspace: WorkspaceExpand) => {
-      const workspaceWindow = await Window.getByLabel(
-        `workspace-${workspace.id}`,
-      );
+      const workspaceWindow = await Window.getByLabel(`workspace-${workspace.id}`);
       if (workspaceWindow) {
         // ワークスペースが開いている場合は、フォーカスを当てる
         workspaceWindow.setFocus();
@@ -162,9 +149,7 @@ export const AppHome = (): JSX.Element => {
         ]}
         selectionType="single"
         selectedItems={selectedItems}
-        onSelectionChange={({ detail }) =>
-          setSelectedItems(detail.selectedItems)
-        }
+        onSelectionChange={({ detail }) => setSelectedItems(detail.selectedItems)}
         items={items}
         loadingText="Loading workspace"
         trackBy="name"

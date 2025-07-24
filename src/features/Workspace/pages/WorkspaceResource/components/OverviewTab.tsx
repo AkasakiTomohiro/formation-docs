@@ -17,12 +17,7 @@ import {
 } from '@cloudscape-design/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import {
-  getStackOutputs,
-  getStackParameters,
-  loadStack,
-  updateStackDetail,
-} from '../../../../../invoke/Stack';
+import { getStackOutputs, getStackParameters, loadStack, updateStackDetail } from '../../../../../invoke/Stack';
 import { useWorkspaceResourceContext } from '../../../contexts';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
@@ -53,23 +48,15 @@ export type StackEditType = z.infer<typeof stackEditValidator>;
 export type BuildOverviewTabNameProps = {
   stackName: string;
 };
-export function buildOverviewTabName({
-  stackName,
-}: BuildOverviewTabNameProps): string {
+export function buildOverviewTabName({ stackName }: BuildOverviewTabNameProps): string {
   return stackName;
 }
 
 export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
   const { modifyResourceTab } = useWorkspaceResourceContext();
-  const [flashbarItems, setFlashbarItems] = useState<
-    FlashbarProps.MessageDefinition[]
-  >([]);
-  const [stackParameters, setStackParameters] = useState<
-    stackParametersDisplayProps[]
-  >([]);
-  const [stackOutputs, setStackOutputs] = useState<stackOutputsDisplayProps[]>(
-    [],
-  );
+  const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
+  const [stackParameters, setStackParameters] = useState<stackParametersDisplayProps[]>([]);
+  const [stackOutputs, setStackOutputs] = useState<stackOutputsDisplayProps[]>([]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -151,13 +138,7 @@ type StackContentProps = {
 };
 
 const StackContent = (props: StackContentProps): JSX.Element => {
-  const {
-    resourceTab,
-    setIsEdit,
-    flashbarItems,
-    stackParameters,
-    stackOutputs,
-  } = props;
+  const { resourceTab, setIsEdit, flashbarItems, stackParameters, stackOutputs } = props;
   return (
     <ContentLayout
       header={
@@ -192,18 +173,14 @@ const StackContent = (props: StackContentProps): JSX.Element => {
             {
               id: 'type',
               header: 'Type',
-              cell: (e) => (
-                <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>
-              ),
+              cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>,
               width: 150,
               minWidth: 100,
             },
             {
               id: 'description',
               header: 'Description',
-              cell: (e) => (
-                <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>
-              ),
+              cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>,
               width: 500,
             },
           ]}
@@ -235,27 +212,21 @@ const StackContent = (props: StackContentProps): JSX.Element => {
             {
               id: 'export',
               header: 'Export',
-              cell: (e) => (
-                <div style={{ whiteSpace: 'pre-line' }}>{e.exportName}</div>
-              ),
+              cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.exportName}</div>,
               width: 250,
               minWidth: 150,
             },
             {
               id: 'value',
               header: 'Value',
-              cell: (e) => (
-                <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>
-              ),
+              cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>,
               width: 250,
               minWidth: 150,
             },
             {
               id: 'description',
               header: 'Description',
-              cell: (e) => (
-                <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>
-              ),
+              cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>,
             },
           ]}
           stickyHeader
@@ -281,9 +252,7 @@ export type StackEditContentProps = {
   resourceTab: OverviewTabProps;
   setIsEdit: (isEdit: boolean) => void;
   flashbarItems: FlashbarProps.MessageDefinition[];
-  setFlashbarItems: React.Dispatch<
-    React.SetStateAction<FlashbarProps.MessageDefinition[]>
-  >;
+  setFlashbarItems: React.Dispatch<React.SetStateAction<FlashbarProps.MessageDefinition[]>>;
 };
 
 const StackEditContent = (props: StackEditContentProps): JSX.Element => {
@@ -356,17 +325,9 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
                 render={({ field, fieldState: { invalid } }) => (
                   <FormField
                     label="Stack name"
-                    errorText={
-                      invalid
-                        ? '1文字以上256文字以下で入力してください'
-                        : undefined
-                    }
+                    errorText={invalid ? '1文字以上256文字以下で入力してください' : undefined}
                   >
-                    <Input
-                      {...field}
-                      onChange={(event) => field.onChange(event.detail.value)}
-                      invalid={invalid}
-                    />
+                    <Input {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
                   </FormField>
                 )}
               />
@@ -376,15 +337,9 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
                 render={({ field, fieldState: { invalid } }) => (
                   <FormField
                     label="Stack description"
-                    errorText={
-                      invalid ? '256文字以下で入力してください' : undefined
-                    }
+                    errorText={invalid ? '256文字以下で入力してください' : undefined}
                   >
-                    <Input
-                      {...field}
-                      onChange={(event) => field.onChange(event.detail.value)}
-                      invalid={invalid}
-                    />
+                    <Input {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
                   </FormField>
                 )}
               />
