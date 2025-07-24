@@ -21,8 +21,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 
 import { getAWSServiceList } from '../../../../../invoke/CloudFormationSchema';
 import { newManualManagementResource } from '../../../../../invoke/ManualManagementResource';
+import { hrefBuilder } from '../../../components/WorkspaceSideMenu';
 import { useWorkspaceResourceContext } from '../../../contexts';
-import { hrefBuilder } from '../../../lib/FilterSideMenu';
 
 import type { WorkspaceLayoutContext } from '../../../Layout';
 import type { ManualResourceTabInfo } from '../../../contexts';
