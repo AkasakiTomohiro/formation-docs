@@ -12,35 +12,14 @@ import {
   buildResourceTabName,
 } from './components';
 import { ManualOverviewTab } from './components/ManualOverviewTab';
-import {
-  ManualResourceTab,
-  buildManualResourceTabName,
-} from './components/ManualResourceTab';
+import { ManualResourceTab, buildManualResourceTabName } from './components/ManualResourceTab';
 
-import type { ManualResourceTabProps } from './components/ManualResourceTab';
-
-import type { OverviewTabProps, ResourceTabProps } from './components';
-export type ResourceInfo<
-  TType extends string,
-  T extends { tabId: string } = { tabId: string },
-> = {
-  type: TType;
-} & T;
-export type WorkspaceResourceInfo =
-  | ResourceInfo<'overview', OverviewTabProps>
-  | ResourceInfo<'resource', ResourceTabProps>
-  | ResourceInfo<'manualOverview'>
-  | ResourceInfo<'manualResource', ManualResourceTabProps>;
+import type { WorkspaceTabInfo } from '../../contexts';
 
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
-  const {
-    resourceTabs,
-    setResourceTabs,
-    addResourceTab,
-    activeTabId,
-    setActiveTabId,
-  } = useWorkspaceResourceContext();
+  const { resourceTabs, addResourceTab, deleteResourceTab, activeTabId, setActiveTabId } =
+    useWorkspaceResourceContext();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -48,7 +27,7 @@ export const WorkspaceResource = (): JSX.Element => {
       const stackId = location.state.selectedStackId;
       const stackName = location.state.selectedStackName;
       if (stackId && stackName) {
-        const newTab: WorkspaceResourceInfo = {
+        const newTab: WorkspaceTabInfo = {
           type: 'overview',
           tabId: `${stackId}/${stackName}`,
           stackId,
@@ -103,9 +82,7 @@ export const WorkspaceResource = (): JSX.Element => {
               content: content,
               dismissible: true,
               onDismiss: () => {
-                setResourceTabs((prev) =>
-                  prev.filter((t) => t.tabId !== tab.tabId),
-                );
+                deleteResourceTab(tab.tabId);
               },
             };
           })}

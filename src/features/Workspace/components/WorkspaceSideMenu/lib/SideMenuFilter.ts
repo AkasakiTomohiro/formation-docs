@@ -1,5 +1,8 @@
+import { ManualManagementId } from '../../../contexts';
+import { hrefBuilder } from './HrefBuilder';
+
 import type { SideNavigationProps } from '@cloudscape-design/components';
-import type { TemplateSummary } from '../contexts/lib/LoadTemplateSummary';
+import type { TemplateSummary } from '../../../contexts/lib/LoadTemplateSummary';
 
 type SectionGroupItem =
   | SideNavigationProps.Section
@@ -7,17 +10,10 @@ type SectionGroupItem =
   | SideNavigationProps.LinkGroup
   | SideNavigationProps.ExpandableLinkGroup;
 
-export const ManualManagementId = 'manualManagement';
-
-export const filterSideMenu = (
-  sideMenu: TemplateSummary[],
-  searchValues: string[],
-): SideNavigationProps.Item[] => {
+export const filterSideMenu = (sideMenu: TemplateSummary[], searchValues: string[]): SideNavigationProps.Item[] => {
   const items: SideNavigationProps.Item[] = [];
 
-  for (const item of sideMenu.sort((a, b) =>
-    a.sectionGroupName.localeCompare(b.sectionGroupName),
-  )) {
+  for (const item of sideMenu.sort((a, b) => a.sectionGroupName.localeCompare(b.sectionGroupName))) {
     const newChildren: SectionGroupItem[] = [
       {
         type: 'link',
@@ -37,21 +33,13 @@ export const filterSideMenu = (
 
     // スタック名に含まれている検索文字を取り除く
     const remainingSearchValuesStack = searchValues.filter(
-      (searchValue) =>
-        item.sectionGroupName
-          .toLowerCase()
-          .includes(searchValue.toLowerCase()) === false,
+      (searchValue) => item.sectionGroupName.toLowerCase().includes(searchValue.toLowerCase()) === false,
     );
 
-    for (const resource of item.resources.sort((a, b) =>
-      a.serviceName.localeCompare(b.serviceName),
-    )) {
+    for (const resource of item.resources.sort((a, b) => a.serviceName.localeCompare(b.serviceName))) {
       // サービス名に含まれている検索文字を取り除く
       const remainingSearchValues = remainingSearchValuesStack.filter(
-        (searchValue) =>
-          resource.serviceName
-            .toLowerCase()
-            .includes(searchValue.toLowerCase()) === false,
+        (searchValue) => resource.serviceName.toLowerCase().includes(searchValue.toLowerCase()) === false,
       );
 
       if (remainingSearchValues.length === 0) {
@@ -88,9 +76,7 @@ export const filterSideMenu = (
           items: resource.recourseType
             .sort((a, b) => a.localeCompare(b))
             .filter((rType) =>
-              remainingSearchValues.every((searchValue) =>
-                rType.toLowerCase().includes(searchValue.toLowerCase()),
-              ),
+              remainingSearchValues.every((searchValue) => rType.toLowerCase().includes(searchValue.toLowerCase())),
             )
             .map((rType) => ({
               type: 'link',
@@ -131,82 +117,4 @@ export const filterSideMenu = (
   }
 
   return items;
-};
-
-export type HrefType =
-  | {
-      type: 'overview';
-      stackId: string;
-      sectionGroupName: string;
-    }
-  | {
-      type: 'resource';
-      stackId: string;
-      sectionGroupName: string;
-      serviceName: string;
-      resourceType: string;
-    }
-  | {
-      type: 'manualOverview';
-    }
-  | {
-      type: 'manualResource';
-      serviceName: string;
-      resourceType: string;
-    };
-
-export const hrefBuilder = (props: HrefType): string => {
-  switch (props.type) {
-    case 'overview':
-      return `overview:${props.stackId}/${props.sectionGroupName}`;
-    case 'resource':
-      return `resource:${props.stackId}/${props.sectionGroupName}/${props.serviceName}/${props.resourceType}`;
-    case 'manualOverview':
-      return 'manualOverview:';
-    case 'manualResource':
-      return `manualResource:${props.serviceName}/${props.resourceType}`;
-  }
-};
-
-export const hrefParser = (href: string): HrefType => {
-  // hrefを:より前と:より後ろに分割
-  const [type, rest] = href.split(':');
-
-  switch (type) {
-    case 'overview': {
-      // hrefの:より後ろの部分を/で分割
-      const [stackId, sectionGroupName] = rest.split('/');
-      return {
-        type: 'overview',
-        stackId: stackId,
-        sectionGroupName: sectionGroupName,
-      };
-    }
-    case 'resource': {
-      // hrefの:より後ろの部分を/で分割
-      const [stackId, sectionGroupName, serviceName, resourceType] =
-        rest.split('/');
-      return {
-        type: 'resource',
-        stackId: stackId,
-        sectionGroupName: sectionGroupName,
-        serviceName: serviceName,
-        resourceType: resourceType,
-      };
-    }
-    case 'manualOverview': {
-      return { type: 'manualOverview' };
-    }
-    case 'manualResource': {
-      // hrefの:より後ろの部分を/で分割
-      const [serviceName, resourceType] = rest.split('/');
-      return {
-        type: 'manualResource',
-        serviceName: serviceName,
-        resourceType: resourceType,
-      };
-    }
-    default:
-      throw new Error(`Unknown href type: ${type}`);
-  }
 };

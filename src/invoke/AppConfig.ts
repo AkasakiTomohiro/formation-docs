@@ -27,9 +27,7 @@ export const APP_CONFIG_FILE_NAME = 'app_config.json';
  * @returns
  */
 export async function loadAppConfig(): Promise<AppConfig> {
-  const result = await invoke<CommandResult<AppConfig>>(
-    'read_app_config_command',
-  );
+  const result = await invoke<CommandResult<AppConfig>>('read_app_config_command');
   if (result.success) {
     return result.value;
   }
@@ -39,15 +37,10 @@ export async function loadAppConfig(): Promise<AppConfig> {
 /**
  * AppConfigからワークスペースを削除する
  */
-export async function deleteWorkspaceFromAppConfig(
-  workspaceId: string,
-): Promise<void> {
-  const result = await invoke<CommandResult<[]>>(
-    'delete_workspace_from_app_config_command',
-    {
-      workspace_id: workspaceId,
-    },
-  );
+export async function deleteWorkspaceFromAppConfig(workspaceId: string): Promise<void> {
+  const result = await invoke<CommandResult<[]>>('delete_workspace_from_app_config_command', {
+    workspace_id: workspaceId,
+  });
   if (!result.success) {
     throw new Error(result.value);
   }

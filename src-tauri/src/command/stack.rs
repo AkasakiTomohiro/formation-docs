@@ -454,6 +454,60 @@ async fn get_stack_parameters(
     return Ok(parameters_json);
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StackOutput {
+    name: String,
+    description: Option<String>,
+    export_name: Option<String>,
+    value: Value,
+}
+
+/// 対象スタックのOutputsを取得する
+///
+/// 対象スタックのOutputsがない場合は、空配列を返す
+///
+/// - `workspace_directory` - ワークスペースのディレクトリパス
+/// - `stack_id` - スタックのID
+async fn get_stack_outputs(
+    workspace_directory: &str,
+    stack_id: &str,
+) -> Result<Vec<StackOutput>, StackError> {
+    let workspace = load_workspace(workspace_directory).await?;
+    let stack_file_name = match workspace.stacks.get(stack_id) {
+        Some(stack_file_name) => stack_file_name,
+        None => {
+            return Err(StackError::App(AppError::new("Stack not found")));
+        }
+    };
+    let template_path = format!("{}/{}", workspace_directory, stack_file_name);
+    let template_json = fs::read_to_string(&template_path)?;
+    let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
+    let outputs_json = template_json["Outputs"].clone();
+
+    let mut result: Vec<StackOutput> = Vec::new();
+    if let Some(outputs) = outputs_json.as_object() {
+        for (key, value) in outputs.iter() {
+            let result_item = StackOutput {
+                name: key.to_string(),
+                description: value
+                    .get("Description")
+                    .and_then(|desc| desc.as_str())
+                    .map(|s| s.to_string()),
+                export_name: value
+                    .get("Export")
+                    .and_then(|export| export.get("Name"))
+                    .and_then(|name| name.as_str())
+                    .map(|str| str.to_string()),
+                value: value["Value"].clone(),
+            };
+            result.push(result_item);
+        }
+    }
+
+    return Ok(result);
+}
+
 async fn update_stack_meta(
     workspace_directory: &str,
     stack_id: &str,
@@ -665,6 +719,23 @@ pub async fn get_stack_parameters_command(
         }
     };
     return match get_stack_parameters(window_state.workspace_directory.as_str(), stack_id).await {
+        Ok(parameters) => Ok(CommandResult::success(parameters)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_stack_outputs_command(
+    window: tauri::Window,
+    stack_id: &str,
+) -> Result<CommandResult<Vec<StackOutput>>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match get_stack_outputs(window_state.workspace_directory.as_str(), stack_id).await {
         Ok(parameters) => Ok(CommandResult::success(parameters)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };

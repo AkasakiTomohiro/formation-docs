@@ -81,10 +81,7 @@ function parseDefinedPropertyToTableItem(
   actualProperties: any,
   definitions: CloudFormationSchema['definitions'] | undefined,
 ): ResourceTableItem {
-  const convertedValue = convertValue(
-    property,
-    getActualProperties(propertyKey, actualProperties),
-  );
+  const convertedValue = convertValue(property, getActualProperties(propertyKey, actualProperties));
   const result: ResourceTableItem = {
     id: `${parentId}/${propertyKey}`,
     property: propertyKey,
@@ -103,8 +100,7 @@ function parseDefinedPropertyToTableItem(
   ) {
     const definitionKey = property.items.$ref.replace('#/definitions/', '');
     const definition = definitions[definitionKey];
-    const propertyList =
-      getActualProperties(propertyKey, actualProperties) ?? [];
+    const propertyList = getActualProperties(propertyKey, actualProperties) ?? [];
     result.children = [];
 
     // 配列のIndex番号ごとに子要素を作成する
@@ -117,12 +113,7 @@ function parseDefinedPropertyToTableItem(
         value: '',
         editMode: 'readonly',
       };
-      childItem.children = parseChildrenPropertyToTableItem(
-        definition.properties,
-        childItem.id,
-        property,
-        definitions,
-      );
+      childItem.children = parseChildrenPropertyToTableItem(definition.properties, childItem.id, property, definitions);
       result.children.push(childItem);
     }
     if (result.children.length === 0) {
@@ -174,10 +165,7 @@ function parseReferencePropertyToTableItem(
 
   const definitionKey = property.$ref.replace('#/definitions/', '');
   const definition = definitions[definitionKey];
-  const convertedValue = convertValue(
-    definition,
-    getActualProperties(propertyKey, actualProperties),
-  );
+  const convertedValue = convertValue(definition, getActualProperties(propertyKey, actualProperties));
   const result: ResourceTableItem = {
     id: `${parentId}/${propertyKey}`,
     property: propertyKey,
@@ -224,9 +212,7 @@ function parseChildrenPropertyToTableItem(
   definitions: CloudFormationSchema['definitions'] | undefined,
 ): ResourceTableItem[] | undefined {
   const result: ResourceTableItem[] = [];
-  for (const [definitionKey, definitionValue] of Object.entries(
-    childrenProperties,
-  )) {
+  for (const [definitionKey, definitionValue] of Object.entries(childrenProperties)) {
     // $refを含む場合は、参照プロパティを取得する
     if ('$ref' in definitionValue) {
       const childItem = parseReferencePropertyToTableItem(

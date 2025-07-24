@@ -10,9 +10,7 @@ export interface StackInfo {
 }
 
 export async function loadStacks(): Promise<StackInfo[]> {
-  const result = await invoke<CommandResult<StackInfo[]>>(
-    'load_stacks_command',
-  );
+  const result = await invoke<CommandResult<StackInfo[]>>('load_stacks_command');
   if (!result.success) {
     throw new Error(result.value);
   }
@@ -55,13 +53,8 @@ export type GetStackResourceListProps = {
   resource_name: string;
 };
 
-export async function getStackResourceList(
-  props: GetStackResourceListProps,
-): Promise<string[]> {
-  const result = await invoke<CommandResult<string[]>>(
-    'get_stack_resource_list_command',
-    props,
-  );
+export async function getStackResourceList(props: GetStackResourceListProps): Promise<string[]> {
+  const result = await invoke<CommandResult<string[]>>('get_stack_resource_list_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }
@@ -78,10 +71,7 @@ export async function getStackResourceProperties(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 ): Promise<any> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const result = await invoke<CommandResult<any>>(
-    'get_stack_resource_properties_command',
-    props,
-  );
+  const result = await invoke<CommandResult<any>>('get_stack_resource_properties_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }
@@ -100,13 +90,28 @@ export type GetStackParametersResult = Record<
   }
 >;
 
-export async function getStackParameters(
-  props: GetStackParametersProps,
-): Promise<GetStackParametersResult> {
-  const result = await invoke<CommandResult<GetStackParametersResult>>(
-    'get_stack_parameters_command',
-    props,
-  );
+export async function getStackParameters(props: GetStackParametersProps): Promise<GetStackParametersResult> {
+  const result = await invoke<CommandResult<GetStackParametersResult>>('get_stack_parameters_command', props);
+  if (!result.success) {
+    throw new Error(result.value);
+  }
+  return result.value;
+}
+
+export type GetStackOutputsProps = {
+  stack_id: string;
+};
+
+type GetStackOutputResult = {
+  name: string;
+  description: string | null;
+  exportName: string | null;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  value: any;
+};
+
+export async function getStackOutputs(props: GetStackOutputsProps): Promise<GetStackOutputResult[]> {
+  const result = await invoke<CommandResult<GetStackOutputResult[]>>('get_stack_outputs_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }
@@ -141,10 +146,7 @@ export async function updateStackMeta(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 ): Promise<any> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const result = await invoke<CommandResult<any>>(
-    'update_stack_meta_command',
-    props,
-  );
+  const result = await invoke<CommandResult<any>>('update_stack_meta_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }
@@ -161,10 +163,7 @@ export async function updateStackDetail(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 ): Promise<any> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const result = await invoke<CommandResult<any>>(
-    'update_stack_detail_command',
-    props,
-  );
+  const result = await invoke<CommandResult<any>>('update_stack_detail_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }

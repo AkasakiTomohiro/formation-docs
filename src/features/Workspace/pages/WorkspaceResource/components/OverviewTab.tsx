@@ -17,22 +17,13 @@ import {
 } from '@cloudscape-design/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import {
-  getStackParameters,
-  loadStack,
-  updateStackDetail,
-} from '../../../../../invoke/Stack';
+import { getStackOutputs, getStackParameters, loadStack, updateStackDetail } from '../../../../../invoke/Stack';
 import { useWorkspaceResourceContext } from '../../../contexts';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
+import type { OverviewTabAttr, OverviewTabInfo } from '../../../contexts';
 
-export type OverviewTabProps = {
-  tabId: string;
-  stackId: string;
-  stackName: string;
-  description: string;
-  isEdit?: boolean;
-};
+export type OverviewTabProps = OverviewTabAttr;
 
 const stackEditValidator = z.object({
   name: z.string().min(1).max(256),
@@ -45,25 +36,27 @@ type stackParametersDisplayProps = {
   description: string;
 };
 
+type stackOutputsDisplayProps = {
+  name: string;
+  description: string | null;
+  exportName: string | null;
+  value: string;
+};
+
 export type StackEditType = z.infer<typeof stackEditValidator>;
 
 export type BuildOverviewTabNameProps = {
   stackName: string;
 };
-export function buildOverviewTabName({
-  stackName,
-}: BuildOverviewTabNameProps): string {
+export function buildOverviewTabName({ stackName }: BuildOverviewTabNameProps): string {
   return stackName;
 }
 
 export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
-  const { setResourceTabs } = useWorkspaceResourceContext();
-  const [flashbarItems, setFlashbarItems] = useState<
-    FlashbarProps.MessageDefinition[]
-  >([]);
-  const [stackParameters, setStackParameters] = useState<
-    stackParametersDisplayProps[]
-  >([]);
+  const { modifyResourceTab } = useWorkspaceResourceContext();
+  const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
+  const [stackParameters, setStackParameters] = useState<stackParametersDisplayProps[]>([]);
+  const [stackOutputs, setStackOutputs] = useState<stackOutputsDisplayProps[]>([]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -72,17 +65,12 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
       const description = stackDetail.description_from_meta;
 
       // 取得したスタック情報を更新
-      setResourceTabs((prev) => {
-        return prev.map((tab) => {
-          if (tab.tabId === props.tabId) {
-            return {
-              ...tab,
-              stackName: stackName,
-              description: description,
-            };
-          }
-          return tab;
-        });
+      modifyResourceTab(props.tabId, (originTab: OverviewTabInfo) => {
+        return {
+          ...originTab,
+          stackName: stackName,
+          description: description,
+        };
       });
     });
 
@@ -98,21 +86,29 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
       });
       setStackParameters(parameters);
     });
+
+    // スタックのoutputを取得し、表中に表示する
+    getStackOutputs({ stack_id: props.stackId }).then((stackOutputs) => {
+      const outputs = stackOutputs.map((output) => {
+        return {
+          name: output.name,
+          description: output.description,
+          exportName: output.exportName,
+          value: JSON.stringify(output.value), // FIXME: convertIntrinsicFunctionValue関数を使用した文字列を代入する
+        };
+      });
+      setStackOutputs(outputs);
+    });
   }, []);
 
   const setIsEdit = (isEdit: boolean) => {
     // 編集モードに入る場合、リソースタブの情報を更新
-    setResourceTabs((prev) =>
-      prev.map((tab) => {
-        if (tab.tabId === props.tabId) {
-          return {
-            ...tab,
-            isEdit: isEdit,
-          };
-        }
-        return tab;
-      }),
-    );
+    modifyResourceTab(props.tabId, (originTab: OverviewTabInfo) => {
+      return {
+        ...originTab,
+        isEdit: isEdit,
+      };
+    });
   };
 
   return props.isEdit ? (
@@ -128,6 +124,7 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
       resourceTab={props}
       setIsEdit={setIsEdit}
       stackParameters={stackParameters}
+      stackOutputs={stackOutputs}
     />
   );
 };
@@ -137,10 +134,11 @@ type StackContentProps = {
   setIsEdit: (isEdit: boolean) => void;
   flashbarItems: FlashbarProps.MessageDefinition[];
   stackParameters: stackParametersDisplayProps[];
+  stackOutputs: stackOutputsDisplayProps[];
 };
 
 const StackContent = (props: StackContentProps): JSX.Element => {
-  const { resourceTab, setIsEdit, flashbarItems, stackParameters } = props;
+  const { resourceTab, setIsEdit, flashbarItems, stackParameters, stackOutputs } = props;
   return (
     <ContentLayout
       header={
@@ -160,47 +158,92 @@ const StackContent = (props: StackContentProps): JSX.Element => {
         </SpaceBetween>
       }
     >
-      <Table
-        resizableColumns
-        columnDefinitions={[
-          {
-            id: 'parameterName',
-            header: 'Parameter Name',
-            cell: (e) => e.name,
-            isRowHeader: true,
-            width: 250,
-            minWidth: 150,
-          },
-          {
-            id: 'type',
-            header: 'Type',
-            cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>,
-            width: 150,
-            minWidth: 100,
-          },
-          {
-            id: 'description',
-            header: 'Description',
-            cell: (e) => (
-              <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>
-            ),
-            width: 500,
-          },
-        ]}
-        stickyHeader
-        enableKeyboardNavigation
-        items={stackParameters}
-        loadingText="Loading resources"
-        trackBy="name"
-        empty={
-          <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
-            <SpaceBetween size="m">
-              <b>No Parameters</b>
-            </SpaceBetween>
-          </Box>
-        }
-        header={<Header>Parameter</Header>}
-      />
+      <SpaceBetween size="m">
+        <Table
+          resizableColumns
+          columnDefinitions={[
+            {
+              id: 'parameterName',
+              header: 'Parameter Name',
+              cell: (e) => e.name,
+              isRowHeader: true,
+              width: 250,
+              minWidth: 150,
+            },
+            {
+              id: 'type',
+              header: 'Type',
+              cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>,
+              width: 150,
+              minWidth: 100,
+            },
+            {
+              id: 'description',
+              header: 'Description',
+              cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>,
+              width: 500,
+            },
+          ]}
+          stickyHeader
+          enableKeyboardNavigation
+          items={stackParameters}
+          loadingText="Loading resources"
+          trackBy="name"
+          empty={
+            <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
+              <SpaceBetween size="m">
+                <b>No Parameters</b>
+              </SpaceBetween>
+            </Box>
+          }
+          header={<Header>Parameter</Header>}
+        />
+        <Table
+          resizableColumns
+          columnDefinitions={[
+            {
+              id: 'outputName',
+              header: 'Output Name',
+              cell: (e) => e.name,
+              isRowHeader: true,
+              width: 250,
+              minWidth: 150,
+            },
+            {
+              id: 'export',
+              header: 'Export',
+              cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.exportName}</div>,
+              width: 250,
+              minWidth: 150,
+            },
+            {
+              id: 'value',
+              header: 'Value',
+              cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>,
+              width: 250,
+              minWidth: 150,
+            },
+            {
+              id: 'description',
+              header: 'Description',
+              cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>,
+            },
+          ]}
+          stickyHeader
+          enableKeyboardNavigation
+          items={stackOutputs}
+          loadingText="Loading resources"
+          trackBy="name"
+          empty={
+            <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
+              <SpaceBetween size="m">
+                <b>No Outputs</b>
+              </SpaceBetween>
+            </Box>
+          }
+          header={<Header>Outputs</Header>}
+        />
+      </SpaceBetween>
     </ContentLayout>
   );
 };
@@ -209,9 +252,7 @@ export type StackEditContentProps = {
   resourceTab: OverviewTabProps;
   setIsEdit: (isEdit: boolean) => void;
   flashbarItems: FlashbarProps.MessageDefinition[];
-  setFlashbarItems: React.Dispatch<
-    React.SetStateAction<FlashbarProps.MessageDefinition[]>
-  >;
+  setFlashbarItems: React.Dispatch<React.SetStateAction<FlashbarProps.MessageDefinition[]>>;
 };
 
 const StackEditContent = (props: StackEditContentProps): JSX.Element => {
@@ -225,7 +266,7 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
       description: resourceTab.description,
     },
   });
-  const { setResourceTabs } = useWorkspaceResourceContext();
+  const { modifyResourceTab } = useWorkspaceResourceContext();
 
   const onSave = async (stackDetailProps: StackEditType) => {
     try {
@@ -236,17 +277,14 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
       });
 
       // 保存したスタックの情報を更新
-      setResourceTabs((prev) =>
-        prev.map((tab) =>
-          tab.tabId === resourceTab.tabId
-            ? {
-                ...tab,
-                stackName: stackDetailProps.name,
-                description: stackDetailProps.description,
-              }
-            : tab,
-        ),
-      );
+      modifyResourceTab(resourceTab.tabId, (originTab: OverviewTabInfo) => {
+        return {
+          ...originTab,
+          stackName: stackDetailProps.name,
+          description: stackDetailProps.description,
+        };
+      });
+
       // Stack詳細表示画面に戻る
       setIsEdit(false);
     } catch (error) {
@@ -287,17 +325,9 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
                 render={({ field, fieldState: { invalid } }) => (
                   <FormField
                     label="Stack name"
-                    errorText={
-                      invalid
-                        ? '1文字以上256文字以下で入力してください'
-                        : undefined
-                    }
+                    errorText={invalid ? '1文字以上256文字以下で入力してください' : undefined}
                   >
-                    <Input
-                      {...field}
-                      onChange={(event) => field.onChange(event.detail.value)}
-                      invalid={invalid}
-                    />
+                    <Input {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
                   </FormField>
                 )}
               />
@@ -307,15 +337,9 @@ const StackEditContent = (props: StackEditContentProps): JSX.Element => {
                 render={({ field, fieldState: { invalid } }) => (
                   <FormField
                     label="Stack description"
-                    errorText={
-                      invalid ? '256文字以下で入力してください' : undefined
-                    }
+                    errorText={invalid ? '256文字以下で入力してください' : undefined}
                   >
-                    <Input
-                      {...field}
-                      onChange={(event) => field.onChange(event.detail.value)}
-                      invalid={invalid}
-                    />
+                    <Input {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
                   </FormField>
                 )}
               />
