@@ -12,6 +12,14 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "biomejs.biome"
   },
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "${capture}.ts, ${capture}.*.ts",
+    "*.tsx": "${capture}.tsx, ${capture}.*.tsx",
+    "tsconfig.json": "tsconfig.*.json",
+    "package.json": "pnpm-lock.yaml",
+    "Cargo.toml": "Cargo.lock"
+  },
   "importSorter.generalConfiguration.sortOnBeforeSave": true,
   "importSorter.sortConfiguration.customOrderingRules.rules": [
     {
