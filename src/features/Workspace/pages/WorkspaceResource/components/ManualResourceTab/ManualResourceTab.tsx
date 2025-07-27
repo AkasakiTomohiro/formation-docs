@@ -21,7 +21,6 @@ import {
   Container,
   ContentLayout,
   Header,
-  Link,
   SegmentedControl,
   SpaceBetween,
   StatusIndicator,
@@ -30,25 +29,23 @@ import {
   Textarea,
 } from '@cloudscape-design/components';
 
-import { getCloudFormationSchema } from '../../../../../invoke/CloudFormationSchema';
+import { getCloudFormationSchema } from '../../../../../../invoke/CloudFormationSchema';
 import {
-  getManualManagementResourceList,
   getManualManagementResourceProperties,
   getManualManagementResourceReasons,
   updateManualResourceMeta,
   updateManualResourceProperties,
-} from '../../../../../invoke/ManualManagementResource';
-import { useWorkspaceResourceContext } from '../../../contexts';
-import { createResourceTableItems } from '../lib/CreateResourceTableItems';
+} from '../../../../../../invoke/ManualManagementResource';
+import { createResourceTableItems } from '../../lib/CreateResourceTableItems';
+import { ResourceIdTable } from './components';
 
-import type { ManualResourceTabAttr, ManualResourceTabInfo } from '../../../contexts';
+import type { ManualResourceTabAttr } from '../../../../contexts';
 
 import type { Dispatch } from 'react';
-import type { ManualManagementResource } from '../../../../../invoke/ManualManagementResource';
-import type { WorkspaceLayoutContext } from '../../../Layout';
-import type { CloudFormationSchema } from './types/CloudFormationSchema';
+import type { WorkspaceLayoutContext } from '../../../../Layout';
+import type { CloudFormationSchema } from '../types/CloudFormationSchema';
 
-import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
+import type { ResourceTableItem } from '../../lib/CreateResourceTableItems';
 
 export type ManualResourceTabProps = ManualResourceTabAttr;
 
@@ -102,11 +99,7 @@ const selectModeControl = (
 );
 
 export const ManualResourceTab = (props: ManualResourceTabProps): JSX.Element => {
-  const [isLoading, setIsLoading] = useState(true);
   const [schema, setSchema] = useState<CloudFormationSchema | undefined>(undefined);
-  const [manualResourceList, setManualResourceList] = useState<ManualManagementResource[]>([]);
-  const [filterText, setFilterText] = useState<string>('');
-  const [isOpen, setIsOpen] = useState(true);
   const [items, setItems] = useState<ResourceTableItem[]>([]);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const [expandedItems, setExpandedItems] = useState<any>();
@@ -127,22 +120,12 @@ export const ManualResourceTab = (props: ManualResourceTabProps): JSX.Element =>
   const [editingValues, setEditingValues] = useState<string>('');
   const [acePreferences, setAcePreferences] = useState({});
   const { setFlashbarItems } = useOutletContext<WorkspaceLayoutContext>();
-  const { modifyResourceTab } = useWorkspaceResourceContext();
   const [isValid, setIsValid] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      getCloudFormationSchema(props.serviceName, props.resourceName),
-      getManualManagementResourceList({
-        service_name: props.serviceName,
-        resource_name: props.resourceName,
-      }),
-    ])
-      .then(([schemaStr, list]) => {
-        setSchema(JSON.parse(schemaStr));
-        setManualResourceList(list);
-      })
-      .finally(() => setIsLoading(false));
+    getCloudFormationSchema(props.serviceName, props.resourceName).then((schemaStr) => {
+      setSchema(JSON.parse(schemaStr));
+    });
   }, [props.serviceName, props.resourceName]);
 
   useEffect(() => {
@@ -177,84 +160,12 @@ export const ManualResourceTab = (props: ManualResourceTabProps): JSX.Element =>
         display: 'flex',
       }}
     >
-      {isOpen ? (
-        <div
-          style={{
-            width: props.selectedResourceId === undefined ? '100%' : '300px',
-            minWidth: '300px',
-            height: '100%',
-          }}
-        >
-          <Table
-            columnDefinitions={[
-              {
-                id: 'resourceId',
-                header: 'resource id',
-                cell: (item) => (
-                  <Link
-                    href="#"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      modifyResourceTab(props.tabId, (originTab: ManualResourceTabInfo) => {
-                        return {
-                          ...originTab,
-                          selectedResourceId: item.resourceId,
-                        };
-                      });
-                    }}
-                  >
-                    {item.resourceId}
-                  </Link>
-                ),
-                sortingField: 'name',
-                isRowHeader: true,
-              },
-            ]}
-            enableKeyboardNavigation
-            items={manualResourceList.filter((item) =>
-              item.resourceId.toLowerCase().includes(filterText.toLowerCase()),
-            )}
-            loadingText="Loading resources"
-            loading={isLoading}
-            sortingDisabled
-            empty={
-              <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
-                <SpaceBetween size="m">
-                  <b>No resources</b>
-                </SpaceBetween>
-              </Box>
-            }
-            filter={
-              <TextFilter
-                filteringPlaceholder="Search Resource"
-                filteringText={filterText}
-                onChange={({ detail }) => setFilterText(detail.filteringText)}
-              />
-            }
-            header={
-              <Header
-                actions={
-                  props.selectedResourceId === undefined ? undefined : (
-                    <SpaceBetween direction="horizontal" size="xs">
-                      <Button
-                        iconName={isOpen ? 'angle-left' : 'angle-right'}
-                        variant="icon"
-                        onClick={() => setIsOpen(!isOpen)}
-                      />
-                    </SpaceBetween>
-                  )
-                }
-              >
-                リソース
-              </Header>
-            }
-          />
-        </div>
-      ) : (
-        <Container>
-          <Button iconName="angle-right" variant="icon" onClick={() => setIsOpen(!isOpen)} />
-        </Container>
-      )}
+      <ResourceIdTable
+        tabId={props.tabId}
+        selectedLogicalId={props.selectedResourceId}
+        serviceName={props.serviceName}
+        resourceName={props.resourceName}
+      />
       {props.selectedResourceId !== undefined && (
         <ContentLayout
           defaultPadding

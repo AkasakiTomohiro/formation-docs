@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useOutletContext } from 'react-router';
 
 import { Link } from '@cloudscape-design/components';
@@ -13,8 +12,8 @@ import Table from '@cloudscape-design/components/table';
 
 import type { useCollection } from '@cloudscape-design/collection-hooks';
 import type { ButtonProps, FlashbarProps, LinkProps, TableProps } from '@cloudscape-design/components';
-import type { StackInfo } from '../../../../invoke/Stack';
 import type { WorkspaceLayoutContext } from '../../Layout';
+import type { StackInfo } from '../../lib/StackInfo';
 
 export type WorkspaceHomePresentationProps = {
   /**
@@ -61,6 +60,11 @@ export type WorkspaceHomePresentationProps = {
    * テーブルのコレクション
    */
   tableCollection: ReturnType<typeof useCollection<StackInfo>>;
+
+  /**
+   * フラッシュバーのアイテム
+   */
+  flashbarItems: FlashbarProps.MessageDefinition[];
 };
 
 export const WorkspaceHomePresentation = ({
@@ -73,9 +77,9 @@ export const WorkspaceHomePresentation = ({
   onSelectionChange,
   isLoading,
   tableCollection,
+  flashbarItems,
 }: WorkspaceHomePresentationProps): JSX.Element => {
   const workspace = useOutletContext<WorkspaceLayoutContext>();
-  const [flashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
 
   return (
     <ContentLayout

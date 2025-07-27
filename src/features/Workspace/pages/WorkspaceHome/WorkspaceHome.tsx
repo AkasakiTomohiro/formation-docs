@@ -7,22 +7,37 @@ import { open } from '@tauri-apps/plugin-dialog';
 
 import { useWorkspaceResourceContext } from '../../contexts';
 import { WorkspaceHomePresentation } from './WorkspaceHome.presentation';
-import { useStacks } from './hooks/useStacks';
+import { deleteStack } from './lib/DeleteStack';
+import { importStack } from './lib/ImportStack';
+import { loadStacks } from './lib/LoadStacks';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
-import type { StackInfo } from '../../../../invoke/Stack';
 import type { WorkspaceLayoutContext } from '../../Layout';
+import type { StackInfo } from '../../lib';
 
 export const WorkspaceHome = (): JSX.Element => {
   const navigate = useNavigate();
   const workspace = useOutletContext<WorkspaceLayoutContext>();
   const { loadSideMenu } = useWorkspaceResourceContext();
   const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
-  const { importStack, loadStacks, deleteStack, stacks, state } = useStacks();
   const [selectedItems, setSelectedItems] = useState<StackInfo[]>([]);
+  const [state, setState] = useState<'loading' | 'loaded'>('loading');
+  const [stacks, setStacks] = useState<StackInfo[]>([]);
   const tableCollection = useCollection<StackInfo>(stacks, {
     pagination: { pageSize: 10 },
   });
+
+  const loadStacksWrap = useCallback(async () => {
+    setState('loading');
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    await loadStacks()
+      .then((stacks) => {
+        setStacks(stacks);
+      })
+      .finally(() => {
+        setState('loaded');
+      });
+  }, []);
 
   const importStackWrap = useCallback(async () => {
     const selectedFile = await open({
@@ -39,7 +54,7 @@ export const WorkspaceHome = (): JSX.Element => {
     if (selectedFile !== null) {
       importStack(selectedFile)
         .then(async () => {
-          await loadStacks();
+          await loadStacksWrap();
           await loadSideMenu();
         })
         .catch((error) => {
@@ -60,11 +75,11 @@ export const WorkspaceHome = (): JSX.Element => {
           ]);
         });
     }
-  }, [workspace, flashbarItems, importStack, loadStacks, loadSideMenu]);
+  }, [workspace, flashbarItems, loadSideMenu, loadStacksWrap]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    loadStacks().catch((error) => {
+    loadStacksWrap().catch((error) => {
       const id = uuidV4();
       setFlashbarItems([
         ...flashbarItems,
@@ -93,8 +108,10 @@ export const WorkspaceHome = (): JSX.Element => {
   };
 
   const onClickDeleteStack = async () => {
-    deleteStack(selectedItems[0]);
+    await deleteStack(selectedItems[0].id);
+    setStacks((oldStacks) => oldStacks.filter((stack) => stack.id !== selectedItems[0].id));
     setSelectedItems([]);
+
     await loadSideMenu();
   };
 
@@ -103,12 +120,13 @@ export const WorkspaceHome = (): JSX.Element => {
       selectedItems={selectedItems}
       isLoading={state === 'loading'}
       onSelectionChange={({ detail }) => setSelectedItems(detail.selectedItems)}
-      onClickReloadStack={loadStacks}
+      onClickReloadStack={loadStacksWrap}
       tableCollection={tableCollection}
       onClickStackName={onClickStackName}
       onClickImportStack={importStackWrap}
       onClickDeleteStack={onClickDeleteStack}
       onClickWorkspaceEdit={() => navigate(`/workspaces/${workspace.id}/edit`)}
+      flashbarItems={flashbarItems}
     />
   );
 };
