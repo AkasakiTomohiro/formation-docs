@@ -18,7 +18,8 @@
     "staticlib",
     "tauri",
     "thiserror",
-    "revalidator"
+    "revalidator",
+    "noconflict"
   ],
   "ignoreWords": [],
   "import": []
