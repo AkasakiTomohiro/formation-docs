@@ -17,11 +17,11 @@ import {
 } from '@cloudscape-design/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { getStackOutputs, getStackParameters, loadStack, updateStackDetail } from '../../../../../invoke/Stack';
-import { useWorkspaceResourceContext } from '../../../contexts';
+import { getStackOutputs, getStackParameters, loadStack, updateStackDetail } from '../../../../../../invoke/Stack';
+import { useWorkspaceResourceContext } from '../../../../contexts';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
-import type { OverviewTabAttr, OverviewTabInfo } from '../../../contexts';
+import type { OverviewTabAttr, OverviewTabInfo } from '../../../../contexts';
 
 export type OverviewTabProps = OverviewTabAttr;
 
