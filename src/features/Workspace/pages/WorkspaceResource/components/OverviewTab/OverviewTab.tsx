@@ -1,22 +1,13 @@
 import { useEffect, useState } from 'react';
-import { z } from 'zod';
 
 import { loadStack } from '../../../../../../invoke/Stack';
 import { useWorkspaceResourceContext } from '../../../../contexts';
-import { StackDisplayContent } from './components/StackDisplayContent/StackDisplayContent';
-import { StackEditContent } from './components/StackEditContent';
+import { OverviewTabPresentation } from './OverviewTab.presentation';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
 import type { OverviewTabAttr, OverviewTabInfo } from '../../../../contexts';
 
 export type OverviewTabProps = OverviewTabAttr;
-
-const stackEditValidator = z.object({
-  name: z.string().min(1).max(256),
-  description: z.string().max(256),
-});
-
-export type StackEditType = z.infer<typeof stackEditValidator>;
 
 export type BuildOverviewTabNameProps = {
   stackName: string;
@@ -46,25 +37,15 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
     });
   }, []);
 
-  if (props.isEdit) {
-    return (
-      <StackEditContent
-        tabId={props.tabId}
-        stackId={props.stackId}
-        stackName={props.stackName}
-        stackDescription={props.description}
-        flashbarItems={flashbarItems}
-        setFlashbarItems={setFlashbarItems}
-      />
-    );
-  }
   return (
-    <StackDisplayContent
+    <OverviewTabPresentation
+      isEdit={props.isEdit}
       tabId={props.tabId}
       stackId={props.stackId}
       stackName={props.stackName}
-      stackDescription={props.description}
+      description={props.description}
       flashbarItems={flashbarItems}
+      setFlashbarItems={setFlashbarItems}
     />
   );
 };
