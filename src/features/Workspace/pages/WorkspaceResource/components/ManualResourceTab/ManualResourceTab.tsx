@@ -30,25 +30,25 @@ import {
   Textarea,
 } from '@cloudscape-design/components';
 
-import { getCloudFormationSchema } from '../../../../../invoke/CloudFormationSchema';
+import { getCloudFormationSchema } from '../../../../../../invoke/CloudFormationSchema';
 import {
   getManualManagementResourceList,
   getManualManagementResourceProperties,
   getManualManagementResourceReasons,
   updateManualResourceMeta,
   updateManualResourceProperties,
-} from '../../../../../invoke/ManualManagementResource';
-import { useWorkspaceResourceContext } from '../../../contexts';
-import { createResourceTableItems } from '../lib/CreateResourceTableItems';
+} from '../../../../../../invoke/ManualManagementResource';
+import { useWorkspaceResourceContext } from '../../../../contexts';
+import { createResourceTableItems } from '../../lib/CreateResourceTableItems';
 
-import type { ManualResourceTabAttr, ManualResourceTabInfo } from '../../../contexts';
+import type { ManualResourceTabAttr, ManualResourceTabInfo } from '../../../../contexts';
 
 import type { Dispatch } from 'react';
-import type { ManualManagementResource } from '../../../../../invoke/ManualManagementResource';
-import type { WorkspaceLayoutContext } from '../../../Layout';
-import type { CloudFormationSchema } from './types/CloudFormationSchema';
+import type { ManualManagementResource } from '../../../../../../invoke/ManualManagementResource';
+import type { WorkspaceLayoutContext } from '../../../../Layout';
+import type { CloudFormationSchema } from '../types/CloudFormationSchema';
 
-import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
+import type { ResourceTableItem } from '../../lib/CreateResourceTableItems';
 
 export type ManualResourceTabProps = ManualResourceTabAttr;
 
