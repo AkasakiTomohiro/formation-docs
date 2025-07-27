@@ -4,7 +4,13 @@ import { deleteWorkspaceFromAppConfig } from '../invoke/AppConfig';
 import { createWorkspace, loadWorkspaces } from '../invoke/Workspace';
 
 import type { CreateWorkspaceInfo, WorkspaceInfo } from '../invoke/AppConfig';
-import type { WorkspaceExpand } from '../invoke/Workspace';
+
+export interface Workspace {
+  name: string;
+  description: string;
+}
+
+export type WorkspaceExpand = WorkspaceInfo & Workspace;
 
 export type UseWorkspacesResult = {
   /**

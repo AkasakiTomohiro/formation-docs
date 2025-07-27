@@ -1,13 +1,8 @@
 import { invoke } from '@tauri-apps/api/core';
 
-import type { CommandResult } from '../lib/CommandResult';
-import type { WorkspaceInfo } from './AppConfig';
+import type { WorkspaceExpand } from '../hooks/useWorkspaces';
 
-export interface Workspace {
-  name: string;
-  description: string;
-}
-export type WorkspaceExpand = WorkspaceInfo & Workspace;
+import type { CommandResult } from '../lib/CommandResult';
 
 export const WORKSPACE_FILE_NAME = 'workspace.json';
 
@@ -37,13 +32,4 @@ export async function loadWorkspaces(): Promise<WorkspaceExpand[]> {
     throw new Error(result.value);
   }
   return result.value;
-}
-
-export async function updateWorkspace(workspace: Workspace): Promise<void> {
-  const result = await invoke<CommandResult<void>>('update_workspace_command', {
-    workspace: workspace,
-  });
-  if (!result.success) {
-    throw new Error(result.value);
-  }
 }
