@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Controller } from 'react-hook-form';
 
 import {
@@ -35,15 +34,19 @@ export type WorkspaceEditPresentationProps = {
    * キャンセルボタンのクリックイベントハンドラ
    */
   onClickCancel: ButtonProps['onClick'];
+
+  /**
+   * フラッシュバーのアイテム
+   */
+  flashbarItems: FlashbarProps.MessageDefinition[];
 };
 
 export const WorkspaceEditPresentation = ({
   control,
   onSubmitSave,
   onClickCancel,
+  flashbarItems,
 }: WorkspaceEditPresentationProps): JSX.Element => {
-  const [flashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
-
   return (
     <ContentLayout
       defaultPadding

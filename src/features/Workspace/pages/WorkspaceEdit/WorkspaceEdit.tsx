@@ -69,6 +69,7 @@ export const WorkspaceEdit = (): JSX.Element => {
       control={control}
       onSubmitSave={handleSubmit(onSave)}
       onClickCancel={() => navigate(`/workspaces/${workspace.id}`)}
+      flashbarItems={flashbarItems}
     />
   );
 };

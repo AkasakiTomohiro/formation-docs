@@ -126,6 +126,7 @@ export const WorkspaceHome = (): JSX.Element => {
       onClickImportStack={importStackWrap}
       onClickDeleteStack={onClickDeleteStack}
       onClickWorkspaceEdit={() => navigate(`/workspaces/${workspace.id}/edit`)}
+      flashbarItems={flashbarItems}
     />
   );
 };
