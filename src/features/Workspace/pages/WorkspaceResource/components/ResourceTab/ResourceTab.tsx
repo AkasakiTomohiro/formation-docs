@@ -15,21 +15,21 @@ import {
   Textarea,
 } from '@cloudscape-design/components';
 
-import { getCloudFormationSchema } from '../../../../../invoke/CloudFormationSchema';
+import { getCloudFormationSchema } from '../../../../../../invoke/CloudFormationSchema';
 import {
   getStackResourceList,
   getStackResourceProperties,
   getStackResourcePropertiesReasons,
   updateStackMeta,
-} from '../../../../../invoke/Stack';
-import { useWorkspaceResourceContext } from '../../../contexts';
-import { createResourceTableItems } from '../lib/CreateResourceTableItems';
+} from '../../../../../../invoke/Stack';
+import { useWorkspaceResourceContext } from '../../../../contexts';
+import { createResourceTableItems } from '../../lib/CreateResourceTableItems';
 
-import type { ResourceTabAttr, ResourceTabInfo } from '../../../contexts';
+import type { ResourceTabAttr, ResourceTabInfo } from '../../../../contexts';
 
-import type { CloudFormationSchema } from './types/CloudFormationSchema';
+import type { CloudFormationSchema } from '../types/CloudFormationSchema';
 
-import type { ResourceTableItem } from '../lib/CreateResourceTableItems';
+import type { ResourceTableItem } from '../../lib/CreateResourceTableItems';
 
 export type ResourceTabProps = ResourceTabAttr;
 
