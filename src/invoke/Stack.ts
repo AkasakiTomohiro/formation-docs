@@ -44,46 +44,6 @@ export async function getStackResourceProperties(
   return result.value;
 }
 
-export type GetStackParametersProps = {
-  stack_id: string;
-};
-
-export type GetStackParametersResult = Record<
-  string,
-  {
-    Type: string;
-    Description: string;
-  }
->;
-
-export async function getStackParameters(props: GetStackParametersProps): Promise<GetStackParametersResult> {
-  const result = await invoke<CommandResult<GetStackParametersResult>>('get_stack_parameters_command', props);
-  if (!result.success) {
-    throw new Error(result.value);
-  }
-  return result.value;
-}
-
-export type GetStackOutputsProps = {
-  stack_id: string;
-};
-
-type GetStackOutputResult = {
-  name: string;
-  description: string | null;
-  exportName: string | null;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  value: any;
-};
-
-export async function getStackOutputs(props: GetStackOutputsProps): Promise<GetStackOutputResult[]> {
-  const result = await invoke<CommandResult<GetStackOutputResult[]>>('get_stack_outputs_command', props);
-  if (!result.success) {
-    throw new Error(result.value);
-  }
-  return result.value;
-}
-
 export type GetStackResourcePropertiesReasonsProps = {
   stack_id: string;
   logical_id: string;
@@ -113,23 +73,6 @@ export async function updateStackMeta(
 ): Promise<any> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const result = await invoke<CommandResult<any>>('update_stack_meta_command', props);
-  if (!result.success) {
-    throw new Error(result.value);
-  }
-  return result.value;
-}
-
-export type UpdateStackDetailProps = {
-  stack_id: string;
-  name: string;
-  description: string;
-};
-export async function updateStackDetail(
-  props: UpdateStackDetailProps,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-): Promise<any> {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const result = await invoke<CommandResult<any>>('update_stack_detail_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }
