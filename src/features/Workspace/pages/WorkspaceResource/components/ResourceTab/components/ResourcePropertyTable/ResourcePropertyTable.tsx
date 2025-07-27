@@ -2,15 +2,15 @@ import { useEffect, useState } from 'react';
 
 import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFormationSchema';
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
+import { createExpandedItems } from '../../../PropertyTable';
 import { ResourcePropertyTablePresentation } from './ResourcePropertyTable.presentation';
 import { getStackResourceProperties } from './lib/GetStackResourceProperties';
 import { getStackResourcePropertiesReasons } from './lib/GetStackResourcePropertiesReasons';
 import { updateStackMeta } from './lib/UpdateStackMeta';
 
-import type { ResourcePropertyTablePresentationProps } from './ResourcePropertyTable.presentation';
-
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
+
 export type ResourcePropertyTableProps = {
   /**
    * スタックID
@@ -57,17 +57,6 @@ export const ResourcePropertyTable = ({
 
   // 選択した論理IDがもつプロパティを管理するためのステート
   const [properties, setProperties] = useState<ResourceTableItem[]>([]);
-
-  // テーブルの表示カラムの設定を管理するためのステート
-  const [preferences, setPreferences] = useState({
-    contentDisplay: [
-      { id: 'property', visible: true },
-      { id: 'type', visible: true },
-      { id: 'description', visible: true },
-      { id: 'value', visible: true },
-      { id: 'reason', visible: true },
-    ],
-  });
 
   useEffect(() => {
     Promise.all([
@@ -121,15 +110,6 @@ export const ResourcePropertyTable = ({
     setIsEdit(true);
   };
 
-  const onChangeReason: ResourcePropertyTablePresentationProps['onChangeReason'] =
-    (item) =>
-    ({ detail }) => {
-      setEditingReasons((prev) => ({
-        ...prev,
-        [item.id]: detail.value,
-      }));
-    };
-
   return (
     <ResourcePropertyTablePresentation
       properties={properties}
@@ -140,40 +120,9 @@ export const ResourcePropertyTable = ({
       onClickSave={onSave}
       onClickCancel={onCancel}
       onClickEdit={onClickEdit}
-      onChangeReason={onChangeReason}
-      expandableRows={{
-        getItemChildren: (item) => item.children ?? [],
-        isItemExpandable: (item) => Boolean(item.children),
-        expandedItems: expandedItems,
-        onExpandableItemToggle: ({ detail }) =>
-          setExpandedItems((prev: ResourceTableItem[] | undefined) => {
-            const next = new Set((prev ?? []).map((item) => item.id));
-            detail.expanded ? next.add(detail.item.id) : next.delete(detail.item.id);
-            return [...next].map((id) => ({ id }));
-          }),
-      }}
-      preferences={preferences}
-      onConfirmPreferences={({ detail }) =>
-        setPreferences({
-          contentDisplay: detail.contentDisplay ? [...detail.contentDisplay] : [],
-        })
-      }
+      expandedItems={expandedItems}
+      setExpandedItems={setExpandedItems}
+      setEditingReasons={setEditingReasons}
     />
   );
 };
-
-/**
- * リソーステーブル用の展開済みアイテムを作成する
- * @param items
- * @returns
- */
-function createExpandedItems(items: ResourceTableItem[]): ResourceTableItem[] {
-  const expandedItems: ResourceTableItem[] = [];
-  for (const item of items) {
-    if (item.children !== undefined) {
-      expandedItems.push(item);
-      expandedItems.push(...createExpandedItems(item.children));
-    }
-  }
-  return expandedItems;
-}

@@ -1,17 +1,8 @@
-import {
-  Box,
-  Button,
-  CollectionPreferences,
-  ContentLayout,
-  Header,
-  SpaceBetween,
-  StatusIndicator,
-  Table,
-  TextFilter,
-  Textarea,
-} from '@cloudscape-design/components';
+import { Button, ContentLayout, Header, SpaceBetween } from '@cloudscape-design/components';
 
-import type { ButtonProps, CollectionPreferencesProps, TableProps, TextareaProps } from '@cloudscape-design/components';
+import { PropertyTable } from '../../../PropertyTable';
+
+import type { ButtonProps, TableProps } from '@cloudscape-design/components';
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 
 export type ResourcePropertyTablePresentationProps = {
@@ -41,14 +32,9 @@ export type ResourcePropertyTablePresentationProps = {
   editingReasons: Record<string, string>;
 
   /**
-   * Reasonsのテキストエリアの変更イベントハンドラ
-   */
-  onChangeReason: (item: ResourceTableItem) => TextareaProps['onChange'];
-
-  /**
    * ネストされた行の開閉関連イベント
    */
-  expandableRows: TableProps<ResourceTableItem>['expandableRows'];
+  expandedItems: TableProps<ResourceTableItem>['expandableRows'];
 
   /**
    * 編集ボタン押下時のイベントハンドラ
@@ -66,31 +52,29 @@ export type ResourcePropertyTablePresentationProps = {
   onClickSave: ButtonProps['onClick'];
 
   /**
-   * 表示設定
+   * ネストされたプロパティの展開状態を更新する関数
    */
-
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  preferences: CollectionPreferencesProps.Preferences<any>;
+  setExpandedItems: (items: any) => void;
 
   /**
-   * 表示設定変更時のイベントハンドラ
+   * 編集中の理由を更新
    */
-  onConfirmPreferences: CollectionPreferencesProps['onConfirm'];
+  setEditingReasons: (reasons: (prev: Record<string, string>) => Record<string, string>) => void;
 };
 
 export const ResourcePropertyTablePresentation = ({
   selectedLogicalId,
   properties,
   isEdit,
-  expandableRows,
+  expandedItems,
   onClickEdit,
   onClickCancel,
   onClickSave,
   reasons,
+  setExpandedItems,
   editingReasons,
-  onChangeReason,
-  preferences,
-  onConfirmPreferences,
+  setEditingReasons,
 }: ResourcePropertyTablePresentationProps): JSX.Element => {
   return (
     <ContentLayout
@@ -115,101 +99,14 @@ export const ResourcePropertyTablePresentation = ({
         </Header>
       }
     >
-      <Table
-        renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
-          `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
-        }
-        renderLoaderPending={() => (
-          <Button variant="inline-link" iconName="add-plus">
-            Show more
-          </Button>
-        )}
-        renderLoaderLoading={() => <StatusIndicator type="loading">Loading items</StatusIndicator>}
-        renderLoaderError={() => <StatusIndicator type="error">Loading error</StatusIndicator>}
-        renderLoaderEmpty={() => <Box>No resources found</Box>}
-        expandableRows={expandableRows}
-        resizableColumns
-        columnDefinitions={[
-          {
-            id: 'property',
-            header: 'Property',
-            cell: (e) => e.property,
-            isRowHeader: true,
-            width: 250,
-            minWidth: 150,
-          },
-          {
-            id: 'type',
-            header: 'Type',
-            cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>,
-            width: 150,
-            minWidth: 100,
-          },
-          {
-            id: 'description',
-            header: 'Description',
-            cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>,
-            width: 500,
-          },
-          {
-            id: 'value',
-            header: 'Value',
-            cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.value === undefined ? '' : `${e.value}`}</div>,
-            width: 300,
-            minWidth: 100,
-          },
-          {
-            id: 'reason',
-            header: 'Reason',
-            cell: (e) => {
-              if (isEdit) {
-                return <Textarea onChange={onChangeReason(e)} value={editingReasons[e.id] ?? ''} />;
-              }
-              return <div style={{ whiteSpace: 'pre-line' }}>{reasons[e.id]}</div>;
-            },
-            width: 300,
-            minWidth: 200,
-          },
-        ]}
-        columnDisplay={preferences.contentDisplay}
-        stickyHeader
-        enableKeyboardNavigation
-        items={properties}
-        loadingText="Loading resources"
-        trackBy="id"
-        empty={
-          <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
-            <SpaceBetween size="m">
-              <b>No resources</b>
-              <Button>Create resource</Button>
-            </SpaceBetween>
-          </Box>
-        }
-        filter={<TextFilter filteringPlaceholder="Find resources" filteringText="" countText="0 matches" />}
-        header={<Header>Table with expandable rows</Header>}
-        preferences={
-          <CollectionPreferences
-            title="Preferences"
-            confirmLabel="Confirm"
-            cancelLabel="Cancel"
-            preferences={preferences}
-            onConfirm={onConfirmPreferences}
-            contentDisplayPreference={{
-              description: 'Customize the visibility and order of the columns.',
-              options: [
-                {
-                  id: 'property',
-                  label: 'Property',
-                  alwaysVisible: true,
-                },
-                { id: 'type', label: 'Type' },
-                { id: 'description', label: 'Description' },
-                { id: 'value', label: 'Value' },
-                { id: 'reason', label: 'Reason' },
-              ],
-            }}
-          />
-        }
+      <PropertyTable
+        isEdit={isEdit}
+        properties={properties}
+        reasons={reasons}
+        editingReasons={editingReasons}
+        expandedItems={expandedItems}
+        setExpandedItems={setExpandedItems}
+        setEditingReasons={setEditingReasons}
       />
     </ContentLayout>
   );
