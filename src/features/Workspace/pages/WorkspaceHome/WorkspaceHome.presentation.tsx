@@ -13,8 +13,8 @@ import Table from '@cloudscape-design/components/table';
 
 import type { useCollection } from '@cloudscape-design/collection-hooks';
 import type { ButtonProps, FlashbarProps, LinkProps, TableProps } from '@cloudscape-design/components';
-import type { StackInfo } from '../../../../invoke/Stack';
 import type { WorkspaceLayoutContext } from '../../Layout';
+import type { StackInfo } from '../../lib/StackInfo';
 
 export type WorkspaceHomePresentationProps = {
   /**

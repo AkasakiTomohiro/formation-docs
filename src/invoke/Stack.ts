@@ -1,41 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 
+import type { StackInfo } from '../features/Workspace/lib/StackInfo';
 import type { CommandResult } from '../lib/CommandResult';
-
-export interface StackInfo {
-  id: string;
-  name: string;
-  description_from_meta: string;
-  description_from_stack?: string;
-}
-
-export async function loadStacks(): Promise<StackInfo[]> {
-  const result = await invoke<CommandResult<StackInfo[]>>('load_stacks_command');
-  if (!result.success) {
-    throw new Error(result.value);
-  }
-  return result.value;
-}
-
-export async function deleteStack(stackId: string): Promise<void> {
-  const result = await invoke<CommandResult<void>>('delete_stack_command', {
-    stack_id: stackId,
-  });
-  if (!result.success) {
-    throw new Error(result.value);
-  }
-  return result.value;
-}
-
-export async function importStack(stackFilePath: string): Promise<void> {
-  const result = await invoke<CommandResult<void>>('import_stack_command', {
-    stack_file_path: stackFilePath,
-  });
-  if (!result.success) {
-    throw new Error(result.value);
-  }
-  return result.value;
-}
 
 export async function loadStack(stackName: string): Promise<StackInfo> {
   const result = await invoke<CommandResult<StackInfo>>('load_stack_command', {
