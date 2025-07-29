@@ -14,19 +14,13 @@ import { v4 as uuidV4 } from 'uuid';
 import CodeView from '@cloudscape-design/code-view/code-view';
 import jsonHighlight from '@cloudscape-design/code-view/highlight/json';
 import {
-  Box,
   Button,
   CodeEditor,
-  CollectionPreferences,
   Container,
   ContentLayout,
   Header,
   SegmentedControl,
   SpaceBetween,
-  StatusIndicator,
-  Table,
-  TextFilter,
-  Textarea,
 } from '@cloudscape-design/components';
 
 import { getCloudFormationSchema } from '../../../../../../invoke/CloudFormationSchema';
@@ -37,6 +31,7 @@ import {
   updateManualResourceProperties,
 } from '../../../../../../invoke/ManualManagementResource';
 import { createResourceTableItems } from '../../lib/CreateResourceTableItems';
+import { PropertyTable } from '../PropertyTable';
 import { ResourceIdTable } from './components';
 
 import type { ManualResourceTabAttr } from '../../../../contexts';
@@ -103,15 +98,6 @@ export const ManualResourceTab = (props: ManualResourceTabProps): JSX.Element =>
   const [items, setItems] = useState<ResourceTableItem[]>([]);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const [expandedItems, setExpandedItems] = useState<any>();
-  const [preferences, setPreferences] = useState({
-    contentDisplay: [
-      { id: 'property', visible: true },
-      { id: 'type', visible: true },
-      { id: 'description', visible: true },
-      { id: 'value', visible: true },
-      { id: 'reason', visible: true },
-    ],
-  });
   const [isEdit, setIsEdit] = useState(false);
   const [reasons, setReasons] = useState<Record<string, string>>({});
   const [editingReasons, setEditingReasons] = useState<Record<string, string>>({});
@@ -246,127 +232,15 @@ export const ManualResourceTab = (props: ManualResourceTabProps): JSX.Element =>
           }
         >
           {mode === 'reason' && (
-            <Table
-              renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
-                `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
-              }
-              renderLoaderPending={() => (
-                <Button variant="inline-link" iconName="add-plus">
-                  Show more
-                </Button>
-              )}
-              renderLoaderLoading={() => <StatusIndicator type="loading">Loading items</StatusIndicator>}
-              renderLoaderError={() => <StatusIndicator type="error">Loading error</StatusIndicator>}
-              renderLoaderEmpty={() => <Box>No resources found</Box>}
-              expandableRows={{
-                getItemChildren: (item) => item.children ?? [],
-                isItemExpandable: (item) => Boolean(item.children),
-                expandedItems: expandedItems,
-                onExpandableItemToggle: ({ detail }) =>
-                  setExpandedItems((prev: ResourceTableItem[] | undefined) => {
-                    const next = new Set((prev ?? []).map((item) => item.id));
-                    detail.expanded ? next.add(detail.item.id) : next.delete(detail.item.id);
-                    return [...next].map((id) => ({ id }));
-                  }),
-              }}
-              resizableColumns
-              columnDefinitions={[
-                {
-                  id: 'property',
-                  header: 'Property',
-                  cell: (e) => e.property,
-                  isRowHeader: true,
-                  width: 250,
-                  minWidth: 150,
-                },
-                {
-                  id: 'type',
-                  header: 'Type',
-                  cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>,
-                  width: 150,
-                  minWidth: 100,
-                },
-                {
-                  id: 'description',
-                  header: 'Description',
-                  cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>,
-                  width: 500,
-                },
-                {
-                  id: 'value',
-                  header: 'Value',
-                  cell: (e) => {
-                    return <div style={{ whiteSpace: 'pre-line' }}>{e.value === undefined ? '' : `${e.value}`}</div>;
-                  },
-                  width: 300,
-                  minWidth: 100,
-                },
-                {
-                  id: 'reason',
-                  header: 'Reason',
-                  cell: (e) => {
-                    if (isEdit) {
-                      return (
-                        <Textarea
-                          onChange={({ detail }) =>
-                            setEditingReasons((prev) => ({
-                              ...prev,
-                              [e.id]: detail.value,
-                            }))
-                          }
-                          value={editingReasons[e.id] ?? ''}
-                        />
-                      );
-                    }
-                    return <div style={{ whiteSpace: 'pre-line' }}>{reasons[e.id]}</div>;
-                  },
-                  width: 300,
-                  minWidth: 200,
-                },
-              ]}
-              columnDisplay={preferences.contentDisplay}
-              stickyHeader
-              enableKeyboardNavigation
-              items={items}
-              loadingText="Loading resources"
-              trackBy="id"
-              empty={
-                <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
-                  <SpaceBetween size="m">
-                    <b>No resources</b>
-                    <Button>Create resource</Button>
-                  </SpaceBetween>
-                </Box>
-              }
-              filter={<TextFilter filteringPlaceholder="Find resources" filteringText="" countText="0 matches" />}
+            <PropertyTable
+              isEdit={isEdit}
+              properties={items}
+              reasons={reasons}
+              expandedItems={expandedItems}
+              setExpandedItems={setExpandedItems}
+              editingReasons={editingReasons}
+              setEditingReasons={setEditingReasons}
               header={<Header actions={selectModeControl(mode, setMode)} />}
-              preferences={
-                <CollectionPreferences
-                  title="Preferences"
-                  confirmLabel="Confirm"
-                  cancelLabel="Cancel"
-                  preferences={preferences}
-                  onConfirm={({ detail }) =>
-                    setPreferences({
-                      contentDisplay: detail.contentDisplay ? [...detail.contentDisplay] : [],
-                    })
-                  }
-                  contentDisplayPreference={{
-                    description: 'Customize the visibility and order of the columns.',
-                    options: [
-                      {
-                        id: 'property',
-                        label: 'Property',
-                        alwaysVisible: true,
-                      },
-                      { id: 'type', label: 'Type' },
-                      { id: 'description', label: 'Description' },
-                      { id: 'value', label: 'Value' },
-                      { id: 'reason', label: 'Reason' },
-                    ],
-                  }}
-                />
-              }
             />
           )}
           {mode === 'value' && (

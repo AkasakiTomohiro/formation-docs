@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   CollectionPreferences,
-  Header,
   SpaceBetween,
   StatusIndicator,
   Table,
