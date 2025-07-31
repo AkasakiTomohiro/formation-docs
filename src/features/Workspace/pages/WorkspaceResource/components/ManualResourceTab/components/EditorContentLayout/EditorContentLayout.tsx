@@ -43,32 +43,27 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    if (schema === undefined) {
-      return;
-    }
-    getCloudFormationSchema(serviceName, resourceName).then((schemaStr) => {
-      const schema = JSON.parse(schemaStr) as CloudFormationSchema;
-      setSchema(JSON.parse(schemaStr));
-      Promise.all([
-        getManualManagementResourceProperties({
-          resource_id: selectedResourceId,
-        }),
-        getManualManagementResourceReasons({
-          resource_id: selectedResourceId,
-        }),
-      ]).then(([properties, reasons]) => {
-        console.log('properties', properties);
-        console.log('reasons', reasons);
-        const resourceTableItems = createResourceTableItems(schema, properties);
-        setItems(resourceTableItems);
-        setExpandedItems(createExpandedItems(resourceTableItems));
-        setReasons(reasons);
-        setValues(JSON.stringify(properties, undefined, 2));
-        setEditingReasons(reasons);
-        setIsEdit(false);
-      });
+    Promise.all([
+      getCloudFormationSchema(serviceName, resourceName).then((schemaStr) => JSON.parse(schemaStr)),
+      getManualManagementResourceProperties({
+        resource_id: selectedResourceId,
+      }),
+      getManualManagementResourceReasons({
+        resource_id: selectedResourceId,
+      }),
+    ]).then(([cloudformationSchema, properties, reasons]) => {
+      console.log('properties', properties);
+      console.log('reasons', reasons);
+      setSchema(cloudformationSchema);
+      const resourceTableItems = createResourceTableItems(cloudformationSchema, properties);
+      setItems(resourceTableItems);
+      setExpandedItems(createExpandedItems(resourceTableItems));
+      setReasons(reasons);
+      setValues(JSON.stringify(properties, undefined, 2));
+      setEditingReasons(reasons);
+      setIsEdit(false);
     });
-  }, [selectedResourceId, schema]);
+  }, [selectedResourceId]);
 
   const onEdit = () => {
     setEditingReasons(reasons);
