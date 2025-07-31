@@ -3,15 +3,13 @@ import { useOutletContext } from 'react-router';
 import { v4 as uuidV4 } from 'uuid';
 
 import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFormationSchema';
-import {
-  getManualManagementResourceProperties,
-  getManualManagementResourceReasons,
-  updateManualResourceMeta,
-  updateManualResourceProperties,
-} from '../../../../../../../../invoke/ManualManagementResource';
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
 import { createExpandedItems } from '../../../PropertyTable';
 import { EditorContentLayoutPresentation } from './EditorContentLayout.presentation';
+import { getManualManagementResourceProperties } from './lib/GetManualManagementResourceProperties';
+import { getManualManagementResourceReasons } from './lib/GetManualManagementResourceReasons';
+import { updateManualResourceMeta } from './lib/UpdateManualResourceMeta';
+import { updateManualResourceProperties } from './lib/UpdateManualResourceProperties';
 
 import type { WorkspaceLayoutContext } from '../../../../../../Layout';
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
