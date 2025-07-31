@@ -5,13 +5,13 @@ import { Tabs } from '@cloudscape-design/components';
 
 import { useWorkspaceResourceContext } from '../../contexts/WorkspaceResourceContext';
 import {
+  ManualOverviewTab,
   OverviewTab,
   ResourceTab,
   buildManualOverviewTabName,
   buildOverviewTabName,
   buildResourceTabName,
 } from './components';
-import { ManualOverviewTab } from './components/ManualOverviewTab';
 import { ManualResourceTab, buildManualResourceTabName } from './components/ManualResourceTab';
 
 import type { WorkspaceTabInfo } from '../../contexts';

@@ -19,13 +19,13 @@ import {
 } from '@cloudscape-design/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { getAWSServiceList } from '../../../../../invoke/CloudFormationSchema';
-import { newManualManagementResource } from '../../../../../invoke/ManualManagementResource';
-import { hrefBuilder } from '../../../components/WorkspaceSideMenu';
-import { useWorkspaceResourceContext } from '../../../contexts';
+import { getAWSServiceList } from '../../../../../../invoke/CloudFormationSchema';
+import { newManualManagementResource } from '../../../../../../invoke/ManualManagementResource';
+import { hrefBuilder } from '../../../../components/WorkspaceSideMenu';
+import { useWorkspaceResourceContext } from '../../../../contexts';
 
-import type { WorkspaceLayoutContext } from '../../../Layout';
-import type { ManualResourceTabInfo } from '../../../contexts';
+import type { WorkspaceLayoutContext } from '../../../../Layout';
+import type { ManualResourceTabInfo } from '../../../../contexts';
 
 import type { SelectProps } from '@cloudscape-design/components';
 
