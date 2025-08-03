@@ -24,7 +24,7 @@ export const ManualResourceTab = (props: ManualResourceTabProps): JSX.Element =>
     >
       <ResourceIdTable
         tabId={props.tabId}
-        selectedLogicalId={props.selectedResourceId}
+        selectedResourceId={props.selectedResourceId}
         serviceName={props.serviceName}
         resourceName={props.resourceName}
       />

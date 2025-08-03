@@ -1,7 +1,6 @@
-import { Box, Button, ContentLayout, Flashbar, Header, SpaceBetween, Table } from '@cloudscape-design/components';
+import { Box, Button, ContentLayout, Header, SpaceBetween, Table } from '@cloudscape-design/components';
 
 import type { ButtonProps } from '@cloudscape-design/components';
-import type { FlashbarProps } from '@cloudscape-design/components';
 
 export type StackParametersDisplayProps = {
   name: string;
@@ -38,11 +37,6 @@ export type StackDisplayContentPresentationProps = {
   stackOutputs: StackOutputsDisplayProps[];
 
   /**
-   * フラッシュバーに表示するメッセージ
-   */
-  flashbarItems: FlashbarProps.MessageDefinition[];
-
-  /**
    * 編集ボタンのクリックハンドラ
    */
   onClickEdit: ButtonProps['onClick'];
@@ -53,7 +47,6 @@ export const StackDisplayContentPresentation = ({
   stackDescription,
   stackParameters,
   stackOutputs,
-  flashbarItems,
   onClickEdit,
 }: StackDisplayContentPresentationProps) => {
   return (
@@ -71,7 +64,6 @@ export const StackDisplayContentPresentation = ({
           >
             {stackName}
           </Header>
-          <Flashbar items={flashbarItems} />
         </SpaceBetween>
       }
     >

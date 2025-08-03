@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useOutletContext } from 'react-router';
-import { v4 as uuidV4 } from 'uuid';
 import { z } from 'zod';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 
+import { useFlashbarContext } from '../../../../../../../../contexts/FlashbarContext';
 import { hrefBuilder } from '../../../../../../components';
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
 import { ManualResourceCreateContentPresentation } from './ManualResourceCreateContent.presentation';
@@ -14,7 +13,6 @@ import { newManualManagementResource } from './lib/NewManualManagementResource';
 
 import type { SelectProps } from '@cloudscape-design/components';
 import type { Dispatch } from 'react';
-import type { WorkspaceLayoutContext } from '../../../../../../Layout';
 import type { ManualResourceTabInfo } from '../../../../../../contexts';
 import type { RegisteringStatus } from './ManualResourceCreateContent.presentation';
 
@@ -43,7 +41,7 @@ export const ManualResourceCreateContent = ({ setRegistering }: ManualResourceCr
   const [services, setServices] = useState<AWSService[]>([]);
   const [selectedService, setSelectedService] = useState<SelectProps.Option | null>(null);
   const [selectedResource, setSelectedResource] = useState<SelectProps.Option | null>(null);
-  const { flashbarItems, setFlashbarItems } = useOutletContext<WorkspaceLayoutContext>();
+  const { addFlashbarItem } = useFlashbarContext();
   const { loadSideMenu, addResourceTab } = useWorkspaceResourceContext();
   const { control, setValue, handleSubmit, setError, reset } = useForm<ResourceEditType>({
     mode: 'onChange',
@@ -105,7 +103,6 @@ export const ManualResourceCreateContent = ({ setRegistering }: ManualResourceCr
         reset();
       })
       .catch((error) => {
-        const id = uuidV4();
         console.error('Error Saving resource:', error);
 
         if (error.value.includes('already exists')) {
@@ -113,20 +110,11 @@ export const ManualResourceCreateContent = ({ setRegistering }: ManualResourceCr
             type: 'already_exists',
           });
         } else {
-          setFlashbarItems([
-            ...flashbarItems,
-            {
-              type: 'error',
-              header: '保存に失敗しました',
-              content: error.value,
-              dismissible: true,
-              dismissLabel: 'close',
-              id: id,
-              onDismiss: () => {
-                setFlashbarItems((items) => items.filter((e) => e.id !== id));
-              },
-            },
-          ]);
+          addFlashbarItem({
+            type: 'error',
+            header: '保存に失敗しました',
+            content: error.value,
+          });
           setRegistering(false);
           setSelectedService(null);
           setSelectedResource(null);

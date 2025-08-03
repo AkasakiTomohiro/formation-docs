@@ -1,6 +1,7 @@
 import { RouterProvider, createBrowserRouter } from 'react-router';
 
 import { Header } from './components/Header';
+import { FlashbarProvider } from './contexts/FlashbarContext';
 import { AppHome } from './features/AppHome';
 import { AppSetup } from './features/AppSetup';
 import {
@@ -14,6 +15,7 @@ import { WorkspaceResourceProvider } from './features/Workspace/contexts/Workspa
 
 const router = createBrowserRouter([
   {
+    id: 'home',
     index: true,
     element: (
       <Header>
@@ -22,6 +24,7 @@ const router = createBrowserRouter([
     ),
   },
   {
+    id: 'workspaces',
     path: 'workspaces',
     element: (
       <Header>
@@ -30,6 +33,7 @@ const router = createBrowserRouter([
     ),
   },
   {
+    id: 'workspace',
     path: 'workspaces/:workspaceId',
     element: (
       <Header>
@@ -57,7 +61,11 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <FlashbarProvider>
+      <RouterProvider router={router} />
+    </FlashbarProvider>
+  );
 }
 
 export default App;

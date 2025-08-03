@@ -6,7 +6,6 @@ import {
   Button,
   Container,
   ContentLayout,
-  Flashbar,
   FormField,
   Header,
   Input,
@@ -15,7 +14,7 @@ import {
 
 import type { Control, UseFormHandleSubmit } from 'react-hook-form';
 
-import type { ButtonProps, FlashbarProps } from '@cloudscape-design/components';
+import type { ButtonProps } from '@cloudscape-design/components';
 
 export const StackEditValidator = z.object({
   name: z.string().min(1).max(256),
@@ -39,16 +38,10 @@ export type StackEditContentPresentationProps = {
    * キャンセルボタンのクリックハンドラ
    */
   onClickCancel: ButtonProps['onClick'];
-
-  /**
-   * フラッシュバーに表示するメッセージ
-   */
-  flashbarItems: FlashbarProps.MessageDefinition[];
 };
 
 export const StackEditContentPresentation = ({
   control,
-  flashbarItems,
   onSubmitSave,
   onClickCancel,
 }: StackEditContentPresentationProps): JSX.Element => {
@@ -57,7 +50,6 @@ export const StackEditContentPresentation = ({
       header={
         <SpaceBetween size="m">
           <Header>Stackの編集</Header>
-          <Flashbar items={flashbarItems} />
         </SpaceBetween>
       }
     >

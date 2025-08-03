@@ -34,6 +34,11 @@ export type LogicalIdTablePresentationProps = {
   setToggleOpen: ButtonProps['onClick'];
 
   /**
+   * 論理IDテーブルの拡大ボタン押下時のイベントハンドラ
+   */
+  onClickExpand: ButtonProps['onClick'];
+
+  /**
    * フィルタリングテキストの変更イベントハンドラ
    */
   onChangeFilteringText?: TextFilterProps['onChange'];
@@ -52,6 +57,7 @@ export const LogicalIdTablePresentation = ({
   onCliCkLogicalId,
   onChangeFilteringText,
   setToggleOpen,
+  onClickExpand,
   isLoading,
 }: LogicalIdTablePresentationProps): JSX.Element => {
   if (isOpen) {
@@ -106,6 +112,7 @@ export const LogicalIdTablePresentation = ({
                 )
               }
             >
+              {selectedLogicalId && <Button iconName="view-full" variant="icon" onClick={onClickExpand} />}
               リソース
             </Header>
           }

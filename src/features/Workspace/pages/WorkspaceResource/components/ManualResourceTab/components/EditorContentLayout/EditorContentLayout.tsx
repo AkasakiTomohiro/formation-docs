@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useOutletContext } from 'react-router';
-import { v4 as uuidV4 } from 'uuid';
 
+import { useFlashbarContext } from '../../../../../../../../contexts/FlashbarContext';
 import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFormationSchema';
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
 import { createExpandedItems } from '../../../PropertyTable';
@@ -11,7 +10,6 @@ import { getManualManagementResourceReasons } from './lib/GetManualManagementRes
 import { updateManualResourceMeta } from './lib/UpdateManualResourceMeta';
 import { updateManualResourceProperties } from './lib/UpdateManualResourceProperties';
 
-import type { WorkspaceLayoutContext } from '../../../../../../Layout';
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
 import type { ViewMode } from './EditorContentLayout.presentation';
@@ -33,7 +31,7 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
   const [mode, setMode] = useState<ViewMode>('reason');
   const [values, setValues] = useState<string>('');
   const [editingValues, setEditingValues] = useState<string>('');
-  const { setFlashbarItems } = useOutletContext<WorkspaceLayoutContext>();
+  const { addFlashbarItem } = useFlashbarContext();
   const [isValid, setIsValid] = useState(true);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -73,21 +71,11 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
 
   const onSave = async () => {
     if (!isValid) {
-      const id = uuidV4();
-      setFlashbarItems((items) => [
-        ...items,
-        {
-          type: 'error',
-          header: '保存に失敗しました',
-          content: 'リソースプロパティのエラーをすべて修正してください',
-          dismissible: true,
-          dismissLabel: 'close',
-          id: id,
-          onDismiss: () => {
-            setFlashbarItems((items) => items.filter((e) => e.id !== id));
-          },
-        },
-      ]);
+      addFlashbarItem({
+        type: 'error',
+        header: '保存に失敗しました',
+        content: 'リソースプロパティのエラーをすべて修正してください',
+      });
       return;
     }
     setReasons(editingReasons);

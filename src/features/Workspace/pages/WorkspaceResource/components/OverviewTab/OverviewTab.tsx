@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import { useWorkspaceResourceContext } from '../../../../contexts';
 import { OverviewTabPresentation } from './OverviewTab.presentation';
 import { loadStack } from './lib/LoadStack';
 
-import type { FlashbarProps } from '@cloudscape-design/components';
 import type { OverviewTabAttr, OverviewTabInfo } from '../../../../contexts';
 
 export type OverviewTabProps = OverviewTabAttr;
@@ -18,7 +17,6 @@ export function buildOverviewTabName({ stackName }: BuildOverviewTabNameProps): 
 
 export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
   const { modifyResourceTab } = useWorkspaceResourceContext();
-  const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -44,8 +42,6 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
       stackId={props.stackId}
       stackName={props.stackName}
       description={props.description}
-      flashbarItems={flashbarItems}
-      setFlashbarItems={setFlashbarItems}
     />
   );
 };
