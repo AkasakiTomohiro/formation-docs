@@ -3,17 +3,14 @@ import { useOutletContext } from 'react-router';
 import { v4 as uuidV4 } from 'uuid';
 
 import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFormationSchema';
-import {
-  getManualManagementResourceProperties,
-  getManualManagementResourceReasons,
-  updateManualResourceMeta,
-  updateManualResourceProperties,
-} from '../../../../../../../../invoke/ManualManagementResource';
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
 import { createExpandedItems } from '../../../PropertyTable';
 import { EditorContentLayoutPresentation } from './EditorContentLayout.presentation';
+import { getManualManagementResourceProperties } from './lib/GetManualManagementResourceProperties';
+import { getManualManagementResourceReasons } from './lib/GetManualManagementResourceReasons';
+import { updateManualResourceMeta } from './lib/UpdateManualResourceMeta';
+import { updateManualResourceProperties } from './lib/UpdateManualResourceProperties';
 
-import type { CodeEditorProps } from '@cloudscape-design/components';
 import type { WorkspaceLayoutContext } from '../../../../../../Layout';
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
@@ -27,7 +24,7 @@ export type EditorContentLayoutProps = {
 
 export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceName }: EditorContentLayoutProps) => {
   const [schema, setSchema] = useState<CloudFormationSchema | undefined>(undefined);
-  const [items, setItems] = useState<ResourceTableItem[]>([]);
+  const [properties, setProperties] = useState<ResourceTableItem[]>([]);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const [expandedItems, setExpandedItems] = useState<any>();
   const [isEdit, setIsEdit] = useState(false);
@@ -36,8 +33,6 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
   const [mode, setMode] = useState<ViewMode>('reason');
   const [values, setValues] = useState<string>('');
   const [editingValues, setEditingValues] = useState<string>('');
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  const [acePreferences, setAcePreferences] = useState<CodeEditorProps.Preferences>({} as any);
   const { setFlashbarItems } = useOutletContext<WorkspaceLayoutContext>();
   const [isValid, setIsValid] = useState(true);
 
@@ -56,7 +51,7 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
       console.log('reasons', reasons);
       setSchema(cloudformationSchema);
       const resourceTableItems = createResourceTableItems(cloudformationSchema, properties);
-      setItems(resourceTableItems);
+      setProperties(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
       setReasons(reasons);
       setValues(JSON.stringify(properties, undefined, 2));
@@ -106,7 +101,7 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
       properties: editingValues,
     });
     const resourceTableItems = createResourceTableItems(schema as CloudFormationSchema, JSON.parse(editingValues));
-    setItems(resourceTableItems);
+    setProperties(resourceTableItems);
     setExpandedItems(createExpandedItems(resourceTableItems));
     setValues(editingValues);
   };
@@ -114,28 +109,26 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
   return (
     <EditorContentLayoutPresentation
       selectedResourceId={selectedResourceId}
-      properties={items}
       isEdit={isEdit}
       viewMode={mode}
-      reasons={reasons}
-      editingReasons={editingReasons}
-      expandedItems={expandedItems}
-      values={values}
-      editingValues={editingValues}
-      acePreferences={acePreferences}
       onClickEdit={onEdit}
       onClickCancel={onCancel}
       onClickSave={onSave}
-      setExpandedItems={setExpandedItems}
-      setEditingReasons={setEditingReasons}
+      propertyTableProps={{
+        properties: properties,
+        reasons: reasons,
+        editingReasons: editingReasons,
+        expandedItems: expandedItems,
+        setExpandedItems: setExpandedItems,
+        setEditingReasons: setEditingReasons,
+      }}
+      resourcePropertyEditorProps={{
+        values: values,
+        editingValues: editingValues,
+        onValidate: ({ detail }) => setIsValid(detail.annotations.length === 0),
+        onDelayedChange: ({ detail }) => setEditingValues(detail.value),
+      }}
       onChangeSegmentedControl={({ detail }) => setMode(detail.selectedId as ViewMode)}
-      onValidate={({ detail }) => {
-        setIsValid(detail.annotations.length === 0);
-      }}
-      onPreferencesChange={(event) => {
-        setAcePreferences(event.detail);
-      }}
-      onDelayedChange={({ detail }) => setEditingValues(detail.value)}
     />
   );
 };

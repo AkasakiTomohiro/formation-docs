@@ -12,11 +12,3 @@ export async function getCloudFormationSchema(service_name: string, resource_nam
   }
   return result.value;
 }
-
-export async function getAWSServiceList(): Promise<Record<string, string[]>> {
-  const result = await invoke<CommandResult<Record<string, string[]>>>('get_aws_service_list_command');
-  if (!result.success) {
-    throw new Error(result.value);
-  }
-  return result.value;
-}
