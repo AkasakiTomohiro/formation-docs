@@ -35,6 +35,11 @@ export type ResourceIdTablePresentationProps = {
   setToggleOpen: ButtonProps['onClick'];
 
   /**
+   * 論理IDテーブルの拡大ボタン押下時のイベントハンドラ
+   */
+  onClickExpand: ButtonProps['onClick'];
+
+  /**
    * フィルタリングテキストの変更イベントハンドラ
    */
   onChangeFilteringText?: TextFilterProps['onChange'];
@@ -56,6 +61,7 @@ export const ResourceIdTablePresentation = ({
   resourceList,
   onClickResourceId,
   setToggleOpen,
+  onClickExpand,
   onChangeFilteringText,
   isLoading,
   isOpen,
@@ -112,6 +118,7 @@ export const ResourceIdTablePresentation = ({
                 )
               }
             >
+              {selectedResourceId && <Button iconName="view-full" variant="icon" onClick={onClickExpand} />}
               リソース
             </Header>
           }
