@@ -2,44 +2,36 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 
 import { useCollection } from '@cloudscape-design/collection-hooks';
-import Box from '@cloudscape-design/components/box';
-import Button from '@cloudscape-design/components/button';
-import ContentLayout from '@cloudscape-design/components/content-layout';
-import Flashbar from '@cloudscape-design/components/flashbar';
-import Header from '@cloudscape-design/components/header';
-import Link from '@cloudscape-design/components/link';
-import Pagination from '@cloudscape-design/components/pagination';
-import SpaceBetween from '@cloudscape-design/components/space-between';
-import Table from '@cloudscape-design/components/table';
-import { invoke } from '@tauri-apps/api/core';
 import { Window } from '@tauri-apps/api/window';
 import { open } from '@tauri-apps/plugin-dialog';
 
 import { useWorkspaces } from '../../hooks/useWorkspaces';
+import { AppHomePresentation } from './AppHome.presentation';
+import { openWorkspace } from './lib/OpenWorkspace';
+
+import type { AppHomePresentationProps } from './AppHome.presentation';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
-import type { WorkspaceExpand } from '../../invoke/Workspace';
+import type { WorkspaceExpand } from '../../hooks/useWorkspaces';
 
 export const AppHome = (): JSX.Element => {
   const isFirstRender = useRef(true);
   const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
   const { state, workspaces, createWorkspace, loadWorkspaces, deleteWorkspace } = useWorkspaces();
-  const { items, collectionProps, paginationProps } = useCollection(workspaces, {
+  const tableCollection = useCollection(workspaces, {
     pagination: { pageSize: 10 },
   });
   const [selectedItems, setSelectedItems] = useState<WorkspaceExpand[]>([]);
 
-  const openWorkspace = useCallback(
-    async (workspace: WorkspaceExpand) => {
+  const openWorkspaceWrap = useCallback<AppHomePresentationProps['onClickWorkspaceLink']>(
+    (workspace: WorkspaceExpand) => async (_) => {
       const workspaceWindow = await Window.getByLabel(`workspace-${workspace.id}`);
       if (workspaceWindow) {
         // ワークスペースが開いている場合は、フォーカスを当てる
         workspaceWindow.setFocus();
       } else {
         // ワークスペースが開いていない場合は、新しいウィンドウで開く
-        const result = await invoke('open_workspace_command', {
-          id: workspace.id,
-        });
+        const result = await openWorkspace(workspace.id);
         console.log({ result, workspace });
         if (!result) {
           const id = uuidV4();
@@ -71,7 +63,7 @@ export const AppHome = (): JSX.Element => {
     });
     if (selectedDir != null) {
       createWorkspace({ directory: selectedDir })
-        .then((workspace) => openWorkspace(workspace))
+        .then((workspace) => openWorkspaceWrap(workspace))
         .catch((error) => {
           const id = uuidV4();
           setFlashbarItems([
@@ -90,7 +82,12 @@ export const AppHome = (): JSX.Element => {
           ]);
         });
     }
-  }, [createWorkspace, openWorkspace, flashbarItems]);
+  }, [createWorkspace, openWorkspaceWrap, flashbarItems]);
+
+  const onClickDeleteWorkspace = () => {
+    deleteWorkspace(selectedItems[0]);
+    setSelectedItems([]);
+  };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -118,74 +115,16 @@ export const AppHome = (): JSX.Element => {
   }, []);
 
   return (
-    <ContentLayout
-      defaultPadding
-      header={
-        <SpaceBetween size="m">
-          <Header variant="h1">Home</Header>
-          <Flashbar items={flashbarItems} />
-        </SpaceBetween>
-      }
-    >
-      <Table
-        {...collectionProps}
-        columnDefinitions={[
-          {
-            id: 'Name',
-            header: 'Workspace name',
-            cell: (e) => <Link onClick={() => openWorkspace(e)}>{e.name}</Link>,
-            isRowHeader: true,
-          },
-          {
-            id: 'Directory',
-            header: 'directory',
-            cell: (e) => e.directory,
-          },
-          {
-            id: 'Description',
-            header: 'Description',
-            cell: (e) => e.description,
-          },
-        ]}
-        selectionType="single"
-        selectedItems={selectedItems}
-        onSelectionChange={({ detail }) => setSelectedItems(detail.selectedItems)}
-        items={items}
-        loadingText="Loading workspace"
-        trackBy="name"
-        empty={
-          <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
-            <SpaceBetween size="m">
-              <b>No resources</b>
-            </SpaceBetween>
-          </Box>
-        }
-        header={
-          <Header
-            actions={
-              <SpaceBetween direction="horizontal" size="xs">
-                <Button
-                  onClick={() => {
-                    deleteWorkspace(selectedItems[0]);
-                    setSelectedItems([]);
-                  }}
-                  disabled={selectedItems.length === 0}
-                >
-                  削除
-                </Button>
-                <Button onClick={loadWorkspaces}>更新</Button>
-                <Button variant="primary" onClick={newWorkspace}>
-                  新規ワークスペース
-                </Button>
-              </SpaceBetween>
-            }
-          >
-            ワークスペース一覧
-          </Header>
-        }
-        pagination={<Pagination {...paginationProps} />}
-        loading={state === 'loading'}
-      />
-    </ContentLayout>
+    <AppHomePresentation
+      flashbarItems={flashbarItems}
+      isLoading={state === 'loading'}
+      selectedItems={selectedItems}
+      tableCollection={tableCollection}
+      onClickWorkspaceLink={openWorkspaceWrap}
+      onClickNewWorkspace={newWorkspace}
+      onClickDeleteWorkspace={onClickDeleteWorkspace}
+      onClickUpdateWorkspace={loadWorkspaces}
+      onSelectionChange={({ detail }) => setSelectedItems(detail.selectedItems)}
+    />
   );
 };
