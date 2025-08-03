@@ -39,7 +39,7 @@ export const StackEditContent = ({
   stackId,
 }: StackEditContentProps): JSX.Element => {
   const { modifyResourceTab } = useWorkspaceResourceContext();
-  const { flashbarItems, addFlashbarItem } = useFlashbarContext();
+  const { addFlashbarItem } = useFlashbarContext();
   const { control, handleSubmit } = useForm<StackEditType>({
     mode: 'onChange',
     resolver: zodResolver(StackEditValidator),
@@ -79,7 +79,6 @@ export const StackEditContent = ({
     <StackEditContentPresentation
       control={control}
       onSubmitSave={handleSubmit(onSave)}
-      flashbarItems={flashbarItems}
       onClickCancel={() => {
         modifyResourceTab(tabId, (originTab: OverviewTabInfo) => {
           return {

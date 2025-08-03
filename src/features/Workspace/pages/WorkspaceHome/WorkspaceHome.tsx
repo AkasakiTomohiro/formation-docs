@@ -18,7 +18,7 @@ export const WorkspaceHome = (): JSX.Element => {
   const navigate = useNavigate();
   const workspace = useRouteLoaderData('workspace') as WorkspaceLayoutLoaderData;
   const { loadSideMenu } = useWorkspaceResourceContext();
-  const { flashbarItems, addFlashbarItem } = useFlashbarContext();
+  const { addFlashbarItem } = useFlashbarContext();
   const [selectedItems, setSelectedItems] = useState<StackInfo[]>([]);
   const [state, setState] = useState<'loading' | 'loaded'>('loading');
   const [stacks, setStacks] = useState<StackInfo[]>([]);
@@ -105,7 +105,6 @@ export const WorkspaceHome = (): JSX.Element => {
       onClickImportStack={importStackWrap}
       onClickDeleteStack={onClickDeleteStack}
       onClickWorkspaceEdit={() => navigate(`/workspaces/${workspace.id}/edit`)}
-      flashbarItems={flashbarItems}
     />
   );
 };

@@ -4,7 +4,6 @@ import { Link } from '@cloudscape-design/components';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
 import ContentLayout from '@cloudscape-design/components/content-layout';
-import Flashbar from '@cloudscape-design/components/flashbar';
 import Header from '@cloudscape-design/components/header';
 import Pagination from '@cloudscape-design/components/pagination';
 import SpaceBetween from '@cloudscape-design/components/space-between';
@@ -13,7 +12,7 @@ import Table from '@cloudscape-design/components/table';
 import type { WorkspaceLayoutLoaderData } from '../../Loader';
 
 import type { useCollection } from '@cloudscape-design/collection-hooks';
-import type { ButtonProps, FlashbarProps, LinkProps, TableProps } from '@cloudscape-design/components';
+import type { ButtonProps, LinkProps, TableProps } from '@cloudscape-design/components';
 import type { StackInfo } from '../../lib/StackInfo';
 
 export type WorkspaceHomePresentationProps = {
@@ -61,11 +60,6 @@ export type WorkspaceHomePresentationProps = {
    * テーブルのコレクション
    */
   tableCollection: ReturnType<typeof useCollection<StackInfo>>;
-
-  /**
-   * フラッシュバーのアイテム
-   */
-  flashbarItems: FlashbarProps.MessageDefinition[];
 };
 
 export const WorkspaceHomePresentation = ({
@@ -78,7 +72,6 @@ export const WorkspaceHomePresentation = ({
   onSelectionChange,
   isLoading,
   tableCollection,
-  flashbarItems,
 }: WorkspaceHomePresentationProps): JSX.Element => {
   const workspace = useRouteLoaderData('workspace') as WorkspaceLayoutLoaderData;
 
@@ -100,7 +93,6 @@ export const WorkspaceHomePresentation = ({
           >
             {workspace.name}
           </Header>
-          <Flashbar items={flashbarItems} />
         </SpaceBetween>
       }
     >

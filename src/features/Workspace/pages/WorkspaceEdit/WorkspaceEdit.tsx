@@ -20,7 +20,7 @@ export const WorkspaceEdit = (): JSX.Element => {
   const workspace = useRouteLoaderData('workspace') as WorkspaceLayoutLoaderData;
   const navigate = useNavigate();
   const revalidator = useRevalidator();
-  const { flashbarItems, addFlashbarItem } = useFlashbarContext();
+  const { addFlashbarItem } = useFlashbarContext();
 
   const { control, handleSubmit } = useForm<WorkspaceEditType>({
     mode: 'onChange',
@@ -56,7 +56,6 @@ export const WorkspaceEdit = (): JSX.Element => {
       control={control}
       onSubmitSave={handleSubmit(onSave)}
       onClickCancel={() => navigate(`/workspaces/${workspace.id}`)}
-      flashbarItems={flashbarItems}
     />
   );
 };

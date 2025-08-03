@@ -5,7 +5,6 @@ import {
   Button,
   Container,
   ContentLayout,
-  Flashbar,
   FormField,
   Header,
   Input,
@@ -16,7 +15,7 @@ import type { WorkspaceEditType } from './WorkspaceEdit';
 
 import type { Control, UseFormHandleSubmit } from 'react-hook-form';
 
-import type { ButtonProps, FlashbarProps } from '@cloudscape-design/components';
+import type { ButtonProps } from '@cloudscape-design/components';
 
 export type WorkspaceEditPresentationProps = {
   /**
@@ -34,18 +33,12 @@ export type WorkspaceEditPresentationProps = {
    * キャンセルボタンのクリックイベントハンドラ
    */
   onClickCancel: ButtonProps['onClick'];
-
-  /**
-   * フラッシュバーのアイテム
-   */
-  flashbarItems: FlashbarProps.MessageDefinition[];
 };
 
 export const WorkspaceEditPresentation = ({
   control,
   onSubmitSave,
   onClickCancel,
-  flashbarItems,
 }: WorkspaceEditPresentationProps): JSX.Element => {
   return (
     <ContentLayout
@@ -53,7 +46,6 @@ export const WorkspaceEditPresentation = ({
       header={
         <SpaceBetween size="m">
           <Header>Workspaceの編集</Header>
-          <Flashbar items={flashbarItems} />
         </SpaceBetween>
       }
     >

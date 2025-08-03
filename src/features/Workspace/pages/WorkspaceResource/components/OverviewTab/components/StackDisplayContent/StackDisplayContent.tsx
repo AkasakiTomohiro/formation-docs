@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import { useFlashbarContext } from '../../../../../../../../contexts/FlashbarContext';
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
 import { StackDisplayContentPresentation } from './StackDisplayContent.presentation';
 import { getStackOutputs } from './lib/GetStackOutputs';
@@ -34,7 +33,6 @@ export const StackDisplayContent = ({
   const { modifyResourceTab } = useWorkspaceResourceContext();
   const [stackParameters, setStackParameters] = useState<StackParametersDisplayProps[]>([]);
   const [stackOutputs, setStackOutputs] = useState<StackOutputsDisplayProps[]>([]);
-  const { flashbarItems } = useFlashbarContext();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -71,7 +69,6 @@ export const StackDisplayContent = ({
       stackDescription={stackDescription}
       stackParameters={stackParameters}
       stackOutputs={stackOutputs}
-      flashbarItems={flashbarItems}
       onClickEdit={() => {
         modifyResourceTab(tabId, (originTab: OverviewTabInfo) => {
           return {
