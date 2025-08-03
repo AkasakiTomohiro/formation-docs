@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import { loadStack } from '../../../../../../invoke/Stack';
 import { useWorkspaceResourceContext } from '../../../../contexts';
 import { OverviewTabPresentation } from './OverviewTab.presentation';
+import { loadStack } from './lib/LoadStack';
 
 import type { FlashbarProps } from '@cloudscape-design/components';
 import type { OverviewTabAttr, OverviewTabInfo } from '../../../../contexts';
