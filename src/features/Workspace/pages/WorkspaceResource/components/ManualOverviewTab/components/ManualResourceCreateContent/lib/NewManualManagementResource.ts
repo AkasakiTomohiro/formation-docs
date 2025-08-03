@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 
-import type { CommandResult } from '../lib/CommandResult';
+import type { CommandResult } from '../../../../../../../../../lib/CommandResult';
 
 export type NewManualManagementResourceProperties = {
   resource_id: string;
