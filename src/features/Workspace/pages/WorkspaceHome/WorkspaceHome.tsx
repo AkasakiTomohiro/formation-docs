@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router';
+import { useNavigate, useRouteLoaderData } from 'react-router';
 
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -11,12 +11,12 @@ import { deleteStack } from './lib/DeleteStack';
 import { importStack } from './lib/ImportStack';
 import { loadStacks } from './lib/LoadStacks';
 
-import type { WorkspaceLayoutContext } from '../../Layout';
+import type { WorkspaceLayoutLoaderData } from '../../Loader';
 import type { StackInfo } from '../../lib';
 
 export const WorkspaceHome = (): JSX.Element => {
   const navigate = useNavigate();
-  const workspace = useOutletContext<WorkspaceLayoutContext>();
+  const workspace = useRouteLoaderData('workspace') as WorkspaceLayoutLoaderData;
   const { loadSideMenu } = useWorkspaceResourceContext();
   const { flashbarItems, addFlashbarItem } = useFlashbarContext();
   const [selectedItems, setSelectedItems] = useState<StackInfo[]>([]);

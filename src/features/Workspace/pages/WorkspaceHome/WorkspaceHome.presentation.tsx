@@ -1,4 +1,4 @@
-import { useOutletContext } from 'react-router';
+import { useRouteLoaderData } from 'react-router';
 
 import { Link } from '@cloudscape-design/components';
 import Box from '@cloudscape-design/components/box';
@@ -10,9 +10,10 @@ import Pagination from '@cloudscape-design/components/pagination';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
 
+import type { WorkspaceLayoutLoaderData } from '../../Loader';
+
 import type { useCollection } from '@cloudscape-design/collection-hooks';
 import type { ButtonProps, FlashbarProps, LinkProps, TableProps } from '@cloudscape-design/components';
-import type { WorkspaceLayoutContext } from '../../Layout';
 import type { StackInfo } from '../../lib/StackInfo';
 
 export type WorkspaceHomePresentationProps = {
@@ -79,7 +80,7 @@ export const WorkspaceHomePresentation = ({
   tableCollection,
   flashbarItems,
 }: WorkspaceHomePresentationProps): JSX.Element => {
-  const workspace = useOutletContext<WorkspaceLayoutContext>();
+  const workspace = useRouteLoaderData('workspace') as WorkspaceLayoutLoaderData;
 
   return (
     <ContentLayout

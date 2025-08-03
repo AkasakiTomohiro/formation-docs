@@ -15,6 +15,7 @@ import { WorkspaceResourceProvider } from './features/Workspace/contexts/Workspa
 
 const router = createBrowserRouter([
   {
+    id: 'home',
     index: true,
     element: (
       <Header>
@@ -23,6 +24,7 @@ const router = createBrowserRouter([
     ),
   },
   {
+    id: 'workspaces',
     path: 'workspaces',
     element: (
       <Header>
@@ -31,6 +33,7 @@ const router = createBrowserRouter([
     ),
   },
   {
+    id: 'workspace',
     path: 'workspaces/:workspaceId',
     element: (
       <Header>

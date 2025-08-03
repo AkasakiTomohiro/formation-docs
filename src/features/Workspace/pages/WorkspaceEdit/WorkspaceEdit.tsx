@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { useNavigate, useOutletContext, useRevalidator } from 'react-router';
+import { useNavigate, useRevalidator, useRouteLoaderData } from 'react-router';
 import { z } from 'zod';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,8 +8,7 @@ import { useFlashbarContext } from '../../../../contexts/FlashbarContext';
 import { WorkspaceEditPresentation } from './WorkspaceEdit.presentation';
 import { updateWorkspace } from './lib/UpdateWorkspace';
 
-import type { WorkspaceLayoutContext } from '../../Layout';
-
+import type { WorkspaceLayoutLoaderData } from '../../Loader';
 const workspaceEditValidator = z.object({
   name: z.string().min(1).max(256),
   description: z.string().max(256),
@@ -18,7 +17,7 @@ const workspaceEditValidator = z.object({
 export type WorkspaceEditType = z.infer<typeof workspaceEditValidator>;
 
 export const WorkspaceEdit = (): JSX.Element => {
-  const workspace = useOutletContext<WorkspaceLayoutContext>();
+  const workspace = useRouteLoaderData('workspace') as WorkspaceLayoutLoaderData;
   const navigate = useNavigate();
   const revalidator = useRevalidator();
   const { flashbarItems, addFlashbarItem } = useFlashbarContext();
