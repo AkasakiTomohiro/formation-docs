@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { useFlashbarContext } from '../../../../../../../../contexts/FlashbarContext';
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
 import { StackDisplayContentPresentation } from './StackDisplayContent.presentation';
 import { getStackOutputs } from './lib/GetStackOutputs';
@@ -12,10 +13,7 @@ import type {
   StackParametersDisplayProps,
 } from './StackDisplayContent.presentation';
 
-export type StackContentProps = Pick<
-  StackDisplayContentPresentationProps,
-  'flashbarItems' | 'stackName' | 'stackDescription'
-> & {
+export type StackContentProps = Pick<StackDisplayContentPresentationProps, 'stackName' | 'stackDescription'> & {
   /**
    * スタックのタブID
    */
@@ -30,13 +28,13 @@ export type StackContentProps = Pick<
 export const StackDisplayContent = ({
   tabId,
   stackId,
-  flashbarItems,
   stackName,
   stackDescription,
 }: StackContentProps): JSX.Element => {
   const { modifyResourceTab } = useWorkspaceResourceContext();
   const [stackParameters, setStackParameters] = useState<StackParametersDisplayProps[]>([]);
   const [stackOutputs, setStackOutputs] = useState<StackOutputsDisplayProps[]>([]);
+  const { flashbarItems } = useFlashbarContext();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
