@@ -211,6 +211,13 @@ async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Resul
     // workspace.jsonのstacksに追加する
     let workspace = load_workspace(workspace_directory).await?;
     let mut stacks = workspace.stacks.clone();
+
+    // スタックが存在する場合は追加しない
+    if stacks.values().any(|v| v == filename) {
+        println!("Stack with name {} already exists.", filename);
+        return Ok(());
+    }
+
     stacks.insert(Uuid::new_v4().to_string(), filename.to_string());
     update_workspace(
         workspace_directory,

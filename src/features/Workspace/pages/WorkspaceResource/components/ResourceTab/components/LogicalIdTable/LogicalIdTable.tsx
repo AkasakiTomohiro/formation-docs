@@ -65,6 +65,14 @@ export const LogicalIdTable = ({
       isLoading={isLoading}
       resourceList={resourceList.filter((item) => item.toLowerCase().includes(filteringText.toLowerCase()))}
       filteringText={filteringText}
+      onClickExpand={() => {
+        modifyResourceTab(tabId, (originTab: ResourceTabInfo) => {
+          return {
+            ...originTab,
+            selectedLogicalId: undefined,
+          };
+        });
+      }}
       onChangeFilteringText={({ detail }) => setFilteringText(detail.filteringText)}
       onCliCkLogicalId={(item) => (event) => {
         event.stopPropagation();
