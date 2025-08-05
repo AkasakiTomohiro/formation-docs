@@ -31,12 +31,14 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
         selectedLogicalId={props.selectedLogicalId}
       />
       {props.selectedLogicalId !== undefined && (
-        <ResourcePropertyTable
-          stackId={props.stackId}
-          serviceName={props.serviceName}
-          resourceName={props.resourceName}
-          selectedLogicalId={props.selectedLogicalId}
-        />
+        <div style={{ paddingLeft: '16px' }}>
+          <ResourcePropertyTable
+            stackId={props.stackId}
+            serviceName={props.serviceName}
+            resourceName={props.resourceName}
+            selectedLogicalId={props.selectedLogicalId}
+          />
+        </div>
       )}
     </div>
   );

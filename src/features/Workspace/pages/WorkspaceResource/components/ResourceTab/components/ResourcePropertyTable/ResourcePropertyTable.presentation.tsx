@@ -77,28 +77,7 @@ export const ResourcePropertyTablePresentation = ({
   setEditingReasons,
 }: ResourcePropertyTablePresentationProps): JSX.Element => {
   return (
-    <ContentLayout
-      defaultPadding
-      header={
-        <Header
-          actions={
-            <SpaceBetween direction="horizontal" size="xs">
-              {!isEdit && <Button onClick={onClickEdit}>編集</Button>}
-              {isEdit && (
-                <>
-                  <Button onClick={onClickCancel}>キャンセル</Button>
-                  <Button variant="primary" onClick={onClickSave}>
-                    保存
-                  </Button>
-                </>
-              )}
-            </SpaceBetween>
-          }
-        >
-          {selectedLogicalId}
-        </Header>
-      }
-    >
+    <ContentLayout>
       <PropertyTable
         isEdit={isEdit}
         properties={properties}
@@ -107,6 +86,25 @@ export const ResourcePropertyTablePresentation = ({
         expandedItems={expandedItems}
         setExpandedItems={setExpandedItems}
         setEditingReasons={setEditingReasons}
+        header={
+          <Header
+            actions={
+              <SpaceBetween direction="horizontal" size="xs">
+                {!isEdit && <Button onClick={onClickEdit}>編集</Button>}
+                {isEdit && (
+                  <>
+                    <Button onClick={onClickCancel}>キャンセル</Button>
+                    <Button variant="primary" onClick={onClickSave}>
+                      保存
+                    </Button>
+                  </>
+                )}
+              </SpaceBetween>
+            }
+          >
+            {selectedLogicalId}
+          </Header>
+        }
       />
     </ContentLayout>
   );

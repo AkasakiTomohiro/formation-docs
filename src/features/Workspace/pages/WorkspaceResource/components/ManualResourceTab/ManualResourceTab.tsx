@@ -29,11 +29,13 @@ export const ManualResourceTab = (props: ManualResourceTabProps): JSX.Element =>
         resourceName={props.resourceName}
       />
       {props.selectedResourceId !== undefined && (
-        <EditorContentLayout
-          selectedResourceId={props.selectedResourceId}
-          serviceName={props.serviceName}
-          resourceName={props.resourceName}
-        />
+        <div style={{ paddingLeft: '16px' }}>
+          <EditorContentLayout
+            selectedResourceId={props.selectedResourceId}
+            serviceName={props.serviceName}
+            resourceName={props.resourceName}
+          />
+        </div>
       )}
     </div>
   );

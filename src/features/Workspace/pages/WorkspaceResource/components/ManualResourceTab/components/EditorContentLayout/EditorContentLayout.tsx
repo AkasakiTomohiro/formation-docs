@@ -12,7 +12,7 @@ import { updateManualResourceProperties } from './lib/UpdateManualResourceProper
 
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
-import type { ViewMode } from './EditorContentLayout.presentation';
+import type { ViewMode } from './components';
 
 export type EditorContentLayoutProps = {
   selectedResourceId: string;
