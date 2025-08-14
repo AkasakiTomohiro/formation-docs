@@ -581,6 +581,69 @@ async fn update_stack_detail(
     return Ok(());
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AWSServiceResource {
+    pub service_name: String,
+    pub recourse_type: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ParameterAndResourceList {
+    pub parameters: Vec<String>,
+    pub resources: HashMap<String, AWSServiceResource>,
+}
+
+async fn load_parameter_and_resource_list(
+    workspace_directory: &str,
+    stack_id: &str,
+) -> Result<ParameterAndResourceList, StackError> {
+    let workspace = load_workspace(workspace_directory).await?;
+    let stack_file_name = match workspace.stacks.get(stack_id) {
+        Some(stack_file_name) => stack_file_name,
+        None => {
+            return Err(StackError::App(AppError::new("Stack not found")));
+        }
+    };
+    let template_path = format!("{}/{}", workspace_directory, stack_file_name);
+    let template_json = fs::read_to_string(&template_path)?;
+    let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
+
+    let parameters_json = template_json["Parameters"].clone();
+    let parameters: Vec<String> = match parameters_json.as_object() {
+        Some(params) => params.keys().cloned().collect(),
+        None => Vec::new(),
+    };
+
+    let resources_json = template_json["Resources"].clone();
+    let mut resources: HashMap<String, AWSServiceResource> = HashMap::new();
+    for (resource_id, resource_value) in resources_json
+        .as_object()
+        .unwrap_or(&serde_json::Map::new())
+        .iter()
+    {
+        let tmp_resource_type = resource_value["Type"].as_str().unwrap_or_default();
+        let parts: Vec<&str> = tmp_resource_type.split("::").collect();
+        let (_, service_name, resource_type): (&str, &str, &str) = match parts[..] {
+            [a, b, c] => (a, b, c),
+            _ => continue,
+        };
+        resources.insert(
+            resource_id.to_string(),
+            AWSServiceResource {
+                service_name: service_name.to_string(),
+                recourse_type: resource_type.to_string(),
+            },
+        );
+    }
+
+    return Ok(ParameterAndResourceList {
+        parameters,
+        resources,
+    });
+}
+
 #[tauri::command]
 pub async fn load_stacks_command(
     window: tauri::Window,
@@ -829,6 +892,28 @@ pub async fn update_stack_detail_command(
     .await
     {
         Ok(_) => Ok(CommandResult::success(())),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn load_parameter_and_resource_list_command(
+    window: tauri::Window,
+    stack_id: &str,
+) -> Result<CommandResult<ParameterAndResourceList>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match load_parameter_and_resource_list(
+        window_state.workspace_directory.as_str(),
+        stack_id,
+    )
+    .await
+    {
+        Ok(result) => Ok(CommandResult::success(result)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
