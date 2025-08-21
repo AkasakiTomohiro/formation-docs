@@ -1,4 +1,5 @@
 import { CfnParameter, Duration, Stack } from 'aws-cdk-lib';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -18,13 +19,19 @@ export class SampleAppStack extends Stack {
     });
     this.queue = queue;
 
-    new CfnParameter(this, 'SampleParameter', {
+    const parameter = new CfnParameter(this, 'SampleParameter', {
       type: 'String',
       description: 'A sample parameter for the stack',
     });
 
-    const topic = new sns.Topic(this, 'SampleAppTopic');
+    const topic = new sns.Topic(this, 'SampleAppTopic', {
+      topicName: parameter.valueAsString,
+    });
 
     topic.addSubscription(new subs.SqsSubscription(queue));
+
+    new s3.Bucket(this, 'SampleBucket', {
+      bucketName: parameter.valueAsString,
+    });
   }
 }
