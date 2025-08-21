@@ -7,9 +7,16 @@ import { TableHeader } from './components';
 import type { PropertyTableProps } from '../../../PropertyTable';
 import type { ResourcePropertyEditorProps } from './components';
 
+import { ResourceEditContent } from '../../../ResourceEditContent/ResourceEditContent';
 import type { TableHeaderProps } from './components';
 
 export type EditorContentLayoutPresentationProps = TableHeaderProps & {
+  /**
+   * ResourceEditContentコンポーネントのprops
+   */
+  resourceEditContentProps: {
+    setDescription: React.Dispatch<React.SetStateAction<string>>;
+  };
   /**
    * PropertyTableコンポーネントのprops
    */
@@ -23,7 +30,9 @@ export type EditorContentLayoutPresentationProps = TableHeaderProps & {
 
 export const EditorContentLayoutPresentation = ({
   selectedResourceId,
+  description,
   isEdit,
+  resourceEditContentProps,
   propertyTableProps,
   viewMode,
   onClickEdit,
@@ -34,6 +43,24 @@ export const EditorContentLayoutPresentation = ({
 }: EditorContentLayoutPresentationProps) => {
   return (
     <ContentLayout>
+      {viewMode === 'description' && (
+        <ResourceEditContent
+          description={description}
+          setDescription={resourceEditContentProps.setDescription}
+          header={
+            <TableHeader
+              selectedResourceId={selectedResourceId}
+              description={description}
+              isEdit={isEdit}
+              onClickEdit={onClickEdit}
+              onClickCancel={onClickCancel}
+              onClickSave={onClickSave}
+              viewMode={viewMode}
+              onChangeSegmentedControl={onChangeSegmentedControl}
+            />
+          }
+        />
+      )}
       {viewMode === 'reason' && (
         <PropertyTable
           isEdit={isEdit}
@@ -46,6 +73,7 @@ export const EditorContentLayoutPresentation = ({
           header={
             <TableHeader
               selectedResourceId={selectedResourceId}
+              description={description}
               isEdit={isEdit}
               onClickEdit={onClickEdit}
               onClickCancel={onClickCancel}
@@ -66,6 +94,7 @@ export const EditorContentLayoutPresentation = ({
           header={
             <TableHeader
               selectedResourceId={selectedResourceId}
+              description={description}
               isEdit={isEdit}
               onClickEdit={onClickEdit}
               onClickCancel={onClickCancel}

@@ -32,6 +32,7 @@ export type ManualResourceTabAttr = {
   tabId: string;
   serviceName: string;
   resourceName: string;
+  description: string;
   selectedResourceId?: string;
 };
 

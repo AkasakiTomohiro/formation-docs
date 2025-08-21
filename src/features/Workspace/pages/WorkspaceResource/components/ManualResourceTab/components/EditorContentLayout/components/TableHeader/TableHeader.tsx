@@ -5,13 +5,18 @@ import type { ButtonProps, SegmentedControlProps } from '@cloudscape-design/comp
 /**
  * コンテンツで表示する種別
  */
-export type ViewMode = 'reason' | 'value';
+export type ViewMode = 'description' | 'reason' | 'value';
 
 export type TableHeaderProps = {
   /**
    * 選択しているリソースID
    */
   selectedResourceId: string;
+
+  /**
+   * 選択しているリソースの説明
+   */
+  description: string;
 
   /**
    * 編集中かどうか
@@ -48,8 +53,11 @@ const selectModeOptions = [
   { text: 'Value', id: 'value' },
 ];
 
+const editingSelectModeOptions = [{ text: 'Description', id: 'description' }, ...selectModeOptions];
+
 export const TableHeader = ({
   selectedResourceId,
+  description,
   isEdit,
   onClickEdit,
   onClickCancel,
@@ -61,7 +69,11 @@ export const TableHeader = ({
     <Header
       actions={
         <SpaceBetween direction="horizontal" size="xs">
-          <SegmentedControl selectedId={viewMode} onChange={onChangeSegmentedControl} options={selectModeOptions} />
+          <SegmentedControl
+            selectedId={viewMode}
+            onChange={onChangeSegmentedControl}
+            options={isEdit ? editingSelectModeOptions : selectModeOptions}
+          />
           {!isEdit && <Button onClick={onClickEdit}>編集</Button>}
           {isEdit && <Button onClick={onClickCancel}>キャンセル</Button>}
           {isEdit && (
@@ -71,6 +83,7 @@ export const TableHeader = ({
           )}
         </SpaceBetween>
       }
+      description={description}
     >
       {selectedResourceId}
     </Header>

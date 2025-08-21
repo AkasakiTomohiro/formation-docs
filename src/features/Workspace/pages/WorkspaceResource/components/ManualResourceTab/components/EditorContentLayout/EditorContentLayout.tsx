@@ -18,9 +18,15 @@ export type EditorContentLayoutProps = {
   selectedResourceId: string;
   serviceName: string;
   resourceName: string;
+  description: string;
 };
 
-export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceName }: EditorContentLayoutProps) => {
+export const EditorContentLayout = ({
+  selectedResourceId,
+  serviceName,
+  resourceName,
+  description,
+}: EditorContentLayoutProps) => {
   const [schema, setSchema] = useState<CloudFormationSchema | undefined>(undefined);
   const [properties, setProperties] = useState<ResourceTableItem[]>([]);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -33,6 +39,7 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
   const [editingValues, setEditingValues] = useState<string>('');
   const { addFlashbarItem } = useFlashbarContext();
   const [isValid, setIsValid] = useState(true);
+  const [resourceDescription, setResourceDescription] = useState<string>(description);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -70,6 +77,8 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
   };
 
   const onSave = async () => {
+    // TODO: descriptionの更新処理を追加
+    // TODO: description編集画面で保存処理後、Reasonタブに切り替える処理を追加
     if (!isValid) {
       addFlashbarItem({
         type: 'error',
@@ -97,11 +106,15 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
   return (
     <EditorContentLayoutPresentation
       selectedResourceId={selectedResourceId}
+      description={resourceDescription}
       isEdit={isEdit}
       viewMode={mode}
       onClickEdit={onEdit}
       onClickCancel={onCancel}
       onClickSave={onSave}
+      resourceEditContentProps={{
+        setDescription: setResourceDescription,
+      }}
       propertyTableProps={{
         properties: properties,
         reasons: reasons,
