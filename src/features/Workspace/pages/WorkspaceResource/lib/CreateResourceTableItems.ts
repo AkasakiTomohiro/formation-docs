@@ -4,6 +4,7 @@ import {
   pseudoProperties,
 } from '../components/types/CloudFormationSchema';
 
+import type { OverviewTabAttr, ResourceTabAttr } from '../../../contexts';
 import type {
   CloudFormationSchema,
   DefinedProperty,
@@ -18,10 +19,23 @@ export type ResourceTableItem = {
   property: string;
   type: string;
   description: string;
-  value: string | undefined;
-  editMode: 'readonly' | 'string' | 'number' | 'enum' | 'boolean'; // FIXME:
+  value: ResourceTableItemValue | undefined;
   children?: ResourceTableItem[];
 };
+
+export type ResourceTableItemValue =
+  | {
+      type: 'value';
+      value: string | undefined;
+    }
+  | (OverviewTabAttr & {
+      type: 'overview';
+      value: string;
+    })
+  | (ResourceTabAttr & {
+      type: 'resource';
+      value: string;
+    });
 
 export type CreateResourceTableItemsOption = {
   parameters: string[];
@@ -110,7 +124,6 @@ function parseDefinedPropertyToTableItem(
     type: convertType(property),
     description: property.description || '',
     value: convertedValue.value,
-    editMode: getEditMode(property),
   };
 
   // プロパティが配列かつ、itemsが定義されている場合は、子要素を取得する
@@ -133,7 +146,6 @@ function parseDefinedPropertyToTableItem(
         type: 'object',
         description: '',
         value: '',
-        editMode: 'readonly',
       };
       childItem.children = parseChildrenPropertyToTableItem(
         definition.properties,
@@ -164,7 +176,6 @@ function parseDefinedPropertyToTableItem(
   if (result.children !== undefined) {
     if (result.children.length !== 0) {
       result.value = '';
-      result.editMode = 'readonly';
     }
   }
   return result;
@@ -202,7 +213,6 @@ function parseReferencePropertyToTableItem(
     type: convertType(definition),
     description: 'description' in property ? property.description || '' : '',
     value: convertedValue.value,
-    editMode: getEditMode(definition),
   };
 
   // プロパティがオブジェクトの場合は、子要素を取得する
@@ -220,7 +230,6 @@ function parseReferencePropertyToTableItem(
   if (result.children !== undefined) {
     if (result.children.length !== 0) {
       result.value = '';
-      result.editMode = 'readonly';
     }
   }
 
@@ -414,7 +423,6 @@ function convertIntrinsicFunctionValue(
         // 疑似パラメータ：<疑似パラメータ>
         return `<${value}>`;
       }
-      console.log('Ref', value, options);
 
       if (value in options.resources) {
         // 論理ID：<Ref: 論理ID>
@@ -444,7 +452,7 @@ function convertValue(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
   options: CreateResourceTableItemsOption,
-): { value: string | undefined } {
+): { value: React.ReactNode | undefined } {
   if (actualProperty === undefined) {
     return {
       value: undefined,
@@ -524,27 +532,4 @@ function convertType(property: DefinedProperty): string {
     }
   }
   return property.type;
-}
-
-/**
- * 編集モードを取得する
- * @param property `$ref`を含まないプロパティ
- * @returns 編集モード
- */
-function getEditMode(property: DefinedProperty): ResourceTableItem['editMode'] {
-  if (isJsonSchemaPrimitiveType(property.type)) {
-    if (property.type === 'string') {
-      if (property.enum) {
-        return 'enum';
-      }
-      return 'string';
-    }
-    if (property.type === 'number' || property.type === 'integer') {
-      return 'number';
-    }
-    if (property.type === 'boolean') {
-      return 'boolean';
-    }
-  }
-  return 'readonly';
 }
