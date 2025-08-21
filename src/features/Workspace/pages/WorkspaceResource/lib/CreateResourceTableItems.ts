@@ -23,16 +23,34 @@ export type ResourceTableItem = {
   children?: ResourceTableItem[];
 };
 
+export type CreateResourceTableItemsOption = {
+  parameters: string[];
+  resources: Record<
+    string,
+    {
+      serviceName: string;
+      serviceType: string;
+    }
+  >;
+};
+
+const DefaultOption: CreateResourceTableItemsOption = {
+  parameters: [],
+  resources: {},
+};
+
 /**
  * CloudFormationSchemaのと実際のテンプレートに定義されているプロパティをテーブルアイテムに変換する
  * @param schema CloudFormationSchema
  * @param actualProperties 実際のテンプレートに定義されているプロパティ
+ * @param options 組み込み関数用のデータ（ParameterとResourceList）
  * @returns テーブルアイテム
  */
 export const createResourceTableItems = (
   schema: CloudFormationSchema,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperties: any,
+  options: CreateResourceTableItemsOption = DefaultOption,
 ): ResourceTableItem[] => {
   const items: ResourceTableItem[] = [];
   for (const [key, value] of Object.entries(schema.properties)) {
@@ -46,6 +64,7 @@ export const createResourceTableItems = (
         value,
         actualProperties,
         schema.definitions,
+        options,
       );
       if (refItem) {
         items.push(refItem);
@@ -57,6 +76,7 @@ export const createResourceTableItems = (
         value,
         actualProperties,
         schema.definitions,
+        options,
       );
       items.push(definedItem);
     }
@@ -71,6 +91,7 @@ export const createResourceTableItems = (
  * @param property プロパティの定義
  * @param actualProperties 実際のテンプレートに定義されているプロパティ
  * @param definitions `CloudFormationSchema.definitions`
+ * @param options 組み込み関数用のデータ（ParameterとResourceList）
  * @return テーブルアイテム
  */
 function parseDefinedPropertyToTableItem(
@@ -80,8 +101,9 @@ function parseDefinedPropertyToTableItem(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperties: any,
   definitions: CloudFormationSchema['definitions'] | undefined,
+  options: CreateResourceTableItemsOption,
 ): ResourceTableItem {
-  const convertedValue = convertValue(property, getActualProperties(propertyKey, actualProperties));
+  const convertedValue = convertValue(property, getActualProperties(propertyKey, actualProperties), options);
   const result: ResourceTableItem = {
     id: `${parentId}/${propertyKey}`,
     property: propertyKey,
@@ -113,7 +135,13 @@ function parseDefinedPropertyToTableItem(
         value: '',
         editMode: 'readonly',
       };
-      childItem.children = parseChildrenPropertyToTableItem(definition.properties, childItem.id, property, definitions);
+      childItem.children = parseChildrenPropertyToTableItem(
+        definition.properties,
+        childItem.id,
+        property,
+        definitions,
+        options,
+      );
       result.children.push(childItem);
     }
     if (result.children.length === 0) {
@@ -128,6 +156,7 @@ function parseDefinedPropertyToTableItem(
       result.id,
       getActualProperties(propertyKey, actualProperties),
       definitions,
+      options,
     );
   }
 
@@ -157,6 +186,7 @@ function parseReferencePropertyToTableItem(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperties: any,
   definitions: CloudFormationSchema['definitions'] | undefined,
+  options: CreateResourceTableItemsOption,
 ): ResourceTableItem | undefined {
   // ReferenceProperty場合はdefinitionsがundefinedになりえないため。処理を中断する
   if (definitions === undefined) {
@@ -165,7 +195,7 @@ function parseReferencePropertyToTableItem(
 
   const definitionKey = property.$ref.replace('#/definitions/', '');
   const definition = definitions[definitionKey];
-  const convertedValue = convertValue(definition, getActualProperties(propertyKey, actualProperties));
+  const convertedValue = convertValue(definition, getActualProperties(propertyKey, actualProperties), options);
   const result: ResourceTableItem = {
     id: `${parentId}/${propertyKey}`,
     property: propertyKey,
@@ -182,6 +212,7 @@ function parseReferencePropertyToTableItem(
       result.id,
       getActualProperties(propertyKey, actualProperties),
       definitions,
+      options,
     );
   }
 
@@ -210,6 +241,7 @@ function parseChildrenPropertyToTableItem(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperties: any,
   definitions: CloudFormationSchema['definitions'] | undefined,
+  options: CreateResourceTableItemsOption,
 ): ResourceTableItem[] | undefined {
   const result: ResourceTableItem[] = [];
   for (const [definitionKey, definitionValue] of Object.entries(childrenProperties)) {
@@ -221,6 +253,7 @@ function parseChildrenPropertyToTableItem(
         definitionValue,
         actualProperties,
         definitions,
+        options,
       );
       if (childItem) {
         result.push(childItem);
@@ -235,6 +268,7 @@ function parseChildrenPropertyToTableItem(
       definitionValue,
       actualProperties,
       definitions,
+      options,
     );
     result.push(childItem);
   }
@@ -290,12 +324,14 @@ function isIntrinsicFunction(
  * 組込み関数の値を文字列化する
  * @param intrinsic 組込み関数
  * @param actualProperty 実際のテンプレートに定義されているプロパティ
+ * @param options 組み込み関数用のデータ（ParameterとResourceList）
  * @returns 文字列化されたプロパティの値
  */
 function convertIntrinsicFunctionValue(
   intrinsic: IntrinsicFunction,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
+  options: CreateResourceTableItemsOption,
 ): string {
   switch (intrinsic) {
     case 'Fn::Base64': {
@@ -341,7 +377,7 @@ function convertIntrinsicFunctionValue(
         // 文字列結合する要素の中にも組込み関数が含まれる場合があるので、再帰的に処理する
         const intrinsic = isIntrinsicFunction(value);
         if (intrinsic !== undefined) {
-          return convertIntrinsicFunctionValue(intrinsic, value);
+          return convertIntrinsicFunctionValue(intrinsic, value, options);
         }
         return value;
       });
@@ -371,13 +407,25 @@ function convertIntrinsicFunctionValue(
       // Refの値が組込み関数の場合は、再帰的に処理する
       const intrinsic = isIntrinsicFunction(value);
       if (intrinsic !== undefined) {
-        value = convertIntrinsicFunctionValue(intrinsic, value);
+        value = convertIntrinsicFunctionValue(intrinsic, value, options);
       }
 
       if (isPseudoProperty(value)) {
         // 疑似パラメータ：<疑似パラメータ>
         return `<${value}>`;
       }
+      console.log('Ref', value, options);
+
+      if (value in options.resources) {
+        // 論理ID：<Ref: 論理ID>
+        return `<Ref LogicalId: ${value}>`;
+      }
+
+      if (options.parameters.includes(value)) {
+        // パラメータ：<Ref: パラメータ>
+        return `<Ref Parameter: ${value}>`;
+      }
+
       // 疑似パラメータ以外：<Ref: 論理ID or Parameter>
       return `<Ref: ${value}>`;
     }
@@ -388,12 +436,14 @@ function convertIntrinsicFunctionValue(
  * propertyに応じた値を文字列化する
  * @param property プロパティ定義
  * @param actualProperty 実際のテンプレートに定義されているプロパティ
+ * @param options 組み込み関数用のデータ（ParameterとResourceList）
  * @returns 文字列化されたプロパティの値
  */
 function convertValue(
   property: DefinedProperty,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
+  options: CreateResourceTableItemsOption,
 ): { value: string | undefined } {
   if (actualProperty === undefined) {
     return {
@@ -405,7 +455,7 @@ function convertValue(
   const intrinsic = isIntrinsicFunction(actualProperty);
   if (intrinsic !== undefined) {
     return {
-      value: convertIntrinsicFunctionValue(intrinsic, actualProperty),
+      value: convertIntrinsicFunctionValue(intrinsic, actualProperty, options),
     };
   }
 
@@ -416,15 +466,24 @@ function convertValue(
     };
   }
 
-  // プロパティが配列かつ、値がプリミティブな場合
+  // プロパティが配列の場合
   if (Array.isArray(actualProperty)) {
     if (actualProperty.length !== 0) {
-      const firstItemType = typeof actualProperty[0];
-      if (firstItemType !== 'object' && firstItemType !== 'function') {
-        return {
-          value: `[ ${actualProperty.join(', ')} ]`,
-        };
-      }
+      const values = actualProperty.map((item) => {
+        const itemType = typeof item;
+
+        // 値がオブジェクトの場合
+        if (itemType === 'object') {
+          const intrinsic = isIntrinsicFunction(item);
+          if (intrinsic !== undefined) {
+            return convertIntrinsicFunctionValue(intrinsic, item, options);
+          }
+        }
+        return item;
+      });
+      return {
+        value: `[\n　${values.join('\n　')}\n]`,
+      };
     }
   }
 

@@ -6,10 +6,12 @@ import { createExpandedItems } from '../../../PropertyTable';
 import { ResourcePropertyTablePresentation } from './ResourcePropertyTable.presentation';
 import { getStackResourceProperties } from './lib/GetStackResourceProperties';
 import { getStackResourcePropertiesReasons } from './lib/GetStackResourcePropertiesReasons';
+import { loadParameterAndResourceList } from './lib/LoadParameterAndResourceList';
 import { updateStackMeta } from './lib/UpdateStackMeta';
 
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
+import type { LoadParameterAndResourceListResult } from './lib/LoadParameterAndResourceList';
 
 export type ResourcePropertyTableProps = {
   /**
@@ -46,9 +48,6 @@ export const ResourcePropertyTable = ({
   // 編集モードの状態を管理するためのステート
   const [isEdit, setIsEdit] = useState(false);
 
-  // CloudFormationのスキーマを管理するためのステート
-  const [schema, setSchema] = useState<CloudFormationSchema | undefined>(undefined);
-
   // ファイルに保存されている理由を管理するためのステート
   const [reasons, setReasons] = useState<Record<string, string>>({});
 
@@ -57,6 +56,12 @@ export const ResourcePropertyTable = ({
 
   // 選択した論理IDがもつプロパティを管理するためのステート
   const [properties, setProperties] = useState<ResourceTableItem[]>([]);
+
+  // 組み込み関数用のデータ（ParameterとResourceList）を管理するためのステート
+  const [parameterAndResourceList, setParameterAndResourceList] = useState<LoadParameterAndResourceListResult>({
+    parameters: [],
+    resources: {},
+  });
 
   useEffect(() => {
     Promise.all([
@@ -69,15 +74,17 @@ export const ResourcePropertyTable = ({
         stack_id: stackId,
         logical_id: selectedLogicalId,
       }),
-    ]).then(([schemaStr, properties, reasons]) => {
+      loadParameterAndResourceList({ stack_id: stackId }),
+    ]).then(([schemaStr, properties, reasons, parameterAndResourceList]) => {
       console.log('properties', properties);
       console.log('reasons', reasons);
+      console.log('parameterAndResourceList', parameterAndResourceList);
       const schemaParsed = JSON.parse(schemaStr) as CloudFormationSchema;
-      setSchema(schemaParsed);
-      const resourceTableItems = createResourceTableItems(schemaParsed, properties);
+      const resourceTableItems = createResourceTableItems(schemaParsed, properties, parameterAndResourceList);
       setProperties(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
       setReasons(reasons);
+      setParameterAndResourceList(parameterAndResourceList);
       setIsEdit(false);
     });
   }, [stackId, serviceName, resourceName, selectedLogicalId]);
@@ -91,11 +98,15 @@ export const ResourcePropertyTable = ({
       reasons: editingReasons,
     });
 
-    getStackResourceProperties({
-      stack_id: stackId,
-      logical_id: selectedLogicalId as string,
-    }).then((properties) => {
-      const resourceTableItems = createResourceTableItems(schema as CloudFormationSchema, properties);
+    await Promise.all([
+      getCloudFormationSchema(serviceName, resourceName),
+      getStackResourceProperties({
+        stack_id: stackId,
+        logical_id: selectedLogicalId as string,
+      }),
+    ]).then(([schemaStr, properties]) => {
+      const schemaParsed = JSON.parse(schemaStr) as CloudFormationSchema;
+      const resourceTableItems = createResourceTableItems(schemaParsed, properties, parameterAndResourceList);
       setProperties(resourceTableItems);
     });
   };
