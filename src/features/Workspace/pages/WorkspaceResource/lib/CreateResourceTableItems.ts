@@ -1,3 +1,4 @@
+import { hrefBuilder } from '../../../components';
 import {
   intrinsicFunctions,
   isJsonSchemaPrimitiveType,
@@ -26,7 +27,7 @@ export type ResourceTableItem = {
 export type ResourceTableItemValue =
   | {
       type: 'value';
-      value: string | undefined;
+      value: string;
     }
   | (OverviewTabAttr & {
       type: 'overview';
@@ -38,12 +39,14 @@ export type ResourceTableItemValue =
     });
 
 export type CreateResourceTableItemsOption = {
+  stackId: string;
+  stackName: string;
   parameters: string[];
   resources: Record<
     string,
     {
       serviceName: string;
-      serviceType: string;
+      recourseType: string;
     }
   >;
 };
@@ -51,6 +54,8 @@ export type CreateResourceTableItemsOption = {
 const DefaultOption: CreateResourceTableItemsOption = {
   parameters: [],
   resources: {},
+  stackId: '',
+  stackName: '',
 };
 
 /**
@@ -123,7 +128,7 @@ function parseDefinedPropertyToTableItem(
     property: propertyKey,
     type: convertType(property),
     description: property.description || '',
-    value: convertedValue.value,
+    value: convertedValue,
   };
 
   // プロパティが配列かつ、itemsが定義されている場合は、子要素を取得する
@@ -145,7 +150,10 @@ function parseDefinedPropertyToTableItem(
         property: index,
         type: 'object',
         description: '',
-        value: '',
+        value: {
+          type: 'value',
+          value: '',
+        },
       };
       childItem.children = parseChildrenPropertyToTableItem(
         definition.properties,
@@ -175,7 +183,10 @@ function parseDefinedPropertyToTableItem(
   // 子要素がある場合はvalueを空文字にする
   if (result.children !== undefined) {
     if (result.children.length !== 0) {
-      result.value = '';
+      result.value = {
+        type: 'value',
+        value: '',
+      };
     }
   }
   return result;
@@ -212,7 +223,7 @@ function parseReferencePropertyToTableItem(
     property: propertyKey,
     type: convertType(definition),
     description: 'description' in property ? property.description || '' : '',
-    value: convertedValue.value,
+    value: convertedValue,
   };
 
   // プロパティがオブジェクトの場合は、子要素を取得する
@@ -229,7 +240,10 @@ function parseReferencePropertyToTableItem(
   // 子要素がある場合はvalueを空文字にする
   if (result.children !== undefined) {
     if (result.children.length !== 0) {
-      result.value = '';
+      result.value = {
+        type: 'value',
+        value: '',
+      };
     }
   }
 
@@ -341,43 +355,79 @@ function convertIntrinsicFunctionValue(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
   options: CreateResourceTableItemsOption,
-): string {
+): ResourceTableItem['value'] {
   switch (intrinsic) {
     case 'Fn::Base64': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::Cidr': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::And': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::Equals': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::If': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::Not': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::Or': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::FindInMap': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::ForEach': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::GetAtt': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::GetAZs': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::ImportValue': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::Join': {
       const delimiter = actualProperty['Fn::Join'][0];
@@ -390,25 +440,46 @@ function convertIntrinsicFunctionValue(
         }
         return value;
       });
-      return pieces.join(delimiter);
+      return {
+        type: 'value',
+        value: pieces.join(delimiter),
+      };
     }
     case 'Fn::Length': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::Select': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::Split': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::Sub': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::ToJsonString': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Fn::Transform': {
-      return JSON.stringify(actualProperty, undefined, '　');
+      return {
+        type: 'value',
+        value: JSON.stringify(actualProperty, undefined, '　'),
+      };
     }
     case 'Ref': {
       let value = actualProperty.Ref;
@@ -421,21 +492,55 @@ function convertIntrinsicFunctionValue(
 
       if (isPseudoProperty(value)) {
         // 疑似パラメータ：<疑似パラメータ>
-        return `<${value}>`;
+        return {
+          type: 'value',
+          value: `<${value}>`,
+        };
       }
 
       if (value in options.resources) {
         // 論理ID：<Ref: 論理ID>
-        return `<Ref LogicalId: ${value}>`;
+        const tabId = hrefBuilder({
+          type: 'resource',
+          stackId: options.stackId,
+          sectionGroupName: options.stackName,
+          serviceName: options.resources[value].serviceName,
+          resourceType: options.resources[value].recourseType,
+        });
+        return {
+          type: 'resource',
+          tabId: tabId,
+          stackId: options.stackId,
+          stackName: options.stackName,
+          serviceName: options.resources[value].serviceName,
+          resourceName: options.resources[value].recourseType,
+          selectedLogicalId: value,
+          value: `<Ref LogicalId: ${value}>`,
+        };
       }
 
       if (options.parameters.includes(value)) {
         // パラメータ：<Ref: パラメータ>
-        return `<Ref Parameter: ${value}>`;
+        const tabId = hrefBuilder({
+          type: 'overview',
+          stackId: options.stackId,
+          sectionGroupName: options.stackName,
+        });
+        return {
+          type: 'overview',
+          tabId: tabId,
+          stackId: options.stackId,
+          stackName: options.stackName,
+          description: '',
+          value: `<Ref: ${value}>`,
+        };
       }
 
       // 疑似パラメータ以外：<Ref: 論理ID or Parameter>
-      return `<Ref: ${value}>`;
+      return {
+        type: 'value',
+        value: `<Ref: ${value}>`,
+      };
     }
   }
 }
@@ -452,24 +557,21 @@ function convertValue(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
   options: CreateResourceTableItemsOption,
-): { value: React.ReactNode | undefined } {
+): ResourceTableItem['value'] {
   if (actualProperty === undefined) {
-    return {
-      value: undefined,
-    };
+    return undefined;
   }
 
   // プロパティが組込み関数の場合
   const intrinsic = isIntrinsicFunction(actualProperty);
   if (intrinsic !== undefined) {
-    return {
-      value: convertIntrinsicFunctionValue(intrinsic, actualProperty, options),
-    };
+    return convertIntrinsicFunctionValue(intrinsic, actualProperty, options);
   }
 
   // プロパティがプリミティブな型の場合はそのまま返す
   if (isJsonSchemaPrimitiveType(property.type)) {
     return {
+      type: 'value',
       value: actualProperty,
     };
   }
@@ -484,12 +586,13 @@ function convertValue(
         if (itemType === 'object') {
           const intrinsic = isIntrinsicFunction(item);
           if (intrinsic !== undefined) {
-            return convertIntrinsicFunctionValue(intrinsic, item, options);
+            return convertIntrinsicFunctionValue(intrinsic, item, options)?.value;
           }
         }
         return item;
       });
       return {
+        type: 'value',
         value: `[\n　${values.join('\n　')}\n]`,
       };
     }
@@ -497,6 +600,7 @@ function convertValue(
 
   // これから以外の場合はJSON.stringifyで文字列化する
   return {
+    type: 'value',
     value: JSON.stringify(actualProperty, undefined, '　'),
   };
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { useWorkspaceResourceContext } from '../../../../contexts';
 import { PropertyTablePresentation } from './PropertyTable.presentation';
 
 import type { ResourceTableItem } from '../../lib/CreateResourceTableItems';
@@ -47,6 +48,7 @@ export const PropertyTable = ({
       { id: 'reason', visible: true },
     ],
   });
+  const { addResourceTab } = useWorkspaceResourceContext();
 
   const onChangeReason: PropertyTablePresentationProps['onChangeReason'] =
     (item) =>
@@ -65,6 +67,7 @@ export const PropertyTable = ({
       header={header}
       editingReasons={editingReasons}
       onChangeReason={onChangeReason}
+      onClickValueLink={(item) => () => addResourceTab(item)}
       expandableRows={{
         getItemChildren: (item) => item.children ?? [],
         isItemExpandable: (item) => Boolean(item.children),

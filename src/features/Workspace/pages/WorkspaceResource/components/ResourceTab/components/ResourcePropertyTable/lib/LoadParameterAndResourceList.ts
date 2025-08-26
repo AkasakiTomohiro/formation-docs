@@ -11,7 +11,7 @@ export type LoadParameterAndResourceListResult = {
     string,
     {
       serviceName: string;
-      serviceType: string;
+      recourseType: string;
     }
   >;
 };

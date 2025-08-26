@@ -20,6 +20,11 @@ export type ResourcePropertyTableProps = {
   stackId: string;
 
   /**
+   * スタック名
+   */
+  stackName: string;
+
+  /**
    * サービス名
    */
   serviceName: string;
@@ -37,6 +42,7 @@ export type ResourcePropertyTableProps = {
 
 export const ResourcePropertyTable = ({
   stackId,
+  stackName,
   serviceName,
   resourceName,
   selectedLogicalId,
@@ -80,14 +86,18 @@ export const ResourcePropertyTable = ({
       console.log('reasons', reasons);
       console.log('parameterAndResourceList', parameterAndResourceList);
       const schemaParsed = JSON.parse(schemaStr) as CloudFormationSchema;
-      const resourceTableItems = createResourceTableItems(schemaParsed, properties, parameterAndResourceList);
+      const resourceTableItems = createResourceTableItems(schemaParsed, properties, {
+        ...parameterAndResourceList,
+        stackId,
+        stackName,
+      });
       setProperties(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
       setReasons(reasons);
       setParameterAndResourceList(parameterAndResourceList);
       setIsEdit(false);
     });
-  }, [stackId, serviceName, resourceName, selectedLogicalId]);
+  }, [stackId, stackName, serviceName, resourceName, selectedLogicalId]);
 
   const onSave = async () => {
     setReasons(editingReasons);
@@ -106,7 +116,11 @@ export const ResourcePropertyTable = ({
       }),
     ]).then(([schemaStr, properties]) => {
       const schemaParsed = JSON.parse(schemaStr) as CloudFormationSchema;
-      const resourceTableItems = createResourceTableItems(schemaParsed, properties, parameterAndResourceList);
+      const resourceTableItems = createResourceTableItems(schemaParsed, properties, {
+        ...parameterAndResourceList,
+        stackId,
+        stackName,
+      });
       setProperties(resourceTableItems);
     });
   };

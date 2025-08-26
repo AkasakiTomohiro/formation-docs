@@ -3,6 +3,7 @@ import { useLocation } from 'react-router';
 
 import { Tabs } from '@cloudscape-design/components';
 
+import { hrefBuilder } from '../../components';
 import { useWorkspaceResourceContext } from '../../contexts/WorkspaceResourceContext';
 import {
   ManualOverviewTab,
@@ -15,7 +16,6 @@ import {
 import { ManualResourceTab, buildManualResourceTabName } from './components/ManualResourceTab';
 
 import type { WorkspaceTabInfo } from '../../contexts';
-
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
   const { resourceTabs, addResourceTab, deleteResourceTab, activeTabId, setActiveTabId } =
@@ -27,9 +27,14 @@ export const WorkspaceResource = (): JSX.Element => {
       const stackId = location.state.selectedStackId;
       const stackName = location.state.selectedStackName;
       if (stackId && stackName) {
+        const tabId = hrefBuilder({
+          type: 'overview',
+          stackId: stackId,
+          sectionGroupName: stackName,
+        });
         const newTab: WorkspaceTabInfo = {
           type: 'overview',
-          tabId: `${stackId}/${stackName}`,
+          tabId,
           stackId,
           stackName,
           description: '',

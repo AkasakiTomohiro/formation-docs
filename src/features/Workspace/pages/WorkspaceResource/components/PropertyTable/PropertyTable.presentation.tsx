@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   CollectionPreferences,
+  Link,
   SpaceBetween,
   StatusIndicator,
   Table,
@@ -9,9 +10,12 @@ import {
   Textarea,
 } from '@cloudscape-design/components';
 
+import type { WorkspaceTabInfo } from '../../../../contexts';
+
 import type { ResourceTableItem } from '../../lib/CreateResourceTableItems';
 
-import type { CollectionPreferencesProps, TableProps, TextareaProps } from '@cloudscape-design/components';
+import type { CollectionPreferencesProps, LinkProps, TableProps, TextareaProps } from '@cloudscape-design/components';
+
 export type PropertyTablePresentationProps = {
   /**
    * リソースのプロパティ一覧
@@ -37,6 +41,11 @@ export type PropertyTablePresentationProps = {
    * Reasonsのテキストエリアの変更イベントハンドラ
    */
   onChangeReason: (item: ResourceTableItem) => TextareaProps['onChange'];
+
+  /**
+   * Valueがリンクの場合のクリックイベントハンドラ
+   */
+  onClickValueLink: (item: WorkspaceTabInfo) => LinkProps['onClick'];
 
   /**
    * ネストされた行の開閉関連イベント
@@ -67,6 +76,7 @@ export const PropertyTablePresentation = ({
   reasons,
   editingReasons,
   onChangeReason,
+  onClickValueLink,
   preferences,
   onConfirmPreferences,
   header,
@@ -111,7 +121,17 @@ export const PropertyTablePresentation = ({
         {
           id: 'value',
           header: 'Value',
-          cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.value === undefined ? '' : `${e.value}`}</div>,
+          cell: (e) => {
+            const tableItemValue = e.value;
+            if (tableItemValue === undefined) {
+              return <div style={{ whiteSpace: 'pre-line' }} />;
+            }
+            if (tableItemValue.type === 'value') {
+              return <div style={{ whiteSpace: 'pre-line' }}>{tableItemValue.value}</div>;
+            }
+            const { value, ...other } = tableItemValue;
+            return <Link onClick={onClickValueLink(other)}>{value}</Link>;
+          },
           width: 300,
           minWidth: 100,
         },
