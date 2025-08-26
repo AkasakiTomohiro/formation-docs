@@ -12,10 +12,7 @@ import type {
   StackParametersDisplayProps,
 } from './StackDisplayContent.presentation';
 
-export type StackContentProps = Pick<
-  StackDisplayContentPresentationProps,
-  'flashbarItems' | 'stackName' | 'stackDescription'
-> & {
+export type StackContentProps = Pick<StackDisplayContentPresentationProps, 'stackName' | 'stackDescription'> & {
   /**
    * スタックのタブID
    */
@@ -30,7 +27,6 @@ export type StackContentProps = Pick<
 export const StackDisplayContent = ({
   tabId,
   stackId,
-  flashbarItems,
   stackName,
   stackDescription,
 }: StackContentProps): JSX.Element => {
@@ -73,7 +69,6 @@ export const StackDisplayContent = ({
       stackDescription={stackDescription}
       stackParameters={stackParameters}
       stackOutputs={stackOutputs}
-      flashbarItems={flashbarItems}
       onClickEdit={() => {
         modifyResourceTab(tabId, (originTab: OverviewTabInfo) => {
           return {

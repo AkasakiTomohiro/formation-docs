@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 
-import type { StackInfo } from '../features/Workspace/lib/StackInfo';
-import type { CommandResult } from '../lib/CommandResult';
+import type { CommandResult } from '../../../../../../../lib/CommandResult';
+import type { StackInfo } from '../../../../../lib/StackInfo';
 
 export async function loadStack(stackName: string): Promise<StackInfo> {
   const result = await invoke<CommandResult<StackInfo>>('load_stack_command', {

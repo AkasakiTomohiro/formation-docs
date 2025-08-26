@@ -26,12 +26,12 @@ export type ResourceIdTableProps = {
   resourceName: string;
 
   /**
-   * 選択されている論理ID
+   * 選択されているリソースID
    */
-  selectedLogicalId: string | undefined;
+  selectedResourceId: string | undefined;
 };
 
-export const ResourceIdTable = ({ tabId, serviceName, resourceName, selectedLogicalId }: ResourceIdTableProps) => {
+export const ResourceIdTable = ({ tabId, serviceName, resourceName, selectedResourceId }: ResourceIdTableProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(true);
   const [resourceList, setResourceList] = useState<ManualManagementResource[]>([]);
@@ -64,7 +64,15 @@ export const ResourceIdTable = ({ tabId, serviceName, resourceName, selectedLogi
       tabId={tabId}
       isOpen={isOpen}
       isLoading={isLoading}
-      selectedResourceId={selectedLogicalId}
+      selectedResourceId={selectedResourceId}
+      onClickExpand={() => {
+        modifyResourceTab(tabId, (originTab: ManualResourceTabInfo) => {
+          return {
+            ...originTab,
+            selectedResourceId: undefined,
+          };
+        });
+      }}
       resourceList={resourceList.filter((item) => item.resourceId.toLowerCase().includes(filteringText.toLowerCase()))}
       filteringText={filteringText}
       onChangeFilteringText={({ detail }) => setFilteringText(detail.filteringText)}

@@ -1,25 +1,24 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router';
-import { v4 as uuidV4 } from 'uuid';
+import { useNavigate, useRouteLoaderData } from 'react-router';
 
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import { open } from '@tauri-apps/plugin-dialog';
 
+import { useFlashbarContext } from '../../../../contexts/FlashbarContext';
 import { useWorkspaceResourceContext } from '../../contexts';
 import { WorkspaceHomePresentation } from './WorkspaceHome.presentation';
 import { deleteStack } from './lib/DeleteStack';
 import { importStack } from './lib/ImportStack';
 import { loadStacks } from './lib/LoadStacks';
 
-import type { FlashbarProps } from '@cloudscape-design/components';
-import type { WorkspaceLayoutContext } from '../../Layout';
+import type { WorkspaceLayoutLoaderData } from '../../Loader';
 import type { StackInfo } from '../../lib';
 
 export const WorkspaceHome = (): JSX.Element => {
   const navigate = useNavigate();
-  const workspace = useOutletContext<WorkspaceLayoutContext>();
+  const workspace = useRouteLoaderData('workspace') as WorkspaceLayoutLoaderData;
   const { loadSideMenu } = useWorkspaceResourceContext();
-  const [flashbarItems, setFlashbarItems] = useState<FlashbarProps.MessageDefinition[]>([]);
+  const { addFlashbarItem } = useFlashbarContext();
   const [selectedItems, setSelectedItems] = useState<StackInfo[]>([]);
   const [state, setState] = useState<'loading' | 'loaded'>('loading');
   const [stacks, setStacks] = useState<StackInfo[]>([]);
@@ -58,43 +57,23 @@ export const WorkspaceHome = (): JSX.Element => {
           await loadSideMenu();
         })
         .catch((error) => {
-          const id = uuidV4();
-          setFlashbarItems([
-            ...flashbarItems,
-            {
-              type: 'error',
-              header: '新規スタックのインポートに失敗しました',
-              content: typeof error === 'string' ? error : undefined,
-              dismissible: true,
-              dismissLabel: 'close',
-              id: id,
-              onDismiss: () => {
-                setFlashbarItems((items) => items.filter((e) => e.id !== id));
-              },
-            },
-          ]);
+          addFlashbarItem({
+            type: 'error',
+            header: '新規スタックのインポートに失敗しました',
+            content: typeof error === 'string' ? error : undefined,
+          });
         });
     }
-  }, [workspace, flashbarItems, loadSideMenu, loadStacksWrap]);
+  }, [workspace, loadSideMenu, loadStacksWrap, addFlashbarItem]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     loadStacksWrap().catch((error) => {
-      const id = uuidV4();
-      setFlashbarItems([
-        ...flashbarItems,
-        {
-          type: 'error',
-          header: 'スタックの読み込みに失敗しました',
-          content: typeof error === 'string' ? error : undefined,
-          dismissible: true,
-          dismissLabel: 'close',
-          id: id,
-          onDismiss: () => {
-            setFlashbarItems((items) => items.filter((e) => e.id !== id));
-          },
-        },
-      ]);
+      addFlashbarItem({
+        type: 'error',
+        header: 'スタックの読み込みに失敗しました',
+        content: typeof error === 'string' ? error : undefined,
+      });
     });
   }, []);
 
@@ -126,7 +105,6 @@ export const WorkspaceHome = (): JSX.Element => {
       onClickImportStack={importStackWrap}
       onClickDeleteStack={onClickDeleteStack}
       onClickWorkspaceEdit={() => navigate(`/workspaces/${workspace.id}/edit`)}
-      flashbarItems={flashbarItems}
     />
   );
 };
