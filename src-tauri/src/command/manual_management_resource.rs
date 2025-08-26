@@ -315,10 +315,11 @@ async fn update_manual_resource_meta(
     return Ok(());
 }
 
-async fn update_manual_resource_properties(
+async fn update_manual_resource_properties_and_description(
     workspace_directory: &str,
     resource_id: &str,
     properties: String,
+    description: &str,
 ) -> Result<(), ManualManagementResourceError> {
     let mut manual_management_resources =
         get_manual_management_resources(workspace_directory).await?;
@@ -341,6 +342,7 @@ async fn update_manual_resource_properties(
         .into_iter()
         .collect();
     resource.properties = parse_properties;
+    resource.description = description.to_string();
     save_manual_management_resources(workspace_directory, &manual_management_resources).await?;
     return Ok(());
 }
@@ -485,10 +487,11 @@ pub async fn update_manual_resource_meta_command(
 }
 
 #[tauri::command(rename_all = "snake_case")]
-pub async fn update_manual_resource_properties_command(
+pub async fn update_manual_resource_properties_and_description_command(
     window: tauri::Window,
     resource_id: &str,
     properties: String,
+    description: &str,
 ) -> Result<CommandResult<()>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
@@ -496,10 +499,11 @@ pub async fn update_manual_resource_properties_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match update_manual_resource_properties(
+    return match update_manual_resource_properties_and_description(
         window_state.workspace_directory.as_str(),
         resource_id,
         properties,
+        description,
     )
     .await
     {

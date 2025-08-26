@@ -8,7 +8,7 @@ import { EditorContentLayoutPresentation } from './EditorContentLayout.presentat
 import { getManualManagementResourceProperties } from './lib/GetManualManagementResourceProperties';
 import { getManualManagementResourceReasons } from './lib/GetManualManagementResourceReasons';
 import { updateManualResourceMeta } from './lib/UpdateManualResourceMeta';
-import { updateManualResourceProperties } from './lib/UpdateManualResourceProperties';
+import { updateManualResourcePropertiesAndDescription } from './lib/UpdateManualResourceProperties';
 
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
@@ -18,7 +18,7 @@ export type EditorContentLayoutProps = {
   selectedResourceId: string;
   serviceName: string;
   resourceName: string;
-  description: string;
+  description: string; // TODO: このdescriptionは削除
 };
 
 export const EditorContentLayout = ({
@@ -39,10 +39,12 @@ export const EditorContentLayout = ({
   const [editingValues, setEditingValues] = useState<string>('');
   const { addFlashbarItem } = useFlashbarContext();
   const [isValid, setIsValid] = useState(true);
-  const [resourceDescription, setResourceDescription] = useState<string>(description);
+  const [resourceDescription, setResourceDescription] = useState<string>('');
+  const [editingResourceDescription, setEditingResourceDescription] = useState<string>('');
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
+    // TODO: descriptionの取得処理を追加
     Promise.all([
       getCloudFormationSchema(serviceName, resourceName).then((schemaStr) => JSON.parse(schemaStr)),
       getManualManagementResourceProperties({
@@ -61,6 +63,7 @@ export const EditorContentLayout = ({
       setReasons(reasons);
       setValues(JSON.stringify(properties, undefined, 2));
       setEditingReasons(reasons);
+      setResourceDescription(description);
       setIsEdit(false);
     });
   }, [selectedResourceId]);
@@ -68,17 +71,18 @@ export const EditorContentLayout = ({
   const onEdit = () => {
     setEditingReasons(reasons);
     setEditingValues(values);
+    setEditingResourceDescription(resourceDescription);
     setIsEdit(!isEdit);
   };
 
   const onCancel = () => {
     setEditingReasons(reasons);
+    setEditingResourceDescription(resourceDescription);
+    setMode('reason');
     setIsEdit(!isEdit);
   };
 
   const onSave = async () => {
-    // TODO: descriptionの更新処理を追加
-    // TODO: description編集画面で保存処理後、Reasonタブに切り替える処理を追加
     if (!isValid) {
       addFlashbarItem({
         type: 'error',
@@ -88,14 +92,17 @@ export const EditorContentLayout = ({
       return;
     }
     setReasons(editingReasons);
+    setResourceDescription(editingResourceDescription);
+    setMode('reason');
     setIsEdit(!isEdit);
     updateManualResourceMeta({
       resource_id: selectedResourceId as string,
       reasons: editingReasons,
     });
-    updateManualResourceProperties({
+    updateManualResourcePropertiesAndDescription({
       resource_id: selectedResourceId as string,
       properties: editingValues,
+      description: editingResourceDescription,
     });
     const resourceTableItems = createResourceTableItems(schema as CloudFormationSchema, JSON.parse(editingValues));
     setProperties(resourceTableItems);
@@ -106,14 +113,14 @@ export const EditorContentLayout = ({
   return (
     <EditorContentLayoutPresentation
       selectedResourceId={selectedResourceId}
-      description={resourceDescription}
+      description={editingResourceDescription}
       isEdit={isEdit}
       viewMode={mode}
       onClickEdit={onEdit}
       onClickCancel={onCancel}
       onClickSave={onSave}
       resourceEditContentProps={{
-        setDescription: setResourceDescription,
+        setDescription: setEditingResourceDescription,
       }}
       propertyTableProps={{
         properties: properties,

@@ -83,7 +83,7 @@ export const TableHeader = ({
           )}
         </SpaceBetween>
       }
-      description={description}
+      description={isEdit ? undefined : description}
     >
       {selectedResourceId}
     </Header>
