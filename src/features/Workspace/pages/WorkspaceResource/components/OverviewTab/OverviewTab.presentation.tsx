@@ -23,21 +23,21 @@ export function buildOverviewTabName({ stackName }: BuildOverviewTabNameProps): 
 }
 
 export const OverviewTabPresentation = ({
-  isEdit,
   tabId,
   stackId,
   stackName,
   description,
   flashbarItems,
   setFlashbarItems,
+  editingValues,
 }: OverviewTabPresentationProps): JSX.Element => {
-  if (isEdit) {
+  if (editingValues) {
     return (
       <StackEditContent
         tabId={tabId}
         stackId={stackId}
-        stackName={stackName}
-        stackDescription={description}
+        stackName={editingValues.stackName}
+        stackDescription={editingValues.stackDescription}
         flashbarItems={flashbarItems}
         setFlashbarItems={setFlashbarItems}
       />

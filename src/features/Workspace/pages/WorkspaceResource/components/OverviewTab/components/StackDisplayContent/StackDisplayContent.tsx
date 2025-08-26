@@ -78,7 +78,10 @@ export const StackDisplayContent = ({
         modifyResourceTab(tabId, (originTab: OverviewTabInfo) => {
           return {
             ...originTab,
-            isEdit: true,
+            editingValues: {
+              stackName,
+              stackDescription,
+            },
           };
         });
       }}

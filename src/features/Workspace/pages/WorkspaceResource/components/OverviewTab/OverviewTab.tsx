@@ -39,13 +39,13 @@ export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
 
   return (
     <OverviewTabPresentation
-      isEdit={props.isEdit}
       tabId={props.tabId}
       stackId={props.stackId}
       stackName={props.stackName}
       description={props.description}
       flashbarItems={flashbarItems}
       setFlashbarItems={setFlashbarItems}
+      editingValues={props.editingValues}
     />
   );
 };
