@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { Duration, Stack } from 'aws-cdk-lib';
+import { Duration, Fn, Stack } from 'aws-cdk-lib';
 import { Vpc } from 'aws-cdk-lib/aws-ec2';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Asset } from 'aws-cdk-lib/aws-s3-assets';
@@ -46,6 +46,8 @@ export class SampleFuncStack extends Stack {
       timeout: Duration.seconds(10),
       loggingFormat: lambda.LoggingFormat.JSON,
       systemLogLevelV2: lambda.SystemLogLevel.INFO,
+      functionName: Fn.importValue('SampleAppStack:FunctionName'),
+      deadLetterQueue: props.sampleAppStack.queue,
     });
   }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFormationSchema';
+import { useWorkspaceResourceContext } from '../../../../../../contexts';
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
 import { createExpandedItems } from '../../../PropertyTable';
 import { ResourcePropertyTablePresentation } from './ResourcePropertyTable.presentation';
@@ -9,6 +10,7 @@ import { getStackResourcePropertiesReasons } from './lib/GetStackResourcePropert
 import { loadParameterAndResourceList } from './lib/LoadParameterAndResourceList';
 import { updateStackMeta } from './lib/UpdateStackMeta';
 
+import type { TemplateSummary } from '../../../../../../contexts/lib/LoadTemplateSummary';
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
 import type { LoadParameterAndResourceListResult } from './lib/LoadParameterAndResourceList';
@@ -69,6 +71,8 @@ export const ResourcePropertyTable = ({
     resources: {},
   });
 
+  const { sideMenu, allStackOutputs } = useWorkspaceResourceContext();
+
   useEffect(() => {
     Promise.all([
       getCloudFormationSchema(serviceName, resourceName),
@@ -90,6 +94,7 @@ export const ResourcePropertyTable = ({
         ...parameterAndResourceList,
         stackId,
         stackName,
+        externalResources: createExternalResources(allStackOutputs, sideMenu),
       });
       setProperties(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
@@ -97,7 +102,7 @@ export const ResourcePropertyTable = ({
       setParameterAndResourceList(parameterAndResourceList);
       setIsEdit(false);
     });
-  }, [stackId, stackName, serviceName, resourceName, selectedLogicalId]);
+  }, [stackId, stackName, serviceName, resourceName, selectedLogicalId, allStackOutputs, sideMenu]);
 
   const onSave = async () => {
     setReasons(editingReasons);
@@ -120,6 +125,7 @@ export const ResourcePropertyTable = ({
         ...parameterAndResourceList,
         stackId,
         stackName,
+        externalResources: createExternalResources(allStackOutputs, sideMenu),
       });
       setProperties(resourceTableItems);
     });
@@ -150,4 +156,22 @@ export const ResourcePropertyTable = ({
       setEditingReasons={setEditingReasons}
     />
   );
+};
+
+/**
+ * スタックのOutputsから外部リソース情報を作成する
+ * @param allStackOutputs 全スタックのOutputs
+ * @param sideMenu サイドメニュー
+ * @returns externalResources
+ */
+const createExternalResources = (
+  allStackOutputs: Record<string, string>,
+  sideMenu: TemplateSummary[],
+): Record<string, { stackId: string; stackName: string }> => {
+  const externalResources: Record<string, { stackId: string; stackName: string }> = {};
+  for (const [key, stackId] of Object.entries(allStackOutputs)) {
+    const stackName = sideMenu.find((item) => item.id === stackId)?.sectionGroupName ?? '';
+    externalResources[key] = { stackId, stackName };
+  }
+  return externalResources;
 };

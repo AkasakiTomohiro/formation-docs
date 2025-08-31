@@ -515,6 +515,27 @@ async fn get_stack_outputs(
     return Ok(result);
 }
 
+/// ワークスペース内の全スタックのOutputsを取得する
+///
+/// - `workspace_directory` - ワークスペースのディレクトリパス
+async fn get_all_stack_outputs(
+    workspace_directory: &str,
+) -> Result<HashMap<String, String>, StackError> {
+    let workspace = load_workspace(workspace_directory).await?;
+    // {Outputsのexport_name: スタックID}の形で返す
+    let mut result: HashMap<String, String> = HashMap::new();
+    for (stack_id, _) in workspace.stacks.iter() {
+        let outputs = get_stack_outputs(workspace_directory, stack_id).await?;
+        for output in outputs.iter().filter(|o| o.export_name.is_some()) {
+            result.insert(
+                output.export_name.as_ref().unwrap().to_string(),
+                stack_id.to_string(),
+            );
+        }
+    }
+    return Ok(result);
+}
+
 async fn update_stack_meta(
     workspace_directory: &str,
     stack_id: &str,
@@ -807,6 +828,22 @@ pub async fn get_stack_outputs_command(
     };
     return match get_stack_outputs(window_state.workspace_directory.as_str(), stack_id).await {
         Ok(parameters) => Ok(CommandResult::success(parameters)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_all_stack_outputs_command(
+    window: tauri::Window,
+) -> Result<CommandResult<HashMap<String, String>>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match get_all_stack_outputs(window_state.workspace_directory.as_str()).await {
+        Ok(outputs) => Ok(CommandResult::success(outputs)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }

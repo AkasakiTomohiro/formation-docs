@@ -53,11 +53,13 @@ export type CreateResourceTableItemsOption = {
       recourseType: string;
     }
   >;
+  externalResources: Record<string, { stackId: string; stackName: string }>;
 };
 
 const DefaultOption: CreateResourceTableItemsOption = {
   parameters: [],
   resources: {},
+  externalResources: {},
   stackId: '',
   stackName: '',
 };
@@ -450,6 +452,25 @@ function convertIntrinsicFunctionValue(
       };
     }
     case 'Fn::ImportValue': {
+      const value = actualProperty['Fn::ImportValue'];
+
+      if (value in options.externalResources) {
+        // <Fn::ImportValue: ExportName>
+        const tabId = hrefBuilder({
+          type: 'overview',
+          stackId: options.externalResources[value].stackId,
+          sectionGroupName: options.externalResources[value].stackName,
+        });
+        return {
+          type: 'overview',
+          tabId: tabId,
+          stackId: options.externalResources[value].stackId,
+          stackName: options.externalResources[value].stackName,
+          description: '',
+          value: `<Fn::ImportValue: ${value}>`,
+        };
+      }
+
       return {
         type: 'value',
         value: JSON.stringify(actualProperty, undefined, '　'),

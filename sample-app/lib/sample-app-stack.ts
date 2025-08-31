@@ -1,4 +1,4 @@
-import { CfnParameter, Duration, Stack } from 'aws-cdk-lib';
+import { CfnOutput, CfnParameter, Duration, Stack } from 'aws-cdk-lib';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
@@ -32,6 +32,11 @@ export class SampleAppStack extends Stack {
 
     new s3.Bucket(this, 'SampleBucket', {
       bucketName: parameter.valueAsString,
+    });
+
+    new CfnOutput(this, 'FuncName', {
+      value: 'FuncName',
+      exportName: 'SampleAppStack:FunctionName',
     });
   }
 }
