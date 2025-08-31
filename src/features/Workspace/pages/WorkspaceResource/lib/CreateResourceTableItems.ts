@@ -36,7 +36,11 @@ export type ResourceTableItemValue =
   | (ResourceTabAttr & {
       type: 'resource';
       value: string;
-    });
+    })
+  | {
+      type: 'array';
+      value: Extract<ResourceTableItemValue, { type: 'resource' | 'overview' | 'value' }>[];
+    };
 
 export type CreateResourceTableItemsOption = {
   stackId: string;
@@ -355,7 +359,7 @@ function convertIntrinsicFunctionValue(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
   options: CreateResourceTableItemsOption,
-): ResourceTableItem['value'] {
+): NonNullable<Exclude<ResourceTableItem['value'], { type: 'array' }>> {
   switch (intrinsic) {
     case 'Fn::Base64': {
       return {
@@ -586,14 +590,17 @@ function convertValue(
         if (itemType === 'object') {
           const intrinsic = isIntrinsicFunction(item);
           if (intrinsic !== undefined) {
-            return convertIntrinsicFunctionValue(intrinsic, item, options)?.value;
+            return convertIntrinsicFunctionValue(intrinsic, item, options);
           }
         }
-        return item;
+        return {
+          type: 'value' as const,
+          value: JSON.stringify(item, undefined, '　'),
+        };
       });
       return {
-        type: 'value',
-        value: `[\n　${values.join('\n　')}\n]`,
+        type: 'array',
+        value: values,
       };
     }
   }

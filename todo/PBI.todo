@@ -47,10 +47,10 @@
                 ✔ Fn::Sub @done(25-07-03 21:14)
                 ✔ Fn::ToJsonString @done(25-07-03 21:14)
                 ✔ Fn::Transform @done(25-07-03 21:14)
-                ☐ Ref関数を利用した値の表示: 文字列だった場合のみリンクにする（組み込み関数の場合は何もしない）
+                ✔ Ref関数を利用した値の表示: 文字列だった場合のみリンクにする（組み込み関数の場合は何もしない） @done(25-08-31 14:52)
                     ✔ Parameter: そのスタックのOverviewTabを表示 @done(25-08-26 22:52)
                     ✔ 論理ID(リソースタイプごとに参照できるものが異なり、JSONなどで機械的に参照可能な形で公開されていないためサポート方式は未定。) : ResourceTabを当該リソース選択状態で表示 @done(25-08-26 22:52)
-                    ☐ 一つのValueに複数のRefが含まれる場合に対応(CreateResourceTableItems.ts L: 589)
+                    ✔ 一つのValueに複数のRefが含まれる場合に対応(CreateResourceTableItems.ts L: 589) @done(25-08-31 14:52)
                     ✔ 疑似パラメータ @done(25-05-15 22:31)
         ☐ リソースのパラメータの説明表示（英語）
             ✔ CloudFormationのリソースごとのデータ構造を管理するjson @done(25-07-03 21:14)

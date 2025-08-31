@@ -129,6 +129,24 @@ export const PropertyTablePresentation = ({
             if (tableItemValue.type === 'value') {
               return <div style={{ whiteSpace: 'pre-line' }}>{tableItemValue.value}</div>;
             }
+            if (tableItemValue.type === 'array') {
+              return (
+                <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
+                  {tableItemValue.value.map((item, index) => {
+                    console.log('item', item);
+                    if (item.type === 'value') {
+                      return <li style={{ whiteSpace: 'pre-line' }}>{item.value}</li>;
+                    }
+                    const { value, ...other } = item;
+                    return (
+                      <li key={`${other.tabId}-${index}`}>
+                        <Link onClick={onClickValueLink(other)}>{value}</Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              );
+            }
             const { value, ...other } = tableItemValue;
             return <Link onClick={onClickValueLink(other)}>{value}</Link>;
           },

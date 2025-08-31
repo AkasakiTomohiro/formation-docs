@@ -186,6 +186,14 @@ export const WorkspaceResourceProvider = ({ children }: WorkspaceResourceProvide
     setResourceTabs((prev) => {
       const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
       if (existingTab) {
+        if (
+          newTab.type === 'resource' &&
+          existingTab.type === 'resource' &&
+          existingTab.selectedLogicalId !== newTab.selectedLogicalId
+        ) {
+          // type='resource'で、selectedLogicalIdが異なる場合は更新する
+          return prev.map((tab) => (tab.tabId === newTab.tabId ? newTab : tab));
+        }
         return prev;
       }
       return [...prev, newTab];
