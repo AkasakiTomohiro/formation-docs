@@ -133,7 +133,6 @@ export const PropertyTablePresentation = ({
               return (
                 <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
                   {tableItemValue.value.map((item, index) => {
-                    console.log('item', item);
                     if (item.type === 'value') {
                       return <li style={{ whiteSpace: 'pre-line' }}>{item.value}</li>;
                     }
