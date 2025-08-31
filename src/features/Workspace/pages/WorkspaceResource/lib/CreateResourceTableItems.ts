@@ -416,6 +416,28 @@ function convertIntrinsicFunctionValue(
       };
     }
     case 'Fn::GetAtt': {
+      const value = actualProperty['Fn::GetAtt'];
+
+      if (value[0] in options.resources) {
+        // <Fn::GetAtt: 論理ID.attr>
+        const tabId = hrefBuilder({
+          type: 'resource',
+          stackId: options.stackId,
+          sectionGroupName: options.stackName,
+          serviceName: options.resources[value[0]].serviceName,
+          resourceType: options.resources[value[0]].recourseType,
+        });
+        return {
+          type: 'resource',
+          tabId: tabId,
+          stackId: options.stackId,
+          stackName: options.stackName,
+          serviceName: options.resources[value[0]].serviceName,
+          resourceName: options.resources[value[0]].recourseType,
+          selectedLogicalId: value[0],
+          value: `<Fn::GetAtt: ${value[0]}.${value[1]}>`,
+        };
+      }
       return {
         type: 'value',
         value: JSON.stringify(actualProperty, undefined, '　'),
