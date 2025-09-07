@@ -336,7 +336,7 @@ function isPseudoProperty(property: string): boolean {
  * @param actualProperty 実際のテンプレートに定義されているプロパティ
  * @returns 組込み関数の名前
  */
-function isIntrinsicFunction(
+export function isIntrinsicFunction(
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
 ): IntrinsicFunction | undefined {
@@ -356,7 +356,7 @@ function isIntrinsicFunction(
  * @param options 組み込み関数用のデータ（ParameterとResourceList）
  * @returns 文字列化されたプロパティの値
  */
-function convertIntrinsicFunctionValue(
+export function convertIntrinsicFunctionValue(
   intrinsic: IntrinsicFunction,
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
