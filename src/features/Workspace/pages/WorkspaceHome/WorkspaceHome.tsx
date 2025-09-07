@@ -17,7 +17,7 @@ import type { StackInfo } from '../../lib';
 export const WorkspaceHome = (): JSX.Element => {
   const navigate = useNavigate();
   const workspace = useRouteLoaderData('workspace') as WorkspaceLayoutLoaderData;
-  const { loadSideMenu } = useWorkspaceResourceContext();
+  const { loadSideMenu, loadAllStackOutputs } = useWorkspaceResourceContext();
   const { addFlashbarItem } = useFlashbarContext();
   const [selectedItems, setSelectedItems] = useState<StackInfo[]>([]);
   const [state, setState] = useState<'loading' | 'loaded'>('loading');
@@ -55,6 +55,7 @@ export const WorkspaceHome = (): JSX.Element => {
         .then(async () => {
           await loadStacksWrap();
           await loadSideMenu();
+          await loadAllStackOutputs();
         })
         .catch((error) => {
           addFlashbarItem({
@@ -64,7 +65,7 @@ export const WorkspaceHome = (): JSX.Element => {
           });
         });
     }
-  }, [workspace, loadSideMenu, loadStacksWrap, addFlashbarItem]);
+  }, [workspace, loadSideMenu, loadStacksWrap, addFlashbarItem, loadAllStackOutputs]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {

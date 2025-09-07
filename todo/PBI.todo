@@ -26,7 +26,7 @@
         ✔ リソースタブでリソース詳細表示後、リソース一覧に戻る機能 ☆ @done(25-08-03 17:27)
         ☐ Tagsの表示
         ☐ 指定したリソースのCDKパラメータを表示
-            ☐ CloudFormationの組み込み関数を利用した値の表示 ☆
+            ✔ CloudFormationの組み込み関数を利用した値の表示 ☆ @done(25-08-31 17:54)
                 たとえば、Fn::Joinだったら文字列結合を行う。組み込み関数を用いた値は編集不可とする。
                 ✔ Fn::Base64 @done(25-07-03 21:13)
                 ✔ Fn::Cidr @done(25-07-03 21:13)
@@ -37,9 +37,9 @@
                 ✔ Fn::Or @done(25-07-03 21:13)
                 ✔ Fn::FindInMap @done(25-07-03 21:13)
                 ✔ Fn::ForEach @done(25-07-03 21:13)
-                ☐ Fn::GetAtt: 第一要素の文字列(論理ID)をリンクにする
+                ✔ Fn::GetAtt: 第一要素の文字列(論理ID)をリンクにする @done(25-08-31 15:32)
                 ✔ Fn::GetAZs @done(25-07-03 21:13)
-                ☐ Fn::ImportValue: 文字列だった場合のみリンクにする（組み込み関数の場合は何もしない）
+                ✔ Fn::ImportValue: 文字列だった場合のみリンクにする（組み込み関数の場合は何もしない） @done(25-08-31 17:54)
                 ✔ Fn::Join @done(25-07-03 21:12)
                 ✔ Fn::Length @done(25-07-03 21:14)
                 ✔ Fn::Select @done(25-07-03 21:14)
@@ -47,10 +47,42 @@
                 ✔ Fn::Sub @done(25-07-03 21:14)
                 ✔ Fn::ToJsonString @done(25-07-03 21:14)
                 ✔ Fn::Transform @done(25-07-03 21:14)
-                ☐ Ref関数を利用した値の表示: 文字列だった場合のみリンクにする（組み込み関数の場合は何もしない）
-                    ☐ Parameter: そのスタックのOverviewTabを表示
-                    ☐ 論理ID(リソースタイプごとに参照できるものが異なり、JSONなどで機械的に参照可能な形で公開されていないためサポート方式は未定。) : ResourceTabを当該リソース選択状態で表示
+                ✔ Ref関数を利用した値の表示: 文字列だった場合のみリンクにする（組み込み関数の場合は何もしない） @done(25-08-31 14:52)
+                    ✔ Parameter: そのスタックのOverviewTabを表示 @done(25-08-26 22:52)
+                    ✔ 論理ID(リソースタイプごとに参照できるものが異なり、JSONなどで機械的に参照可能な形で公開されていないためサポート方式は未定。) : ResourceTabを当該リソース選択状態で表示 @done(25-08-26 22:52)
+                    ✔ 一つのValueに複数のRefが含まれる場合に対応(CreateResourceTableItems.ts L: 589) @done(25-08-31 14:52)
                     ✔ 疑似パラメータ @done(25-05-15 22:31)
+            ☐ valueの型がオブジェクトの場合、内部に組み込み関数が含まれる場合の対応
+                例えば、以下のような場合
+                ```json
+                {
+                    "PolicyDocument": {
+                        "Statement": [
+                            {
+                                "Action": "sqs:SendMessage",
+                                "Condition": {
+                                    "ArnEquals": {
+                                        "aws:SourceArn": {
+                                            "Ref": "SampleAppTopicA1D4DBDE"
+                                        }
+                                    }
+                                },
+                                "Effect": "Allow",
+                                "Principal": {
+                                    "Service": "sns.amazonaws.com"
+                                },
+                                "Resource": {
+                                    "Fn::GetAtt": [
+                                        "SampleAppQueueECFF513D",
+                                        "Arn"
+                                    ]
+                                }
+                            }
+                        ],
+                        "Version": "2012-10-17"
+                    },
+                }
+                ```
         ☐ リソースのパラメータの説明表示（英語）
             ✔ CloudFormationのリソースごとのデータ構造を管理するjson @done(25-07-03 21:14)
                 https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/resource-type-schemas.html
@@ -141,6 +173,7 @@
     ✔ タブが開いた状態のリソースを押下したとき、そのタブにフォーカスが当たらない @done(25-05-20 21:23)
     ✔ リソースタブAでリソース詳細を開いた状態で、別のリソースのリソースタブを開き、再度リソースタブAにフォーカスすると詳細ではなく一覧が表示される @done(25-05-20 22:41)
     ☐ 手動管理リソース詳細タブを開いた状態で同じ種類のリソースを手動管理リソースとして作成すると、新しいほうのリソース詳細が表示されない
+    ☐ S3バケットのリソース詳細タブを開くと、CreateResourceTableItemsで失敗する
 ☐ その他 ☆
     ☐ AWS CLIのservice-2.jsonのDL機能を削除
     ☐ ウィンドウを開いた際の大きさ調整
