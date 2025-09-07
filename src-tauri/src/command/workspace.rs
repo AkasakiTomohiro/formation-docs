@@ -187,6 +187,7 @@ pub async fn open_workspace(handle: tauri::AppHandle, id: &str) -> Result<bool, 
             tauri::WebviewUrl::App(PathBuf::from(format!("workspaces/{}", id))),
         )
         .title(workspace_info.name)
+        .inner_size(1200.0, 900.0)
     }
     .build()
     .expect("failed to create new window");
