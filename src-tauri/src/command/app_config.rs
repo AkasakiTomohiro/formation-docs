@@ -18,13 +18,11 @@ pub struct AppConfig {
     pub workspaces: HashMap<String, String>,
     pub initialized: bool,
     pub initialized_at: String,
-    pub aws_cli_commit_hash: Option<String>,
 }
 pub struct AppConfigUpdate {
     pub workspaces: Option<HashMap<String, String>>,
     pub initialized: Option<bool>,
     pub initialized_at: Option<String>,
-    pub aws_cli_commit_hash: Option<Option<String>>,
 }
 
 impl AppConfig {
@@ -33,7 +31,6 @@ impl AppConfig {
             workspaces: HashMap::new(),
             initialized: false,
             initialized_at: Utc::now().to_string(),
-            aws_cli_commit_hash: None,
         }
     }
 }
@@ -97,7 +94,6 @@ pub async fn add_workspace_to_app_config(
         workspaces: Some(app_config.workspaces),
         initialized: None,
         initialized_at: None,
-        aws_cli_commit_hash: None,
     })
     .await?;
     return Ok(workspace_id);
@@ -110,7 +106,6 @@ pub async fn delete_workspace_from_app_config(workspace_id: &str) -> Result<(), 
         workspaces: Some(app_config.workspaces),
         initialized: None,
         initialized_at: None,
-        aws_cli_commit_hash: None,
     })
     .await?;
     return Ok(());
@@ -124,9 +119,6 @@ pub async fn save_app_config(update_config: AppConfigUpdate) -> Result<(), AppCo
         initialized_at: update_config
             .initialized_at
             .unwrap_or(app_config.initialized_at),
-        aws_cli_commit_hash: update_config
-            .aws_cli_commit_hash
-            .unwrap_or(app_config.aws_cli_commit_hash),
     };
     let app_config_json = serde_json::to_string(&new_app_config)?;
     let app_config_path = app_config_path()?;
