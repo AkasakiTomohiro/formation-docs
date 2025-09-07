@@ -1,5 +1,6 @@
 mod api;
 mod command;
+mod config;
 mod utils;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
