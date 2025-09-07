@@ -1,6 +1,9 @@
-import { Box, Button, ContentLayout, Header, SpaceBetween, Table } from '@cloudscape-design/components';
+import { Box, Button, ContentLayout, Header, Link, SpaceBetween, Table } from '@cloudscape-design/components';
 
-import type { ButtonProps } from '@cloudscape-design/components';
+import type { WorkspaceTabInfo } from '../../../../../../contexts';
+import type { ResourceTableItemValue } from '../../../../lib/CreateResourceTableItems';
+
+import type { ButtonProps, LinkProps } from '@cloudscape-design/components';
 
 export type StackParametersDisplayProps = {
   name: string;
@@ -12,7 +15,7 @@ export type StackOutputsDisplayProps = {
   name: string;
   description: string | null;
   exportName: string | null;
-  value: string;
+  value: Exclude<ResourceTableItemValue, { type: 'array' }>;
 };
 
 export type StackDisplayContentPresentationProps = {
@@ -40,6 +43,11 @@ export type StackDisplayContentPresentationProps = {
    * 編集ボタンのクリックハンドラ
    */
   onClickEdit: ButtonProps['onClick'];
+
+  /**
+   * Valueがリンクの場合のクリックイベントハンドラ
+   */
+  onClickValueLink: (item: WorkspaceTabInfo) => LinkProps['onClick'];
 };
 
 export const StackDisplayContentPresentation = ({
@@ -48,6 +56,7 @@ export const StackDisplayContentPresentation = ({
   stackParameters,
   stackOutputs,
   onClickEdit,
+  onClickValueLink,
 }: StackDisplayContentPresentationProps) => {
   return (
     <ContentLayout
@@ -128,7 +137,17 @@ export const StackDisplayContentPresentation = ({
             {
               id: 'value',
               header: 'Value',
-              cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.value}</div>,
+              cell: (e) => {
+                const tableItemValue = e.value;
+                if (tableItemValue === undefined) {
+                  return <div style={{ whiteSpace: 'pre-line' }} />;
+                }
+                if (tableItemValue.type === 'value') {
+                  return <div style={{ whiteSpace: 'pre-line' }}>{tableItemValue.value}</div>;
+                }
+                const { value, ...other } = tableItemValue;
+                return <Link onClick={onClickValueLink(other)}>{value}</Link>;
+              },
               width: 250,
               minWidth: 150,
             },
