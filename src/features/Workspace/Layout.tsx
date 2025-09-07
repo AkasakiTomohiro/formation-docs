@@ -8,12 +8,13 @@ import { WorkspaceSideMenu } from './components/WorkspaceSideMenu';
 import { useWorkspaceResourceContext } from './contexts/WorkspaceResourceContext';
 
 export const WorkspaceLayout = (): JSX.Element => {
-  const { loadSideMenu } = useWorkspaceResourceContext();
+  const { loadSideMenu, loadAllStackOutputs } = useWorkspaceResourceContext();
   const { flashbarItems } = useFlashbarContext();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     loadSideMenu();
+    loadAllStackOutputs();
   }, []);
 
   return (

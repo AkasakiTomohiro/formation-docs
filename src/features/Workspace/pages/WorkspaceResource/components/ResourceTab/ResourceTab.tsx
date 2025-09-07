@@ -33,6 +33,7 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
       {props.selectedLogicalId !== undefined && (
         <ResourcePropertyTable
           stackId={props.stackId}
+          stackName={props.stackName}
           serviceName={props.serviceName}
           resourceName={props.resourceName}
           selectedLogicalId={props.selectedLogicalId}
