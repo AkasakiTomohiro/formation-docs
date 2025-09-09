@@ -1388,7 +1388,6 @@ dependencies = [
  "dashmap",
  "dirs 6.0.0",
  "globmatch",
- "globset",
  "log",
  "regex",
  "reqwest",
