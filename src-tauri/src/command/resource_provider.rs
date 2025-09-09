@@ -22,7 +22,6 @@ async fn setup_app() -> Result<(), ResourceProviderError> {
             workspaces: None,
             initialized: Some(true),
             initialized_at: Some(Utc::now().to_string()),
-            aws_cli_commit_hash: None,
         })
         .await?;
     }
