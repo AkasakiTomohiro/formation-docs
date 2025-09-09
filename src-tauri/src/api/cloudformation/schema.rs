@@ -1,5 +1,5 @@
 use super::super::super::utils::AppError;
-use crate::command::app_config::APP_CONFIG_DIRECTORY_NAME;
+use crate::config::app_config::APP_CONFIG_DIRECTORY_NAME;
 use regex::Regex;
 use serde_json::Value;
 use std::{

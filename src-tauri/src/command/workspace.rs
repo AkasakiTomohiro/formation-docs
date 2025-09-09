@@ -1,4 +1,4 @@
-use super::app_config;
+use super::super::config::app_config;
 use crate::utils::get_window_state;
 use crate::utils::set_window_state;
 use crate::utils::AppError;
@@ -56,6 +56,8 @@ pub enum WorkspaceError {
     Json(#[from] serde_json::Error),
     #[error("app config error: {0}")]
     AppConfig(#[from] app_config::AppConfigError),
+    #[error("app config error: {0}")]
+    AppConfigCommand(#[from] super::app_config::AppConfigCommandError),
 }
 async fn create_workspace(directory: &str) -> Result<WorkspaceMergeInfo, WorkspaceError> {
     let name = Path::new(directory).file_name().and_then(|f| f.to_str());
@@ -72,7 +74,7 @@ async fn create_workspace(directory: &str) -> Result<WorkspaceMergeInfo, Workspa
         let workspace_json = serde_json::to_string(&workspace).unwrap();
         fs::write(&workspace_path, workspace_json).await?;
     }
-    let workspace_result = app_config::add_workspace_to_app_config(directory).await?;
+    let workspace_result = super::app_config::add_workspace_to_app_config(directory).await?;
     return Ok(WorkspaceMergeInfo {
         id: workspace_result,
         directory: directory.to_string(),

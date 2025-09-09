@@ -12,12 +12,15 @@ use tokio::fs;
 const APP_CONFIG_FILE_NAME: &str = "app_config.json";
 pub const APP_CONFIG_DIRECTORY_NAME: &str = "formation-docs";
 
+///
+/// 旧バージョンのコンフィグを最新版に変換するための仕組み
+/// TODO：共通化できるようになったらUtilsに移動
+///
+
 /// 「最新版に変換できる」トレイト
 pub trait ConfigMigratable: Any {
     /// 次のバージョンの型（最新版なら Self を返す）
     fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable>;
-    // where
-    //     Self: Sized;
 
     /// 今が最新版なら true
     fn is_latest(&self) -> bool;
@@ -42,55 +45,14 @@ pub trait ConfigMigratable: Any {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AppConfigV1 {
-    pub version: u32,
-    pub workspaces: HashMap<String, String>,
-}
-impl AppConfigV1 {
-    pub fn new() -> Self {
-        AppConfigV1 {
-            version: 1,
-            workspaces: HashMap::new(),
-        }
-    }
-}
+///
+/// アプリコンフィグ v1
+///
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct AppConfigV2 {
+struct AppConfigV1 {
     pub version: u32,
     pub workspaces: HashMap<String, String>,
-    pub initialized: bool,
-    pub initialized_at: String,
-}
-impl AppConfigV2 {
-    pub fn new() -> Self {
-        AppConfigV2 {
-            version: 2,
-            workspaces: HashMap::new(),
-            initialized: false,
-            initialized_at: Utc::now().to_string(),
-        }
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AppConfig {
-    pub version: u32,
-    pub workspaces: HashMap<String, String>,
-    pub initialized: bool,
-    pub initialized_at: String,
-}
-impl AppConfig {
-    pub fn new() -> Self {
-        let config = AppConfigV2::new();
-        AppConfig {
-            version: config.version,
-            workspaces: config.workspaces,
-            initialized: config.initialized,
-            initialized_at: config.initialized_at,
-        }
-    }
 }
 
 impl ConfigMigratable for AppConfigV1 {
@@ -107,6 +69,29 @@ impl ConfigMigratable for AppConfigV1 {
     }
     fn as_any(self: Box<Self>) -> Box<dyn Any> {
         self
+    }
+}
+
+///
+/// アプリコンフィグ v2
+///
+
+#[derive(Debug, Serialize, Deserialize)]
+struct AppConfigV2 {
+    pub version: u32,
+    pub workspaces: HashMap<String, String>,
+    pub initialized: bool,
+    pub initialized_at: String,
+}
+
+impl AppConfigV2 {
+    pub fn new() -> Self {
+        AppConfigV2 {
+            version: 2,
+            workspaces: HashMap::new(),
+            initialized: false,
+            initialized_at: Utc::now().to_string(),
+        }
     }
 }
 
@@ -127,6 +112,28 @@ impl ConfigMigratable for AppConfigV2 {
     }
 }
 
+///
+/// アプリコンフィグ 最新バージョン
+///
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AppConfig {
+    pub version: u32,
+    pub workspaces: HashMap<String, String>,
+    pub initialized: bool,
+    pub initialized_at: String,
+}
+impl AppConfig {
+    pub fn new() -> Self {
+        let config: Box<dyn ConfigMigratable> = Box::new(AppConfigV2::new());
+        *config
+            .migrate_boxed()
+            .as_any()
+            .downcast::<AppConfig>()
+            .unwrap()
+    }
+}
+
 impl ConfigMigratable for AppConfig {
     fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable> {
         self
@@ -139,6 +146,10 @@ impl ConfigMigratable for AppConfig {
     }
 }
 
+///
+/// アプリコンフィグ エラー
+///
+
 #[derive(Debug, Error)]
 pub enum AppConfigError {
     #[error("app error: {0}")]
@@ -149,7 +160,8 @@ pub enum AppConfigError {
     Json(#[from] serde_json::Error),
 }
 
-fn app_config_path() -> Result<PathBuf, AppConfigError> {
+/// app_config.jsonのパスを取得
+pub fn app_config_path() -> Result<PathBuf, AppConfigError> {
     let dir = config_local_dir().ok_or(AppConfigError::App(AppError::new(
         "Failed to get local config directory",
     )))?;
@@ -158,6 +170,7 @@ fn app_config_path() -> Result<PathBuf, AppConfigError> {
         .join(APP_CONFIG_FILE_NAME));
 }
 
+/// app_config.jsonのバージョンを取得
 async fn read_config_version() -> Result<u32, AppConfigError> {
     let config_path = app_config_path()?;
     match config_path.exists() {
@@ -174,13 +187,20 @@ async fn read_config_version() -> Result<u32, AppConfigError> {
     }
 }
 
-async fn write_app_config(new_app_config: &AppConfig) -> Result<(), AppConfigError> {
+/// app_config.jsonへ書き込む
+///
+/// - `new_app_config`: 書き込む内容
+pub async fn write_app_config(new_app_config: &AppConfig) -> Result<(), AppConfigError> {
     let app_config_json = serde_json::to_string::<AppConfig>(new_app_config)?;
     let app_config_path = app_config_path()?;
     fs::write(app_config_path, app_config_json).await?;
     return Ok(());
 }
 
+/// app_config.jsonを読み込む
+///
+/// versionが最新でない場合はマイグレーションして最新版に変換し、保存する
+/// - 戻り値: 読み込んだAppConfig
 pub async fn read_app_config() -> Result<AppConfig, AppConfigError> {
     let version = read_config_version().await?;
     let config_path = app_config_path()?;
