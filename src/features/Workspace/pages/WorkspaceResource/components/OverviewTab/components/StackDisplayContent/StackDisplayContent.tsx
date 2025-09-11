@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
+import { convertIntrinsicFunctionValue, isIntrinsicFunction } from '../../../../lib/CreateResourceTableItems';
+import { loadParameterAndResourceList } from '../../../ResourceTab/components/ResourcePropertyTable/lib/LoadParameterAndResourceList';
 import { StackDisplayContentPresentation } from './StackDisplayContent.presentation';
 import { getStackOutputs } from './lib/GetStackOutputs';
 import { getStackParameters } from './lib/GetStackParameters';
@@ -30,7 +32,7 @@ export const StackDisplayContent = ({
   stackName,
   stackDescription,
 }: StackContentProps): JSX.Element => {
-  const { modifyResourceTab } = useWorkspaceResourceContext();
+  const { modifyResourceTab, addResourceTab } = useWorkspaceResourceContext();
   const [stackParameters, setStackParameters] = useState<StackParametersDisplayProps[]>([]);
   const [stackOutputs, setStackOutputs] = useState<StackOutputsDisplayProps[]>([]);
 
@@ -50,17 +52,35 @@ export const StackDisplayContent = ({
     });
 
     // スタックのoutputを取得し、表中に表示する
-    getStackOutputs({ stack_id: stackId }).then((stackOutputs) => {
-      const outputs = stackOutputs.map((output) => {
-        return {
-          name: output.name,
-          description: output.description,
-          exportName: output.exportName,
-          value: JSON.stringify(output.value), // FIXME: convertIntrinsicFunctionValue関数を使用した文字列を代入する
-        };
-      });
-      setStackOutputs(outputs);
-    });
+    Promise.all([getStackOutputs({ stack_id: stackId }), loadParameterAndResourceList({ stack_id: stackId })]).then(
+      ([stackOutputs, parameterAndResourceList]) => {
+        const outputs = stackOutputs.map((output) => {
+          const intrinsic = isIntrinsicFunction(output.value);
+          let value: StackOutputsDisplayProps['value'];
+          if (intrinsic === undefined) {
+            value = {
+              type: 'value',
+              value: output.value,
+            };
+          } else {
+            value = convertIntrinsicFunctionValue(intrinsic, output.value, {
+              stackId: stackId,
+              stackName: stackName,
+              parameters: parameterAndResourceList.parameters,
+              resources: parameterAndResourceList.resources,
+              externalResources: {},
+            });
+          }
+          return {
+            name: output.name,
+            description: output.description,
+            exportName: output.exportName,
+            value: value,
+          };
+        });
+        setStackOutputs(outputs);
+      },
+    );
   }, []);
 
   return (
@@ -80,6 +100,7 @@ export const StackDisplayContent = ({
           };
         });
       }}
+      onClickValueLink={(item) => () => addResourceTab(item)}
     />
   );
 };

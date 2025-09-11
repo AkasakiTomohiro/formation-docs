@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useState } from 'react';
 import { useLoaderData, useNavigate } from 'react-router';
 
+import { getAllStackOutputs } from './lib/GetAllStackOutputs';
 import { loadManualManagementResourceSummary } from './lib/LoadManualManagementResourceSummary';
 import { loadTemplateSummary } from './lib/LoadTemplateSummary';
 
@@ -108,6 +109,16 @@ export interface WorkspaceResourceContext {
    * サイドメニュー要素取得関数
    */
   loadSideMenu: () => Promise<void>;
+
+  /**
+   * 全スタックのOutputs
+   */
+  allStackOutputs: Record<string, string>;
+
+  /**
+   * 全スタックのOutputs取得関数
+   */
+  loadAllStackOutputs: () => Promise<void>;
 }
 
 const WorkspaceResourceContext = createContext<WorkspaceResourceContext>({
@@ -143,6 +154,10 @@ const WorkspaceResourceContext = createContext<WorkspaceResourceContext>({
   loadSideMenu: () => {
     throw new Error('loadSideMenu is not implemented');
   },
+  allStackOutputs: {},
+  loadAllStackOutputs: () => {
+    throw new Error('loadAllStackOutputs is not implemented');
+  },
 });
 
 export function useWorkspaceResourceContext(): WorkspaceResourceContext {
@@ -168,6 +183,9 @@ export const WorkspaceResourceProvider = ({ children }: WorkspaceResourceProvide
   // サイドメニュー
   const [sideMenu, setSideMenu] = useState<TemplateSummary[]>([]);
 
+  // 全スタックのOutputs
+  const [allStackOutputs, setAllStackOutputs] = useState<Record<string, string>>({});
+
   // サイドメニュー要素取得関数
   const loadSideMenu = useCallback(() => {
     return Promise.all([loadTemplateSummary(), loadManualManagementResourceSummary()]).then(
@@ -184,11 +202,26 @@ export const WorkspaceResourceProvider = ({ children }: WorkspaceResourceProvide
     );
   }, []);
 
+  // 全スタックのOutputs取得関数
+  const loadAllStackOutputs = useCallback(() => {
+    return getAllStackOutputs().then((outputs) => {
+      setAllStackOutputs(outputs);
+    });
+  }, []);
+
   // リソースタブ追加関数
   const addResourceTab = useCallback((newTab: WorkspaceTabInfo) => {
     setResourceTabs((prev) => {
       const existingTab = prev.find((tab) => tab.tabId === newTab.tabId);
       if (existingTab) {
+        if (
+          newTab.type === 'resource' &&
+          existingTab.type === 'resource' &&
+          existingTab.selectedLogicalId !== newTab.selectedLogicalId
+        ) {
+          // type='resource'で、selectedLogicalIdが異なる場合は更新する
+          return prev.map((tab) => (tab.tabId === newTab.tabId ? newTab : tab));
+        }
         return prev;
       }
       return [...prev, newTab];
@@ -251,6 +284,8 @@ export const WorkspaceResourceProvider = ({ children }: WorkspaceResourceProvide
         setActiveTabId,
         sideMenu,
         loadSideMenu,
+        allStackOutputs,
+        loadAllStackOutputs,
       }}
     >
       {children}
