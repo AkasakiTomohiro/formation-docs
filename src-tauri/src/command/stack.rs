@@ -5,6 +5,8 @@ use std::io::ErrorKind;
 use std::path::Path;
 use std::path::PathBuf;
 
+use crate::config::workspace_config::read_workspace_config;
+use crate::config::workspace_config::WorkspaceConfigError;
 use crate::utils::get_window_state;
 use crate::utils::AppError;
 use crate::utils::CommandResult;
@@ -13,7 +15,6 @@ use serde_json::Value;
 use thiserror::Error;
 use uuid::Uuid;
 
-use super::workspace::load_workspace;
 use super::workspace::update_workspace;
 use super::workspace::WorkspaceUpdate;
 
@@ -63,8 +64,10 @@ enum StackError {
     Yaml(#[from] serde_yaml::Error),
     #[error("json error: {0}")]
     Json(#[from] serde_json::Error),
-    #[error("workspace error: {0}")]
-    Workspace(#[from] super::workspace::WorkspaceError),
+    #[error("workspace config error: {0}")]
+    WorkspaceConfig(#[from] WorkspaceConfigError),
+    #[error("workspace command error: {0}")]
+    WorkspaceCommand(#[from] super::workspace::WorkspaceCommandError),
 }
 
 fn load_stack_meta(workspace_directory: &str, stack_name: &str) -> Result<StackMeta, StackError> {
@@ -107,7 +110,7 @@ async fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, StackError
     //     }
     // };
     // let paths: Vec<_> = builder.into_iter().flatten().collect();
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     let mut stacks = Vec::new();
     for (id, file_name) in workspace.stacks.iter() {
         // スタックを読み込む
@@ -126,7 +129,7 @@ async fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, StackError
 }
 
 async fn delete_stack(workspace_directory: &str, stack_id: &str) -> Result<(), StackError> {
-    let mut workspace = load_workspace(workspace_directory).await?;
+    let mut workspace = read_workspace_config(workspace_directory).await?;
 
     match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => {
@@ -209,7 +212,7 @@ async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Resul
     }
 
     // workspace.jsonのstacksに追加する
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     let mut stacks = workspace.stacks.clone();
 
     // スタックが存在する場合は追加しない
@@ -276,7 +279,7 @@ async fn load_stack_from_id(
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Stack, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     return match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => {
             load_stack_from_info(workspace_directory, stack_id, stack_file_name).await
@@ -304,7 +307,7 @@ async fn load_template_summary(
     workspace_directory: &str,
 ) -> Result<Vec<TemplateSummary>, StackError> {
     let mut templates = Vec::new();
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     for (id, stack_file_name) in workspace.stacks.iter() {
         let meta = load_stack_meta(
             workspace_directory,
@@ -365,7 +368,7 @@ async fn get_stack_resource_list(
     service_name: &str,
     resource_name: &str,
 ) -> Result<Vec<String>, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -397,7 +400,7 @@ async fn get_stack_resource_properties(
     stack_id: &str,
     logical_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -419,7 +422,7 @@ async fn get_stack_resource_properties_reasons(
     stack_id: &str,
     logical_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -444,7 +447,7 @@ async fn get_stack_parameters(
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -480,7 +483,7 @@ async fn get_stack_outputs(
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Vec<StackOutput>, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -521,7 +524,7 @@ async fn get_stack_outputs(
 async fn get_all_stack_outputs(
     workspace_directory: &str,
 ) -> Result<HashMap<String, String>, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     // {Outputsのexport_name: スタックID}の形で返す
     let mut result: HashMap<String, String> = HashMap::new();
     for (stack_id, _) in workspace.stacks.iter() {
@@ -541,7 +544,7 @@ async fn update_stack_meta(
     stack_id: &str,
     update_stack_meta: StackMetaUpdate,
 ) -> Result<(), StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     let stack_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name.replace(".template.json", ""),
         None => {
@@ -574,7 +577,7 @@ async fn update_stack_detail(
     stack_id: &str,
     update_stack_meta: StackMetaUpdate,
 ) -> Result<(), StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     let stack_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name.replace(".template.json", ""),
         None => {
@@ -620,7 +623,7 @@ async fn load_parameter_and_resource_list(
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<ParameterAndResourceList, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = read_workspace_config(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
