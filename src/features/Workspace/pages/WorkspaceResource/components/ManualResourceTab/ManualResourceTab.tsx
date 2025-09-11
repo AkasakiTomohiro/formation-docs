@@ -34,7 +34,6 @@ export const ManualResourceTab = (props: ManualResourceTabProps): JSX.Element =>
             selectedResourceId={props.selectedResourceId}
             serviceName={props.serviceName}
             resourceName={props.resourceName}
-            description={props.description}
           />
         </div>
       )}

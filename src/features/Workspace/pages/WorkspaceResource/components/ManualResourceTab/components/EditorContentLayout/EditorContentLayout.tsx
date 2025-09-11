@@ -5,7 +5,6 @@ import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFor
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
 import { createExpandedItems } from '../../../PropertyTable';
 import { EditorContentLayoutPresentation } from './EditorContentLayout.presentation';
-import { getManualManagementResourceProperties } from './lib/GetManualManagementResourceProperties';
 import { getManualManagementResourceReasons } from './lib/GetManualManagementResourceReasons';
 import { updateManualResourceMeta } from './lib/UpdateManualResourceMeta';
 import { updateManualResourcePropertiesAndDescription } from './lib/UpdateManualResourceProperties';
@@ -13,20 +12,15 @@ import { updateManualResourcePropertiesAndDescription } from './lib/UpdateManual
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
 import type { ViewMode } from './components';
+import { getManualManagementResource } from './lib/GetManualManagementResource';
 
 export type EditorContentLayoutProps = {
   selectedResourceId: string;
   serviceName: string;
   resourceName: string;
-  description: string; // TODO: このdescriptionは削除
 };
 
-export const EditorContentLayout = ({
-  selectedResourceId,
-  serviceName,
-  resourceName,
-  description,
-}: EditorContentLayoutProps) => {
+export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceName }: EditorContentLayoutProps) => {
   const [schema, setSchema] = useState<CloudFormationSchema | undefined>(undefined);
   const [properties, setProperties] = useState<ResourceTableItem[]>([]);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -44,26 +38,27 @@ export const EditorContentLayout = ({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    // TODO: descriptionの取得処理を追加
     Promise.all([
       getCloudFormationSchema(serviceName, resourceName).then((schemaStr) => JSON.parse(schemaStr)),
-      getManualManagementResourceProperties({
+      getManualManagementResource({
         resource_id: selectedResourceId,
       }),
       getManualManagementResourceReasons({
         resource_id: selectedResourceId,
       }),
-    ]).then(([cloudformationSchema, properties, reasons]) => {
-      console.log('properties', properties);
+    ]).then(([cloudformationSchema, resource, reasons]) => {
+      console.log('properties', resource.Properties);
       console.log('reasons', reasons);
+      console.log('resource.Description', resource.Description);
       setSchema(cloudformationSchema);
-      const resourceTableItems = createResourceTableItems(cloudformationSchema, properties);
+      const resourceTableItems = createResourceTableItems(cloudformationSchema, resource.Properties);
       setProperties(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
       setReasons(reasons);
-      setValues(JSON.stringify(properties, undefined, 2));
+      setValues(JSON.stringify(resource.Properties, undefined, 2));
       setEditingReasons(reasons);
-      setResourceDescription(description);
+      setResourceDescription(resource.Description);
+      setEditingResourceDescription(resource.Description);
       setIsEdit(false);
     });
   }, [selectedResourceId]);

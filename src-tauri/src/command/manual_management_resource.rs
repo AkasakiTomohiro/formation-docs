@@ -16,7 +16,7 @@ const MANUAL_MANAGEMENT_RESOURCES_FILE: &str = "manual_management_resources.json
 /// 手動管理リソースのmetaファイル名
 const MANUAL_MANAGEMENT_RESOURCES_META_FILE: &str = "manual_management_resources.meta.json";
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "PascalCase")]
 pub struct ManualManagementResource {
     pub description: String,
@@ -263,6 +263,20 @@ async fn load_manual_resource_meta(
     return Ok(meta_json);
 }
 
+async fn get_manual_resource(
+    workspace_directory: &str,
+    resource_id: &str,
+) -> Result<ManualManagementResource, ManualManagementResourceError> {
+    let manual_management_resources = get_manual_management_resources(workspace_directory).await?;
+    let resource = manual_management_resources
+        .resources
+        .get(resource_id)
+        .ok_or(ManualManagementResourceError::App(AppError::new(
+            "Resource ID not found.",
+        )))?;
+    return Ok(resource.clone());
+}
+
 async fn get_manual_resource_properties(
     workspace_directory: &str,
     resource_id: &str,
@@ -413,6 +427,23 @@ pub async fn load_manual_management_resource_summary_command(
         .await
     {
         Ok(summary) => Ok(CommandResult::success(summary)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_manual_management_resource_command(
+    window: tauri::Window,
+    resource_id: &str,
+) -> Result<CommandResult<ManualManagementResource>, CommandResult> {
+    let window_state = match get_window_state(window) {
+        Some(state) => state,
+        None => {
+            return Err(CommandResult::failed("Window state not found"));
+        }
+    };
+    return match get_manual_resource(window_state.workspace_directory.as_str(), resource_id).await {
+        Ok(resource) => Ok(CommandResult::success(resource)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
