@@ -1,4 +1,4 @@
-use crate::utils::AppError;
+use crate::utils::{AppError, ConfigMigratable};
 use chrono::Utc;
 use dirs::config_local_dir;
 use serde::{Deserialize, Serialize};
@@ -13,39 +13,6 @@ const APP_CONFIG_FILE_NAME: &str = "app_config.json";
 pub const APP_CONFIG_DIRECTORY_NAME: &str = "formation-docs";
 
 ///
-/// 旧バージョンのコンフィグを最新版に変換するための仕組み
-/// TODO：共通化できるようになったらUtilsに移動
-///
-
-/// 「最新版に変換できる」トレイト
-pub trait ConfigMigratable: Any {
-    /// 次のバージョンの型（最新版なら Self を返す）
-    fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable>;
-
-    /// 今が最新版なら true
-    fn is_latest(&self) -> bool;
-
-    /// Any型としてダウンキャストできるようにする
-    fn as_any(self: Box<Self>) -> Box<dyn Any>;
-
-    /// 最新版になるまでマイグレーション
-    fn migrate_until_latest(self: Box<Self>) -> AppConfig
-    where
-        Self: Sized,
-    {
-        let mut current: Box<dyn ConfigMigratable> = self;
-        while !current.is_latest() {
-            current = current.migrate_boxed();
-        }
-        // 最後は AppConfig に downcast
-        *current
-            .as_any()
-            .downcast::<AppConfig>()
-            .expect("must be Conf at latest")
-    }
-}
-
-///
 /// アプリコンフィグ v1
 ///
 
@@ -56,7 +23,9 @@ struct AppConfigV1 {
 }
 
 impl ConfigMigratable for AppConfigV1 {
-    fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable> {
+    type Latest = AppConfig;
+
+    fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable<Latest = Self::Latest>> {
         Box::new(AppConfigV2 {
             version: 2,
             workspaces: self.workspaces,
@@ -96,7 +65,9 @@ impl AppConfigV2 {
 }
 
 impl ConfigMigratable for AppConfigV2 {
-    fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable> {
+    type Latest = AppConfig;
+
+    fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable<Latest = Self::Latest>> {
         Box::new(AppConfig {
             version: 2,
             workspaces: self.workspaces,
@@ -125,7 +96,7 @@ pub struct AppConfig {
 }
 impl AppConfig {
     pub fn new() -> Self {
-        let config: Box<dyn ConfigMigratable> = Box::new(AppConfigV2::new());
+        let config: Box<dyn ConfigMigratable<Latest = AppConfig>> = Box::new(AppConfigV2::new());
         *config
             .migrate_boxed()
             .as_any()
@@ -135,7 +106,9 @@ impl AppConfig {
 }
 
 impl ConfigMigratable for AppConfig {
-    fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable> {
+    type Latest = Self;
+
+    fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable<Latest = Self::Latest>> {
         self
     }
     fn is_latest(&self) -> bool {
