@@ -2,9 +2,10 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::io::ErrorKind;
-use std::path::Path;
 use std::path::PathBuf;
 
+use crate::config::stack_config::read_stack_meta_config;
+use crate::config::stack_config::StackMetaConfigError;
 use crate::config::workspace_config::read_workspace_config;
 use crate::config::workspace_config::WorkspaceConfigError;
 use crate::utils::get_window_state;
@@ -28,6 +29,7 @@ pub struct Stack {
     exist: bool,
 }
 
+// TODO:削除
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StackMeta {
     pub name: String,
@@ -68,29 +70,8 @@ enum StackError {
     WorkspaceConfig(#[from] WorkspaceConfigError),
     #[error("workspace command error: {0}")]
     WorkspaceCommand(#[from] super::workspace::WorkspaceCommandError),
-}
-
-fn load_stack_meta(workspace_directory: &str, stack_name: &str) -> Result<StackMeta, StackError> {
-    // ${スタック名}.meta.jsonが存在するか確認
-    let meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
-    let meta_path = Path::new(&meta_path);
-    if !meta_path.exists() {
-        // ${スタック名}.meta.jsonを作成する
-        fs::File::create(&meta_path)?;
-        // 空のJSONを作成
-        let empty_json = StackMeta {
-            name: stack_name.to_string(),
-            description: String::new(),
-            reasons: HashMap::new(),
-        };
-        let empty_json = serde_json::to_string(&empty_json).unwrap();
-        fs::write(&meta_path, empty_json)?;
-    }
-
-    // ${スタック名}.meta.jsonを読み込む
-    let meta_json = fs::read_to_string(&meta_path)?;
-    let meta_json = serde_json::from_str::<StackMeta>(&meta_json)?;
-    return Ok(meta_json);
+    #[error("stack meta config error: {0}")]
+    StackMetaConfig(#[from] StackMetaConfigError),
 }
 
 /**
@@ -250,14 +231,16 @@ async fn load_stack_from_info(
         .and_then(|desc| Some(desc.to_string()));
 
     // メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
-    let meta_json = match load_stack_meta(
+    let meta_json = match read_stack_meta_config(
         workspace_directory,
         stack_file_name
             .to_string()
             .clone()
             .replace(".template.json", "")
             .as_str(),
-    ) {
+    )
+    .await
+    {
         Ok(meta_json) => meta_json,
         Err(_) => {
             return Err(StackError::App(AppError::new("Failed to load stack meta")));
@@ -309,10 +292,11 @@ async fn load_template_summary(
     let mut templates = Vec::new();
     let workspace = read_workspace_config(workspace_directory).await?;
     for (id, stack_file_name) in workspace.stacks.iter() {
-        let meta = load_stack_meta(
+        let meta = read_stack_meta_config(
             workspace_directory,
             stack_file_name.replace(".template.json", "").as_str(),
-        )?;
+        )
+        .await?;
 
         let template_path = format!("{}/{}", workspace_directory, stack_file_name);
         let template_json = fs::read_to_string(&template_path)?;
@@ -551,7 +535,7 @@ async fn update_stack_meta(
             return Err(StackError::App(AppError::new("Stack not found")));
         }
     };
-    let stack_meta = load_stack_meta(workspace_directory, &stack_name)?;
+    let stack_meta = read_stack_meta_config(workspace_directory, &stack_name).await?;
     let new_stack_meta = StackMeta {
         name: update_stack_meta.name.unwrap_or(stack_meta.name),
         description: update_stack_meta
@@ -584,7 +568,7 @@ async fn update_stack_detail(
             return Err(StackError::App(AppError::new("Stack not found")));
         }
     };
-    let stack_meta = load_stack_meta(workspace_directory, &stack_name)?;
+    let stack_meta = read_stack_meta_config(workspace_directory, &stack_name).await?;
     let new_stack_meta = StackMeta {
         name: update_stack_meta.name.unwrap_or(stack_meta.name),
         description: update_stack_meta
