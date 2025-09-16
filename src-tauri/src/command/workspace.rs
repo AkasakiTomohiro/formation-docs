@@ -88,18 +88,14 @@ async fn load_workspaces() -> Result<Vec<WorkspaceMergeInfo>, WorkspaceCommandEr
 
     let mut workspaces = Vec::new();
     for (id, directory) in app_config.workspaces.iter() {
-        let workspace_path = workspace_config_path(directory)?;
-        if workspace_path.exists() {
-            let workspace_json = fs::read_to_string(&workspace_path).await?;
-            let workspace = serde_json::from_str::<WorkspaceConfig>(&workspace_json)?;
-            workspaces.push(WorkspaceMergeInfo {
-                id: id.to_string(),
-                directory: directory.to_string(),
-                name: workspace.name,
-                description: workspace.description,
-                stacks: workspace.stacks.clone(),
-            });
-        }
+        let workspace = read_workspace_config(directory).await?;
+        workspaces.push(WorkspaceMergeInfo {
+            id: id.to_string(),
+            directory: directory.to_string(),
+            name: workspace.name,
+            description: workspace.description,
+            stacks: workspace.stacks.clone(),
+        });
     }
     return Ok(workspaces);
 }
