@@ -1,5 +1,4 @@
 import { Box, Button, Container, Header, Link, SpaceBetween, Table, TextFilter } from '@cloudscape-design/components';
-
 import type { ButtonProps, LinkProps, TextFilterProps } from '@cloudscape-design/components';
 
 export type LogicalIdTablePresentationProps = {

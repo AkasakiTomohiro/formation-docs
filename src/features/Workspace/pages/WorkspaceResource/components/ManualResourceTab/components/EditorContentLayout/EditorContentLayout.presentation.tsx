@@ -1,12 +1,9 @@
 import { Button, ContentLayout, Header, SegmentedControl, SpaceBetween } from '@cloudscape-design/components';
-
 import { PropertyTable } from '../../../PropertyTable';
 import { ResourcePropertyEditor } from './components';
-
+import type { ButtonProps, SegmentedControlProps } from '@cloudscape-design/components';
 import type { PropertyTableProps } from '../../../PropertyTable';
 import type { ResourcePropertyEditorProps } from './components';
-
-import type { ButtonProps, SegmentedControlProps } from '@cloudscape-design/components';
 
 /**
  * コンテンツで表示する種別

@@ -1,7 +1,5 @@
 import { Button, ContentLayout, Header, SpaceBetween } from '@cloudscape-design/components';
-
 import { PropertyTable } from '../../../PropertyTable';
-
 import type { ButtonProps, TableProps } from '@cloudscape-design/components';
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 
@@ -54,7 +52,6 @@ export type ResourcePropertyTablePresentationProps = {
   /**
    * ネストされたプロパティの展開状態を更新する関数
    */
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   setExpandedItems: (items: any) => void;
 
   /**

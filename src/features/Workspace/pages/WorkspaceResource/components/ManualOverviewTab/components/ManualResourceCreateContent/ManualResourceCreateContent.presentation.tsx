@@ -1,5 +1,3 @@
-import { Controller } from 'react-hook-form';
-
 import {
   Box,
   Button,
@@ -11,12 +9,11 @@ import {
   SpaceBetween,
   Textarea,
 } from '@cloudscape-design/components';
-
-import type { ResourceEditType } from './ManualResourceCreateContent';
-
+import { Controller } from 'react-hook-form';
 import type { ButtonProps, SelectProps } from '@cloudscape-design/components';
 import type { FormEventHandler } from 'react';
 import type { Control } from 'react-hook-form';
+import type { ResourceEditType } from './ManualResourceCreateContent';
 
 export type RegisteringStatus = 'SELECT_RESOURCE' | 'INPUT_NAME';
 

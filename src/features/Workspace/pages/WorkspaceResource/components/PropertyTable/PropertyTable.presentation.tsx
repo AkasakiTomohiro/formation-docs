@@ -6,15 +6,12 @@ import {
   SpaceBetween,
   StatusIndicator,
   Table,
-  TextFilter,
   Textarea,
+  TextFilter,
 } from '@cloudscape-design/components';
-
-import type { WorkspaceTabInfo } from '../../../../contexts';
-
-import type { ResourceTableItem } from '../../lib/CreateResourceTableItems';
-
 import type { CollectionPreferencesProps, LinkProps, TableProps, TextareaProps } from '@cloudscape-design/components';
+import type { WorkspaceTabInfo } from '../../../../contexts';
+import type { ResourceTableItem } from '../../lib/CreateResourceTableItems';
 
 export type PropertyTablePresentationProps = {
   /**
@@ -55,7 +52,6 @@ export type PropertyTablePresentationProps = {
   /**
    * 表示設定
    */
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   preferences: CollectionPreferencesProps.Preferences<any>;
 
   /**

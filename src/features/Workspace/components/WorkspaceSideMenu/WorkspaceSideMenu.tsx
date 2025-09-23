@@ -1,12 +1,10 @@
 import { useCallback, useMemo } from 'react';
 import { useLoaderData, useNavigate } from 'react-router';
-
 import { useWorkspaceResourceContext } from '../../contexts';
-import { WorkspaceSideMenuPresentation } from './WorkspaceSideMenu.presentation';
 import { filterSideMenu, hrefParser } from './lib';
-
-import type { WorkspaceLayoutLoaderData } from '../../Loader';
+import { WorkspaceSideMenuPresentation } from './WorkspaceSideMenu.presentation';
 import type { WorkspaceTabInfo } from '../../contexts';
+import type { WorkspaceLayoutLoaderData } from '../../Loader';
 import type { WorkspaceSideMenuPresentationProps } from './WorkspaceSideMenu.presentation';
 
 export const WorkspaceSideMenu = (): JSX.Element => {

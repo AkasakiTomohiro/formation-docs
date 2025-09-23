@@ -1,9 +1,7 @@
 import { Box, Button, ContentLayout, Header, Link, SpaceBetween, Table } from '@cloudscape-design/components';
-
+import type { ButtonProps, LinkProps } from '@cloudscape-design/components';
 import type { WorkspaceTabInfo } from '../../../../../../contexts';
 import type { ResourceTableItemValue } from '../../../../lib/CreateResourceTableItems';
-
-import type { ButtonProps, LinkProps } from '@cloudscape-design/components';
 
 export type StackParametersDisplayProps = {
   name: string;

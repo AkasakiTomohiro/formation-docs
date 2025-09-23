@@ -1,8 +1,6 @@
+import { AppLayout, Flashbar, SpaceBetween } from '@cloudscape-design/components';
 import { useEffect } from 'react';
 import { Outlet } from 'react-router';
-
-import { AppLayout, Flashbar, SpaceBetween } from '@cloudscape-design/components';
-
 import { useFlashbarContext } from '../../contexts/FlashbarContext';
 import { WorkspaceSideMenu } from './components/WorkspaceSideMenu';
 import { useWorkspaceResourceContext } from './contexts/WorkspaceResourceContext';
@@ -11,7 +9,7 @@ export const WorkspaceLayout = (): JSX.Element => {
   const { loadSideMenu, loadAllStackOutputs } = useWorkspaceResourceContext();
   const { flashbarItems } = useFlashbarContext();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
     loadSideMenu();
     loadAllStackOutputs();

@@ -1,5 +1,4 @@
 import { invoke } from '@tauri-apps/api/core';
-
 import type { CommandResult } from '../../../../../../../../../lib/CommandResult';
 
 export type GetStackOutputsProps = {
@@ -10,7 +9,6 @@ type GetStackOutputResult = {
   name: string;
   description: string | null;
   exportName: string | null;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   value: any;
 };
 

@@ -1,5 +1,4 @@
 import { invoke } from '@tauri-apps/api/core';
-
 import type { CommandResult } from '../../../lib/CommandResult';
 
 export async function openWorkspace(workspaceId: string): Promise<boolean> {

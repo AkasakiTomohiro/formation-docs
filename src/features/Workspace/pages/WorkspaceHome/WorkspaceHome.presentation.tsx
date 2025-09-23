@@ -1,5 +1,3 @@
-import { useRouteLoaderData } from 'react-router';
-
 import { Link } from '@cloudscape-design/components';
 import Box from '@cloudscape-design/components/box';
 import Button from '@cloudscape-design/components/button';
@@ -8,11 +6,10 @@ import Header from '@cloudscape-design/components/header';
 import Pagination from '@cloudscape-design/components/pagination';
 import SpaceBetween from '@cloudscape-design/components/space-between';
 import Table from '@cloudscape-design/components/table';
-
-import type { WorkspaceLayoutLoaderData } from '../../Loader';
-
+import { useRouteLoaderData } from 'react-router';
 import type { useCollection } from '@cloudscape-design/collection-hooks';
 import type { ButtonProps, LinkProps, TableProps } from '@cloudscape-design/components';
+import type { WorkspaceLayoutLoaderData } from '../../Loader';
 import type { StackInfo } from '../../lib/StackInfo';
 
 export type WorkspaceHomePresentationProps = {
