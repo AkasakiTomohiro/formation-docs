@@ -1,5 +1,4 @@
 import { invoke } from '@tauri-apps/api/core';
-
 import type { CommandResult } from '../../../../../../../../../lib/CommandResult';
 
 export type UpdateStackMetaProps = {
@@ -8,11 +7,7 @@ export type UpdateStackMetaProps = {
   reasons: Record<string, string>;
 };
 
-export async function updateStackMeta(
-  props: UpdateStackMetaProps,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-): Promise<any> {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export async function updateStackMeta(props: UpdateStackMetaProps): Promise<any> {
   const result = await invoke<CommandResult<any>>('update_stack_meta_command', props);
   if (!result.success) {
     throw new Error(result.value);

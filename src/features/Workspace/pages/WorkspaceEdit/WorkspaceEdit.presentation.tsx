@@ -1,5 +1,3 @@
-import { Controller } from 'react-hook-form';
-
 import {
   Box,
   Button,
@@ -10,18 +8,15 @@ import {
   Input,
   SpaceBetween,
 } from '@cloudscape-design/components';
-
-import type { WorkspaceEditType } from './WorkspaceEdit';
-
-import type { Control, UseFormHandleSubmit } from 'react-hook-form';
-
+import { Controller } from 'react-hook-form';
 import type { ButtonProps } from '@cloudscape-design/components';
+import type { Control, UseFormHandleSubmit } from 'react-hook-form';
+import type { WorkspaceEditType } from './WorkspaceEdit';
 
 export type WorkspaceEditPresentationProps = {
   /**
    * useFormのコントロール
    */
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   control: Control<WorkspaceEditType, any>;
 
   /**

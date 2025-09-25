@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-
 import { useFlashbarContext } from '../../../../../../../../contexts/FlashbarContext';
 import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFormationSchema';
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
@@ -9,7 +8,6 @@ import { getManualManagementResourceProperties } from './lib/GetManualManagement
 import { getManualManagementResourceReasons } from './lib/GetManualManagementResourceReasons';
 import { updateManualResourceMeta } from './lib/UpdateManualResourceMeta';
 import { updateManualResourceProperties } from './lib/UpdateManualResourceProperties';
-
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
 import type { ViewMode } from './EditorContentLayout.presentation';
@@ -23,7 +21,6 @@ export type EditorContentLayoutProps = {
 export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceName }: EditorContentLayoutProps) => {
   const [schema, setSchema] = useState<CloudFormationSchema | undefined>(undefined);
   const [properties, setProperties] = useState<ResourceTableItem[]>([]);
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const [expandedItems, setExpandedItems] = useState<any>();
   const [isEdit, setIsEdit] = useState(false);
   const [reasons, setReasons] = useState<Record<string, string>>({});
@@ -34,7 +31,7 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
   const { addFlashbarItem } = useFlashbarContext();
   const [isValid, setIsValid] = useState(true);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
     Promise.all([
       getCloudFormationSchema(serviceName, resourceName).then((schemaStr) => JSON.parse(schemaStr)),

@@ -1,10 +1,7 @@
+import { SideNavigation, SpaceBetween } from '@cloudscape-design/components';
 import { useLoaderData } from 'react-router';
 import styled from 'styled-components';
-
-import { SideNavigation, SpaceBetween } from '@cloudscape-design/components';
-
 import { SearchForm } from './components';
-
 import type { SideNavigationProps } from '@cloudscape-design/components';
 import type { MouseEventHandler } from 'react';
 import type { WorkspaceLayoutLoaderData } from '../../Loader';

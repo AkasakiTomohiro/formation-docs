@@ -9,10 +9,8 @@ import {
   SpaceBetween,
   Table,
 } from '@cloudscape-design/components';
-
 import type { useCollection } from '@cloudscape-design/collection-hooks';
 import type { ButtonProps, FlashbarProps, LinkProps, TableProps } from '@cloudscape-design/components';
-
 import type { WorkspaceExpand } from '../../hooks/useWorkspaces';
 
 export type AppHomePresentationProps = {

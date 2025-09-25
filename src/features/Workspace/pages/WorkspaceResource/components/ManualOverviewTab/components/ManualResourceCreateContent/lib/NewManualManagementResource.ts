@@ -1,5 +1,4 @@
 import { invoke } from '@tauri-apps/api/core';
-
 import type { CommandResult } from '../../../../../../../../../lib/CommandResult';
 
 export type NewManualManagementResourceProperties = {
@@ -9,11 +8,7 @@ export type NewManualManagementResourceProperties = {
   resource_name: string;
 };
 
-export async function newManualManagementResource(
-  props: NewManualManagementResourceProperties,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-): Promise<any> {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export async function newManualManagementResource(props: NewManualManagementResourceProperties): Promise<any> {
   const result = await invoke<CommandResult<any>>('new_manual_management_resource_command', props);
   if (!result.success) {
     throw new Error(result.value);

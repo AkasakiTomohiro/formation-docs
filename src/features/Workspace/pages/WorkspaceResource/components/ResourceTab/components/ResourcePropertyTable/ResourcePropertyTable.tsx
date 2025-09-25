@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
-
 import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFormationSchema';
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
 import { createExpandedItems } from '../../../PropertyTable';
-import { ResourcePropertyTablePresentation } from './ResourcePropertyTable.presentation';
 import { getStackResourceProperties } from './lib/GetStackResourceProperties';
 import { getStackResourcePropertiesReasons } from './lib/GetStackResourcePropertiesReasons';
 import { loadParameterAndResourceList } from './lib/LoadParameterAndResourceList';
 import { updateStackMeta } from './lib/UpdateStackMeta';
-
+import { ResourcePropertyTablePresentation } from './ResourcePropertyTable.presentation';
 import type { TemplateSummary } from '../../../../../../contexts/lib/LoadTemplateSummary';
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
@@ -50,7 +48,6 @@ export const ResourcePropertyTable = ({
   selectedLogicalId,
 }: ResourcePropertyTableProps): JSX.Element => {
   // ネストされたプロパティの展開状態を管理するためのステート
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const [expandedItems, setExpandedItems] = useState<any>();
 
   // 編集モードの状態を管理するためのステート

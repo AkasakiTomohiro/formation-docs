@@ -6,12 +6,10 @@ import 'ace-builds/src-noconflict/ext-language_tools';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/snippets/json';
 import 'ace-builds/src-noconflict/theme-github';
-import jsonWorker from 'ace-builds/src-noconflict/worker-json?url';
-
 import CodeView from '@cloudscape-design/code-view/code-view';
 import jsonHighlight from '@cloudscape-design/code-view/highlight/json';
 import { CodeEditor, Container } from '@cloudscape-design/components';
-
+import jsonWorker from 'ace-builds/src-noconflict/worker-json?url';
 import type { CodeEditorProps } from '@cloudscape-design/components';
 
 ace.config.setModuleUrl('ace/mode/json_worker', jsonWorker);

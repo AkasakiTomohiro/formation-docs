@@ -1,5 +1,4 @@
-import { RouterProvider, createBrowserRouter } from 'react-router';
-
+import { createBrowserRouter, RouterProvider } from 'react-router';
 import { Header } from './components/Header';
 import { FlashbarProvider } from './contexts/FlashbarContext';
 import { AppHome } from './features/AppHome';

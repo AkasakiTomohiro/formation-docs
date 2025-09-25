@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
 import { LogicalIdTablePresentation } from './LogicalIdTable.presentation';
 import { getStackResourceList } from './lib/GetStackResourceList';
-
 import type { ResourceTabInfo } from '../../../../../../contexts';
 
 export type LogicalIdTableProps = {

@@ -1,8 +1,6 @@
 import { useCallback, useState } from 'react';
-
 import { deleteWorkspaceFromAppConfig } from '../invoke/AppConfig';
 import { createWorkspace, loadWorkspaces } from '../invoke/Workspace';
-
 import type { CreateWorkspaceInfo, WorkspaceInfo } from '../invoke/AppConfig';
 
 export interface Workspace {
