@@ -113,6 +113,16 @@ impl StackMetaConfig {
             .downcast::<StackMetaConfig>()
             .expect("must be StackMeta at latest")
     }
+    pub fn new_stack_meta(
+        name: &str,
+        description: &str,
+        reasons: HashMap<String, HashMap<String, String>>,
+    ) -> Self {
+        let mut config = StackMetaConfig::new(name);
+        config.description = description.to_string();
+        config.reasons = reasons;
+        config
+    }
 }
 
 impl ConfigMigratable for StackMetaConfig {
@@ -173,7 +183,7 @@ async fn read_config_version(
 ///
 /// - `stack_meta_path`: 書き込むパス
 /// - `new_config`: 書き込む内容
-async fn write_stack_meta_config(
+pub async fn write_stack_meta_config(
     stack_meta_path: &PathBuf,
     new_config: &StackMetaConfig,
 ) -> Result<(), StackMetaConfigError> {

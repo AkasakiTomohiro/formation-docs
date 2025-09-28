@@ -5,6 +5,9 @@ use std::io::ErrorKind;
 use std::path::PathBuf;
 
 use crate::config::stack_config::read_stack_meta_config;
+use crate::config::stack_config::stack_meta_config_path;
+use crate::config::stack_config::write_stack_meta_config;
+use crate::config::stack_config::StackMetaConfig;
 use crate::config::stack_config::StackMetaConfigError;
 use crate::config::workspace_config::read_workspace_config;
 use crate::config::workspace_config::WorkspaceConfigError;
@@ -27,14 +30,6 @@ pub struct Stack {
     description_from_meta: Option<String>,
     description_from_stack: Option<String>,
     exist: bool,
-}
-
-// TODO:削除
-#[derive(Debug, Serialize, Deserialize)]
-pub struct StackMeta {
-    pub name: String,
-    pub description: String,
-    pub reasons: HashMap<String, HashMap<String, String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -536,12 +531,13 @@ async fn update_stack_meta(
         }
     };
     let stack_meta = read_stack_meta_config(workspace_directory, &stack_name).await?;
-    let new_stack_meta = StackMeta {
-        name: update_stack_meta.name.unwrap_or(stack_meta.name),
-        description: update_stack_meta
+    let new_stack_meta = StackMetaConfig::new_stack_meta(
+        update_stack_meta.name.unwrap_or(stack_meta.name).as_str(),
+        update_stack_meta
             .description
-            .unwrap_or(stack_meta.description),
-        reasons: match update_stack_meta.reasons {
+            .unwrap_or(stack_meta.description)
+            .as_str(),
+        match update_stack_meta.reasons {
             Some(update_meta) => {
                 let mut new_reasons = stack_meta.reasons.clone();
                 new_reasons.insert(update_meta.logical_id, update_meta.reasons);
@@ -549,10 +545,9 @@ async fn update_stack_meta(
             }
             None => stack_meta.reasons,
         },
-    };
-    let stack_meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
-    let stack_meta_json = serde_json::to_string(&new_stack_meta).unwrap();
-    fs::write(&stack_meta_path, stack_meta_json)?;
+    );
+    let meta_path = stack_meta_config_path(workspace_directory, &stack_name)?;
+    write_stack_meta_config(&meta_path, &new_stack_meta).await?;
     return Ok(());
 }
 
@@ -569,12 +564,13 @@ async fn update_stack_detail(
         }
     };
     let stack_meta = read_stack_meta_config(workspace_directory, &stack_name).await?;
-    let new_stack_meta = StackMeta {
-        name: update_stack_meta.name.unwrap_or(stack_meta.name),
-        description: update_stack_meta
+    let new_stack_meta = StackMetaConfig::new_stack_meta(
+        update_stack_meta.name.unwrap_or(stack_meta.name).as_str(),
+        update_stack_meta
             .description
-            .unwrap_or(stack_meta.description),
-        reasons: match update_stack_meta.reasons {
+            .unwrap_or(stack_meta.description)
+            .as_str(),
+        match update_stack_meta.reasons {
             Some(update_meta) => {
                 let mut new_reasons = stack_meta.reasons.clone();
                 new_reasons.insert(update_meta.logical_id, update_meta.reasons);
@@ -582,10 +578,9 @@ async fn update_stack_detail(
             }
             None => stack_meta.reasons,
         },
-    };
-    let stack_meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
-    let stack_meta_json = serde_json::to_string(&new_stack_meta).unwrap();
-    fs::write(&stack_meta_path, stack_meta_json)?;
+    );
+    let meta_path = stack_meta_config_path(workspace_directory, &stack_name)?;
+    write_stack_meta_config(&meta_path, &new_stack_meta).await?;
     return Ok(());
 }
 
