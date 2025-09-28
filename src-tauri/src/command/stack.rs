@@ -4,11 +4,8 @@ use std::fs;
 use std::io::ErrorKind;
 use std::path::PathBuf;
 
-use crate::config::stack_config::read_stack_meta_config;
-use crate::config::stack_config::stack_meta_config_path;
-use crate::config::stack_config::write_stack_meta_config;
-use crate::config::stack_config::StackMetaConfig;
-use crate::config::stack_config::StackMetaConfigError;
+use crate::config::stack_meta_config::StackMetaConfig;
+use crate::config::stack_meta_config::StackMetaConfigError;
 use crate::config::workspace_config::read_workspace_config;
 use crate::config::workspace_config::WorkspaceConfigError;
 use crate::utils::get_window_state;
@@ -30,25 +27,6 @@ pub struct Stack {
     description_from_meta: Option<String>,
     description_from_stack: Option<String>,
     exist: bool,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct StackMetaReasonsUpdate {
-    pub logical_id: String,
-    pub reasons: HashMap<String, String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct StackMetaUpdate {
-    pub name: Option<String>,
-    pub description: Option<String>,
-    pub reasons: Option<StackMetaReasonsUpdate>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct StackPropertiesUpdate {
-    pub logical_id: String,
-    pub properties: HashMap<String, Value>,
 }
 
 #[derive(Debug, Error)]
@@ -226,7 +204,7 @@ async fn load_stack_from_info(
         .and_then(|desc| Some(desc.to_string()));
 
     // メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
-    let meta_json = match read_stack_meta_config(
+    let meta_json = match StackMetaConfig::read(
         workspace_directory,
         stack_file_name
             .to_string()
@@ -287,7 +265,7 @@ async fn load_template_summary(
     let mut templates = Vec::new();
     let workspace = read_workspace_config(workspace_directory).await?;
     for (id, stack_file_name) in workspace.stacks.iter() {
-        let meta = read_stack_meta_config(
+        let meta = StackMetaConfig::read(
             workspace_directory,
             stack_file_name.replace(".template.json", "").as_str(),
         )
@@ -518,10 +496,11 @@ async fn get_all_stack_outputs(
     return Ok(result);
 }
 
-async fn update_stack_meta(
+async fn update_stack_reasons(
     workspace_directory: &str,
     stack_id: &str,
-    update_stack_meta: StackMetaUpdate,
+    logical_id: &str,
+    reasons: HashMap<String, String>,
 ) -> Result<(), StackError> {
     let workspace = read_workspace_config(workspace_directory).await?;
     let stack_name = match workspace.stacks.get(stack_id) {
@@ -530,31 +509,17 @@ async fn update_stack_meta(
             return Err(StackError::App(AppError::new("Stack not found")));
         }
     };
-    let stack_meta = read_stack_meta_config(workspace_directory, &stack_name).await?;
-    let new_stack_meta = StackMetaConfig::new_stack_meta(
-        update_stack_meta.name.unwrap_or(stack_meta.name).as_str(),
-        update_stack_meta
-            .description
-            .unwrap_or(stack_meta.description)
-            .as_str(),
-        match update_stack_meta.reasons {
-            Some(update_meta) => {
-                let mut new_reasons = stack_meta.reasons.clone();
-                new_reasons.insert(update_meta.logical_id, update_meta.reasons);
-                new_reasons
-            }
-            None => stack_meta.reasons,
-        },
-    );
-    let meta_path = stack_meta_config_path(workspace_directory, &stack_name)?;
-    write_stack_meta_config(&meta_path, &new_stack_meta).await?;
+    let mut stack_meta = StackMetaConfig::read(workspace_directory, &stack_name).await?;
+    stack_meta.reasons.insert(logical_id.to_string(), reasons);
+    stack_meta.write(workspace_directory, &stack_name).await?;
     return Ok(());
 }
 
 async fn update_stack_detail(
     workspace_directory: &str,
     stack_id: &str,
-    update_stack_meta: StackMetaUpdate,
+    name: &str,
+    description: &str,
 ) -> Result<(), StackError> {
     let workspace = read_workspace_config(workspace_directory).await?;
     let stack_name = match workspace.stacks.get(stack_id) {
@@ -563,24 +528,10 @@ async fn update_stack_detail(
             return Err(StackError::App(AppError::new("Stack not found")));
         }
     };
-    let stack_meta = read_stack_meta_config(workspace_directory, &stack_name).await?;
-    let new_stack_meta = StackMetaConfig::new_stack_meta(
-        update_stack_meta.name.unwrap_or(stack_meta.name).as_str(),
-        update_stack_meta
-            .description
-            .unwrap_or(stack_meta.description)
-            .as_str(),
-        match update_stack_meta.reasons {
-            Some(update_meta) => {
-                let mut new_reasons = stack_meta.reasons.clone();
-                new_reasons.insert(update_meta.logical_id, update_meta.reasons);
-                new_reasons
-            }
-            None => stack_meta.reasons,
-        },
-    );
-    let meta_path = stack_meta_config_path(workspace_directory, &stack_name)?;
-    write_stack_meta_config(&meta_path, &new_stack_meta).await?;
+    let mut stack_meta = StackMetaConfig::read(workspace_directory, &stack_name).await?;
+    stack_meta.name = name.to_string();
+    stack_meta.description = description.to_string();
+    stack_meta.write(workspace_directory, &stack_name).await?;
     return Ok(());
 }
 
@@ -843,17 +794,11 @@ pub async fn update_stack_meta_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match update_stack_meta(
+    return match update_stack_reasons(
         window_state.workspace_directory.as_str(),
         stack_id,
-        StackMetaUpdate {
-            name: None,
-            description: None,
-            reasons: Some(StackMetaReasonsUpdate {
-                logical_id: logical_id.to_string(),
-                reasons: reasons,
-            }),
-        },
+        logical_id,
+        reasons,
     )
     .await
     {
@@ -902,11 +847,8 @@ pub async fn update_stack_detail_command(
     return match update_stack_detail(
         window_state.workspace_directory.as_str(),
         stack_id,
-        StackMetaUpdate {
-            name: Some(name.to_string()),
-            description: Some(description.to_string()),
-            reasons: None,
-        },
+        name,
+        description,
     )
     .await
     {
