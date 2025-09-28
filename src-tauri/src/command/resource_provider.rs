@@ -1,6 +1,4 @@
-use crate::command::app_config::save_app_config;
-use crate::command::app_config::AppConfigUpdate;
-use crate::config::app_config::read_app_config;
+use crate::config::app_config::AppConfig;
 use chrono::Utc;
 use thiserror::Error;
 
@@ -17,15 +15,12 @@ pub enum ResourceProviderError {
 }
 
 async fn setup_app() -> Result<(), ResourceProviderError> {
-    let app_config = read_app_config().await?;
+    let mut app_config = AppConfig::read().await?;
     if app_config.initialized == false {
         cloudformation::schema::dl_resource_provider("us-east-1").await?;
-        save_app_config(AppConfigUpdate {
-            workspaces: None,
-            initialized: Some(true),
-            initialized_at: Some(Utc::now().to_string()),
-        })
-        .await?;
+        app_config.initialized = true;
+        app_config.initialized_at = Utc::now().to_string();
+        app_config.write().await?;
     }
     return Ok(());
 }

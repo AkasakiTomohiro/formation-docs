@@ -1,4 +1,5 @@
-use super::super::config::app_config;
+use crate::config::app_config::AppConfig;
+use crate::config::app_config::AppConfigError;
 use crate::config::workspace_config::read_workspace_config;
 use crate::config::workspace_config::workspace_config_path;
 use crate::config::workspace_config::WorkspaceConfig;
@@ -39,7 +40,7 @@ pub enum WorkspaceCommandError {
     #[error("json error: {0}")]
     Json(#[from] serde_json::Error),
     #[error("app config error: {0}")]
-    AppConfig(#[from] app_config::AppConfigError),
+    AppConfig(#[from] AppConfigError),
     #[error("app config error: {0}")]
     AppConfigCommand(#[from] super::app_config::AppConfigCommandError),
     #[error("workspace config error: {0}")]
@@ -60,7 +61,7 @@ async fn create_workspace(directory: &str) -> Result<WorkspaceMergeInfo, Workspa
 async fn load_workspace_merge_info(
     workspace_id: &str,
 ) -> Result<WorkspaceMergeInfo, WorkspaceCommandError> {
-    let app_config = app_config::read_app_config().await?;
+    let app_config = AppConfig::read().await?;
 
     // すでに登録されている場合は登録IDを返す
     let workspace_directory = app_config.workspaces.get(workspace_id);
@@ -84,7 +85,7 @@ async fn load_workspace_merge_info(
 }
 
 async fn load_workspaces() -> Result<Vec<WorkspaceMergeInfo>, WorkspaceCommandError> {
-    let app_config = app_config::read_app_config().await?;
+    let app_config = AppConfig::read().await?;
 
     let mut workspaces = Vec::new();
     for (id, directory) in app_config.workspaces.iter() {

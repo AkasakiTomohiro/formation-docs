@@ -103,6 +103,44 @@ impl AppConfig {
             .downcast::<AppConfig>()
             .unwrap()
     }
+
+    /// app_config.jsonを読み込む
+    ///
+    /// versionが最新でない場合はマイグレーションして最新版に変換し、保存する
+    /// - 戻り値: 読み込んだAppConfig
+    pub async fn read() -> Result<AppConfig, AppConfigError> {
+        let version = read_config_version().await?;
+        let config_path = app_config_path()?;
+        match version {
+            1 => {
+                let config_json = fs::read_to_string(&config_path).await?;
+                let config_json = serde_json::from_str::<AppConfigV1>(&config_json)?;
+                let boxed = Box::new(config_json);
+                let config: AppConfig = boxed.migrate_until_latest();
+                config.write().await?;
+                Ok(config)
+            }
+            2 => {
+                let config_json = fs::read_to_string(&config_path).await?;
+                let config_json = serde_json::from_str::<AppConfigV2>(&config_json)?;
+                let boxed = Box::new(config_json);
+                Ok(boxed.migrate_until_latest())
+            }
+            _ => {
+                let config_json = AppConfig::new();
+                config_json.write().await?;
+                Ok(config_json)
+            }
+        }
+    }
+
+    /// app_config.jsonへ書き込む
+    pub async fn write(&self) -> Result<(), AppConfigError> {
+        let app_config_json = serde_json::to_string::<AppConfig>(self)?;
+        let app_config_path = app_config_path()?;
+        fs::write(app_config_path, app_config_json).await?;
+        return Ok(());
+    }
 }
 
 impl ConfigMigratable for AppConfig {
@@ -134,7 +172,7 @@ pub enum AppConfigError {
 }
 
 /// app_config.jsonのパスを取得
-pub fn app_config_path() -> Result<PathBuf, AppConfigError> {
+fn app_config_path() -> Result<PathBuf, AppConfigError> {
     let dir = config_local_dir().ok_or(AppConfigError::App(AppError::new(
         "Failed to get local config directory",
     )))?;
@@ -157,45 +195,5 @@ async fn read_config_version() -> Result<u32, AppConfigError> {
             Ok(version)
         }
         false => Ok(0),
-    }
-}
-
-/// app_config.jsonへ書き込む
-///
-/// - `new_app_config`: 書き込む内容
-pub async fn write_app_config(new_app_config: &AppConfig) -> Result<(), AppConfigError> {
-    let app_config_json = serde_json::to_string::<AppConfig>(new_app_config)?;
-    let app_config_path = app_config_path()?;
-    fs::write(app_config_path, app_config_json).await?;
-    return Ok(());
-}
-
-/// app_config.jsonを読み込む
-///
-/// versionが最新でない場合はマイグレーションして最新版に変換し、保存する
-/// - 戻り値: 読み込んだAppConfig
-pub async fn read_app_config() -> Result<AppConfig, AppConfigError> {
-    let version = read_config_version().await?;
-    let config_path = app_config_path()?;
-    let config_json = fs::read_to_string(&config_path).await?;
-
-    match version {
-        1 => {
-            let config_json = serde_json::from_str::<AppConfigV1>(&config_json)?;
-            let boxed = Box::new(config_json);
-            let config: AppConfig = boxed.migrate_until_latest();
-            write_app_config(&config).await?;
-            Ok(config)
-        }
-        2 => {
-            let config_json = serde_json::from_str::<AppConfigV2>(&config_json)?;
-            let boxed = Box::new(config_json);
-            Ok(boxed.migrate_until_latest())
-        }
-        _ => {
-            let config_json = AppConfig::new();
-            write_app_config(&config_json).await?;
-            Ok(config_json)
-        }
     }
 }
