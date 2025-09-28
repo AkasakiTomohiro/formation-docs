@@ -134,28 +134,27 @@ async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Resul
         .unwrap_or_default()
         .to_str()
         .unwrap_or_default();
-    let copy_file_path = format!("{}/{}", workspace_directory, filename);
+    let mut copy_file_path = PathBuf::from(workspace_directory).join(filename);
+    println!("Importing stack file: {}", stack_file_path);
 
-    if copy_file_path == stack_file_path {
-        return Ok(());
-    }
-
-    if filename.ends_with(".yaml") || filename.ends_with(".yml") {
-        // YAMLファイルをJSONに変換して保存
-        let yaml_content = fs::read_to_string(stack_file_path)?;
-        let yaml_value: serde_yaml::Value = serde_yaml::from_str(&yaml_content)?;
-        let json_content = serde_json::to_string_pretty(&yaml_value)?;
-        let json_file_path = copy_file_path
-            .replace(".yaml", ".json")
-            .replace(".yml", ".json");
-        fs::write(json_file_path, json_content)?;
-    } else {
-        // 通常のコピー処理
-        fs::copy(stack_file_path, copy_file_path)?;
+    // インポート元と先が同じファイルパスでない場合のみコピー
+    if copy_file_path.to_str().unwrap() != stack_file_path {
+        if filename.ends_with(".yaml") || filename.ends_with(".yml") {
+            // YAMLファイルをJSONに変換して保存
+            let yaml_content = fs::read_to_string(stack_file_path)?;
+            let yaml_value: serde_yaml::Value = serde_yaml::from_str(&yaml_content)?;
+            let json_content = serde_json::to_string_pretty(&yaml_value)?;
+            copy_file_path.set_extension("json");
+            fs::write(copy_file_path, json_content)?;
+        } else {
+            // 通常のコピー処理
+            fs::copy(stack_file_path, copy_file_path)?;
+        }
     }
 
     // workspace.jsonのstacksに追加する
     let mut workspace = WorkspaceConfig::read(workspace_directory).await?;
+    println!("Current stacks: {:?}", workspace.stacks);
 
     // スタックが存在する場合は追加しない
     if workspace.stacks.values().any(|v| v == filename) {
@@ -166,6 +165,7 @@ async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Resul
     workspace
         .stacks
         .insert(Uuid::new_v4().to_string(), filename.to_string());
+    println!("Updated stacks: {:?}", workspace.stacks);
     workspace.write(workspace_directory).await?;
 
     return Ok(());
