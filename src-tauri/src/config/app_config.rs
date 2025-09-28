@@ -9,6 +9,7 @@ use std::path::PathBuf;
 use thiserror::Error;
 use tokio::fs;
 
+const APP_CONFIG_LATEST_VERSION: u32 = 1;
 const APP_CONFIG_FILE_NAME: &str = "app_config.json";
 pub const APP_CONFIG_DIRECTORY_NAME: &str = "formation-docs";
 
@@ -20,43 +21,14 @@ pub const APP_CONFIG_DIRECTORY_NAME: &str = "formation-docs";
 struct AppConfigV1 {
     pub version: u32,
     pub workspaces: HashMap<String, String>,
-}
-
-impl ConfigMigratable for AppConfigV1 {
-    type Latest = AppConfig;
-
-    fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable<Latest = Self::Latest>> {
-        Box::new(AppConfigV2 {
-            version: 2,
-            workspaces: self.workspaces,
-            initialized: false,
-            initialized_at: Utc::now().to_string(),
-        })
-    }
-    fn is_latest(&self) -> bool {
-        false
-    }
-    fn as_any(self: Box<Self>) -> Box<dyn Any> {
-        self
-    }
-}
-
-///
-/// アプリコンフィグ v2
-///
-
-#[derive(Debug, Serialize, Deserialize)]
-struct AppConfigV2 {
-    pub version: u32,
-    pub workspaces: HashMap<String, String>,
     pub initialized: bool,
     pub initialized_at: String,
 }
 
-impl AppConfigV2 {
+impl AppConfigV1 {
     pub fn new() -> Self {
-        AppConfigV2 {
-            version: 2,
+        AppConfigV1 {
+            version: 1,
             workspaces: HashMap::new(),
             initialized: false,
             initialized_at: Utc::now().to_string(),
@@ -64,19 +36,16 @@ impl AppConfigV2 {
     }
 }
 
-impl ConfigMigratable for AppConfigV2 {
+impl ConfigMigratable for AppConfigV1 {
     type Latest = AppConfig;
 
     fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable<Latest = Self::Latest>> {
         Box::new(AppConfig {
-            version: 2,
+            version: APP_CONFIG_LATEST_VERSION,
             workspaces: self.workspaces,
             initialized: self.initialized,
             initialized_at: self.initialized_at,
         })
-    }
-    fn is_latest(&self) -> bool {
-        false
     }
     fn as_any(self: Box<Self>) -> Box<dyn Any> {
         self
@@ -96,7 +65,7 @@ pub struct AppConfig {
 }
 impl AppConfig {
     pub fn new() -> Self {
-        let config: Box<dyn ConfigMigratable<Latest = AppConfig>> = Box::new(AppConfigV2::new());
+        let config: Box<dyn ConfigMigratable<Latest = AppConfig>> = Box::new(AppConfigV1::new());
         *config
             .migrate_boxed()
             .as_any()
@@ -115,14 +84,6 @@ impl AppConfig {
             1 => {
                 let config_json = fs::read_to_string(&config_path).await?;
                 let config_json = serde_json::from_str::<AppConfigV1>(&config_json)?;
-                let boxed = Box::new(config_json);
-                let config: AppConfig = boxed.migrate_until_latest();
-                config.write().await?;
-                Ok(config)
-            }
-            2 => {
-                let config_json = fs::read_to_string(&config_path).await?;
-                let config_json = serde_json::from_str::<AppConfigV2>(&config_json)?;
                 let boxed = Box::new(config_json);
                 Ok(boxed.migrate_until_latest())
             }

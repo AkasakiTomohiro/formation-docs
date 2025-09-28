@@ -8,6 +8,7 @@ use thiserror::Error;
 use tokio::fs;
 
 const WORKSPACE_FILE_NAME: &str = "workspace.json";
+const WORKSPACE_CONFIG_LATEST_VERSION: u32 = 1;
 
 ///
 /// ワークスペースコンフィグ v1
@@ -16,46 +17,16 @@ const WORKSPACE_FILE_NAME: &str = "workspace.json";
 #[derive(Debug, Serialize, Deserialize)]
 struct WorkspaceConfigV1 {
     pub version: u32,
-    pub name: String,
-    pub description: String,
-}
-
-impl ConfigMigratable for WorkspaceConfigV1 {
-    type Latest = WorkspaceConfig;
-
-    fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable<Latest = Self::Latest>> {
-        Box::new(WorkspaceConfigV2 {
-            version: 2,
-            stacks: HashMap::new(),
-            name: self.name,
-            description: self.description,
-        })
-    }
-    fn is_latest(&self) -> bool {
-        false
-    }
-    fn as_any(self: Box<Self>) -> Box<dyn Any> {
-        self
-    }
-}
-
-///
-/// ワークスペースコンフィグ v2
-///
-
-#[derive(Debug, Serialize, Deserialize)]
-struct WorkspaceConfigV2 {
-    pub version: u32,
     // stack_id: stack_file_nameのマッピング
     pub stacks: HashMap<String, String>,
     pub name: String,
     pub description: String,
 }
 
-impl WorkspaceConfigV2 {
+impl WorkspaceConfigV1 {
     pub fn new(name: &str) -> Self {
-        WorkspaceConfigV2 {
-            version: 2,
+        WorkspaceConfigV1 {
+            version: 1,
             stacks: HashMap::new(),
             name: name.to_string().chars().take(256).collect(),
             description: "".to_string().chars().take(256).collect(),
@@ -63,19 +34,16 @@ impl WorkspaceConfigV2 {
     }
 }
 
-impl ConfigMigratable for WorkspaceConfigV2 {
+impl ConfigMigratable for WorkspaceConfigV1 {
     type Latest = WorkspaceConfig;
 
     fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable<Latest = Self::Latest>> {
         Box::new(WorkspaceConfig {
-            version: 2,
+            version: WORKSPACE_CONFIG_LATEST_VERSION,
             stacks: self.stacks,
             name: self.name,
             description: self.description,
         })
-    }
-    fn is_latest(&self) -> bool {
-        false
     }
     fn as_any(self: Box<Self>) -> Box<dyn Any> {
         self
@@ -96,7 +64,7 @@ pub struct WorkspaceConfig {
 impl WorkspaceConfig {
     pub fn new(name: &str) -> Self {
         let config: Box<dyn ConfigMigratable<Latest = WorkspaceConfig>> =
-            Box::new(WorkspaceConfigV2::new(name));
+            Box::new(WorkspaceConfigV1::new(name));
         *config
             .migrate_boxed()
             .as_any()
@@ -116,14 +84,6 @@ impl WorkspaceConfig {
             1 => {
                 let config_json = fs::read_to_string(&config_path).await?;
                 let config_json = serde_json::from_str::<WorkspaceConfigV1>(&config_json)?;
-                let boxed = Box::new(config_json);
-                let config: WorkspaceConfig = boxed.migrate_until_latest();
-                config.write(workspace_directory).await?;
-                Ok(config)
-            }
-            2 => {
-                let config_json = fs::read_to_string(&config_path).await?;
-                let config_json = serde_json::from_str::<WorkspaceConfigV2>(&config_json)?;
                 let boxed = Box::new(config_json);
                 Ok(boxed.migrate_until_latest())
             }

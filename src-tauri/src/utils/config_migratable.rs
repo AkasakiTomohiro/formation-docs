@@ -12,7 +12,9 @@ pub trait ConfigMigratable: Any {
     fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable<Latest = Self::Latest>>;
 
     /// 今が最新版なら true
-    fn is_latest(&self) -> bool;
+    fn is_latest(&self) -> bool {
+        false
+    }
 
     /// Any型としてダウンキャストできるようにする
     fn as_any(self: Box<Self>) -> Box<dyn Any>;
