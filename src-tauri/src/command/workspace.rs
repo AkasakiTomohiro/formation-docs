@@ -1,7 +1,5 @@
 use crate::config::app_config::AppConfig;
 use crate::config::app_config::AppConfigError;
-use crate::config::workspace_config::read_workspace_config;
-use crate::config::workspace_config::workspace_config_path;
 use crate::config::workspace_config::WorkspaceConfig;
 use crate::config::workspace_config::WorkspaceConfigError;
 use crate::utils::get_window_state;
@@ -13,7 +11,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
-use tokio::fs;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WorkspaceMergeInfo {
@@ -22,13 +19,6 @@ pub struct WorkspaceMergeInfo {
     pub name: String,
     pub description: String,
     pub stacks: HashMap<String, String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct WorkspaceUpdate {
-    pub name: Option<String>,
-    pub description: Option<String>,
-    pub stacks: Option<HashMap<String, String>>,
 }
 
 #[derive(Debug, Error)]
@@ -47,7 +37,7 @@ pub enum WorkspaceCommandError {
     WorkspaceConfig(#[from] WorkspaceConfigError),
 }
 async fn create_workspace(directory: &str) -> Result<WorkspaceMergeInfo, WorkspaceCommandError> {
-    let workspace = read_workspace_config(directory).await?;
+    let workspace = WorkspaceConfig::read(directory).await?;
     let workspace_result = super::app_config::add_workspace_to_app_config(directory).await?;
     return Ok(WorkspaceMergeInfo {
         id: workspace_result,
@@ -66,18 +56,14 @@ async fn load_workspace_merge_info(
     // すでに登録されている場合は登録IDを返す
     let workspace_directory = app_config.workspaces.get(workspace_id);
     if workspace_directory.is_some() {
-        let workspace_path = workspace_config_path(workspace_directory.unwrap())?;
-        if workspace_path.exists() {
-            let workspace_json = fs::read_to_string(&workspace_path).await?;
-            let workspace = serde_json::from_str::<WorkspaceConfig>(&workspace_json)?;
-            return Ok(WorkspaceMergeInfo {
-                id: workspace_id.to_string(),
-                directory: workspace_directory.unwrap().to_string(),
-                name: workspace.name,
-                description: workspace.description,
-                stacks: workspace.stacks.clone(),
-            });
-        }
+        let workspace = WorkspaceConfig::read(workspace_directory.unwrap()).await?;
+        return Ok(WorkspaceMergeInfo {
+            id: workspace_id.to_string(),
+            directory: workspace_directory.unwrap().to_string(),
+            name: workspace.name,
+            description: workspace.description,
+            stacks: workspace.stacks.clone(),
+        });
     }
     return Err(WorkspaceCommandError::App(AppError::new(
         "Failed to find Workspace",
@@ -89,7 +75,7 @@ async fn load_workspaces() -> Result<Vec<WorkspaceMergeInfo>, WorkspaceCommandEr
 
     let mut workspaces = Vec::new();
     for (id, directory) in app_config.workspaces.iter() {
-        let workspace = read_workspace_config(directory).await?;
+        let workspace = WorkspaceConfig::read(directory).await?;
         workspaces.push(WorkspaceMergeInfo {
             id: id.to_string(),
             directory: directory.to_string(),
@@ -103,19 +89,13 @@ async fn load_workspaces() -> Result<Vec<WorkspaceMergeInfo>, WorkspaceCommandEr
 
 pub async fn update_workspace(
     workspace_directory: &str,
-    update_config: WorkspaceUpdate,
+    name: &str,
+    description: &str,
 ) -> Result<(), WorkspaceCommandError> {
-    let workspace = read_workspace_config(workspace_directory).await?;
-    let new_workspace = WorkspaceConfig {
-        version: workspace.version,
-        name: update_config.name.unwrap_or(workspace.name),
-        description: update_config.description.unwrap_or(workspace.description),
-        stacks: update_config.stacks.unwrap_or(workspace.stacks),
-    };
-
-    let workspace_path = workspace_config_path(workspace_directory)?;
-    let workspace_json = serde_json::to_string(&new_workspace).unwrap();
-    fs::write(&workspace_path, workspace_json).await?;
+    let mut workspace = WorkspaceConfig::read(workspace_directory).await?;
+    workspace.name = name.to_string();
+    workspace.description = description.to_string();
+    workspace.write(workspace_directory).await?;
     return Ok(());
 }
 
@@ -188,9 +168,10 @@ pub async fn load_workspaces_command(
 }
 
 #[tauri::command(rename_all = "snake_case")]
-pub async fn update_workspace_command(
+pub async fn update_workspace_details_command(
     window: tauri::Window,
-    workspace: WorkspaceUpdate,
+    name: &str,
+    description: &str,
 ) -> Result<CommandResult<()>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
@@ -198,7 +179,7 @@ pub async fn update_workspace_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    match update_workspace(window_state.workspace_directory.as_str(), workspace).await {
+    match update_workspace(window_state.workspace_directory.as_str(), name, description).await {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to update Workspace")),
     }

@@ -103,6 +103,56 @@ impl WorkspaceConfig {
             .downcast::<WorkspaceConfig>()
             .unwrap()
     }
+
+    /// workspace.jsonを読み込む
+    ///
+    /// versionが最新でない場合はマイグレーションして最新版に変換し、保存する
+    /// - 戻り値: 読み込んだWorkspaceConfig
+    pub async fn read(workspace_directory: &str) -> Result<WorkspaceConfig, WorkspaceConfigError> {
+        let version = read_config_version(workspace_directory).await?;
+        let config_path = workspace_config_path(workspace_directory);
+
+        match version {
+            1 => {
+                let config_json = fs::read_to_string(&config_path).await?;
+                let config_json = serde_json::from_str::<WorkspaceConfigV1>(&config_json)?;
+                let boxed = Box::new(config_json);
+                let config: WorkspaceConfig = boxed.migrate_until_latest();
+                config.write(workspace_directory).await?;
+                Ok(config)
+            }
+            2 => {
+                let config_json = fs::read_to_string(&config_path).await?;
+                let config_json = serde_json::from_str::<WorkspaceConfigV2>(&config_json)?;
+                let boxed = Box::new(config_json);
+                Ok(boxed.migrate_until_latest())
+            }
+            _ => {
+                let name = Path::new(workspace_directory)
+                    .file_name()
+                    .and_then(|f| f.to_str());
+                if name.is_none() {
+                    return Err(WorkspaceConfigError::App(AppError::new(
+                        "Invalid directory",
+                    )));
+                }
+                let name = name.unwrap();
+                let config_json = WorkspaceConfig::new(name);
+                config_json.write(workspace_directory).await?;
+                Ok(config_json)
+            }
+        }
+    }
+
+    /// workspace.jsonへ書き込む
+    ///
+    /// - `workspace_directory`: ワークスペースディレクトリ
+    pub async fn write(&self, workspace_directory: &str) -> Result<(), WorkspaceConfigError> {
+        let workspace_config_json = serde_json::to_string::<WorkspaceConfig>(self)?;
+        let workspace_config_path = workspace_config_path(workspace_directory);
+        fs::write(workspace_config_path, workspace_config_json).await?;
+        return Ok(());
+    }
 }
 
 impl ConfigMigratable for WorkspaceConfig {
@@ -130,19 +180,13 @@ pub enum WorkspaceConfigError {
 }
 
 /// workspace.jsonのパスを取得
-pub fn workspace_config_path(workspace_directory: &str) -> Result<PathBuf, WorkspaceConfigError> {
-    let workspace_path = PathBuf::from(workspace_directory).join(WORKSPACE_FILE_NAME);
-    if !workspace_path.exists() {
-        return Err(WorkspaceConfigError::App(AppError::new(
-            "Failed to find Workspace",
-        )));
-    }
-    return Ok(workspace_path);
+fn workspace_config_path(workspace_directory: &str) -> PathBuf {
+    return PathBuf::from(workspace_directory).join(WORKSPACE_FILE_NAME);
 }
 
 /// workspace.jsonのバージョンを取得
 async fn read_config_version(workspace_directory: &str) -> Result<u32, WorkspaceConfigError> {
-    let config_path = workspace_config_path(workspace_directory)?;
+    let config_path = workspace_config_path(workspace_directory);
     match config_path.exists() {
         true => {
             let config_json = fs::read_to_string(&config_path).await?;
@@ -154,59 +198,5 @@ async fn read_config_version(workspace_directory: &str) -> Result<u32, Workspace
             Ok(version)
         }
         false => Ok(0),
-    }
-}
-
-/// workspace.jsonへ書き込む
-///
-/// - `new_app_config`: 書き込む内容
-async fn write_workspace_config(
-    workspace_directory: &str,
-    new_workspace_config: &WorkspaceConfig,
-) -> Result<(), WorkspaceConfigError> {
-    let workspace_config_json = serde_json::to_string::<WorkspaceConfig>(new_workspace_config)?;
-    let workspace_config_path = workspace_config_path(workspace_directory)?;
-    fs::write(workspace_config_path, workspace_config_json).await?;
-    return Ok(());
-}
-
-/// workspace.jsonを読み込む
-///
-/// versionが最新でない場合はマイグレーションして最新版に変換し、保存する
-/// - 戻り値: 読み込んだWorkspaceConfig
-pub async fn read_workspace_config(
-    workspace_directory: &str,
-) -> Result<WorkspaceConfig, WorkspaceConfigError> {
-    let version = read_config_version(workspace_directory).await?;
-    let config_path = workspace_config_path(workspace_directory)?;
-    let config_json = fs::read_to_string(&config_path).await?;
-
-    match version {
-        1 => {
-            let config_json = serde_json::from_str::<WorkspaceConfigV1>(&config_json)?;
-            let boxed = Box::new(config_json);
-            let config: WorkspaceConfig = boxed.migrate_until_latest();
-            write_workspace_config(workspace_directory, &config).await?;
-            Ok(config)
-        }
-        2 => {
-            let config_json = serde_json::from_str::<WorkspaceConfigV2>(&config_json)?;
-            let boxed = Box::new(config_json);
-            Ok(boxed.migrate_until_latest())
-        }
-        _ => {
-            let name = Path::new(workspace_directory)
-                .file_name()
-                .and_then(|f| f.to_str());
-            if name.is_none() {
-                return Err(WorkspaceConfigError::App(AppError::new(
-                    "Invalid directory",
-                )));
-            }
-            let name = name.unwrap();
-            let config_json = WorkspaceConfig::new(name);
-            write_workspace_config(workspace_directory, &config_json).await?;
-            Ok(config_json)
-        }
     }
 }
