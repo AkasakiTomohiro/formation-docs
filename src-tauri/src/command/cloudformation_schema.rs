@@ -1,8 +1,6 @@
 use std::{collections::HashMap, fs};
 
 use super::super::api::cloudformation;
-use regex::Regex;
-use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::utils::{AppError, CommandResult};

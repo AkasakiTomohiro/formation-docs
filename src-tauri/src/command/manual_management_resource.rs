@@ -5,8 +5,9 @@ use crate::utils::AppError;
 use crate::utils::CommandResult;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::HashMap;
 use std::collections::HashSet;
-use std::{collections::HashMap, path::Path};
+use std::path::PathBuf;
 use thiserror::Error;
 use tokio::fs;
 
@@ -68,11 +69,8 @@ enum ManualManagementResourceError {
 async fn get_manual_management_resources(
     workspace_directory: &str,
 ) -> Result<ManualManagementResources, ManualManagementResourceError> {
-    let manual_management_resources_path = format!(
-        "{}/{}",
-        workspace_directory, MANUAL_MANAGEMENT_RESOURCES_FILE
-    );
-    let manual_management_resources_path = Path::new(&manual_management_resources_path);
+    let manual_management_resources_path =
+        PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_FILE);
 
     if !manual_management_resources_path.exists() {
         // ファイルが存在しない場合は新規に作成
@@ -98,11 +96,8 @@ async fn save_manual_management_resources(
     workspace_directory: &str,
     manual_management_resources: &ManualManagementResources,
 ) -> Result<(), ManualManagementResourceError> {
-    let manual_management_resources_path = format!(
-        "{}/{}",
-        workspace_directory, MANUAL_MANAGEMENT_RESOURCES_FILE
-    );
-    let manual_management_resources_path = Path::new(&manual_management_resources_path);
+    let manual_management_resources_path =
+        PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_FILE);
     let updated_json = serde_json::to_string(&manual_management_resources)?;
     fs::write(&manual_management_resources_path, updated_json).await?;
     Ok(())
@@ -241,11 +236,7 @@ async fn load_manual_resource_meta(
     workspace_directory: &str,
 ) -> Result<ManualManagementMeta, ManualManagementResourceError> {
     // 手動管理リソースのmeta.jsonが存在するか確認
-    let meta_path = format!(
-        "{}/{}",
-        workspace_directory, MANUAL_MANAGEMENT_RESOURCES_META_FILE
-    );
-    let meta_path = Path::new(&meta_path);
+    let meta_path = PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_META_FILE);
     if !meta_path.exists() {
         // meta.jsonを作成する
         fs::File::create(&meta_path).await?;
@@ -306,10 +297,7 @@ async fn update_manual_resource_meta(
             None => manual_resource_meta.reasons,
         },
     };
-    let meta_path = format!(
-        "{}/{}",
-        workspace_directory, MANUAL_MANAGEMENT_RESOURCES_META_FILE
-    );
+    let meta_path = PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_META_FILE);
     let manual_resource_meta_json = serde_json::to_string(&new_manual_resource_meta).unwrap();
     fs::write(&meta_path, manual_resource_meta_json).await?;
     return Ok(());

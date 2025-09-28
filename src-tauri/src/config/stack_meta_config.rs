@@ -145,7 +145,9 @@ fn stack_meta_config_path(
     workspace_directory: &str,
     stack_name: &str,
 ) -> Result<PathBuf, StackMetaConfigError> {
-    let meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
+    let meta_path = PathBuf::from(workspace_directory)
+        .join(stack_name)
+        .with_extension("meta.json");
     let meta_path = PathBuf::from(&meta_path);
     return Ok(meta_path);
 }
