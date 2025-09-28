@@ -127,7 +127,7 @@ pub async fn open_workspace(
         tauri::WebviewWindowBuilder::new(
             &handle,
             window_id,
-            tauri::WebviewUrl::App(PathBuf::from("workspace").join(id)),
+            tauri::WebviewUrl::App(PathBuf::from("workspaces").join(id)),
         )
         .title(workspace_info.name)
         .inner_size(1200.0, 900.0)
