@@ -1,6 +1,5 @@
 import { ManualManagementId } from '../../../contexts';
 import { hrefBuilder } from './HrefBuilder';
-
 import type { SideNavigationProps } from '@cloudscape-design/components';
 import type { TemplateSummary } from '../../../contexts/lib/LoadTemplateSummary';
 

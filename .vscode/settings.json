@@ -6,6 +6,10 @@
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
   },
   "editor.tabSize": 2,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.biome": "explicit",
+    "source.fixAll.biome": "explicit"
+  },
   "[typescript]": {
     "editor.defaultFormatter": "biomejs.biome"
   },

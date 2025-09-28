@@ -1,6 +1,5 @@
 import { LogicalIdTable } from './components/LogicalIdTable';
 import { ResourcePropertyTable } from './components/ResourcePropertyTable';
-
 import type { ResourceTabAttr } from '../../../../contexts';
 export type ResourceTabProps = ResourceTabAttr;
 

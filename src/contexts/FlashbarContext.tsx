@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useState } from 'react';
 import { v4 as uuidV4 } from 'uuid';
-
 import type { FlashbarProps } from '@cloudscape-design/components';
 
 type AddFlashbarItemProps = {

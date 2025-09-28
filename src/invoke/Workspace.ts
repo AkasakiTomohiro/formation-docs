@@ -1,7 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-
 import type { WorkspaceExpand } from '../hooks/useWorkspaces';
-
 import type { CommandResult } from '../lib/CommandResult';
 
 export const WORKSPACE_FILE_NAME = 'workspace.json';

@@ -1,2 +1,2 @@
-export * from './WorkspaceSideMenu';
 export { hrefBuilder } from './lib';
+export * from './WorkspaceSideMenu';

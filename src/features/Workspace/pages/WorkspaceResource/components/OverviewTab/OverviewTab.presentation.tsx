@@ -1,6 +1,5 @@
 import { StackDisplayContent } from './components/StackDisplayContent/StackDisplayContent';
 import { StackEditContent } from './components/StackEditContent';
-
 import type { OverviewTabAttr } from '../../../../contexts';
 
 export type OverviewTabPresentationProps = OverviewTabAttr;

@@ -99,7 +99,6 @@ export interface CloudFormationSchema {
   createOnlyProperties: PropertyPath[];
   deprecatedProperties: PropertyPath[];
   primaryIdentifier: PropertyPath[];
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   typeConfiguration?: Record<string, any>;
   resourceLink?: ResourceLink;
 }

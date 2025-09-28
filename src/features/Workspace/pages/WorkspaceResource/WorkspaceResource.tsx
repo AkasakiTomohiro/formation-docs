@@ -1,27 +1,24 @@
+import { Tabs } from '@cloudscape-design/components';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router';
-
-import { Tabs } from '@cloudscape-design/components';
-
 import { hrefBuilder } from '../../components';
 import { useWorkspaceResourceContext } from '../../contexts/WorkspaceResourceContext';
 import {
-  ManualOverviewTab,
-  OverviewTab,
-  ResourceTab,
   buildManualOverviewTabName,
   buildOverviewTabName,
   buildResourceTabName,
+  ManualOverviewTab,
+  OverviewTab,
+  ResourceTab,
 } from './components';
-import { ManualResourceTab, buildManualResourceTabName } from './components/ManualResourceTab';
-
+import { buildManualResourceTabName, ManualResourceTab } from './components/ManualResourceTab';
 import type { WorkspaceTabInfo } from '../../contexts';
 export const WorkspaceResource = (): JSX.Element => {
   const location = useLocation();
   const { resourceTabs, addResourceTab, deleteResourceTab, activeTabId, setActiveTabId } =
     useWorkspaceResourceContext();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
     if (location.state) {
       const stackId = location.state.selectedStackId;

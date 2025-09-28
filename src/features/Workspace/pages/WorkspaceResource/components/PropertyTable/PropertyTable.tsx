@@ -1,8 +1,6 @@
 import { useState } from 'react';
-
 import { useWorkspaceResourceContext } from '../../../../contexts';
 import { PropertyTablePresentation } from './PropertyTable.presentation';
-
 import type { ResourceTableItem } from '../../lib/CreateResourceTableItems';
 import type { PropertyTablePresentationProps } from './PropertyTable.presentation';
 
@@ -13,13 +11,11 @@ export type PropertyTableProps = Pick<
   /**
    * ネストされたプロパティの展開状態
    */
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   expandedItems: any;
 
   /**
    * ネストされたプロパティの展開状態を更新する関数
    */
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   setExpandedItems: (items: any) => void;
 
   /**

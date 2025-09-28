@@ -1,14 +1,12 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useRevalidator, useRouteLoaderData } from 'react-router';
 import { z } from 'zod';
-
-import { zodResolver } from '@hookform/resolvers/zod';
-
 import { useFlashbarContext } from '../../../../contexts/FlashbarContext';
-import { WorkspaceEditPresentation } from './WorkspaceEdit.presentation';
 import { updateWorkspace } from './lib/UpdateWorkspace';
-
+import { WorkspaceEditPresentation } from './WorkspaceEdit.presentation';
 import type { WorkspaceLayoutLoaderData } from '../../Loader';
+
 const workspaceEditValidator = z.object({
   name: z.string().min(1).max(256),
   description: z.string().max(256),
