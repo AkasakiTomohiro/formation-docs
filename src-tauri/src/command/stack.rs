@@ -134,7 +134,6 @@ async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Resul
         .to_str()
         .unwrap_or_default();
     let mut copy_file_path = PathBuf::from(workspace_directory).join(filename);
-    println!("Importing stack file: {}", stack_file_path);
 
     // インポート元と先が同じファイルパスでない場合のみコピー
     if copy_file_path.to_str().unwrap() != stack_file_path {
@@ -153,7 +152,6 @@ async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Resul
 
     // workspace.jsonのstacksに追加する
     let mut workspace = WorkspaceConfig::read(workspace_directory).await?;
-    println!("Current stacks: {:?}", workspace.stacks);
 
     // スタックが存在する場合は追加しない
     if workspace.stacks.values().any(|v| v == filename) {
@@ -164,7 +162,6 @@ async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Resul
     workspace
         .stacks
         .insert(Uuid::new_v4().to_string(), filename.to_string());
-    println!("Updated stacks: {:?}", workspace.stacks);
     workspace.write(workspace_directory).await?;
 
     return Ok(());
