@@ -2,9 +2,12 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fs;
 use std::io::ErrorKind;
-use std::path::Path;
 use std::path::PathBuf;
 
+use crate::config::stack_meta_config::StackMetaConfig;
+use crate::config::stack_meta_config::StackMetaConfigError;
+use crate::config::workspace_config::WorkspaceConfig;
+use crate::config::workspace_config::WorkspaceConfigError;
 use crate::utils::get_window_state;
 use crate::utils::AppError;
 use crate::utils::CommandResult;
@@ -12,10 +15,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use thiserror::Error;
 use uuid::Uuid;
-
-use super::workspace::load_workspace;
-use super::workspace::update_workspace;
-use super::workspace::WorkspaceUpdate;
 
 // フロントで利用する形
 #[derive(Debug, Serialize, Deserialize)]
@@ -25,32 +24,6 @@ pub struct Stack {
     description_from_meta: Option<String>,
     description_from_stack: Option<String>,
     exist: bool,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct StackMeta {
-    pub name: String,
-    pub description: String,
-    pub reasons: HashMap<String, HashMap<String, String>>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct StackMetaReasonsUpdate {
-    pub logical_id: String,
-    pub reasons: HashMap<String, String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct StackMetaUpdate {
-    pub name: Option<String>,
-    pub description: Option<String>,
-    pub reasons: Option<StackMetaReasonsUpdate>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct StackPropertiesUpdate {
-    pub logical_id: String,
-    pub properties: HashMap<String, Value>,
 }
 
 #[derive(Debug, Error)]
@@ -63,31 +36,12 @@ enum StackError {
     Yaml(#[from] serde_yaml::Error),
     #[error("json error: {0}")]
     Json(#[from] serde_json::Error),
-    #[error("workspace error: {0}")]
-    Workspace(#[from] super::workspace::WorkspaceError),
-}
-
-fn load_stack_meta(workspace_directory: &str, stack_name: &str) -> Result<StackMeta, StackError> {
-    // ${スタック名}.meta.jsonが存在するか確認
-    let meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
-    let meta_path = Path::new(&meta_path);
-    if !meta_path.exists() {
-        // ${スタック名}.meta.jsonを作成する
-        fs::File::create(&meta_path)?;
-        // 空のJSONを作成
-        let empty_json = StackMeta {
-            name: stack_name.to_string(),
-            description: String::new(),
-            reasons: HashMap::new(),
-        };
-        let empty_json = serde_json::to_string(&empty_json).unwrap();
-        fs::write(&meta_path, empty_json)?;
-    }
-
-    // ${スタック名}.meta.jsonを読み込む
-    let meta_json = fs::read_to_string(&meta_path)?;
-    let meta_json = serde_json::from_str::<StackMeta>(&meta_json)?;
-    return Ok(meta_json);
+    #[error("workspace config error: {0}")]
+    WorkspaceConfig(#[from] WorkspaceConfigError),
+    #[error("workspace command error: {0}")]
+    WorkspaceCommand(#[from] super::workspace::WorkspaceCommandError),
+    #[error("stack meta config error: {0}")]
+    StackMetaConfig(#[from] StackMetaConfigError),
 }
 
 /**
@@ -107,7 +61,7 @@ async fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, StackError
     //     }
     // };
     // let paths: Vec<_> = builder.into_iter().flatten().collect();
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     let mut stacks = Vec::new();
     for (id, file_name) in workspace.stacks.iter() {
         // スタックを読み込む
@@ -126,7 +80,7 @@ async fn load_stacks(workspace_directory: &str) -> Result<Vec<Stack>, StackError
 }
 
 async fn delete_stack(workspace_directory: &str, stack_id: &str) -> Result<(), StackError> {
-    let mut workspace = load_workspace(workspace_directory).await?;
+    let mut workspace = WorkspaceConfig::read(workspace_directory).await?;
 
     match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => {
@@ -165,15 +119,7 @@ async fn delete_stack(workspace_directory: &str, stack_id: &str) -> Result<(), S
             };
             // workspace.jsonのstacksから削除する
             workspace.stacks.remove(stack_id);
-            update_workspace(
-                workspace_directory,
-                WorkspaceUpdate {
-                    name: None,
-                    description: None,
-                    stacks: Some(workspace.stacks.clone()),
-                },
-            )
-            .await?;
+            workspace.write(workspace_directory).await?;
         }
         None => return Err(StackError::App(AppError::new("Stack not found"))),
     };
@@ -209,25 +155,18 @@ async fn import_stack(workspace_directory: &str, stack_file_path: &str) -> Resul
     }
 
     // workspace.jsonのstacksに追加する
-    let workspace = load_workspace(workspace_directory).await?;
-    let mut stacks = workspace.stacks.clone();
+    let mut workspace = WorkspaceConfig::read(workspace_directory).await?;
 
     // スタックが存在する場合は追加しない
-    if stacks.values().any(|v| v == filename) {
+    if workspace.stacks.values().any(|v| v == filename) {
         println!("Stack with name {} already exists.", filename);
         return Ok(());
     }
 
-    stacks.insert(Uuid::new_v4().to_string(), filename.to_string());
-    update_workspace(
-        workspace_directory,
-        WorkspaceUpdate {
-            name: None,
-            description: None,
-            stacks: Some(stacks.clone()),
-        },
-    )
-    .await?;
+    workspace
+        .stacks
+        .insert(Uuid::new_v4().to_string(), filename.to_string());
+    workspace.write(workspace_directory).await?;
 
     return Ok(());
 }
@@ -247,14 +186,16 @@ async fn load_stack_from_info(
         .and_then(|desc| Some(desc.to_string()));
 
     // メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
-    let meta_json = match load_stack_meta(
+    let meta_json = match StackMetaConfig::read(
         workspace_directory,
         stack_file_name
             .to_string()
             .clone()
             .replace(".template.json", "")
             .as_str(),
-    ) {
+    )
+    .await
+    {
         Ok(meta_json) => meta_json,
         Err(_) => {
             return Err(StackError::App(AppError::new("Failed to load stack meta")));
@@ -276,7 +217,7 @@ async fn load_stack_from_id(
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Stack, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     return match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => {
             load_stack_from_info(workspace_directory, stack_id, stack_file_name).await
@@ -304,12 +245,13 @@ async fn load_template_summary(
     workspace_directory: &str,
 ) -> Result<Vec<TemplateSummary>, StackError> {
     let mut templates = Vec::new();
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     for (id, stack_file_name) in workspace.stacks.iter() {
-        let meta = load_stack_meta(
+        let meta = StackMetaConfig::read(
             workspace_directory,
             stack_file_name.replace(".template.json", "").as_str(),
-        )?;
+        )
+        .await?;
 
         let template_path = format!("{}/{}", workspace_directory, stack_file_name);
         let template_json = fs::read_to_string(&template_path)?;
@@ -365,7 +307,7 @@ async fn get_stack_resource_list(
     service_name: &str,
     resource_name: &str,
 ) -> Result<Vec<String>, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -397,7 +339,7 @@ async fn get_stack_resource_properties(
     stack_id: &str,
     logical_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -419,7 +361,7 @@ async fn get_stack_resource_properties_reasons(
     stack_id: &str,
     logical_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -444,7 +386,7 @@ async fn get_stack_parameters(
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -480,7 +422,7 @@ async fn get_stack_outputs(
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Vec<StackOutput>, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -521,7 +463,7 @@ async fn get_stack_outputs(
 async fn get_all_stack_outputs(
     workspace_directory: &str,
 ) -> Result<HashMap<String, String>, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     // {Outputsのexport_name: スタックID}の形で返す
     let mut result: HashMap<String, String> = HashMap::new();
     for (stack_id, _) in workspace.stacks.iter() {
@@ -536,69 +478,42 @@ async fn get_all_stack_outputs(
     return Ok(result);
 }
 
-async fn update_stack_meta(
+async fn update_stack_reasons(
     workspace_directory: &str,
     stack_id: &str,
-    update_stack_meta: StackMetaUpdate,
+    logical_id: &str,
+    reasons: HashMap<String, String>,
 ) -> Result<(), StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     let stack_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name.replace(".template.json", ""),
         None => {
             return Err(StackError::App(AppError::new("Stack not found")));
         }
     };
-    let stack_meta = load_stack_meta(workspace_directory, &stack_name)?;
-    let new_stack_meta = StackMeta {
-        name: update_stack_meta.name.unwrap_or(stack_meta.name),
-        description: update_stack_meta
-            .description
-            .unwrap_or(stack_meta.description),
-        reasons: match update_stack_meta.reasons {
-            Some(update_meta) => {
-                let mut new_reasons = stack_meta.reasons.clone();
-                new_reasons.insert(update_meta.logical_id, update_meta.reasons);
-                new_reasons
-            }
-            None => stack_meta.reasons,
-        },
-    };
-    let stack_meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
-    let stack_meta_json = serde_json::to_string(&new_stack_meta).unwrap();
-    fs::write(&stack_meta_path, stack_meta_json)?;
+    let mut stack_meta = StackMetaConfig::read(workspace_directory, &stack_name).await?;
+    stack_meta.reasons.insert(logical_id.to_string(), reasons);
+    stack_meta.write(workspace_directory, &stack_name).await?;
     return Ok(());
 }
 
 async fn update_stack_detail(
     workspace_directory: &str,
     stack_id: &str,
-    update_stack_meta: StackMetaUpdate,
+    name: &str,
+    description: &str,
 ) -> Result<(), StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     let stack_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name.replace(".template.json", ""),
         None => {
             return Err(StackError::App(AppError::new("Stack not found")));
         }
     };
-    let stack_meta = load_stack_meta(workspace_directory, &stack_name)?;
-    let new_stack_meta = StackMeta {
-        name: update_stack_meta.name.unwrap_or(stack_meta.name),
-        description: update_stack_meta
-            .description
-            .unwrap_or(stack_meta.description),
-        reasons: match update_stack_meta.reasons {
-            Some(update_meta) => {
-                let mut new_reasons = stack_meta.reasons.clone();
-                new_reasons.insert(update_meta.logical_id, update_meta.reasons);
-                new_reasons
-            }
-            None => stack_meta.reasons,
-        },
-    };
-    let stack_meta_path = format!("{}/{}.meta.json", workspace_directory, stack_name);
-    let stack_meta_json = serde_json::to_string(&new_stack_meta).unwrap();
-    fs::write(&stack_meta_path, stack_meta_json)?;
+    let mut stack_meta = StackMetaConfig::read(workspace_directory, &stack_name).await?;
+    stack_meta.name = name.to_string();
+    stack_meta.description = description.to_string();
+    stack_meta.write(workspace_directory, &stack_name).await?;
     return Ok(());
 }
 
@@ -620,7 +535,7 @@ async fn load_parameter_and_resource_list(
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<ParameterAndResourceList, StackError> {
-    let workspace = load_workspace(workspace_directory).await?;
+    let workspace = WorkspaceConfig::read(workspace_directory).await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -861,17 +776,11 @@ pub async fn update_stack_meta_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match update_stack_meta(
+    return match update_stack_reasons(
         window_state.workspace_directory.as_str(),
         stack_id,
-        StackMetaUpdate {
-            name: None,
-            description: None,
-            reasons: Some(StackMetaReasonsUpdate {
-                logical_id: logical_id.to_string(),
-                reasons: reasons,
-            }),
-        },
+        logical_id,
+        reasons,
     )
     .await
     {
@@ -920,11 +829,8 @@ pub async fn update_stack_detail_command(
     return match update_stack_detail(
         window_state.workspace_directory.as_str(),
         stack_id,
-        StackMetaUpdate {
-            name: Some(name.to_string()),
-            description: Some(description.to_string()),
-            reasons: None,
-        },
+        name,
+        description,
     )
     .await
     {
