@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": []
+    "includes": ["**"]
   },
   "formatter": {
     "enabled": true,
@@ -15,15 +15,50 @@
     "indentWidth": 2,
     "lineWidth": 120
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              { "type": false, "source": ["ace-builds/src-noconflict/ace"] },
+              { "type": false, "source": [":URL:"] },
+              { "type": false, "source": [":NODE:"] },
+              { "type": false, "source": [":PACKAGE:"] },
+              { "type": false, "source": [":ALIAS:"] },
+              { "type": false, "source": [":PATH:"] },
+              { "type": true, "source": [":URL:"] },
+              { "type": true, "source": [":NODE:"] },
+              { "type": true, "source": [":PACKAGE:"] },
+              { "type": true, "source": [":ALIAS:"] },
+              { "type": true, "source": [":PATH:"] }
+            ]
+          }
+        }
+      }
+    }
   },
   "linter": {
     "enabled": true,
+    "domains": {
+      "project": "recommended",
+      "react": "recommended"
+    },
     "rules": {
       "recommended": true,
       "a11y": {
         "noSvgWithoutTitle": "off"
+      },
+      "style": {
+        "useImportType": "error",
+        "noCommonJs": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "complexity": {
+        "noUselessFragments": "off"
       }
     }
   },

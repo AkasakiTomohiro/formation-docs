@@ -1,17 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import { Window } from '@tauri-apps/api/window';
 import { open } from '@tauri-apps/plugin-dialog';
-
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFlashbarContext } from '../../contexts/FlashbarContext';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
 import { AppHomePresentation } from './AppHome.presentation';
 import { openWorkspace } from './lib/OpenWorkspace';
-
-import type { AppHomePresentationProps } from './AppHome.presentation';
-
 import type { WorkspaceExpand } from '../../hooks/useWorkspaces';
+import type { AppHomePresentationProps } from './AppHome.presentation';
 
 export const AppHome = (): JSX.Element => {
   const isFirstRender = useRef(true);
@@ -68,7 +64,7 @@ export const AppHome = (): JSX.Element => {
     setSelectedItems([]);
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;

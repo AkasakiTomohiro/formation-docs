@@ -1,5 +1,4 @@
 import { invoke } from '@tauri-apps/api/core';
-
 import type { CommandResult } from '../../../../../../../../../lib/CommandResult';
 
 export type GetStackResourcePropertiesProps = {
@@ -7,11 +6,7 @@ export type GetStackResourcePropertiesProps = {
   logical_id: string;
 };
 
-export async function getStackResourceProperties(
-  props: GetStackResourcePropertiesProps,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-): Promise<any> {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export async function getStackResourceProperties(props: GetStackResourcePropertiesProps): Promise<any> {
   const result = await invoke<CommandResult<any>>('get_stack_resource_properties_command', props);
   if (!result.success) {
     throw new Error(result.value);

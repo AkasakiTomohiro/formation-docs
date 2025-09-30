@@ -1,14 +1,11 @@
 import { createContext, useCallback, useContext, useState } from 'react';
 import { useLoaderData, useNavigate } from 'react-router';
-
 import { getAllStackOutputs } from './lib/GetAllStackOutputs';
 import { loadManualManagementResourceSummary } from './lib/LoadManualManagementResourceSummary';
 import { loadTemplateSummary } from './lib/LoadTemplateSummary';
-
+import type { TokenGroupProps } from '@cloudscape-design/components';
 import type { WorkspaceLayoutLoaderData } from '../Loader';
 import type { TemplateSummary } from './lib/LoadTemplateSummary';
-
-import type { TokenGroupProps } from '@cloudscape-design/components';
 
 type TabInfo<TType extends string, T extends { tabId: string } = { tabId: string }> = {
   type: TType;

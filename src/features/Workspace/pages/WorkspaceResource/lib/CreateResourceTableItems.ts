@@ -4,7 +4,6 @@ import {
   isJsonSchemaPrimitiveType,
   pseudoProperties,
 } from '../components/types/CloudFormationSchema';
-
 import type { OverviewTabAttr, ResourceTabAttr } from '../../../contexts';
 import type {
   CloudFormationSchema,
@@ -73,7 +72,6 @@ const DefaultOption: CreateResourceTableItemsOption = {
  */
 export const createResourceTableItems = (
   schema: CloudFormationSchema,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperties: any,
   options: CreateResourceTableItemsOption = DefaultOption,
 ): ResourceTableItem[] => {
@@ -123,7 +121,6 @@ function parseDefinedPropertyToTableItem(
   parentId: string,
   propertyKey: string,
   property: DefinedProperty,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperties: any,
   definitions: CloudFormationSchema['definitions'] | undefined,
   options: CreateResourceTableItemsOption,
@@ -211,7 +208,6 @@ function parseReferencePropertyToTableItem(
   parentId: string,
   propertyKey: string,
   property: ReferenceProperty | ReferencePropertyWithDescription,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperties: any,
   definitions: CloudFormationSchema['definitions'] | undefined,
   options: CreateResourceTableItemsOption,
@@ -267,7 +263,6 @@ function parseReferencePropertyToTableItem(
 function parseChildrenPropertyToTableItem(
   childrenProperties: Record<string, Property>,
   parentId: string,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperties: any,
   definitions: CloudFormationSchema['definitions'] | undefined,
   options: CreateResourceTableItemsOption,
@@ -310,12 +305,7 @@ function parseChildrenPropertyToTableItem(
  * @param actualProperties 実際のテンプレートに定義されているプロパティ
  * @returns プロパティの実際の値
  */
-function getActualProperties(
-  propertyKey: string,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  actualProperties: any,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-): any {
+function getActualProperties(propertyKey: string, actualProperties: any): any {
   if (typeof actualProperties === 'object' && propertyKey in actualProperties) {
     return actualProperties[propertyKey];
   }
@@ -327,7 +317,6 @@ function getActualProperties(
  * @param property プロパティ名
  */
 function isPseudoProperty(property: string): boolean {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   return pseudoProperties.includes(property as any);
 }
 
@@ -336,10 +325,7 @@ function isPseudoProperty(property: string): boolean {
  * @param actualProperty 実際のテンプレートに定義されているプロパティ
  * @returns 組込み関数の名前
  */
-export function isIntrinsicFunction(
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  actualProperty: any,
-): IntrinsicFunction | undefined {
+export function isIntrinsicFunction(actualProperty: any): IntrinsicFunction | undefined {
   const objKeys = Object.keys(actualProperty);
   for (const intrinsic of intrinsicFunctions) {
     if (objKeys.includes(intrinsic)) {
@@ -358,7 +344,6 @@ export function isIntrinsicFunction(
  */
 export function convertIntrinsicFunctionValue(
   intrinsic: IntrinsicFunction,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
   options: CreateResourceTableItemsOption,
 ): NonNullable<Exclude<ResourceTableItem['value'], { type: 'array' }>> {
@@ -478,7 +463,6 @@ export function convertIntrinsicFunctionValue(
     }
     case 'Fn::Join': {
       const delimiter = actualProperty['Fn::Join'][0];
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       const pieces = actualProperty['Fn::Join'][1].map((value: any) => {
         // 文字列結合する要素の中にも組込み関数が含まれる場合があるので、再帰的に処理する
         const intrinsic = isIntrinsicFunction(value);
@@ -601,7 +585,6 @@ export function convertIntrinsicFunctionValue(
  */
 function convertValue(
   property: DefinedProperty,
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   actualProperty: any,
   options: CreateResourceTableItemsOption,
 ): ResourceTableItem['value'] {

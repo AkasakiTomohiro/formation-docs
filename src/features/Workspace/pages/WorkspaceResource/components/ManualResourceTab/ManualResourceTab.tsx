@@ -1,6 +1,5 @@
 import { ResourceIdTable } from './components';
 import { EditorContentLayout } from './components/EditorContentLayout';
-
 import type { ManualResourceTabAttr } from '../../../../contexts';
 
 export type ManualResourceTabProps = ManualResourceTabAttr;

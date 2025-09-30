@@ -1,7 +1,5 @@
-import { useState } from 'react';
-
 import { Box, Button, ContentLayout, Header, SpaceBetween, TextContent } from '@cloudscape-design/components';
-
+import { useState } from 'react';
 import { ManualResourceCreateContent } from './components/ManualResourceCreateContent';
 
 export function buildManualOverviewTabName(): string {

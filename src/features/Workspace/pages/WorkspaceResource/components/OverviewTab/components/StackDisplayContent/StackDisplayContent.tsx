@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
 import { convertIntrinsicFunctionValue, isIntrinsicFunction } from '../../../../lib/CreateResourceTableItems';
 import { loadParameterAndResourceList } from '../../../ResourceTab/components/ResourcePropertyTable/lib/LoadParameterAndResourceList';
-import { StackDisplayContentPresentation } from './StackDisplayContent.presentation';
 import { getStackOutputs } from './lib/GetStackOutputs';
 import { getStackParameters } from './lib/GetStackParameters';
-
+import { StackDisplayContentPresentation } from './StackDisplayContent.presentation';
 import type { OverviewTabInfo } from '../../../../../../contexts';
 import type {
   StackDisplayContentPresentationProps,
@@ -36,7 +34,7 @@ export const StackDisplayContent = ({
   const [stackParameters, setStackParameters] = useState<StackParametersDisplayProps[]>([]);
   const [stackOutputs, setStackOutputs] = useState<StackOutputsDisplayProps[]>([]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
     // スタックパラメータを取得し、表中に表示する
     getStackParameters({ stack_id: stackId }).then((stackParameters) => {

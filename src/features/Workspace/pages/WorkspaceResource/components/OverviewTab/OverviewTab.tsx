@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
-
 import { useWorkspaceResourceContext } from '../../../../contexts';
-import { OverviewTabPresentation } from './OverviewTab.presentation';
 import { loadStack } from './lib/LoadStack';
-
+import { OverviewTabPresentation } from './OverviewTab.presentation';
 import type { OverviewTabAttr, OverviewTabInfo } from '../../../../contexts';
 
 export type OverviewTabProps = OverviewTabAttr;
@@ -18,7 +16,7 @@ export function buildOverviewTabName({ stackName }: BuildOverviewTabNameProps): 
 export const OverviewTab = (props: OverviewTabProps): JSX.Element => {
   const { modifyResourceTab } = useWorkspaceResourceContext();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
     loadStack(props.stackId).then((stackDetail) => {
       const stackName = stackDetail.name;

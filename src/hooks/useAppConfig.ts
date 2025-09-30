@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-
 import { loadAppConfig, setupApp } from '../invoke/AppConfig';
-
 import type { AppConfig } from '../invoke/AppConfig';
 
 export type UseAppConfigResult = {
@@ -17,7 +15,7 @@ export function useAppConfig(): UseAppConfigResult {
   const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
   const navigate = useNavigate();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   const loadAppConfigWrap = useCallback(async () => {
     const config = await loadAppConfig();
     setAppConfig(config);

@@ -1,5 +1,4 @@
 import { Input, TokenGroup } from '@cloudscape-design/components';
-
 import type { InputProps, TokenGroupProps } from '@cloudscape-design/components';
 
 export type SearchFormPresentationProps = {

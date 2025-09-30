@@ -1,10 +1,7 @@
 import { useState } from 'react';
-
 import { ResourcePropertyEditorPresentation } from './ResourcePropertyEditor.presentation';
-
-import type { ResourcePropertyEditorPresentationProps } from './ResourcePropertyEditor.presentation';
-
 import type { CodeEditorProps } from '@cloudscape-design/components';
+import type { ResourcePropertyEditorPresentationProps } from './ResourcePropertyEditor.presentation';
 
 export type ResourcePropertyEditorProps = Omit<
   ResourcePropertyEditorPresentationProps,
@@ -19,7 +16,6 @@ export const ResourcePropertyEditor = ({
   onValidate,
   onDelayedChange,
 }: ResourcePropertyEditorProps): JSX.Element => {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const [acePreferences, setAcePreferences] = useState<CodeEditorProps.Preferences>({} as any);
 
   return (

@@ -1,16 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useRouteLoaderData } from 'react-router';
-
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import { open } from '@tauri-apps/plugin-dialog';
-
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useRouteLoaderData } from 'react-router';
 import { useFlashbarContext } from '../../../../contexts/FlashbarContext';
 import { useWorkspaceResourceContext } from '../../contexts';
-import { WorkspaceHomePresentation } from './WorkspaceHome.presentation';
 import { deleteStack } from './lib/DeleteStack';
 import { importStack } from './lib/ImportStack';
 import { loadStacks } from './lib/LoadStacks';
-
+import { WorkspaceHomePresentation } from './WorkspaceHome.presentation';
 import type { WorkspaceLayoutLoaderData } from '../../Loader';
 import type { StackInfo } from '../../lib';
 
@@ -67,7 +64,7 @@ export const WorkspaceHome = (): JSX.Element => {
     }
   }, [workspace, loadSideMenu, loadStacksWrap, addFlashbarItem, loadAllStackOutputs]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
     loadStacksWrap().catch((error) => {
       addFlashbarItem({

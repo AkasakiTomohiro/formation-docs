@@ -1,6 +1,3 @@
-import { Controller } from 'react-hook-form';
-import { z } from 'zod';
-
 import {
   Box,
   Button,
@@ -11,10 +8,10 @@ import {
   Input,
   SpaceBetween,
 } from '@cloudscape-design/components';
-
-import type { Control, UseFormHandleSubmit } from 'react-hook-form';
-
+import { Controller } from 'react-hook-form';
+import { z } from 'zod';
 import type { ButtonProps } from '@cloudscape-design/components';
+import type { Control, UseFormHandleSubmit } from 'react-hook-form';
 
 export const StackEditValidator = z.object({
   name: z.string().min(1).max(256),
@@ -26,7 +23,6 @@ export type StackEditContentPresentationProps = {
   /**
    * Stackの編集フォームのコントロール
    */
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   control: Control<StackEditType, any>;
 
   /**

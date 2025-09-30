@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react';
-
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
-import { ResourceIdTablePresentation } from './ResourceIdTable.presentation';
 import { getManualManagementResourceList } from './lib/GetManualManagementResourceList';
-
-import type { ResourceIdTablePresentationProps } from './ResourceIdTable.presentation';
-
+import { ResourceIdTablePresentation } from './ResourceIdTable.presentation';
 import type { ManualResourceTabInfo } from '../../../../../../contexts';
 import type { ManualManagementResource } from './lib/GetManualManagementResourceList';
+import type { ResourceIdTablePresentationProps } from './ResourceIdTable.presentation';
 
 export type ResourceIdTableProps = {
   /**

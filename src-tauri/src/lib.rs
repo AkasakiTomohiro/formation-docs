@@ -1,5 +1,6 @@
 mod api;
 mod command;
+mod config;
 mod utils;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -24,7 +25,7 @@ pub fn run() {
             command::app_config::delete_workspace_from_app_config_command,
             command::workspace::create_workspace_command,
             command::workspace::load_workspace_merge_info_command,
-            command::workspace::update_workspace_command,
+            command::workspace::update_workspace_details_command,
             command::workspace::load_workspaces_command,
             command::resource_provider::setup_app_command,
             command::stack::load_stacks_command,
