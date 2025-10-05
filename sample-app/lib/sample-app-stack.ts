@@ -3,7 +3,6 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as subs from 'aws-cdk-lib/aws-sns-subscriptions';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
-
 import type { StackProps } from 'aws-cdk-lib';
 import type { Construct } from 'constructs';
 
@@ -32,6 +31,16 @@ export class SampleAppStack extends Stack {
 
     new s3.Bucket(this, 'SampleBucket', {
       bucketName: parameter.valueAsString,
+      intelligentTieringConfigurations: [
+        {
+          prefix: 'documents/',
+          name: 'SampleIntelligentTiering1',
+        },
+        {
+          prefix: 'documents/',
+          name: 'SampleIntelligentTiering2',
+        },
+      ],
     });
 
     new CfnOutput(this, 'FuncName', {

@@ -147,7 +147,7 @@ function parseDefinedPropertyToTableItem(
     result.children = [];
 
     // 配列のIndex番号ごとに子要素を作成する
-    for (const [index, property] of Object.entries(propertyList)) {
+    for (const [index, property] of Object.entries(propertyList.length === 0 ? [{}] : propertyList)) {
       const childItem: ResourceTableItem = {
         id: `${result.id}/${index}`,
         property: index,
