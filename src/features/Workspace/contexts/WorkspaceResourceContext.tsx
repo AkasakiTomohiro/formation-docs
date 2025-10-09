@@ -16,7 +16,10 @@ export type OverviewTabAttr = {
   stackId: string;
   stackName: string;
   description: string;
-  isEdit?: boolean;
+  editingValues?: {
+    stackName: string;
+    stackDescription: string;
+  };
 };
 export type ResourceTabAttr = {
   tabId: string;

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useFlashbarContext } from '../../../../../../../../contexts/FlashbarContext';
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
@@ -37,7 +38,7 @@ export const StackEditContent = ({
 }: StackEditContentProps): JSX.Element => {
   const { modifyResourceTab } = useWorkspaceResourceContext();
   const { addFlashbarItem } = useFlashbarContext();
-  const { control, handleSubmit } = useForm<StackEditType>({
+  const { control, handleSubmit, watch } = useForm<StackEditType>({
     mode: 'onChange',
     resolver: zodResolver(StackEditValidator),
     defaultValues: {
@@ -45,6 +46,21 @@ export const StackEditContent = ({
       description: stackDescription,
     },
   });
+  const [description, name] = watch(['description', 'name']);
+
+  // スタック名と説明が変更されるたびにコンテキストにデータを保持
+  useEffect(() => {
+    console.log('StackEditContent useEffect in stack edit content', { description, name });
+    modifyResourceTab(tabId, (originTab: OverviewTabInfo) => {
+      return {
+        ...originTab,
+        editingValues: {
+          stackName: name,
+          stackDescription: description,
+        },
+      };
+    });
+  }, [description, name, modifyResourceTab, tabId]);
 
   const onSave = async (stackDetailProps: StackEditType) => {
     try {
@@ -60,7 +76,7 @@ export const StackEditContent = ({
           ...originTab,
           stackName: stackDetailProps.name,
           description: stackDetailProps.description,
-          isEdit: false,
+          editingValues: undefined,
         };
       });
     } catch (error) {
@@ -80,7 +96,7 @@ export const StackEditContent = ({
         modifyResourceTab(tabId, (originTab: OverviewTabInfo) => {
           return {
             ...originTab,
-            isEdit: false,
+            editingValues: undefined,
           };
         });
       }}

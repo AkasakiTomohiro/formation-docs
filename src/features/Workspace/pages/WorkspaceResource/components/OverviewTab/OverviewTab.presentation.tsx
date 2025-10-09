@@ -12,14 +12,21 @@ export function buildOverviewTabName({ stackName }: BuildOverviewTabNameProps): 
 }
 
 export const OverviewTabPresentation = ({
-  isEdit,
   tabId,
   stackId,
   stackName,
   description,
+  editingValues,
 }: OverviewTabPresentationProps): JSX.Element => {
-  if (isEdit) {
-    return <StackEditContent tabId={tabId} stackId={stackId} stackName={stackName} stackDescription={description} />;
+  if (editingValues) {
+    return (
+      <StackEditContent
+        tabId={tabId}
+        stackId={stackId}
+        stackName={editingValues.stackName}
+        stackDescription={editingValues.stackDescription}
+      />
+    );
   }
   return <StackDisplayContent tabId={tabId} stackId={stackId} stackName={stackName} stackDescription={description} />;
 };
