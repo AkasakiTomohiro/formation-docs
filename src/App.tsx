@@ -1,8 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { Header } from './components/Header';
 import { FlashbarProvider } from './contexts/FlashbarContext';
-import { AppHome } from './features/AppHome';
-import { AppSetup } from './features/AppSetup';
 import {
   WorkspaceEdit,
   WorkspaceHome,
@@ -11,23 +9,17 @@ import {
   workspaceLoader,
 } from './features/Workspace';
 import { WorkspaceResourceProvider } from './features/Workspace/contexts/WorkspaceResourceContext';
+import { Workspaces } from './features/Workspaces';
+import { workspacesLoader } from './features/Workspaces/Loader';
 
 const router = createBrowserRouter([
   {
-    id: 'home',
-    index: true,
-    element: (
-      <Header>
-        <AppSetup />
-      </Header>
-    ),
-  },
-  {
     id: 'workspaces',
-    path: 'workspaces',
+    index: true,
+    loader: workspacesLoader,
     element: (
       <Header>
-        <AppHome />
+        <Workspaces />
       </Header>
     ),
   },

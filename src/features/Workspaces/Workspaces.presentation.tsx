@@ -13,7 +13,7 @@ import type { useCollection } from '@cloudscape-design/collection-hooks';
 import type { ButtonProps, FlashbarProps, LinkProps, TableProps } from '@cloudscape-design/components';
 import type { WorkspaceExpand } from '../../hooks/useWorkspaces';
 
-export type AppHomePresentationProps = {
+export type WorkspacesPresentationProps = {
   /**
    * フラッシュバーのアイテム
    */
@@ -60,7 +60,7 @@ export type AppHomePresentationProps = {
   onSelectionChange: TableProps['onSelectionChange'];
 };
 
-export const AppHomePresentation = ({
+export const WorkspacesPresentation = ({
   flashbarItems,
   isLoading,
   selectedItems,
@@ -70,7 +70,7 @@ export const AppHomePresentation = ({
   onClickDeleteWorkspace,
   onClickUpdateWorkspace,
   onSelectionChange,
-}: AppHomePresentationProps): JSX.Element => {
+}: WorkspacesPresentationProps): JSX.Element => {
   return (
     <ContentLayout
       defaultPadding
