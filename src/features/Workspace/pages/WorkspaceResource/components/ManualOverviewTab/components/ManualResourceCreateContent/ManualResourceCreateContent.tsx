@@ -39,7 +39,7 @@ export const ManualResourceCreateContent = ({ setRegistering }: ManualResourceCr
   const [selectedService, setSelectedService] = useState<SelectProps.Option | null>(null);
   const [selectedResource, setSelectedResource] = useState<SelectProps.Option | null>(null);
   const { addFlashbarItem } = useFlashbarContext();
-  const { loadSideMenu, addResourceTab } = useWorkspaceResourceContext();
+  const { loadSideMenu, addResourceTab, modifyResourceTab } = useWorkspaceResourceContext();
   const { control, setValue, handleSubmit, setError, reset } = useForm<ResourceEditType>({
     mode: 'onChange',
     resolver: zodResolver(resourceEditValidator),
@@ -91,9 +91,12 @@ export const ManualResourceCreateContent = ({ setRegistering }: ManualResourceCr
           tabId: tabId,
           serviceName: data.serviceName,
           resourceName: data.resourceName,
-          selectedResourceId: data.resourceId,
         };
         addResourceTab(newTab);
+        modifyResourceTab(tabId, (tab) => ({
+          ...tab,
+          selectedResourceId: data.resourceId,
+        }));
         setRegistering(false);
         setSelectedService(null);
         setSelectedResource(null);
