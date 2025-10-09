@@ -147,7 +147,7 @@ function parseDefinedPropertyToTableItem(
     result.children = [];
 
     // 配列のIndex番号ごとに子要素を作成する
-    for (const [index, property] of Object.entries(propertyList)) {
+    for (const [index, property] of Object.entries(propertyList.length === 0 ? [{}] : propertyList)) {
       const childItem: ResourceTableItem = {
         id: `${result.id}/${index}`,
         property: index,
@@ -261,14 +261,14 @@ function parseReferencePropertyToTableItem(
  * @return テーブルアイテム
  */
 function parseChildrenPropertyToTableItem(
-  childrenProperties: Record<string, Property>,
+  childrenProperties: Record<string, Property> | undefined,
   parentId: string,
   actualProperties: any,
   definitions: CloudFormationSchema['definitions'] | undefined,
   options: CreateResourceTableItemsOption,
 ): ResourceTableItem[] | undefined {
   const result: ResourceTableItem[] = [];
-  for (const [definitionKey, definitionValue] of Object.entries(childrenProperties)) {
+  for (const [definitionKey, definitionValue] of Object.entries(childrenProperties ?? {})) {
     // $refを含む場合は、参照プロパティを取得する
     if ('$ref' in definitionValue) {
       const childItem = parseReferencePropertyToTableItem(
