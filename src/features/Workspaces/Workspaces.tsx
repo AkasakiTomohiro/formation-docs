@@ -4,12 +4,12 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFlashbarContext } from '../../contexts/FlashbarContext';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
-import { AppHomePresentation } from './AppHome.presentation';
 import { openWorkspace } from './lib/OpenWorkspace';
+import { WorkspacesPresentation } from './Workspaces.presentation';
 import type { WorkspaceExpand } from '../../hooks/useWorkspaces';
-import type { AppHomePresentationProps } from './AppHome.presentation';
+import type { WorkspacesPresentationProps } from './Workspaces.presentation';
 
-export const AppHome = (): JSX.Element => {
+export const Workspaces = (): JSX.Element => {
   const isFirstRender = useRef(true);
   const { flashbarItems, addFlashbarItem } = useFlashbarContext();
   const { state, workspaces, createWorkspace, loadWorkspaces, deleteWorkspace } = useWorkspaces();
@@ -18,7 +18,7 @@ export const AppHome = (): JSX.Element => {
   });
   const [selectedItems, setSelectedItems] = useState<WorkspaceExpand[]>([]);
 
-  const openWorkspaceWrap = useCallback<AppHomePresentationProps['onClickWorkspaceLink']>(
+  const openWorkspaceWrap = useCallback<WorkspacesPresentationProps['onClickWorkspaceLink']>(
     (workspace: WorkspaceExpand) => async (_) => {
       const workspaceWindow = await Window.getByLabel(`workspace-${workspace.id}`);
       if (workspaceWindow) {
@@ -80,7 +80,7 @@ export const AppHome = (): JSX.Element => {
   }, []);
 
   return (
-    <AppHomePresentation
+    <WorkspacesPresentation
       flashbarItems={flashbarItems}
       isLoading={state === 'loading'}
       selectedItems={selectedItems}
