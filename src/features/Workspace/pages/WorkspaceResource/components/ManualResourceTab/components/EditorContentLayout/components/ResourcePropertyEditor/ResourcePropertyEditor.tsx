@@ -9,7 +9,6 @@ export type ResourcePropertyEditorProps = Omit<
 >;
 
 export const ResourcePropertyEditor = ({
-  isEdit,
   values,
   editingValues,
   header,
@@ -20,7 +19,6 @@ export const ResourcePropertyEditor = ({
 
   return (
     <ResourcePropertyEditorPresentation
-      isEdit={isEdit}
       values={values}
       editingValues={editingValues}
       header={header}

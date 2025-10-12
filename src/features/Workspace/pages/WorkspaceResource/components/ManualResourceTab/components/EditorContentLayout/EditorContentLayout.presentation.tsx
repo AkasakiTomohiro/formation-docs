@@ -12,14 +12,14 @@ export type ViewMode = 'reason' | 'value';
 
 export type EditorContentLayoutPresentationProps = {
   /**
+   * タブID
+   */
+  tabId: string;
+
+  /**
    * 選択しているリソースID
    */
   selectedResourceId: string;
-
-  /**
-   * 編集中かどうか
-   */
-  isEdit: boolean;
 
   /**
    * コンテンツで表示する種別
@@ -49,7 +49,7 @@ export type EditorContentLayoutPresentationProps = {
   /**
    * PropertyTableコンポーネントのprops
    */
-  propertyTableProps: Omit<PropertyTableProps, 'isEdit' | 'header'>;
+  propertyTableProps: Omit<PropertyTableProps, 'header'>;
 
   /**
    * ResourcePropertyEditorコンポーネントのprops
@@ -63,8 +63,8 @@ const selectModeOptions = [
 ];
 
 export const EditorContentLayoutPresentation = ({
+  tabId,
   selectedResourceId,
-  isEdit,
   propertyTableProps,
   viewMode,
   onClickEdit,
@@ -80,12 +80,15 @@ export const EditorContentLayoutPresentation = ({
         <Header
           actions={
             <SpaceBetween direction="horizontal" size="xs">
-              {!isEdit && <Button onClick={onClickEdit}>編集</Button>}
-              {isEdit && <Button onClick={onClickCancel}>キャンセル</Button>}
-              {isEdit && (
-                <Button variant="primary" onClick={onClickSave}>
-                  保存
-                </Button>
+              {propertyTableProps.editingReasons === undefined ? (
+                <Button onClick={onClickEdit}>編集</Button>
+              ) : (
+                <>
+                  <Button onClick={onClickCancel}>キャンセル</Button>
+                  <Button variant="primary" onClick={onClickSave}>
+                    保存
+                  </Button>
+                </>
               )}
             </SpaceBetween>
           }
@@ -96,13 +99,12 @@ export const EditorContentLayoutPresentation = ({
     >
       {viewMode === 'reason' && (
         <PropertyTable
-          isEdit={isEdit}
+          tabId={tabId}
           properties={propertyTableProps.properties}
           reasons={propertyTableProps.reasons}
           expandedItems={propertyTableProps.expandedItems}
           setExpandedItems={propertyTableProps.setExpandedItems}
           editingReasons={propertyTableProps.editingReasons}
-          setEditingReasons={propertyTableProps.setEditingReasons}
           header={
             <Header
               variant="h2"
@@ -119,7 +121,6 @@ export const EditorContentLayoutPresentation = ({
       )}
       {viewMode === 'value' && (
         <ResourcePropertyEditor
-          isEdit={isEdit}
           values={resourcePropertyEditorProps.values}
           editingValues={resourcePropertyEditorProps.editingValues}
           onDelayedChange={resourcePropertyEditorProps.onDelayedChange}
