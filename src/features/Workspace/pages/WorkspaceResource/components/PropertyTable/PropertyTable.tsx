@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useWorkspaceResourceContext } from '../../../../contexts';
 import { PropertyTablePresentation } from './PropertyTable.presentation';
-import type { ResourceTabInfo } from '../../../../contexts';
+import type { ManualResourceTabInfo, ResourceTabInfo } from '../../../../contexts';
 import type { ResourceTableItem } from '../../lib/CreateResourceTableItems';
 import type { PropertyTablePresentationProps } from './PropertyTable.presentation';
 
@@ -50,7 +50,19 @@ export const PropertyTable = ({
     (item) =>
     ({ detail }) => {
       // 編集中の値をコンテキストに保存
-      modifyResourceTab(tabId, (originTab: ResourceTabInfo) => {
+      modifyResourceTab(tabId, (originTab: ResourceTabInfo | ManualResourceTabInfo) => {
+        if (originTab.type === 'manualResource') {
+          return {
+            ...originTab,
+            editingValues: {
+              reasons: {
+                ...editingReasons,
+                [item.id]: detail.value,
+              },
+              properties: originTab.editingValues?.properties || '{}',
+            },
+          };
+        }
         return {
           ...originTab,
           editingValues: {
@@ -66,7 +78,6 @@ export const PropertyTable = ({
   return (
     <PropertyTablePresentation
       properties={properties}
-      // isEdit={isEdit}
       reasons={reasons}
       header={header}
       editingReasons={editingReasons}
