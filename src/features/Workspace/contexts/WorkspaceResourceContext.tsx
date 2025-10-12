@@ -28,12 +28,19 @@ export type ResourceTabAttr = {
   serviceName: string;
   resourceName: string;
   selectedLogicalId?: string;
+  editingValues?: {
+    reasons: Record<string, string>;
+  };
 };
 export type ManualResourceTabAttr = {
   tabId: string;
   serviceName: string;
   resourceName: string;
   selectedResourceId?: string;
+  editingValues?: {
+    properties: string;
+    reasons: Record<string, string>;
+  };
 };
 
 export type OverviewTabInfo = TabInfo<'overview', OverviewTabAttr>;

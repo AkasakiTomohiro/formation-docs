@@ -29,9 +29,11 @@ export const ManualResourceTab = (props: ManualResourceTabProps): JSX.Element =>
       />
       {props.selectedResourceId !== undefined && (
         <EditorContentLayout
+          tabId={props.tabId}
           selectedResourceId={props.selectedResourceId}
           serviceName={props.serviceName}
           resourceName={props.resourceName}
+          editingValues={props.editingValues}
         />
       )}
     </div>

@@ -1,13 +1,19 @@
 import { useState } from 'react';
 import { useWorkspaceResourceContext } from '../../../../contexts';
 import { PropertyTablePresentation } from './PropertyTable.presentation';
+import type { ResourceTabInfo } from '../../../../contexts';
 import type { ResourceTableItem } from '../../lib/CreateResourceTableItems';
 import type { PropertyTablePresentationProps } from './PropertyTable.presentation';
 
 export type PropertyTableProps = Pick<
   PropertyTablePresentationProps,
-  'properties' | 'isEdit' | 'reasons' | 'editingReasons' | 'header'
+  'properties' | 'reasons' | 'editingReasons' | 'header'
 > & {
+  /**
+   * タブID
+   */
+  tabId: string;
+
   /**
    * ネストされたプロパティの展開状態
    */
@@ -17,21 +23,15 @@ export type PropertyTableProps = Pick<
    * ネストされたプロパティの展開状態を更新する関数
    */
   setExpandedItems: (items: any) => void;
-
-  /**
-   * 編集中の理由を更新
-   */
-  setEditingReasons: (reasons: (prev: Record<string, string>) => Record<string, string>) => void;
 };
 
 export const PropertyTable = ({
+  tabId,
   properties,
-  isEdit,
   reasons,
   expandedItems,
   setExpandedItems,
   editingReasons,
-  setEditingReasons,
   header,
 }: PropertyTableProps) => {
   // テーブルの表示カラムの設定を管理するためのステート
@@ -44,21 +44,29 @@ export const PropertyTable = ({
       { id: 'reason', visible: true },
     ],
   });
-  const { addResourceTab } = useWorkspaceResourceContext();
+  const { addResourceTab, modifyResourceTab } = useWorkspaceResourceContext();
 
   const onChangeReason: PropertyTablePresentationProps['onChangeReason'] =
     (item) =>
     ({ detail }) => {
-      setEditingReasons((prev) => ({
-        ...prev,
-        [item.id]: detail.value,
-      }));
+      // 編集中の値をコンテキストに保存
+      modifyResourceTab(tabId, (originTab: ResourceTabInfo) => {
+        return {
+          ...originTab,
+          editingValues: {
+            reasons: {
+              ...editingReasons,
+              [item.id]: detail.value,
+            },
+          },
+        };
+      });
     };
 
   return (
     <PropertyTablePresentation
       properties={properties}
-      isEdit={isEdit}
+      // isEdit={isEdit}
       reasons={reasons}
       header={header}
       editingReasons={editingReasons}

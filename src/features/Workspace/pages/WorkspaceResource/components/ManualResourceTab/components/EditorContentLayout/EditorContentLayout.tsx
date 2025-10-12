@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useFlashbarContext } from '../../../../../../../../contexts/FlashbarContext';
 import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFormationSchema';
+import { useWorkspaceResourceContext } from '../../../../../../contexts';
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
 import { createExpandedItems } from '../../../PropertyTable';
 import { EditorContentLayoutPresentation } from './EditorContentLayout.presentation';
@@ -8,28 +9,38 @@ import { getManualManagementResourceProperties } from './lib/GetManualManagement
 import { getManualManagementResourceReasons } from './lib/GetManualManagementResourceReasons';
 import { updateManualResourceMeta } from './lib/UpdateManualResourceMeta';
 import { updateManualResourceProperties } from './lib/UpdateManualResourceProperties';
+import type { ManualResourceTabInfo } from '../../../../../../contexts';
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
-import type { ViewMode } from './EditorContentLayout.presentation';
+import type { EditorContentLayoutPresentationProps, ViewMode } from './EditorContentLayout.presentation';
 
 export type EditorContentLayoutProps = {
+  tabId: string;
   selectedResourceId: string;
   serviceName: string;
   resourceName: string;
+  editingValues?: {
+    properties: string;
+    reasons: Record<string, string>;
+  };
 };
 
-export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceName }: EditorContentLayoutProps) => {
+export const EditorContentLayout = ({
+  tabId,
+  selectedResourceId,
+  serviceName,
+  resourceName,
+  editingValues,
+}: EditorContentLayoutProps) => {
   const [schema, setSchema] = useState<CloudFormationSchema | undefined>(undefined);
   const [properties, setProperties] = useState<ResourceTableItem[]>([]);
   const [expandedItems, setExpandedItems] = useState<any>();
-  const [isEdit, setIsEdit] = useState(false);
   const [reasons, setReasons] = useState<Record<string, string>>({});
-  const [editingReasons, setEditingReasons] = useState<Record<string, string>>({});
   const [mode, setMode] = useState<ViewMode>('reason');
   const [values, setValues] = useState<string>('');
-  const [editingValues, setEditingValues] = useState<string>('');
   const { addFlashbarItem } = useFlashbarContext();
   const [isValid, setIsValid] = useState(true);
+  const { modifyResourceTab } = useWorkspaceResourceContext();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
@@ -50,20 +61,28 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
       setExpandedItems(createExpandedItems(resourceTableItems));
       setReasons(reasons);
       setValues(JSON.stringify(properties, undefined, 2));
-      setEditingReasons(reasons);
-      setIsEdit(false);
     });
   }, [selectedResourceId]);
 
   const onEdit = () => {
-    setEditingReasons(reasons);
-    setEditingValues(values);
-    setIsEdit(!isEdit);
+    modifyResourceTab(tabId, (originTab: ManualResourceTabInfo) => {
+      return {
+        ...originTab,
+        editingValues: {
+          reasons: reasons,
+          properties: values,
+        },
+      };
+    });
   };
 
   const onCancel = () => {
-    setEditingReasons(reasons);
-    setIsEdit(!isEdit);
+    modifyResourceTab(tabId, (originTab: ManualResourceTabInfo) => {
+      return {
+        ...originTab,
+        editingValues: undefined,
+      };
+    });
   };
 
   const onSave = async () => {
@@ -75,43 +94,75 @@ export const EditorContentLayout = ({ selectedResourceId, serviceName, resourceN
       });
       return;
     }
-    setReasons(editingReasons);
-    setIsEdit(!isEdit);
-    updateManualResourceMeta({
+    await updateManualResourceMeta({
       resource_id: selectedResourceId as string,
-      reasons: editingReasons,
+      reasons: editingValues?.reasons || {},
     });
-    updateManualResourceProperties({
+    await updateManualResourceProperties({
       resource_id: selectedResourceId as string,
-      properties: editingValues,
+      properties: editingValues?.properties ?? '{}',
     });
-    const resourceTableItems = createResourceTableItems(schema as CloudFormationSchema, JSON.parse(editingValues));
+    const resourceTableItems = createResourceTableItems(
+      schema as CloudFormationSchema,
+      JSON.parse(editingValues?.properties || '{}'),
+    );
     setProperties(resourceTableItems);
     setExpandedItems(createExpandedItems(resourceTableItems));
-    setValues(editingValues);
+    modifyResourceTab(tabId, (originTab: ManualResourceTabInfo) => {
+      return {
+        ...originTab,
+        editingValues: undefined,
+      };
+    });
+
+    await Promise.all([
+      getManualManagementResourceProperties({
+        resource_id: selectedResourceId,
+      }),
+      getManualManagementResourceReasons({
+        resource_id: selectedResourceId,
+      }),
+    ]).then(([properties, reasons]) => {
+      setReasons(reasons);
+      setValues(JSON.stringify(properties, undefined, 2));
+    });
+  };
+
+  const onPropertiesChange: EditorContentLayoutPresentationProps['resourcePropertyEditorProps']['onDelayedChange'] = ({
+    detail,
+  }) => {
+    modifyResourceTab(tabId, (originTab: ManualResourceTabInfo) => {
+      return {
+        ...originTab,
+        editingValues: {
+          reasons: editingValues?.reasons || {},
+          properties: detail.value,
+        },
+      };
+    });
   };
 
   return (
     <EditorContentLayoutPresentation
+      tabId={tabId}
       selectedResourceId={selectedResourceId}
-      isEdit={isEdit}
       viewMode={mode}
       onClickEdit={onEdit}
       onClickCancel={onCancel}
       onClickSave={onSave}
       propertyTableProps={{
+        tabId: tabId,
         properties: properties,
         reasons: reasons,
-        editingReasons: editingReasons,
+        editingReasons: editingValues?.reasons,
         expandedItems: expandedItems,
         setExpandedItems: setExpandedItems,
-        setEditingReasons: setEditingReasons,
       }}
       resourcePropertyEditorProps={{
         values: values,
-        editingValues: editingValues,
+        editingValues: editingValues?.properties || '{}',
         onValidate: ({ detail }) => setIsValid(detail.annotations.length === 0),
-        onDelayedChange: ({ detail }) => setEditingValues(detail.value),
+        onDelayedChange: onPropertiesChange,
       }}
       onChangeSegmentedControl={({ detail }) => setMode(detail.selectedId as ViewMode)}
     />

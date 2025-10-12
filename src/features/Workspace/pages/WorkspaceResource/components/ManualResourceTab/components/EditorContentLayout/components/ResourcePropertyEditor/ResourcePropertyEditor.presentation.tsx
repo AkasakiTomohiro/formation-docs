@@ -38,7 +38,7 @@ export type ResourcePropertyEditorPresentationProps = {
   /**
    * 編集中かどうか
    */
-  isEdit: boolean;
+  // isEdit: boolean;
 
   /**
    * コンテナーヘッダーコンポーネント
@@ -77,7 +77,6 @@ export type ResourcePropertyEditorPresentationProps = {
 };
 
 export const ResourcePropertyEditorPresentation = ({
-  isEdit,
   header,
   values,
   editingValues,
@@ -88,7 +87,7 @@ export const ResourcePropertyEditorPresentation = ({
 }: ResourcePropertyEditorPresentationProps): JSX.Element => {
   return (
     <Container header={header}>
-      {isEdit ? (
+      {editingValues !== undefined ? (
         <CodeEditor
           ace={ace}
           language="json"

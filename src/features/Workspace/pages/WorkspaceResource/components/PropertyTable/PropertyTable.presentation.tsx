@@ -20,19 +20,15 @@ export type PropertyTablePresentationProps = {
   properties: ResourceTableItem[];
 
   /**
-   * 編集中かどうか
-   */
-  isEdit: boolean;
-
-  /**
    * Reasonの値
    */
   reasons: Record<string, string>;
 
   /**
    * 編集中のReasonの値
+   * 編集中状態でなければ`undefined`
    */
-  editingReasons: Record<string, string>;
+  editingReasons?: Record<string, string>;
 
   /**
    * Reasonsのテキストエリアの変更イベントハンドラ
@@ -67,7 +63,6 @@ export type PropertyTablePresentationProps = {
 
 export const PropertyTablePresentation = ({
   properties,
-  isEdit,
   expandableRows,
   reasons,
   editingReasons,
@@ -152,8 +147,8 @@ export const PropertyTablePresentation = ({
           id: 'reason',
           header: 'Reason',
           cell: (e) => {
-            if (isEdit) {
-              return <Textarea onChange={onChangeReason(e)} value={editingReasons[e.id] ?? ''} />;
+            if (editingReasons !== undefined) {
+              return <Textarea onChange={onChangeReason(e)} value={editingReasons?.[e.id] ?? ''} />;
             }
             return <div style={{ whiteSpace: 'pre-line' }}>{reasons[e.id]}</div>;
           },

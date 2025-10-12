@@ -31,11 +31,13 @@ export const ResourceTab = (props: ResourceTabProps): JSX.Element => {
       />
       {props.selectedLogicalId !== undefined && (
         <ResourcePropertyTable
+          tabId={props.tabId}
           stackId={props.stackId}
           stackName={props.stackName}
           serviceName={props.serviceName}
           resourceName={props.resourceName}
           selectedLogicalId={props.selectedLogicalId}
+          editingValues={props.editingValues}
         />
       )}
     </div>
