@@ -19,7 +19,10 @@ export type EditorContentLayoutProps = {
   selectedResourceId: string;
   serviceName: string;
   resourceName: string;
-  editingValues?: Record<string, any>;
+  editingValues?: {
+    properties: string;
+    reasons: Record<string, string>;
+  };
 };
 
 export const EditorContentLayout = ({
@@ -91,13 +94,13 @@ export const EditorContentLayout = ({
       });
       return;
     }
-    updateManualResourceMeta({
+    await updateManualResourceMeta({
       resource_id: selectedResourceId as string,
-      reasons: editingValues?.reasons,
+      reasons: editingValues?.reasons || {},
     });
-    updateManualResourceProperties({
+    await updateManualResourceProperties({
       resource_id: selectedResourceId as string,
-      properties: editingValues?.properties,
+      properties: editingValues?.properties ?? '{}',
     });
     const resourceTableItems = createResourceTableItems(
       schema as CloudFormationSchema,
@@ -111,6 +114,18 @@ export const EditorContentLayout = ({
         editingValues: undefined,
       };
     });
+
+    await Promise.all([
+      getManualManagementResourceProperties({
+        resource_id: selectedResourceId,
+      }),
+      getManualManagementResourceReasons({
+        resource_id: selectedResourceId,
+      }),
+    ]).then(([properties, reasons]) => {
+      setReasons(reasons);
+      setValues(JSON.stringify(properties, undefined, 2));
+    });
   };
 
   const onPropertiesChange: EditorContentLayoutPresentationProps['resourcePropertyEditorProps']['onDelayedChange'] = ({
@@ -120,7 +135,7 @@ export const EditorContentLayout = ({
       return {
         ...originTab,
         editingValues: {
-          reasons: editingValues?.reasons,
+          reasons: editingValues?.reasons || {},
           properties: detail.value,
         },
       };
@@ -145,7 +160,7 @@ export const EditorContentLayout = ({
       }}
       resourcePropertyEditorProps={{
         values: values,
-        editingValues: editingValues?.properties,
+        editingValues: editingValues?.properties || '{}',
         onValidate: ({ detail }) => setIsValid(detail.annotations.length === 0),
         onDelayedChange: onPropertiesChange,
       }}
