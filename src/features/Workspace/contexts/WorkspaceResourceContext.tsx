@@ -41,6 +41,7 @@ export type ManualResourceTabAttr = {
     properties: string;
     reasons: Record<string, string>;
   };
+  viewMode: ViewMode;
 };
 
 export type OverviewTabInfo = TabInfo<'overview', OverviewTabAttr>;
@@ -51,6 +52,11 @@ export type ManualResourceTabInfo = TabInfo<'manualResource', ManualResourceTabA
 export type WorkspaceTabInfo = OverviewTabInfo | ResourceTabInfo | ManualOverviewTabInfo | ManualResourceTabInfo;
 
 export const ManualManagementId = 'manualManagement';
+
+/**
+ * 手動管理リソースのコンテンツで表示する種別
+ */
+export type ViewMode = 'reason' | 'value';
 
 export interface WorkspaceResourceContext {
   /**
@@ -123,6 +129,12 @@ export interface WorkspaceResourceContext {
    * 全スタックのOutputs取得関数
    */
   loadAllStackOutputs: () => Promise<void>;
+
+  /**
+   * 手動管理リソースの表示モード
+   */
+  viewMode: (tabId: string) => ViewMode;
+  setViewMode: (tabId: string, mode: ViewMode) => void;
 }
 
 const WorkspaceResourceContext = createContext<WorkspaceResourceContext>({
@@ -161,6 +173,12 @@ const WorkspaceResourceContext = createContext<WorkspaceResourceContext>({
   allStackOutputs: {},
   loadAllStackOutputs: () => {
     throw new Error('loadAllStackOutputs is not implemented');
+  },
+  viewMode: () => {
+    throw new Error('viewMode is not implemented');
+  },
+  setViewMode: () => {
+    throw new Error('setViewMode is not implemented');
   },
 });
 
@@ -271,6 +289,32 @@ export const WorkspaceResourceProvider = ({ children }: WorkspaceResourceProvide
     [resourceTabs, activeTabId, deleteAllResourceTabs],
   );
 
+  // 手動管理リソースの表示モード取得関数
+  const viewMode = useCallback(
+    (tabId: string) => {
+      const tab = resourceTabs.find((t) => t.tabId === tabId && t.type === 'manualResource') as
+        | ManualResourceTabInfo
+        | undefined;
+      return tab?.viewMode || 'reason';
+    },
+    [resourceTabs],
+  );
+
+  // 手動管理リソースの表示モード変更関数
+  const setViewMode = useCallback((tabId: string, mode: ViewMode) => {
+    setResourceTabs((prev) =>
+      prev.map((tab) => {
+        if (tab.tabId === tabId && tab.type === 'manualResource') {
+          return {
+            ...tab,
+            viewMode: mode,
+          };
+        }
+        return tab;
+      }),
+    );
+  }, []);
+
   return (
     <WorkspaceResourceContext.Provider
       value={{
@@ -290,6 +334,8 @@ export const WorkspaceResourceProvider = ({ children }: WorkspaceResourceProvide
         loadSideMenu,
         allStackOutputs,
         loadAllStackOutputs,
+        viewMode,
+        setViewMode,
       }}
     >
       {children}

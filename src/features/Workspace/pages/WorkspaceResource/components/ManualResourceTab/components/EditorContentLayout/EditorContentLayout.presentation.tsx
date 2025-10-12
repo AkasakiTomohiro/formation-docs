@@ -2,13 +2,9 @@ import { Button, ContentLayout, Header, SegmentedControl, SpaceBetween } from '@
 import { PropertyTable } from '../../../PropertyTable';
 import { ResourcePropertyEditor } from './components';
 import type { ButtonProps, SegmentedControlProps } from '@cloudscape-design/components';
+import type { ViewMode } from '../../../../../../contexts';
 import type { PropertyTableProps } from '../../../PropertyTable';
 import type { ResourcePropertyEditorProps } from './components';
-
-/**
- * コンテンツで表示する種別
- */
-export type ViewMode = 'reason' | 'value';
 
 export type EditorContentLayoutPresentationProps = {
   /**

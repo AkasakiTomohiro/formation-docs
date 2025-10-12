@@ -9,10 +9,10 @@ import { getManualManagementResourceProperties } from './lib/GetManualManagement
 import { getManualManagementResourceReasons } from './lib/GetManualManagementResourceReasons';
 import { updateManualResourceMeta } from './lib/UpdateManualResourceMeta';
 import { updateManualResourceProperties } from './lib/UpdateManualResourceProperties';
-import type { ManualResourceTabInfo } from '../../../../../../contexts';
+import type { ManualResourceTabInfo, ViewMode } from '../../../../../../contexts';
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
-import type { EditorContentLayoutPresentationProps, ViewMode } from './EditorContentLayout.presentation';
+import type { EditorContentLayoutPresentationProps } from './EditorContentLayout.presentation';
 
 export type EditorContentLayoutProps = {
   tabId: string;
@@ -36,11 +36,10 @@ export const EditorContentLayout = ({
   const [properties, setProperties] = useState<ResourceTableItem[]>([]);
   const [expandedItems, setExpandedItems] = useState<any>();
   const [reasons, setReasons] = useState<Record<string, string>>({});
-  const [mode, setMode] = useState<ViewMode>('reason');
   const [values, setValues] = useState<string>('');
   const { addFlashbarItem } = useFlashbarContext();
   const [isValid, setIsValid] = useState(true);
-  const { modifyResourceTab } = useWorkspaceResourceContext();
+  const { viewMode, setViewMode, modifyResourceTab } = useWorkspaceResourceContext();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
@@ -146,7 +145,7 @@ export const EditorContentLayout = ({
     <EditorContentLayoutPresentation
       tabId={tabId}
       selectedResourceId={selectedResourceId}
-      viewMode={mode}
+      viewMode={viewMode(tabId)}
       onClickEdit={onEdit}
       onClickCancel={onCancel}
       onClickSave={onSave}
@@ -160,11 +159,11 @@ export const EditorContentLayout = ({
       }}
       resourcePropertyEditorProps={{
         values: values,
-        editingValues: editingValues?.properties || '{}',
+        editingValues: editingValues?.properties,
         onValidate: ({ detail }) => setIsValid(detail.annotations.length === 0),
         onDelayedChange: onPropertiesChange,
       }}
-      onChangeSegmentedControl={({ detail }) => setMode(detail.selectedId as ViewMode)}
+      onChangeSegmentedControl={({ detail }) => setViewMode(tabId, detail.selectedId as ViewMode)}
     />
   );
 };
