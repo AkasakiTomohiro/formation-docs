@@ -8,12 +8,18 @@ import { getStackResourcePropertiesReasons } from './lib/GetStackResourcePropert
 import { loadParameterAndResourceList } from './lib/LoadParameterAndResourceList';
 import { updateStackMeta } from './lib/UpdateStackMeta';
 import { ResourcePropertyTablePresentation } from './ResourcePropertyTable.presentation';
+import type { ResourceTabInfo } from '../../../../../../contexts';
 import type { TemplateSummary } from '../../../../../../contexts/lib/LoadTemplateSummary';
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
 import type { CloudFormationSchema } from '../../../types/CloudFormationSchema';
 import type { LoadParameterAndResourceListResult } from './lib/LoadParameterAndResourceList';
 
 export type ResourcePropertyTableProps = {
+  /**
+   * タブID
+   */
+  tabId: string;
+
   /**
    * スタックID
    */
@@ -38,26 +44,27 @@ export type ResourcePropertyTableProps = {
    * 選択している論理ID
    */
   selectedLogicalId: string;
+
+  /**
+   * 編集中の値
+   */
+  editingValues?: ResourceTabInfo['editingValues'];
 };
 
 export const ResourcePropertyTable = ({
+  tabId,
   stackId,
   stackName,
   serviceName,
   resourceName,
   selectedLogicalId,
+  editingValues,
 }: ResourcePropertyTableProps): JSX.Element => {
   // ネストされたプロパティの展開状態を管理するためのステート
   const [expandedItems, setExpandedItems] = useState<any>();
 
-  // 編集モードの状態を管理するためのステート
-  const [isEdit, setIsEdit] = useState(false);
-
   // ファイルに保存されている理由を管理するためのステート
   const [reasons, setReasons] = useState<Record<string, string>>({});
-
-  // 編集中の理由を管理するためのステート
-  const [editingReasons, setEditingReasons] = useState<Record<string, string>>({});
 
   // 選択した論理IDがもつプロパティを管理するためのステート
   const [properties, setProperties] = useState<ResourceTableItem[]>([]);
@@ -68,7 +75,7 @@ export const ResourcePropertyTable = ({
     resources: {},
   });
 
-  const { sideMenu, allStackOutputs } = useWorkspaceResourceContext();
+  const { sideMenu, allStackOutputs, modifyResourceTab } = useWorkspaceResourceContext();
 
   useEffect(() => {
     Promise.all([
@@ -97,17 +104,22 @@ export const ResourcePropertyTable = ({
       setExpandedItems(createExpandedItems(resourceTableItems));
       setReasons(reasons);
       setParameterAndResourceList(parameterAndResourceList);
-      setIsEdit(false);
     });
   }, [stackId, stackName, serviceName, resourceName, selectedLogicalId, allStackOutputs, sideMenu]);
 
   const onSave = async () => {
-    setReasons(editingReasons);
-    setIsEdit(false);
     await updateStackMeta({
       stack_id: stackId,
       logical_id: selectedLogicalId as string,
-      reasons: editingReasons,
+      reasons: editingValues?.reasons ?? {},
+    });
+
+    // 編集中の値をクリア
+    modifyResourceTab(tabId, (originTab: ResourceTabInfo) => {
+      return {
+        ...originTab,
+        editingValues: undefined,
+      };
     });
 
     await Promise.all([
@@ -116,7 +128,11 @@ export const ResourcePropertyTable = ({
         stack_id: stackId,
         logical_id: selectedLogicalId as string,
       }),
-    ]).then(([schemaStr, properties]) => {
+      getStackResourcePropertiesReasons({
+        stack_id: stackId,
+        logical_id: selectedLogicalId,
+      }),
+    ]).then(([schemaStr, properties, reasons]) => {
       const schemaParsed = JSON.parse(schemaStr) as CloudFormationSchema;
       const resourceTableItems = createResourceTableItems(schemaParsed, properties, {
         ...parameterAndResourceList,
@@ -125,32 +141,41 @@ export const ResourcePropertyTable = ({
         externalResources: createExternalResources(allStackOutputs, sideMenu),
       });
       setProperties(resourceTableItems);
+      setReasons(reasons);
     });
   };
 
   const onCancel = () => {
-    setEditingReasons(reasons);
-    setIsEdit(false);
+    // 編集中の値をクリア
+    modifyResourceTab(tabId, (originTab: ResourceTabInfo) => {
+      return {
+        ...originTab,
+        editingValues: undefined,
+      };
+    });
   };
 
   const onClickEdit = () => {
-    setEditingReasons(reasons);
-    setIsEdit(true);
+    modifyResourceTab(tabId, (originTab: ResourceTabInfo) => {
+      return {
+        ...originTab,
+        editingValues: { reasons },
+      };
+    });
   };
 
   return (
     <ResourcePropertyTablePresentation
+      tabId={tabId}
       properties={properties}
-      isEdit={isEdit}
       selectedLogicalId={selectedLogicalId}
       reasons={reasons}
-      editingReasons={editingReasons}
+      editingReasons={editingValues?.reasons}
       onClickSave={onSave}
       onClickCancel={onCancel}
       onClickEdit={onClickEdit}
       expandedItems={expandedItems}
       setExpandedItems={setExpandedItems}
-      setEditingReasons={setEditingReasons}
     />
   );
 };

@@ -5,6 +5,11 @@ import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems
 
 export type ResourcePropertyTablePresentationProps = {
   /**
+   * タブID
+   */
+  tabId: string;
+
+  /**
    * 選択している論理ID
    */
   selectedLogicalId: string;
@@ -15,11 +20,6 @@ export type ResourcePropertyTablePresentationProps = {
   properties: ResourceTableItem[];
 
   /**
-   * 編集中かどうか
-   */
-  isEdit: boolean;
-
-  /**
    * Reasonの値
    */
   reasons: Record<string, string>;
@@ -27,7 +27,7 @@ export type ResourcePropertyTablePresentationProps = {
   /**
    * 編集中のReasonの値
    */
-  editingReasons: Record<string, string>;
+  editingReasons?: Record<string, string>;
 
   /**
    * ネストされた行の開閉関連イベント
@@ -53,17 +53,12 @@ export type ResourcePropertyTablePresentationProps = {
    * ネストされたプロパティの展開状態を更新する関数
    */
   setExpandedItems: (items: any) => void;
-
-  /**
-   * 編集中の理由を更新
-   */
-  setEditingReasons: (reasons: (prev: Record<string, string>) => Record<string, string>) => void;
 };
 
 export const ResourcePropertyTablePresentation = ({
+  tabId,
   selectedLogicalId,
   properties,
-  isEdit,
   expandedItems,
   onClickEdit,
   onClickCancel,
@@ -71,7 +66,6 @@ export const ResourcePropertyTablePresentation = ({
   reasons,
   setExpandedItems,
   editingReasons,
-  setEditingReasons,
 }: ResourcePropertyTablePresentationProps): JSX.Element => {
   return (
     <ContentLayout
@@ -80,8 +74,9 @@ export const ResourcePropertyTablePresentation = ({
         <Header
           actions={
             <SpaceBetween direction="horizontal" size="xs">
-              {!isEdit && <Button onClick={onClickEdit}>編集</Button>}
-              {isEdit && (
+              {editingReasons === undefined ? (
+                <Button onClick={onClickEdit}>編集</Button>
+              ) : (
                 <>
                   <Button onClick={onClickCancel}>キャンセル</Button>
                   <Button variant="primary" onClick={onClickSave}>
@@ -97,13 +92,12 @@ export const ResourcePropertyTablePresentation = ({
       }
     >
       <PropertyTable
-        isEdit={isEdit}
+        tabId={tabId}
         properties={properties}
         reasons={reasons}
         editingReasons={editingReasons}
         expandedItems={expandedItems}
         setExpandedItems={setExpandedItems}
-        setEditingReasons={setEditingReasons}
       />
     </ContentLayout>
   );
