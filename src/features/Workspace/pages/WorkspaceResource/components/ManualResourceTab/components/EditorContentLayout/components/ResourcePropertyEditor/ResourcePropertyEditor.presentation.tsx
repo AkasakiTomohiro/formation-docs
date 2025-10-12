@@ -53,7 +53,7 @@ export type ResourcePropertyEditorPresentationProps = {
   /**
    * 編集中のValueの値
    */
-  editingValues: string;
+  editingValues: string | undefined;
 
   /**
    * Aceエディタの表示設定

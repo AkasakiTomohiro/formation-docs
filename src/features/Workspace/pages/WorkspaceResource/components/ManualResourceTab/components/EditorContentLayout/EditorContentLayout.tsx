@@ -160,7 +160,7 @@ export const EditorContentLayout = ({
       }}
       resourcePropertyEditorProps={{
         values: values,
-        editingValues: editingValues?.properties || '{}',
+        editingValues: editingValues?.properties,
         onValidate: ({ detail }) => setIsValid(detail.annotations.length === 0),
         onDelayedChange: onPropertiesChange,
       }}
