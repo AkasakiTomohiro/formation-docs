@@ -17,7 +17,7 @@ pub const APP_CONFIG_DIRECTORY_NAME: &str = "formation-docs";
 /// アプリコンフィグ v1
 ///
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct AppConfigV1 {
     pub version: u32,
     pub workspaces: HashMap<String, String>,
@@ -31,7 +31,7 @@ impl AppConfigV1 {
             version: 1,
             workspaces: HashMap::new(),
             initialized: false,
-            initialized_at: Utc::now().to_string(),
+            initialized_at: "".to_string(),
         }
     }
 }
@@ -56,7 +56,7 @@ impl ConfigMigratable for AppConfigV1 {
 /// アプリコンフィグ 最新バージョン
 ///
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AppConfig {
     pub version: u32,
     pub workspaces: HashMap<String, String>,
@@ -156,5 +156,75 @@ async fn read_config_version() -> Result<u32, AppConfigError> {
             Ok(version)
         }
         false => Ok(0),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crate::utils::ConfigMigratable;
+
+    #[test]
+    fn app_config_v1_new() {
+        let config_v1 = super::AppConfigV1::new();
+        assert_eq!(config_v1.version, 1);
+        assert!(config_v1.workspaces.is_empty());
+        assert!(config_v1.initialized == false);
+        assert!(config_v1.initialized_at.is_empty());
+        assert!(config_v1.is_latest() == false);
+    }
+
+    #[test]
+    fn app_config_v1_migrate_boxed() {
+        let mut config_v1 = super::AppConfigV1::new();
+        config_v1
+            .workspaces
+            .insert("default".to_string(), "Default Workspace".to_string());
+        config_v1.initialized_at = "2024-01-01T00:00:00Z".to_string();
+        let boxed = Box::new(config_v1.clone()).migrate_boxed();
+        let downcasted = boxed.as_any().downcast::<super::AppConfig>();
+
+        // downcastに成功していること
+        assert!(downcasted.is_ok());
+
+        // AppConfigV1がAppConfigに変換されていること
+        let migrate_config = downcasted.unwrap();
+        assert!(migrate_config.is_latest());
+        assert_eq!(migrate_config.version, super::APP_CONFIG_LATEST_VERSION);
+        assert_eq!(migrate_config.workspaces, config_v1.workspaces);
+        assert_eq!(migrate_config.initialized, config_v1.initialized);
+        assert_eq!(migrate_config.initialized_at, config_v1.initialized_at);
+    }
+
+    #[test]
+    fn app_config_new() {
+        let config = super::AppConfig::new();
+        assert_eq!(config.version, super::APP_CONFIG_LATEST_VERSION);
+        assert!(config.workspaces.is_empty());
+        assert!(config.initialized == false);
+        assert!(config.initialized_at.is_empty());
+        assert!(config.is_latest());
+    }
+
+    #[test]
+    fn app_config_migrate_boxed() {
+        let mut config = super::AppConfig::new();
+        config
+            .workspaces
+            .insert("default".to_string(), "Default Workspace".to_string());
+        config.initialized_at = "2024-01-01T00:00:00Z".to_string();
+        let boxed = Box::new(config.clone()).migrate_boxed();
+        let downcasted = boxed.as_any().downcast::<super::AppConfig>();
+
+        // downcastに成功していること
+        assert!(downcasted.is_ok());
+
+        // AppConfigがAppConfigに変換されていること
+        let migrate_config = downcasted.unwrap();
+        assert!(migrate_config.is_latest());
+        assert_eq!(migrate_config.version, config.version);
+        assert_eq!(migrate_config.workspaces, config.workspaces);
+        assert_eq!(migrate_config.initialized, config.initialized);
+        assert_eq!(migrate_config.initialized_at, config.initialized_at);
     }
 }
