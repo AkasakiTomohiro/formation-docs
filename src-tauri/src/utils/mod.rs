@@ -1,6 +1,7 @@
 pub mod app_error;
 pub mod command_result;
 pub mod config_migratable;
+pub mod context;
 pub mod window_state;
 
 pub use app_error::AppError;
