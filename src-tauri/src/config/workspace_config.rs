@@ -1,11 +1,12 @@
+use crate::utils::context::file::FileSystem;
 use crate::utils::{AppError, ConfigMigratable};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::any::Any;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use thiserror::Error;
-use tokio::fs;
 
 const WORKSPACE_FILE_NAME: &str = "workspace.json";
 const WORKSPACE_CONFIG_LATEST_VERSION: u32 = 1;
@@ -76,13 +77,16 @@ impl WorkspaceConfig {
     ///
     /// versionが最新でない場合はマイグレーションして最新版に変換し、保存する
     /// - 戻り値: 読み込んだWorkspaceConfig
-    pub async fn read(workspace_directory: &str) -> Result<WorkspaceConfig, WorkspaceConfigError> {
-        let version = read_config_version(workspace_directory).await?;
+    pub async fn read(
+        file_system: Arc<dyn FileSystem>,
+        workspace_directory: &str,
+    ) -> Result<WorkspaceConfig, WorkspaceConfigError> {
+        let version = read_config_version(file_system.clone(), workspace_directory).await?;
         let config_path = workspace_config_path(workspace_directory);
 
         match version {
             1 => {
-                let config_json = fs::read_to_string(&config_path).await?;
+                let config_json = file_system.read_file(&config_path).await?;
                 let config_json = serde_json::from_str::<WorkspaceConfigV1>(&config_json)?;
                 let boxed = Box::new(config_json);
                 Ok(boxed.migrate_until_latest())
@@ -98,7 +102,9 @@ impl WorkspaceConfig {
                 }
                 let name = name.unwrap();
                 let config_json = WorkspaceConfig::new(name);
-                config_json.write(workspace_directory).await?;
+                config_json
+                    .write(file_system.clone(), workspace_directory)
+                    .await?;
                 Ok(config_json)
             }
         }
@@ -107,10 +113,16 @@ impl WorkspaceConfig {
     /// workspace.jsonへ書き込む
     ///
     /// - `workspace_directory`: ワークスペースディレクトリ
-    pub async fn write(&self, workspace_directory: &str) -> Result<(), WorkspaceConfigError> {
+    pub async fn write(
+        &self,
+        file_system: Arc<dyn FileSystem>,
+        workspace_directory: &str,
+    ) -> Result<(), WorkspaceConfigError> {
         let workspace_config_json = serde_json::to_string::<WorkspaceConfig>(self)?;
         let workspace_config_path = workspace_config_path(workspace_directory);
-        fs::write(workspace_config_path, workspace_config_json).await?;
+        file_system
+            .write_file(&workspace_config_path, workspace_config_json.as_bytes())
+            .await?;
         return Ok(());
     }
 }
@@ -145,11 +157,14 @@ fn workspace_config_path(workspace_directory: &str) -> PathBuf {
 }
 
 /// workspace.jsonのバージョンを取得
-async fn read_config_version(workspace_directory: &str) -> Result<u32, WorkspaceConfigError> {
+async fn read_config_version(
+    file_system: Arc<dyn FileSystem>,
+    workspace_directory: &str,
+) -> Result<u32, WorkspaceConfigError> {
     let config_path = workspace_config_path(workspace_directory);
     match config_path.exists() {
         true => {
-            let config_json = fs::read_to_string(&config_path).await?;
+            let config_json = file_system.read_file(&config_path).await?;
             let config_json: Value = serde_json::from_str(&config_json)?;
             let version = config_json
                 .get("version")
