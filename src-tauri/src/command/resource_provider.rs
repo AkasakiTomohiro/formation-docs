@@ -19,7 +19,7 @@ pub enum ResourceProviderError {
 async fn setup_app(state: State<'_, AppContext>) -> Result<(), ResourceProviderError> {
     let mut app_config = AppConfig::read(state.file_system.clone()).await?;
     if app_config.initialized == false {
-        cloudformation::schema::dl_resource_provider("us-east-1").await?;
+        cloudformation::schema::dl_resource_provider(state.clone(), "us-east-1").await?;
         app_config.initialized = true;
         app_config.initialized_at = Utc::now().to_string();
         app_config.write(state.file_system.clone()).await?;
