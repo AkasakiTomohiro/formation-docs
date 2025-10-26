@@ -1,3 +1,4 @@
+use crate::utils::context::file::FileSystem;
 use crate::utils::{AppError, ConfigMigratable};
 use chrono::Utc;
 use dirs::config_local_dir;
@@ -6,8 +7,8 @@ use serde_json::Value;
 use std::any::Any;
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::sync::Arc;
 use thiserror::Error;
-use tokio::fs;
 
 const APP_CONFIG_LATEST_VERSION: u32 = 1;
 const APP_CONFIG_FILE_NAME: &str = "app_config.json";
@@ -77,30 +78,38 @@ impl AppConfig {
     ///
     /// versionが最新でない場合はマイグレーションして最新版に変換し、保存する
     /// - 戻り値: 読み込んだAppConfig
-    pub async fn read() -> Result<AppConfig, AppConfigError> {
-        let version = read_config_version().await?;
+    pub async fn read(file_system: Arc<dyn FileSystem>) -> Result<AppConfig, AppConfigError> {
+        let version = read_config_version(file_system.clone()).await?;
         let config_path = app_config_path()?;
         match version {
             1 => {
-                let config_json = fs::read_to_string(&config_path).await?;
+                let config_json = file_system.read_file(&config_path).await?;
                 let config_json = serde_json::from_str::<AppConfigV1>(&config_json)?;
                 let boxed = Box::new(config_json);
                 Ok(boxed.migrate_until_latest())
             }
             _ => {
                 let config_json = AppConfig::new();
-                config_json.write().await?;
+                config_json.write(file_system).await?;
                 Ok(config_json)
             }
         }
     }
 
     /// app_config.jsonへ書き込む
-    pub async fn write(&self) -> Result<(), AppConfigError> {
+    pub async fn write(&self, file_system: Arc<dyn FileSystem>) -> Result<(), AppConfigError> {
         let app_config_json = serde_json::to_string::<AppConfig>(self)?;
         let app_config_path = app_config_path()?;
-        fs::write(app_config_path, app_config_json).await?;
-        return Ok(());
+
+        // ディレクトリが存在しない場合は作成する
+        if let Some(parent_dir) = app_config_path.parent() {
+            file_system.create_dir_all(parent_dir).await?;
+        }
+
+        file_system
+            .write_file(&app_config_path, app_config_json.as_bytes())
+            .await?;
+        Ok(())
     }
 }
 
@@ -143,11 +152,11 @@ fn app_config_path() -> Result<PathBuf, AppConfigError> {
 }
 
 /// app_config.jsonのバージョンを取得
-async fn read_config_version() -> Result<u32, AppConfigError> {
+async fn read_config_version(file_system: Arc<dyn FileSystem>) -> Result<u32, AppConfigError> {
     let config_path = app_config_path()?;
     match config_path.exists() {
         true => {
-            let config_json = fs::read_to_string(&config_path).await?;
+            let config_json = file_system.read_file(&config_path).await?;
             let config_json: Value = serde_json::from_str(&config_json)?;
             let version = config_json
                 .get("version")

@@ -1,7 +1,7 @@
-use crate::config::app_config::AppConfig;
-use crate::config::app_config::AppConfigError;
+use crate::config::app_config::{AppConfig, AppConfigError};
 use crate::config::workspace_config::WorkspaceConfig;
 use crate::config::workspace_config::WorkspaceConfigError;
+use crate::utils::context::app_context::AppContext;
 use crate::utils::get_window_state;
 use crate::utils::set_window_state;
 use crate::utils::AppError;
@@ -10,6 +10,7 @@ use crate::utils::WindowState;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use tauri::{Manager, State};
 use thiserror::Error;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -36,9 +37,13 @@ pub enum WorkspaceCommandError {
     #[error("workspace config error: {0}")]
     WorkspaceConfig(#[from] WorkspaceConfigError),
 }
-async fn create_workspace(directory: &str) -> Result<WorkspaceMergeInfo, WorkspaceCommandError> {
+
+async fn create_workspace(
+    state: State<'_, AppContext>,
+    directory: &str,
+) -> Result<WorkspaceMergeInfo, WorkspaceCommandError> {
     let workspace = WorkspaceConfig::read(directory).await?;
-    let workspace_result = super::app_config::add_workspace_to_app_config(directory).await?;
+    let workspace_result = super::app_config::add_workspace_to_app_config(state, directory).await?;
     return Ok(WorkspaceMergeInfo {
         id: workspace_result,
         directory: directory.to_string(),
@@ -49,9 +54,10 @@ async fn create_workspace(directory: &str) -> Result<WorkspaceMergeInfo, Workspa
 }
 
 async fn load_workspace_merge_info(
+    state: State<'_, AppContext>,
     workspace_id: &str,
 ) -> Result<WorkspaceMergeInfo, WorkspaceCommandError> {
-    let app_config = AppConfig::read().await?;
+    let app_config = AppConfig::read(state.file_system.clone()).await?;
 
     // すでに登録されている場合は登録IDを返す
     let workspace_directory = app_config.workspaces.get(workspace_id);
@@ -70,8 +76,10 @@ async fn load_workspace_merge_info(
     )));
 }
 
-async fn load_workspaces() -> Result<Vec<WorkspaceMergeInfo>, WorkspaceCommandError> {
-    let app_config = AppConfig::read().await?;
+async fn load_workspaces(
+    state: State<'_, AppContext>,
+) -> Result<Vec<WorkspaceMergeInfo>, WorkspaceCommandError> {
+    let app_config = AppConfig::read(state.file_system.clone()).await?;
 
     let mut workspaces = Vec::new();
     for (id, directory) in app_config.workspaces.iter() {
@@ -111,7 +119,8 @@ pub async fn open_workspace(
         )
         .title("formation-docs")
     } else {
-        let workspace_info = load_workspace_merge_info(id).await?;
+        let app_context = handle.state::<AppContext>();
+        let workspace_info = load_workspace_merge_info(app_context, id).await?;
         let path = Path::new(workspace_info.directory.as_str());
         log::info!("Open: {}", path.to_str().unwrap());
         if !path.exists() {
@@ -140,9 +149,10 @@ pub async fn open_workspace(
 
 #[tauri::command]
 pub async fn create_workspace_command(
+    state: State<'_, AppContext>,
     directory: &str,
 ) -> Result<CommandResult<WorkspaceMergeInfo>, CommandResult> {
-    match create_workspace(directory).await {
+    match create_workspace(state, directory).await {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to create Workspace")),
     }
@@ -150,9 +160,10 @@ pub async fn create_workspace_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_workspace_merge_info_command(
+    state: State<'_, AppContext>,
     workspace_id: &str,
 ) -> Result<CommandResult<WorkspaceMergeInfo>, CommandResult> {
-    match load_workspace_merge_info(workspace_id).await {
+    match load_workspace_merge_info(state, workspace_id).await {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to load Workspace")),
     }
@@ -160,8 +171,9 @@ pub async fn load_workspace_merge_info_command(
 
 #[tauri::command]
 pub async fn load_workspaces_command(
+    state: State<'_, AppContext>,
 ) -> Result<CommandResult<Vec<WorkspaceMergeInfo>>, CommandResult> {
-    match load_workspaces().await {
+    match load_workspaces(state).await {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to load Workspaces")),
     }

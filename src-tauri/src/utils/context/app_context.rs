@@ -1,21 +1,15 @@
-use std::sync::{Arc, OnceLock};
+use std::sync::Arc;
 
-use super::file::FileSystem;
+use super::file::{FileSystem, LocalFileSystem};
 
 pub struct AppContext {
     pub file_system: Arc<dyn FileSystem>,
 }
 
-static APP_CONTEXT: OnceLock<AppContext> = OnceLock::new();
-
 impl AppContext {
-    pub fn init_global(ctx: AppContext) {
-        if let Err(_) = APP_CONTEXT.set(ctx) {
-            panic!("AppContext already initialized");
+    pub fn new() -> Self {
+        Self {
+            file_system: Arc::new(LocalFileSystem {}),
         }
-    }
-
-    pub fn global() -> &'static AppContext {
-        APP_CONTEXT.get().expect("AppContext not initialized")
     }
 }
