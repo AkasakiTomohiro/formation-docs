@@ -22,7 +22,7 @@ pub enum DlSchemaError {
     #[error("reqwest error: {0}")]
     Reqwest(#[from] reqwest::Error),
     #[error("io error: {0}")]
-    Io(#[from] std::io::Error),
+    Io(#[from] tokio::io::Error),
     #[error("zip error: {0:?}")]
     Zip(#[from] zip::result::ZipError),
     #[error("json error: {0}")]
@@ -56,9 +56,9 @@ pub async fn generate_summary_service_list(
 ) -> Result<(), DlSchemaError> {
     let mut result_map: HashMap<String, HashSet<String>> = HashMap::new();
     let re = Regex::new(r"aws-([a-z\d]+)-([a-z\d]+)\.json").unwrap();
-    // TODO:tokio版を使用するように修正
-    for entry in fs::read_dir(&output_dir)? {
-        if let Some(entry) = entry?.file_name().to_str() {
+    let mut entries = state.file_system.read_dir(&output_dir).await?;
+    while let Some(entry) = entries.next_entry().await? {
+        if let Some(entry) = entry.file_name().to_str() {
             if re.is_match(entry) {
                 let file_path = output_dir.join(entry);
                 let schema_json = state.file_system.read_file(&file_path).await?;
@@ -112,7 +112,7 @@ pub async fn dl_resource_provider(
     let url = get_resource_provider_dl_path(region);
     let save_path = get_resource_provider_save_path(region)?;
     if save_path.exists() {
-        std::fs::remove_file(&save_path)?
+        state.file_system.remove_file(&save_path).await?
     }
 
     // Zipファイルをダウンロード
@@ -128,11 +128,12 @@ pub async fn dl_resource_provider(
         let out_path = output_dir.join(file.name());
 
         if file.is_dir() {
-            std::fs::create_dir_all(&out_path)?;
+            state.file_system.create_dir_all(&out_path).await?;
         } else {
             if let Some(parent) = out_path.parent() {
-                std::fs::create_dir_all(parent)?;
+                state.file_system.create_dir_all(parent).await?;
             }
+            // FIXME:
             let mut outfile = std::fs::File::create(&out_path)?;
             std::io::copy(&mut file, &mut outfile)?;
         }
