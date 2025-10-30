@@ -39,3 +39,4 @@ globmatch = "0.3.0"
 serde_yaml = "0.9.34"
 dashmap = "6.1.0"
 async-trait = "0.1.89"
+tokio-util = { version = "0.7.16", features = ["io-util"] }

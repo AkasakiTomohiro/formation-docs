@@ -133,9 +133,13 @@ pub async fn dl_resource_provider(
             if let Some(parent) = out_path.parent() {
                 state.file_system.create_dir_all(parent).await?;
             }
-            // FIXME:
-            let mut outfile = std::fs::File::create(&out_path)?;
-            std::io::copy(&mut file, &mut outfile)?;
+
+            let mut sync_reader = tokio_util::io::SyncIoBridge::new(file);
+            let mut outfile = state.file_system.touch_and_open_file(&out_path).await?;
+            state
+                .file_system
+                .copy_file_stream(&mut sync_reader, &mut outfile)
+                .await?;
         }
     }
     generate_summary_service_list(state, output_dir).await?;
