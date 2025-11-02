@@ -1,13 +1,14 @@
 use super::super::super::utils::AppError;
 use crate::config::app_config::APP_CONFIG_DIRECTORY_NAME;
+use crate::utils::context::app_context::AppContext;
 use regex::Regex;
 use serde_json::Value;
 use std::{
     collections::{HashMap, HashSet},
-    fs,
     io::Cursor,
     path::PathBuf,
 };
+use tauri::State;
 use thiserror::Error;
 use zip::ZipArchive;
 
@@ -20,11 +21,13 @@ pub enum DlSchemaError {
     #[error("reqwest error: {0}")]
     Reqwest(#[from] reqwest::Error),
     #[error("io error: {0}")]
-    Io(#[from] std::io::Error),
+    Io(#[from] tokio::io::Error),
     #[error("zip error: {0:?}")]
     Zip(#[from] zip::result::ZipError),
     #[error("json error: {0}")]
     Json(#[from] serde_json::Error),
+    #[error("task join error: {0}")]
+    Join(#[from] tokio::task::JoinError),
 }
 
 /// CloudFormationのサービスとリソース種別のサマリー結果を保存するファイル名
@@ -48,14 +51,18 @@ fn get_resource_provider_save_path(region: &str) -> Result<PathBuf, DlSchemaErro
     };
 }
 
-pub fn generate_summary_service_list(output_dir: PathBuf) -> Result<(), DlSchemaError> {
+pub async fn generate_summary_service_list(
+    state: State<'_, AppContext>,
+    output_dir: PathBuf,
+) -> Result<(), DlSchemaError> {
     let mut result_map: HashMap<String, HashSet<String>> = HashMap::new();
     let re = Regex::new(r"aws-([a-z\d]+)-([a-z\d]+)\.json").unwrap();
-    for entry in fs::read_dir(&output_dir)? {
-        if let Some(entry) = entry?.file_name().to_str() {
+    let mut entries = state.file_system.read_dir(&output_dir).await?;
+    while let Some(entry) = entries.next_entry().await? {
+        if let Some(entry) = entry.file_name().to_str() {
             if re.is_match(entry) {
                 let file_path = output_dir.join(entry);
-                let schema_json = fs::read_to_string(&file_path)?;
+                let schema_json = state.file_system.read_file(&file_path).await?;
                 let schema_json: Value = serde_json::from_str(&schema_json)?;
                 if schema_json.is_object() == true {
                     let type_name = schema_json["typeName"]
@@ -80,7 +87,10 @@ pub fn generate_summary_service_list(output_dir: PathBuf) -> Result<(), DlSchema
     }
     let summary_file_path = output_dir.join(SUMMARY_SERVICE_LIST_FILE);
     let summary_json = serde_json::to_string(&result_map)?;
-    fs::write(summary_file_path, summary_json)?;
+    state
+        .file_system
+        .write_file(&summary_file_path, summary_json.as_bytes())
+        .await?;
     return Ok(());
 }
 
@@ -96,35 +106,49 @@ pub fn get_resource_provider_save_dir(region: &str) -> Result<PathBuf, DlSchemaE
     };
 }
 
-pub async fn dl_resource_provider(region: &str) -> Result<(), DlSchemaError> {
+pub async fn dl_resource_provider(
+    state: State<'_, AppContext>,
+    region: &str,
+) -> Result<(), DlSchemaError> {
     let url = get_resource_provider_dl_path(region);
     let save_path = get_resource_provider_save_path(region)?;
     if save_path.exists() {
-        std::fs::remove_file(&save_path)?
+        state.file_system.remove_file(&save_path).await?
     }
 
     // Zipファイルをダウンロード
-    let response = reqwest::get(url).await?;
+    let response = state.http_client.get(url).await?;
     let bytes = response.bytes().await?;
 
-    // ZIPファイルを解凍
-    let content = Cursor::new(bytes);
     let output_dir = get_resource_provider_save_dir(region)?;
-    let mut archive = ZipArchive::new(content)?;
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i)?;
-        let out_path = output_dir.join(file.name());
+    let output_dir_tmp = output_dir.clone();
+    let file_system = state.file_system.clone();
 
-        if file.is_dir() {
-            std::fs::create_dir_all(&out_path)?;
-        } else {
-            if let Some(parent) = out_path.parent() {
-                std::fs::create_dir_all(parent)?;
+    // ZIPファイルを解凍
+    // 非同期処理内で同期処理を行うため（ZipArchiveが同期処理）、spawn_blockingで別スレッドに処理を移す
+    // spawn_blocking内では非同期関数は使えないため、tokioではなくstdクレートを使用
+    tokio::task::spawn_blocking(move || {
+        let content = Cursor::new(bytes);
+        let mut archive = ZipArchive::new(content)?;
+        for i in 0..archive.len() {
+            let mut file = archive.by_index(i)?;
+            let out_path = output_dir_tmp.join(file.name());
+
+            if file.is_dir() {
+                file_system.create_dir_all_sync(&out_path)?;
+            } else {
+                if let Some(parent) = out_path.parent() {
+                    file_system.create_dir_all_sync(parent)?;
+                }
+
+                let mut outfile = file_system.touch_and_open_file(&out_path)?;
+                file_system.copy_file_stream(&mut file, &mut outfile)?;
             }
-            let mut outfile = std::fs::File::create(&out_path)?;
-            std::io::copy(&mut file, &mut outfile)?;
         }
-    }
-    generate_summary_service_list(output_dir)?;
+        Ok::<(), DlSchemaError>(())
+    })
+    .await??;
+
+    generate_summary_service_list(state, output_dir).await?;
     return Ok(());
 }
