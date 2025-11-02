@@ -1,6 +1,5 @@
 use crate::utils::context::file::FileSystem;
 use crate::utils::{AppError, ConfigMigratable};
-use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::any::Any;
@@ -172,8 +171,9 @@ async fn read_config_version(file_system: Arc<dyn FileSystem>) -> Result<u32, Ap
 
 #[cfg(test)]
 mod tests {
-
+    use crate::utils::context::file::MockFileSystem;
     use crate::utils::ConfigMigratable;
+    use std::sync::Arc;
 
     /// AppConfigV1の初期生成データが正しいことを確認
     #[test]
@@ -261,5 +261,20 @@ mod tests {
         assert_eq!(migrate_config.workspaces, config.workspaces);
         assert_eq!(migrate_config.initialized, config.initialized);
         assert_eq!(migrate_config.initialized_at, config.initialized_at);
+    }
+
+    #[tokio::test]
+    async fn app_config_read_normal() {
+        // ######### 準備 #########
+        let file_system = Arc::new(MockFileSystem::new());
+
+        // ######### 実行 #########
+        let result = super::AppConfig::read(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がOkであること
+        assert!(result.is_ok());
+
+        // readの戻り値の内容が期待通りであること
     }
 }
