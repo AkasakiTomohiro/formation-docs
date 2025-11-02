@@ -1,6 +1,6 @@
 use async_trait::async_trait;
-use std::path::Path;
-use tokio::{fs::File, fs::ReadDir, io};
+use std::{fs::File, io::Read, io::Write, path::Path};
+use tokio::{fs::ReadDir, io};
 
 #[async_trait]
 pub trait FileSystem: Send + Sync {
@@ -8,14 +8,15 @@ pub trait FileSystem: Send + Sync {
     async fn write_file(&self, path: &Path, contents: &[u8]) -> io::Result<()>;
     async fn remove_file(&self, path: &Path) -> io::Result<()>;
     async fn copy_file(&self, from: &Path, to: &Path) -> Result<u64, std::io::Error>;
-    async fn copy_file_stream(
+    fn copy_file_stream(
         &self,
-        from: &mut (dyn io::AsyncRead + Unpin + Send),
-        to: &mut (dyn io::AsyncWrite + Unpin + Send),
-    ) -> io::Result<u64>;
-    async fn touch_and_open_file(&self, path: &Path) -> io::Result<File>;
+        from: &mut (dyn Read + Send),
+        to: &mut (dyn Write + Send),
+    ) -> std::io::Result<u64>;
+    fn touch_and_open_file(&self, path: &Path) -> std::io::Result<File>;
     async fn read_dir(&self, path: &Path) -> io::Result<ReadDir>;
     async fn create_dir_all(&self, path: &Path) -> io::Result<()>;
+    fn create_dir_all_sync(&self, path: &Path) -> std::io::Result<()>;
 }
 
 pub struct LocalFileSystem;
@@ -37,16 +38,16 @@ impl FileSystem for LocalFileSystem {
         return tokio::fs::copy(from, to).await;
     }
 
-    async fn copy_file_stream(
+    fn copy_file_stream(
         &self,
-        from: &mut (dyn io::AsyncRead + Unpin + Send),
-        to: &mut (dyn io::AsyncWrite + Unpin + Send),
-    ) -> io::Result<u64> {
-        return tokio::io::copy(from, to).await;
+        from: &mut (dyn Read + Send),
+        to: &mut (dyn Write + Send),
+    ) -> std::io::Result<u64> {
+        return std::io::copy(from, to);
     }
 
-    async fn touch_and_open_file(&self, path: &Path) -> io::Result<File> {
-        return tokio::fs::File::create(path).await;
+    fn touch_and_open_file(&self, path: &Path) -> std::io::Result<File> {
+        return std::fs::File::create(path);
     }
 
     async fn read_dir(&self, path: &Path) -> io::Result<ReadDir> {
@@ -55,5 +56,9 @@ impl FileSystem for LocalFileSystem {
 
     async fn create_dir_all(&self, path: &Path) -> io::Result<()> {
         return tokio::fs::create_dir_all(path).await;
+    }
+
+    fn create_dir_all_sync(&self, path: &Path) -> std::io::Result<()> {
+        return std::fs::create_dir_all(path);
     }
 }

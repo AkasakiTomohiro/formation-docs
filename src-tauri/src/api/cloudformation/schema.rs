@@ -5,7 +5,6 @@ use regex::Regex;
 use serde_json::Value;
 use std::{
     collections::{HashMap, HashSet},
-    fs, // TODO:削除
     io::Cursor,
     path::PathBuf,
 };
@@ -27,6 +26,8 @@ pub enum DlSchemaError {
     Zip(#[from] zip::result::ZipError),
     #[error("json error: {0}")]
     Json(#[from] serde_json::Error),
+    #[error("task join error: {0}")]
+    Join(#[from] tokio::task::JoinError),
 }
 
 /// CloudFormationのサービスとリソース種別のサマリー結果を保存するファイル名
@@ -119,29 +120,35 @@ pub async fn dl_resource_provider(
     let response = reqwest::get(url).await?;
     let bytes = response.bytes().await?;
 
-    // ZIPファイルを解凍
-    let content = Cursor::new(bytes);
     let output_dir = get_resource_provider_save_dir(region)?;
-    let mut archive = ZipArchive::new(content)?;
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i)?;
-        let out_path = output_dir.join(file.name());
+    let output_dir_tmp = output_dir.clone();
+    let file_system = state.file_system.clone();
 
-        if file.is_dir() {
-            state.file_system.create_dir_all(&out_path).await?;
-        } else {
-            if let Some(parent) = out_path.parent() {
-                state.file_system.create_dir_all(parent).await?;
+    // ZIPファイルを解凍
+    // 非同期処理内で同期処理を行うため（ZipArchiveが同期処理）、spawn_blockingで別スレッドに処理を移す
+    // spawn_blocking内では非同期関数は使えないため、tokioではなくstdクレートを使用
+    tokio::task::spawn_blocking(move || {
+        let content = Cursor::new(bytes);
+        let mut archive = ZipArchive::new(content)?;
+        for i in 0..archive.len() {
+            let mut file = archive.by_index(i)?;
+            let out_path = output_dir_tmp.join(file.name());
+
+            if file.is_dir() {
+                file_system.create_dir_all_sync(&out_path)?;
+            } else {
+                if let Some(parent) = out_path.parent() {
+                    file_system.create_dir_all_sync(parent)?;
+                }
+
+                let mut outfile = file_system.touch_and_open_file(&out_path)?;
+                file_system.copy_file_stream(&mut file, &mut outfile)?;
             }
-
-            let mut sync_reader = tokio_util::io::SyncIoBridge::new(file);
-            let mut outfile = state.file_system.touch_and_open_file(&out_path).await?;
-            state
-                .file_system
-                .copy_file_stream(&mut sync_reader, &mut outfile)
-                .await?;
         }
-    }
+        Ok::<(), DlSchemaError>(())
+    })
+    .await??;
+
     generate_summary_service_list(state, output_dir).await?;
     return Ok(());
 }
