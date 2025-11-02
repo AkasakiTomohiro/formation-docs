@@ -1,5 +1,6 @@
 use crate::command::cloudformation_schema::get_cloudformation_schema;
 use crate::command::stack::Resource;
+use crate::utils::context::app_context::AppContext;
 use crate::utils::get_window_state;
 use crate::utils::AppError;
 use crate::utils::CommandResult;
@@ -8,8 +9,8 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::PathBuf;
+use tauri::State;
 use thiserror::Error;
-use tokio::fs;
 
 /// 手動管理リソースのJSONファイル名
 const MANUAL_MANAGEMENT_RESOURCES_FILE: &str = "manual_management_resources.json";
@@ -67,6 +68,7 @@ enum ManualManagementResourceError {
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 async fn get_manual_management_resources(
+    state: State<'_, AppContext>,
     workspace_directory: &str,
 ) -> Result<ManualManagementResources, ManualManagementResourceError> {
     let manual_management_resources_path =
@@ -78,11 +80,17 @@ async fn get_manual_management_resources(
             resources: HashMap::new(),
         };
         let initial_json = serde_json::to_string(&initial_data)?;
-        fs::write(&manual_management_resources_path, initial_json).await?;
+        state
+            .file_system
+            .write_file(&manual_management_resources_path, initial_json.as_bytes())
+            .await?;
     }
 
     // JSONファイルを読み込む
-    let template_json = fs::read_to_string(&manual_management_resources_path).await?;
+    let template_json = state
+        .file_system
+        .read_file(&manual_management_resources_path)
+        .await?;
     let template_json = serde_json::from_str(&template_json)?;
 
     return Ok(template_json);
@@ -93,13 +101,17 @@ async fn get_manual_management_resources(
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 /// - `manual_management_resources` - 保存する手動管理リソースのデータ
 async fn save_manual_management_resources(
+    state: State<'_, AppContext>,
     workspace_directory: &str,
     manual_management_resources: &ManualManagementResources,
 ) -> Result<(), ManualManagementResourceError> {
     let manual_management_resources_path =
         PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_FILE);
     let updated_json = serde_json::to_string(&manual_management_resources)?;
-    fs::write(&manual_management_resources_path, updated_json).await?;
+    state
+        .file_system
+        .write_file(&manual_management_resources_path, updated_json.as_bytes())
+        .await?;
     Ok(())
 }
 
@@ -111,6 +123,7 @@ async fn save_manual_management_resources(
 /// - `service_name` - サービス名(すべて小文字)
 /// - `resource_name` - リソース名(すべて小文字)
 async fn new_manual_management_resource(
+    state: State<'_, AppContext>,
     workspace_directory: &str,
     resource_id: &str,
     description: &str,
@@ -118,7 +131,8 @@ async fn new_manual_management_resource(
     resource_name: &str,
 ) -> Result<(), ManualManagementResourceError> {
     // 指定されたサービス名とリソース名に基づいてCloudFormationのスキーマを取得
-    let resource_schema = get_cloudformation_schema(service_name, resource_name)?;
+    let resource_schema =
+        get_cloudformation_schema(state.clone(), service_name, resource_name).await?;
     let resource_schema: Value = serde_json::from_str(&resource_schema)?;
     if resource_schema.is_object() == false {
         return Err(ManualManagementResourceError::App(AppError::new(
@@ -137,7 +151,7 @@ async fn new_manual_management_resource(
 
     // 手動管理リソースのJSONファイルを取得し、リソースIDが既に存在しないことを確認してから新しいリソースを追加
     let mut manual_management_resources =
-        get_manual_management_resources(workspace_directory).await?;
+        get_manual_management_resources(state.clone(), workspace_directory).await?;
     if manual_management_resources
         .resources
         .contains_key(resource_id)
@@ -156,7 +170,12 @@ async fn new_manual_management_resource(
     );
 
     // 更新された手動管理リソースのJSONファイルを保存
-    save_manual_management_resources(workspace_directory, &manual_management_resources).await?;
+    save_manual_management_resources(
+        state.clone(),
+        workspace_directory,
+        &manual_management_resources,
+    )
+    .await?;
 
     return Ok(());
 }
@@ -173,11 +192,13 @@ pub struct ManualManagementResourceSummary {
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 async fn get_manual_management_resource_list(
+    state: State<'_, AppContext>,
     workspace_directory: &str,
     service_name: &str,
     resource_name: &str,
 ) -> Result<Vec<ManualManagementResourceSummary>, ManualManagementResourceError> {
-    let manual_management_resources = get_manual_management_resources(workspace_directory).await?;
+    let manual_management_resources =
+        get_manual_management_resources(state, workspace_directory).await?;
     let mut result: Vec<ManualManagementResourceSummary> = Vec::new();
 
     let r#type = format!("AWS::{}::{}", service_name, resource_name);
@@ -198,9 +219,11 @@ async fn get_manual_management_resource_list(
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 async fn load_manual_management_resource_summary(
+    state: State<'_, AppContext>,
     workspace_directory: &str,
 ) -> Result<Vec<Resource>, ManualManagementResourceError> {
-    let manual_management_resources = get_manual_management_resources(workspace_directory).await?;
+    let manual_management_resources =
+        get_manual_management_resources(state, workspace_directory).await?;
     let mut resources = HashMap::<String, HashSet<String>>::new();
     for (_, manual_management_resource) in manual_management_resources.resources.iter() {
         let parts: Vec<&str> = manual_management_resource.r#type.split("::").collect();
@@ -233,32 +256,36 @@ async fn load_manual_management_resource_summary(
 }
 
 async fn load_manual_resource_meta(
+    state: State<'_, AppContext>,
     workspace_directory: &str,
 ) -> Result<ManualManagementMeta, ManualManagementResourceError> {
     // 手動管理リソースのmeta.jsonが存在するか確認
     let meta_path = PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_META_FILE);
     if !meta_path.exists() {
-        // meta.jsonを作成する
-        fs::File::create(&meta_path).await?;
         // 空のJSONを作成
         let empty_json = ManualManagementMeta {
             reasons: HashMap::new(),
         };
         let empty_json = serde_json::to_string(&empty_json).unwrap();
-        fs::write(&meta_path, empty_json).await?;
+        state
+            .file_system
+            .write_file(&meta_path, empty_json.as_bytes())
+            .await?;
     }
 
     // meta.jsonを読み込む
-    let meta_json = fs::read_to_string(&meta_path).await?;
+    let meta_json = state.file_system.read_file(&meta_path).await?;
     let meta_json = serde_json::from_str::<ManualManagementMeta>(&meta_json)?;
     return Ok(meta_json);
 }
 
 async fn get_manual_resource_properties(
+    state: State<'_, AppContext>,
     workspace_directory: &str,
     resource_id: &str,
 ) -> Result<HashMap<String, Value>, ManualManagementResourceError> {
-    let manual_management_resources = get_manual_management_resources(workspace_directory).await?;
+    let manual_management_resources =
+        get_manual_management_resources(state, workspace_directory).await?;
     let resource = manual_management_resources
         .resources
         .get(resource_id)
@@ -269,10 +296,11 @@ async fn get_manual_resource_properties(
 }
 
 async fn get_manual_resource_reasons(
+    state: State<'_, AppContext>,
     workspace_directory: &str,
     resource_id: &str,
 ) -> Result<Value, ManualManagementResourceError> {
-    let meta_json = load_manual_resource_meta(workspace_directory).await?;
+    let meta_json = load_manual_resource_meta(state, workspace_directory).await?;
     if let Some(reasons) = meta_json.reasons.get(resource_id) {
         // 指定されたリソースIDのreasonsが存在する場合はそのまま返す
         return Ok(serde_json::to_value(reasons.clone())?);
@@ -283,10 +311,12 @@ async fn get_manual_resource_reasons(
 }
 
 async fn update_manual_resource_meta(
+    state: State<'_, AppContext>,
     workspace_directory: &str,
     update_manual_resource_meta: ManualManagementMetaUpdate,
 ) -> Result<(), ManualManagementResourceError> {
-    let manual_resource_meta = load_manual_resource_meta(workspace_directory).await?;
+    let manual_resource_meta =
+        load_manual_resource_meta(state.clone(), workspace_directory).await?;
     let new_manual_resource_meta = ManualManagementMeta {
         reasons: match update_manual_resource_meta.reasons {
             Some(update_meta) => {
@@ -299,17 +329,21 @@ async fn update_manual_resource_meta(
     };
     let meta_path = PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_META_FILE);
     let manual_resource_meta_json = serde_json::to_string(&new_manual_resource_meta).unwrap();
-    fs::write(&meta_path, manual_resource_meta_json).await?;
+    state
+        .file_system
+        .write_file(&meta_path, manual_resource_meta_json.as_bytes())
+        .await?;
     return Ok(());
 }
 
 async fn update_manual_resource_properties(
+    state: State<'_, AppContext>,
     workspace_directory: &str,
     resource_id: &str,
     properties: String,
 ) -> Result<(), ManualManagementResourceError> {
     let mut manual_management_resources =
-        get_manual_management_resources(workspace_directory).await?;
+        get_manual_management_resources(state.clone(), workspace_directory).await?;
     let resource = manual_management_resources
         .resources
         .get_mut(resource_id)
@@ -329,12 +363,18 @@ async fn update_manual_resource_properties(
         .into_iter()
         .collect();
     resource.properties = parse_properties;
-    save_manual_management_resources(workspace_directory, &manual_management_resources).await?;
+    save_manual_management_resources(
+        state.clone(),
+        workspace_directory,
+        &manual_management_resources,
+    )
+    .await?;
     return Ok(());
 }
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn new_manual_management_resource_command(
+    state: State<'_, AppContext>,
     window: tauri::Window,
     resource_id: &str,
     description: &str,
@@ -348,6 +388,7 @@ pub async fn new_manual_management_resource_command(
         }
     };
     return match new_manual_management_resource(
+        state,
         window_state.workspace_directory.as_str(),
         resource_id,
         description,
@@ -363,6 +404,7 @@ pub async fn new_manual_management_resource_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_management_resource_list_command(
+    state: State<'_, AppContext>,
     window: tauri::Window,
     service_name: &str,
     resource_name: &str,
@@ -374,6 +416,7 @@ pub async fn get_manual_management_resource_list_command(
         }
     };
     return match get_manual_management_resource_list(
+        state,
         window_state.workspace_directory.as_str(),
         service_name,
         resource_name,
@@ -387,6 +430,7 @@ pub async fn get_manual_management_resource_list_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_manual_management_resource_summary_command(
+    state: State<'_, AppContext>,
     window: tauri::Window,
 ) -> Result<CommandResult<Vec<Resource>>, CommandResult> {
     let window_state = match get_window_state(window) {
@@ -395,8 +439,11 @@ pub async fn load_manual_management_resource_summary_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match load_manual_management_resource_summary(window_state.workspace_directory.as_str())
-        .await
+    return match load_manual_management_resource_summary(
+        state,
+        window_state.workspace_directory.as_str(),
+    )
+    .await
     {
         Ok(summary) => Ok(CommandResult::success(summary)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
@@ -405,6 +452,7 @@ pub async fn load_manual_management_resource_summary_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_resource_properties_command(
+    state: State<'_, AppContext>,
     window: tauri::Window,
     resource_id: &str,
 ) -> Result<CommandResult<HashMap<String, Value>>, CommandResult> {
@@ -415,6 +463,7 @@ pub async fn get_manual_resource_properties_command(
         }
     };
     return match get_manual_resource_properties(
+        state,
         window_state.workspace_directory.as_str(),
         resource_id,
     )
@@ -427,6 +476,7 @@ pub async fn get_manual_resource_properties_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_resource_reasons_command(
+    state: State<'_, AppContext>,
     window: tauri::Window,
     resource_id: &str,
 ) -> Result<CommandResult<Value>, CommandResult> {
@@ -436,8 +486,12 @@ pub async fn get_manual_resource_reasons_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_manual_resource_reasons(window_state.workspace_directory.as_str(), resource_id)
-        .await
+    return match get_manual_resource_reasons(
+        state,
+        window_state.workspace_directory.as_str(),
+        resource_id,
+    )
+    .await
     {
         Ok(reasons) => Ok(CommandResult::success(reasons)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
@@ -446,6 +500,7 @@ pub async fn get_manual_resource_reasons_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_manual_resource_meta_command(
+    state: State<'_, AppContext>,
     window: tauri::Window,
     resource_id: &str,
     reasons: HashMap<String, String>,
@@ -457,6 +512,7 @@ pub async fn update_manual_resource_meta_command(
         }
     };
     return match update_manual_resource_meta(
+        state,
         window_state.workspace_directory.as_str(),
         ManualManagementMetaUpdate {
             reasons: Some(ManualManagementMetaReasonsUpdate {
@@ -474,6 +530,7 @@ pub async fn update_manual_resource_meta_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_manual_resource_properties_command(
+    state: State<'_, AppContext>,
     window: tauri::Window,
     resource_id: &str,
     properties: String,
@@ -485,6 +542,7 @@ pub async fn update_manual_resource_properties_command(
         }
     };
     return match update_manual_resource_properties(
+        state,
         window_state.workspace_directory.as_str(),
         resource_id,
         properties,

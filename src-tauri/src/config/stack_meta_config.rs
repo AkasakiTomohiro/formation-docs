@@ -1,11 +1,12 @@
+use crate::utils::context::file::FileSystem;
 use crate::utils::{AppError, ConfigMigratable};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::any::Any;
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::sync::Arc;
 use thiserror::Error;
-use tokio::fs;
 
 const STACK_META_CONFIG_LATEST_VERSION: u32 = 1;
 
@@ -79,22 +80,26 @@ impl StackMetaConfig {
     /// - `workspace_directory`: ワークスペースディレクトリ
     /// - `stack_name`: スタック名
     pub async fn read(
+        file_system: Arc<dyn FileSystem>,
         workspace_directory: &str,
         stack_name: &str,
     ) -> Result<StackMetaConfig, StackMetaConfigError> {
-        let version = read_config_version(workspace_directory, stack_name).await?;
+        let version =
+            read_config_version(file_system.clone(), workspace_directory, stack_name).await?;
         let config_path = stack_meta_config_path(workspace_directory, &stack_name)?;
 
         match version {
             1 => {
-                let config_json = fs::read_to_string(&config_path).await?;
+                let config_json = file_system.read_file(&config_path).await?;
                 let config_json = serde_json::from_str::<StackMetaConfigV1>(&config_json)?;
                 let boxed = Box::new(config_json);
                 Ok(boxed.migrate_until_latest())
             }
             _ => {
                 let config_json = StackMetaConfig::new(stack_name);
-                config_json.write(workspace_directory, stack_name).await?;
+                config_json
+                    .write(file_system.clone(), workspace_directory, stack_name)
+                    .await?;
                 Ok(config_json)
             }
         }
@@ -106,12 +111,15 @@ impl StackMetaConfig {
     /// - `stack_name`: スタック名
     pub async fn write(
         &self,
+        file_system: Arc<dyn FileSystem>,
         workspace_directory: &str,
         stack_name: &str,
     ) -> Result<(), StackMetaConfigError> {
         let config_path = stack_meta_config_path(workspace_directory, stack_name)?;
         let config_json = serde_json::to_string(self)?;
-        fs::write(config_path, config_json).await?;
+        file_system
+            .write_file(&config_path, config_json.as_bytes())
+            .await?;
         return Ok(());
     }
 }
@@ -154,13 +162,14 @@ fn stack_meta_config_path(
 
 /// ${スタック名}.meta.jsonのバージョンを取得
 async fn read_config_version(
+    file_system: Arc<dyn FileSystem>,
     workspace_directory: &str,
     stack_name: &str,
 ) -> Result<u32, StackMetaConfigError> {
     let meta_path = stack_meta_config_path(workspace_directory, stack_name)?;
     match meta_path.exists() {
         true => {
-            let config_json = fs::read_to_string(&meta_path).await?;
+            let config_json = file_system.read_file(&meta_path).await?;
             let config_json: Value = serde_json::from_str(&config_json)?;
             let version = config_json
                 .get("version")
