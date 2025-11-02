@@ -1,7 +1,6 @@
 use crate::utils::context::file::FileSystem;
 use crate::utils::{AppError, ConfigMigratable};
 use chrono::Utc;
-use dirs::config_local_dir;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::any::Any;
@@ -80,7 +79,7 @@ impl AppConfig {
     /// - 戻り値: 読み込んだAppConfig
     pub async fn read(file_system: Arc<dyn FileSystem>) -> Result<AppConfig, AppConfigError> {
         let version = read_config_version(file_system.clone()).await?;
-        let config_path = app_config_path()?;
+        let config_path = app_config_path(file_system.clone())?;
         match version {
             1 => {
                 let config_json = file_system.read_file(&config_path).await?;
@@ -99,7 +98,7 @@ impl AppConfig {
     /// app_config.jsonへ書き込む
     pub async fn write(&self, file_system: Arc<dyn FileSystem>) -> Result<(), AppConfigError> {
         let app_config_json = serde_json::to_string::<AppConfig>(self)?;
-        let app_config_path = app_config_path()?;
+        let app_config_path = app_config_path(file_system.clone())?;
 
         // ディレクトリが存在しない場合は作成する
         if let Some(parent_dir) = app_config_path.parent() {
@@ -142,10 +141,13 @@ pub enum AppConfigError {
 }
 
 /// app_config.jsonのパスを取得
-fn app_config_path() -> Result<PathBuf, AppConfigError> {
-    let dir = config_local_dir().ok_or(AppConfigError::App(AppError::new(
-        "Failed to get local config directory",
-    )))?;
+fn app_config_path(file_system: Arc<dyn FileSystem>) -> Result<PathBuf, AppConfigError> {
+    let dir = file_system
+        .config_local_dir()
+        .ok_or(AppConfigError::App(AppError::new(
+            "Failed to get local config directory",
+        )))?;
+
     return Ok(dir
         .join(APP_CONFIG_DIRECTORY_NAME)
         .join(APP_CONFIG_FILE_NAME));
@@ -153,7 +155,7 @@ fn app_config_path() -> Result<PathBuf, AppConfigError> {
 
 /// app_config.jsonのバージョンを取得
 async fn read_config_version(file_system: Arc<dyn FileSystem>) -> Result<u32, AppConfigError> {
-    let config_path = app_config_path()?;
+    let config_path = app_config_path(file_system.clone())?;
     match config_path.exists() {
         true => {
             let config_json = file_system.read_file(&config_path).await?;
