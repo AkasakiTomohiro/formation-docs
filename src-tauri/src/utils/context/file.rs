@@ -1,5 +1,9 @@
 use async_trait::async_trait;
-use std::{fs::File, io::Read, io::Write, path::Path};
+use std::{
+    fs::File,
+    io::{Read, Write},
+    path::{Path, PathBuf},
+};
 use tokio::{fs::ReadDir, io};
 
 #[async_trait]
@@ -17,6 +21,7 @@ pub trait FileSystem: Send + Sync {
     async fn read_dir(&self, path: &Path) -> io::Result<ReadDir>;
     async fn create_dir_all(&self, path: &Path) -> io::Result<()>;
     fn create_dir_all_sync(&self, path: &Path) -> std::io::Result<()>;
+    fn config_local_dir(&self) -> Option<PathBuf>;
 }
 
 pub struct LocalFileSystem;
@@ -60,5 +65,9 @@ impl FileSystem for LocalFileSystem {
 
     fn create_dir_all_sync(&self, path: &Path) -> std::io::Result<()> {
         return std::fs::create_dir_all(path);
+    }
+
+    fn config_local_dir(&self) -> Option<PathBuf> {
+        return dirs::config_local_dir();
     }
 }
