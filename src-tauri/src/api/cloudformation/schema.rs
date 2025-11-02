@@ -117,7 +117,7 @@ pub async fn dl_resource_provider(
     }
 
     // Zipファイルをダウンロード
-    let response = reqwest::get(url).await?;
+    let response = state.http_client.get(url).await?;
     let bytes = response.bytes().await?;
 
     let output_dir = get_resource_provider_save_dir(region)?;
