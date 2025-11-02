@@ -173,9 +173,15 @@ mod tests {
 
     use crate::utils::ConfigMigratable;
 
+    /// AppConfigV1の初期生成データが正しいことを確認
     #[test]
     fn app_config_v1_new() {
+        // ######### 準備 #########
+
+        // ######### 実行 #########
         let config_v1 = super::AppConfigV1::new();
+
+        // ######### 検証 #########
         assert_eq!(config_v1.version, 1);
         assert!(config_v1.workspaces.is_empty());
         assert!(config_v1.initialized == false);
@@ -183,14 +189,20 @@ mod tests {
         assert!(config_v1.is_latest() == false);
     }
 
+    /// AppConfigV1をマイグレーションしたときに、AppConfigに変換できることを確認
     #[test]
     fn app_config_v1_migrate_boxed() {
+        // ######### 準備 #########
         let mut config_v1 = super::AppConfigV1::new();
         config_v1
             .workspaces
             .insert("default".to_string(), "Default Workspace".to_string());
         config_v1.initialized_at = "2024-01-01T00:00:00Z".to_string();
+
+        // ######### 実行 #########
         let boxed = Box::new(config_v1.clone()).migrate_boxed();
+
+        // ######### 検証 #########
         let downcasted = boxed.as_any().downcast::<super::AppConfig>();
 
         // downcastに成功していること
@@ -205,9 +217,15 @@ mod tests {
         assert_eq!(migrate_config.initialized_at, config_v1.initialized_at);
     }
 
+    // AppConfigの初期生成データが正しいことを確認
     #[test]
     fn app_config_new() {
+        // ######### 準備 #########
+
+        // ######### 実行 #########
         let config = super::AppConfig::new();
+
+        // ######### 検証 #########
         assert_eq!(config.version, super::APP_CONFIG_LATEST_VERSION);
         assert!(config.workspaces.is_empty());
         assert!(config.initialized == false);
@@ -215,14 +233,20 @@ mod tests {
         assert!(config.is_latest());
     }
 
+    /// AppConfigをマイグレーションしたときに、同じデータが返ってくることを確認
     #[test]
     fn app_config_migrate_boxed() {
+        // ######### 準備 #########
         let mut config = super::AppConfig::new();
         config
             .workspaces
             .insert("default".to_string(), "Default Workspace".to_string());
         config.initialized_at = "2024-01-01T00:00:00Z".to_string();
+
+        // ######### 実行 #########
         let boxed = Box::new(config.clone()).migrate_boxed();
+
+        // ######### 検証 #########
         let downcasted = boxed.as_any().downcast::<super::AppConfig>();
 
         // downcastに成功していること
