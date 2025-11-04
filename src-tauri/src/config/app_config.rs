@@ -173,6 +173,8 @@ async fn read_config_version(file_system: Arc<dyn FileSystem>) -> Result<u32, Ap
 mod tests {
     use crate::utils::context::file::MockFileSystem;
     use crate::utils::ConfigMigratable;
+    use std::path::PathBuf;
+    use std::str::FromStr;
     use std::sync::Arc;
 
     /// AppConfigV1の初期生成データが正しいことを確認
@@ -266,7 +268,29 @@ mod tests {
     #[tokio::test]
     async fn app_config_read_normal() {
         // ######### 準備 #########
-        let file_system = Arc::new(MockFileSystem::new());
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from_str("config_local_dir_path").unwrap()));
+
+        // path_existsのモック
+        mock_file_system.expect_path_exists().return_const(true);
+
+        // read_fileのモック
+        mock_file_system.expect_read_file().returning(|_path| {
+            // TODO: 理解していないため確認必要
+            let app_config_json = r#"{
+                    "version": 1,
+                    "workspaces": {},
+                    "initialized": false,
+                    "initialized_at": ""
+                }"#;
+            Box::pin(async move { Ok(app_config_json.to_string()) })
+        });
+
+        let file_system = Arc::new(mock_file_system);
 
         // ######### 実行 #########
         let result = super::AppConfig::read(file_system).await;
