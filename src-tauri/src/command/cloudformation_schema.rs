@@ -30,7 +30,7 @@ pub async fn get_cloudformation_schema(
         resource_name.to_lowercase()
     );
     let schema_path = schema_directory.join(filename);
-    if !schema_path.exists() {
+    if !state.file_system.path_exists(&schema_path) {
         return Err(CloudFormationSchemaError::App(AppError::new(
             "Schema file not found",
         )));
@@ -47,7 +47,7 @@ async fn get_aws_service_list(
         super::super::api::cloudformation::schema::get_resource_provider_save_dir("us-east-1")?;
     let summary_file_path =
         schema_directory.join(cloudformation::schema::SUMMARY_SERVICE_LIST_FILE);
-    if !summary_file_path.exists() {
+    if !state.file_system.path_exists(&summary_file_path) {
         cloudformation::schema::generate_summary_service_list(
             state.clone(),
             schema_directory.clone(),
