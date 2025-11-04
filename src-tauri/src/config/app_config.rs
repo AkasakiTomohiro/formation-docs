@@ -155,7 +155,7 @@ fn app_config_path(file_system: Arc<dyn FileSystem>) -> Result<PathBuf, AppConfi
 /// app_config.jsonのバージョンを取得
 async fn read_config_version(file_system: Arc<dyn FileSystem>) -> Result<u32, AppConfigError> {
     let config_path = app_config_path(file_system.clone())?;
-    match config_path.exists() {
+    match file_system.path_exists(&config_path) {
         true => {
             let config_json = file_system.read_file(&config_path).await?;
             let config_json: Value = serde_json::from_str(&config_json)?;

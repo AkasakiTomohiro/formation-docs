@@ -74,7 +74,10 @@ async fn get_manual_management_resources(
     let manual_management_resources_path =
         PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_FILE);
 
-    if !manual_management_resources_path.exists() {
+    if !state
+        .file_system
+        .path_exists(&manual_management_resources_path)
+    {
         // ファイルが存在しない場合は新規に作成
         let initial_data = ManualManagementResources {
             resources: HashMap::new(),
@@ -261,7 +264,7 @@ async fn load_manual_resource_meta(
 ) -> Result<ManualManagementMeta, ManualManagementResourceError> {
     // 手動管理リソースのmeta.jsonが存在するか確認
     let meta_path = PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_META_FILE);
-    if !meta_path.exists() {
+    if !state.file_system.path_exists(&meta_path) {
         // 空のJSONを作成
         let empty_json = ManualManagementMeta {
             reasons: HashMap::new(),
