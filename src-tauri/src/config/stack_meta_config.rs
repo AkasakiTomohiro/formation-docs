@@ -167,7 +167,7 @@ async fn read_config_version(
     stack_name: &str,
 ) -> Result<u32, StackMetaConfigError> {
     let meta_path = stack_meta_config_path(workspace_directory, stack_name)?;
-    match meta_path.exists() {
+    match file_system.path_exists(&meta_path) {
         true => {
             let config_json = file_system.read_file(&meta_path).await?;
             let config_json: Value = serde_json::from_str(&config_json)?;

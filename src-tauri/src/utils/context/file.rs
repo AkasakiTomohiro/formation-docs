@@ -22,6 +22,7 @@ pub trait FileSystem: Send + Sync {
     async fn create_dir_all(&self, path: &Path) -> io::Result<()>;
     fn create_dir_all_sync(&self, path: &Path) -> std::io::Result<()>;
     fn config_local_dir(&self) -> Option<PathBuf>;
+    fn path_exists(&self, path: &Path) -> bool;
 }
 
 pub struct LocalFileSystem;
@@ -69,5 +70,9 @@ impl FileSystem for LocalFileSystem {
 
     fn config_local_dir(&self) -> Option<PathBuf> {
         return dirs::config_local_dir();
+    }
+
+    fn path_exists(&self, path: &Path) -> bool {
+        path.exists()
     }
 }

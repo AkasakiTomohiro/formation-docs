@@ -162,7 +162,7 @@ async fn read_config_version(
     workspace_directory: &str,
 ) -> Result<u32, WorkspaceConfigError> {
     let config_path = workspace_config_path(workspace_directory);
-    match config_path.exists() {
+    match file_system.path_exists(&config_path) {
         true => {
             let config_json = file_system.read_file(&config_path).await?;
             let config_json: Value = serde_json::from_str(&config_json)?;

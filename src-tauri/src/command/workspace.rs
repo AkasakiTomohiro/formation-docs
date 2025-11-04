@@ -125,10 +125,11 @@ pub async fn open_workspace(
         .title("formation-docs")
     } else {
         let app_context = handle.state::<AppContext>();
+        let file_system = app_context.file_system.clone();
         let workspace_info = load_workspace_merge_info(app_context, id).await?;
         let path = Path::new(workspace_info.directory.as_str());
         log::info!("Open: {}", path.to_str().unwrap());
-        if !path.exists() {
+        if !file_system.path_exists(path) {
             return Ok(false);
         }
         let window_id = format!("workspace-{}", id);

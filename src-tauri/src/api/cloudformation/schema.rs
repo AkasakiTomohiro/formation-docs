@@ -112,7 +112,7 @@ pub async fn dl_resource_provider(
 ) -> Result<(), DlSchemaError> {
     let url = get_resource_provider_dl_path(region);
     let save_path = get_resource_provider_save_path(region)?;
-    if save_path.exists() {
+    if state.file_system.path_exists(&save_path) {
         state.file_system.remove_file(&save_path).await?
     }
 
