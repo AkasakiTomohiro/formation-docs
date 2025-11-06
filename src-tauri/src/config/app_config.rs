@@ -82,9 +82,14 @@ impl AppConfig {
         match version {
             1 => {
                 let config_json = file_system.read_file(&config_path).await?;
-                let config_json = serde_json::from_str::<AppConfigV1>(&config_json)?;
-                let boxed = Box::new(config_json);
-                Ok(boxed.migrate_until_latest())
+                if let Ok(config_json) = serde_json::from_str::<AppConfigV1>(&config_json) {
+                    let boxed = Box::new(config_json);
+                    Ok(boxed.migrate_until_latest())
+                } else {
+                    let config_json = AppConfig::new();
+                    config_json.write(file_system).await?;
+                    Ok(config_json)
+                }
             }
             _ => {
                 let config_json = AppConfig::new();
@@ -145,7 +150,7 @@ fn app_config_path(file_system: Arc<dyn FileSystem>) -> Result<PathBuf, AppConfi
         .config_local_dir()
         .ok_or(AppConfigError::App(AppError::new(
             "Failed to get local config directory",
-        )))?;
+        )))?; // TODO: UT
 
     return Ok(dir
         .join(APP_CONFIG_DIRECTORY_NAME)
@@ -157,7 +162,7 @@ async fn read_config_version(file_system: Arc<dyn FileSystem>) -> Result<u32, Ap
     let config_path = app_config_path(file_system.clone())?;
     match file_system.path_exists(&config_path) {
         true => {
-            let config_json = file_system.read_file(&config_path).await?;
+            let config_json = file_system.read_file(&config_path).await?; // TODO: UT
             let config_json: Value = serde_json::from_str(&config_json)?;
             let version = config_json
                 .get("version")
@@ -265,6 +270,7 @@ mod tests {
         assert_eq!(migrate_config.initialized_at, config.initialized_at);
     }
 
+    /// app_configが存在するバージョンであるとき、AppConfig::readが正しく動作することを確認
     #[tokio::test]
     async fn app_config_read_normal() {
         // ######### 準備 #########
@@ -280,14 +286,13 @@ mod tests {
 
         // read_fileのモック
         mock_file_system.expect_read_file().returning(|_path| {
-            // TODO: 理解していないため確認必要
             let app_config_json = r#"{
                     "version": 1,
                     "workspaces": {},
                     "initialized": false,
                     "initialized_at": ""
                 }"#;
-            Box::pin(async move { Ok(app_config_json.to_string()) })
+            Ok(app_config_json.to_string())
         });
 
         let file_system = Arc::new(mock_file_system);
@@ -300,5 +305,154 @@ mod tests {
         assert!(result.is_ok());
 
         // readの戻り値の内容が期待通りであること
+        let app_config = result.unwrap();
+        assert_eq!(app_config.version, super::APP_CONFIG_LATEST_VERSION);
+        assert!(app_config.workspaces.is_empty());
+        assert!(app_config.initialized == false);
+        assert!(app_config.initialized_at.is_empty());
+    }
+
+    /// app_configが存在しない場合、AppConfig::readが正しく動作することを確認
+    #[tokio::test]
+    async fn app_config_read_no_exist() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from_str("config_local_dir_path").unwrap()));
+
+        // path_existsのモック
+        mock_file_system.expect_path_exists().return_const(false);
+
+        // write_fileのモック
+        mock_file_system
+            .expect_write_file()
+            .returning(|_path, _contents| Ok(()));
+
+        // create_dir_allのモック
+        mock_file_system
+            .expect_create_dir_all()
+            .returning(|_path| Ok(()));
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::read(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がOkであること
+        assert!(result.is_ok());
+
+        // readの戻り値の内容が期待通りであること
+        let app_config = result.unwrap();
+        assert_eq!(app_config.version, super::APP_CONFIG_LATEST_VERSION);
+        assert!(app_config.workspaces.is_empty());
+        assert!(app_config.initialized == false);
+        assert!(app_config.initialized_at.is_empty());
+    }
+
+    /// app_configが想定外のバージョンであるとき、AppConfig::readが正しく動作することを確認
+    #[tokio::test]
+    async fn app_config_read_unexpected_version() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from_str("config_local_dir_path").unwrap()));
+
+        // path_existsのモック
+        mock_file_system.expect_path_exists().return_const(true);
+
+        // read_fileのモック
+        mock_file_system.expect_read_file().returning(|_path| {
+            let app_config_json = r#"{
+                    "version": -1,
+                    "workspaces": {},
+                    "initialized": false,
+                    "initialized_at": ""
+                }"#;
+            Ok(app_config_json.to_string())
+        });
+
+        // write_fileのモック
+        mock_file_system
+            .expect_write_file()
+            .returning(|_path, _contents| Ok(()));
+
+        // create_dir_allのモック
+        mock_file_system
+            .expect_create_dir_all()
+            .returning(|_path| Ok(()));
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::read(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がOkであること
+        assert!(result.is_ok());
+
+        // readの戻り値の内容が期待通りであること
+        let app_config = result.unwrap();
+        assert_eq!(app_config.version, super::APP_CONFIG_LATEST_VERSION);
+        assert!(app_config.workspaces.is_empty());
+        assert!(app_config.initialized == false);
+        assert!(app_config.initialized_at.is_empty());
+    }
+
+    /// app_configが適切な形でないとき、AppConfig::readが正しく動作することを確認
+    #[tokio::test]
+    async fn app_config_read_invalid() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from_str("config_local_dir_path").unwrap()));
+
+        // path_existsのモック
+        mock_file_system.expect_path_exists().return_const(true);
+
+        // read_fileのモック
+        mock_file_system.expect_read_file().returning(|_path| {
+            let app_config_json = r#"{
+                    "version": 1,
+                    "workspaces": {},
+                    "initialized_at": ""
+                }"#;
+            Ok(app_config_json.to_string())
+        });
+
+        // write_fileのモック
+        mock_file_system
+            .expect_write_file()
+            .returning(|_path, _contents| Ok(()));
+
+        // create_dir_allのモック
+        mock_file_system
+            .expect_create_dir_all()
+            .returning(|_path| Ok(()));
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::read(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がOkであること
+        assert!(result.is_ok());
+
+        // readの戻り値の内容が期待通りであること
+        let app_config = result.unwrap();
+        assert_eq!(app_config.version, super::APP_CONFIG_LATEST_VERSION);
+        assert!(app_config.workspaces.is_empty());
+        assert!(app_config.initialized == false);
+        assert!(app_config.initialized_at.is_empty());
     }
 }

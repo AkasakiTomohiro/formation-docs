@@ -6,8 +6,8 @@ use std::{
 };
 use tokio::{fs::ReadDir, io};
 
-#[async_trait]
 #[mockall::automock]
+#[async_trait]
 pub trait FileSystem: Send + Sync {
     async fn read_file(&self, path: &Path) -> io::Result<String>;
     async fn write_file(&self, path: &Path, contents: &[u8]) -> io::Result<()>;
