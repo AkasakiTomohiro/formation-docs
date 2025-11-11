@@ -3,6 +3,7 @@
     "tauri-apps.tauri-vscode",
     "biomejs.biome",
     "rust-lang.rust-analyzer",
-    "vadimcn.vscode-lldb"
+    "vadimcn.vscode-lldb",
+    "ryanluker.vscode-coverage-gutters"
   ]
 }
