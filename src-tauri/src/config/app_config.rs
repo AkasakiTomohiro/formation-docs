@@ -178,6 +178,7 @@ async fn read_config_version(file_system: Arc<dyn FileSystem>) -> Result<u32, Ap
 mod tests {
     use crate::utils::context::file::MockFileSystem;
     use crate::utils::ConfigMigratable;
+    use std::io::{Error, ErrorKind};
     use std::path::PathBuf;
     use std::str::FromStr;
     use std::sync::Arc;
@@ -454,5 +455,282 @@ mod tests {
         assert!(app_config.workspaces.is_empty());
         assert!(app_config.initialized == false);
         assert!(app_config.initialized_at.is_empty());
+    }
+
+    /// 1回目の呼び出しでconfig_local_dirが取得できない場合、AppConfig::readがErrを返すことを確認
+    #[tokio::test]
+    async fn app_config_read_first_err_config_local_dir() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(None);
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::read(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がErrであること
+        assert!(result.is_err());
+    }
+
+    /// 1回目の呼び出しでread_fileがErrを返す場合、AppConfig::readがErrを返すことを確認
+    #[tokio::test]
+    async fn app_config_read_first_err_read_file() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from_str("config_local_dir_path").unwrap()));
+
+        // path_existsのモック
+        mock_file_system.expect_path_exists().return_const(true);
+
+        // read_fileのモック
+        mock_file_system
+            .expect_read_file()
+            .returning(|_path| Err(Error::new(ErrorKind::Other, "read_file error")));
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::read(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がErrであること
+        assert!(result.is_err());
+    }
+
+    /// serde_json::from_strがErrを返す場合、AppConfig::readがErrを返すことを確認
+    #[tokio::test]
+    async fn app_config_read_err_json_from_str() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from_str("config_local_dir_path").unwrap()));
+
+        // path_existsのモック
+        mock_file_system.expect_path_exists().return_const(true);
+
+        // read_fileのモック
+        mock_file_system.expect_read_file().returning(|_path| {
+            let app_config_json = r#"invalid json"#;
+            Ok(app_config_json.to_string())
+        });
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::read(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がErrであること
+        assert!(result.is_err());
+    }
+
+    /// 2回目の呼び出しでconfig_local_dirが取得できない場合、AppConfig::readがErrを返すことを確認
+    #[tokio::test]
+    async fn app_config_read_second_err_config_local_dir() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .times(2)
+            .returning_st({
+                let mut call_count = 0;
+                move || {
+                    call_count += 1;
+                    match call_count {
+                        1 => Some(PathBuf::from_str("config_local_dir_path").unwrap()),
+                        2 => None, // 2回目の呼び出しでNoneを返す
+                        _ => panic!("Unexpected call"),
+                    }
+                }
+            });
+
+        // path_existsのモック
+        mock_file_system.expect_path_exists().return_const(true);
+
+        // read_fileのモック
+        mock_file_system.expect_read_file().returning(|_path| {
+            let app_config_json = r#"{
+                    "version": 1,
+                    "workspaces": {},
+                    "initialized_at": ""
+                }"#;
+            Ok(app_config_json.to_string())
+        });
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::read(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がErrであること
+        assert!(result.is_err());
+    }
+
+    /// 2回目の呼び出しでread_fileがErrを返す場合、AppConfig::readがErrを返すことを確認
+    #[tokio::test]
+    async fn app_config_read_second_err_read_file() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from_str("config_local_dir_path").unwrap()));
+
+        // path_existsのモック
+        mock_file_system.expect_path_exists().return_const(true);
+
+        // read_fileのモック
+        let mut call_count = 0;
+        mock_file_system
+            .expect_read_file()
+            .times(2)
+            .returning_st(move |_path| {
+                call_count += 1;
+                match call_count {
+                    1 => {
+                        let app_config_json = r#"{
+                                "version": 1,
+                                "workspaces": {},
+                                "initialized_at": ""
+                            }"#;
+                        Ok(app_config_json.to_string())
+                    }
+                    2 => Err(Error::new(ErrorKind::Other, "read_file error")), // 2回目の呼び出しでErrを返す
+                    _ => panic!("Unexpected call"),
+                }
+            });
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::read(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がErrであること
+        assert!(result.is_err());
+    }
+
+    /// versionが1のときの呼び出しでAppConfig::writeがErrを返す場合、AppConfig::readがErrを返すことを確認
+    #[tokio::test]
+    async fn app_config_read_err_first_write() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .times(3)
+            .returning_st({
+                let mut call_count = 0;
+                move || {
+                    call_count += 1;
+                    match call_count {
+                        1 => Some(PathBuf::from_str("config_local_dir_path").unwrap()),
+                        2 => Some(PathBuf::from_str("config_local_dir_path").unwrap()),
+                        3 => None, // 3回目の呼び出しでNoneを返す
+                        _ => panic!("Unexpected call"),
+                    }
+                }
+            });
+
+        // path_existsのモック
+        mock_file_system.expect_path_exists().return_const(true);
+
+        // read_fileのモック
+        let mut call_count = 0;
+        mock_file_system
+            .expect_read_file()
+            .times(2)
+            .returning_st(move |_path| {
+                call_count += 1;
+                match call_count {
+                    1 => {
+                        let app_config_json = r#"{
+                                "version": 1,
+                                "workspaces": {},
+                                "initialized_at": ""
+                            }"#;
+                        Ok(app_config_json.to_string())
+                    }
+                    2 => {
+                        // 2回目の呼び出しで不正な文字列を返す
+                        let app_config_json = r#"invalid json"#;
+                        Ok(app_config_json.to_string())
+                    }
+                    _ => panic!("Unexpected call"),
+                }
+            });
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::read(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がErrであること
+        assert!(result.is_err());
+    }
+
+    /// versionが1でないときの呼び出しでAppConfig::writeがErrを返す場合、AppConfig::readがErrを返すことを確認
+    #[tokio::test]
+    async fn app_config_read_err_second_write() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .times(3)
+            .returning_st({
+                let mut call_count = 0;
+                move || {
+                    call_count += 1;
+                    match call_count {
+                        1 => Some(PathBuf::from_str("config_local_dir_path").unwrap()),
+                        2 => Some(PathBuf::from_str("config_local_dir_path").unwrap()),
+                        3 => None, // 3回目の呼び出しでNoneを返す
+                        _ => panic!("Unexpected call"),
+                    }
+                }
+            });
+
+        // path_existsのモック
+        mock_file_system.expect_path_exists().return_const(true);
+
+        // read_fileのモック
+        mock_file_system.expect_read_file().returning(|_path| {
+            let app_config_json = r#"{
+                    "version": 2,
+                    "workspaces": {},
+                    "initialized_at": ""
+                }"#;
+            Ok(app_config_json.to_string())
+        });
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::read(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がErrであること
+        assert!(result.is_err());
     }
 }
