@@ -175,6 +175,7 @@ async fn read_config_version(file_system: Arc<dyn FileSystem>) -> Result<u32, Ap
 }
 
 #[cfg(test)]
+#[coverage(off)]
 mod tests {
     use crate::utils::context::file::MockFileSystem;
     use crate::utils::ConfigMigratable;

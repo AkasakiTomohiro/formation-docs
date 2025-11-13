@@ -1,3 +1,5 @@
+#![feature(coverage_attribute)]
+
 mod api;
 mod command;
 mod config;

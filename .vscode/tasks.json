@@ -5,7 +5,7 @@
       "label": "Rust Coverage",
       "type": "shell",
       "command": "cargo",
-      "args": ["+nightly", "coverage"],
+      "args": ["coverage"],
       "options": {
         "cwd": "${workspaceFolder}/src-tauri"
       },
