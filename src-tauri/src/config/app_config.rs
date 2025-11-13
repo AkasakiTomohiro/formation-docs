@@ -104,10 +104,10 @@ impl AppConfig {
         let app_config_json = serde_json::to_string::<AppConfig>(self)?;
         let app_config_path = app_config_path(file_system.clone())?;
 
-        // ディレクトリが存在しない場合は作成する
-        if let Some(parent_dir) = app_config_path.parent() {
-            file_system.create_dir_all(parent_dir).await?;
-        }
+        // ディレクトリが存在しないことがあるため作成する
+        file_system
+            .create_dir_all(app_config_path.parent().unwrap())
+            .await?;
 
         file_system
             .write_file(&app_config_path, app_config_json.as_bytes())
@@ -150,7 +150,7 @@ fn app_config_path(file_system: Arc<dyn FileSystem>) -> Result<PathBuf, AppConfi
         .config_local_dir()
         .ok_or(AppConfigError::App(AppError::new(
             "Failed to get local config directory",
-        )))?; // TODO: UT
+        )))?;
 
     return Ok(dir
         .join(APP_CONFIG_DIRECTORY_NAME)
@@ -162,7 +162,7 @@ async fn read_config_version(file_system: Arc<dyn FileSystem>) -> Result<u32, Ap
     let config_path = app_config_path(file_system.clone())?;
     match file_system.path_exists(&config_path) {
         true => {
-            let config_json = file_system.read_file(&config_path).await?; // TODO: UT
+            let config_json = file_system.read_file(&config_path).await?;
             let config_json: Value = serde_json::from_str(&config_json)?;
             let version = config_json
                 .get("version")
@@ -733,5 +733,38 @@ mod tests {
         // ######### 検証 #########
         // readの戻り値がErrであること
         assert!(result.is_err());
+    }
+
+    /// AppConfig::writeが正常に動作することを確認
+    #[tokio::test]
+    async fn app_config_write_normal() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(
+                PathBuf::from_str("parent/config_local_dir_path").unwrap(),
+            ));
+
+        // create_dir_allのモック
+        mock_file_system
+            .expect_create_dir_all()
+            .returning(|_path| Ok(()));
+
+        // write_fileのモック
+        mock_file_system
+            .expect_write_file()
+            .returning(|_path, _contents| Ok(()));
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::new().write(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がOkであること
+        assert!(result.is_ok());
     }
 }
