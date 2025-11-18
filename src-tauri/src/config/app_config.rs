@@ -101,7 +101,8 @@ impl AppConfig {
 
     /// app_config.jsonへ書き込む
     pub async fn write(&self, file_system: Arc<dyn FileSystem>) -> Result<(), AppConfigError> {
-        let app_config_json = serde_json::to_string::<AppConfig>(self)?;
+        // AppConfigでシリアライズ時にエラーが発生しうる属性（Infinity、NaN等）がないためunwrapしてもpanicは発生しない
+        let app_config_json = serde_json::to_string::<AppConfig>(self).unwrap();
         let app_config_path = app_config_path(file_system.clone())?;
 
         // ディレクトリが存在しないことがあるため作成する
@@ -226,6 +227,26 @@ mod tests {
         assert_eq!(migrate_config.workspaces, config_v1.workspaces);
         assert_eq!(migrate_config.initialized, config_v1.initialized);
         assert_eq!(migrate_config.initialized_at, config_v1.initialized_at);
+    }
+
+    /// AppConfigV1をas_anyでダウンキャストできることを確認
+    #[test]
+    fn app_config_v1_as_any() {
+        // ######### 準備 #########
+        let mut config_v1 = super::AppConfigV1::new();
+        config_v1
+            .workspaces
+            .insert("default".to_string(), "Default Workspace".to_string());
+        config_v1.initialized_at = "2024-01-01T00:00:00Z".to_string();
+
+        // ######### 実行 #########
+        let boxed = Box::new(config_v1.clone()).as_any();
+
+        // ######### 検証 #########
+        let downcasted = boxed.downcast::<super::AppConfigV1>();
+
+        // downcastに成功していること
+        assert!(downcasted.is_ok());
     }
 
     // AppConfigの初期生成データが正しいことを確認
@@ -766,5 +787,87 @@ mod tests {
         // ######### 検証 #########
         // readの戻り値がOkであること
         assert!(result.is_ok());
+    }
+
+    // config_local_dirが取得できない場合、AppConfig::writeがErrを返すことを確認
+    #[tokio::test]
+    async fn app_config_write_err_config_local_dir() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(None);
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::new().write(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がErrであること
+        assert!(result.is_err());
+    }
+
+    // create_dir_allがErrを返す場合、AppConfig::writeがErrを返すことを確認
+    #[tokio::test]
+    async fn app_config_write_err_create_dir_all() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(
+                PathBuf::from_str("parent/config_local_dir_path").unwrap(),
+            ));
+
+        // create_dir_allのモック
+        mock_file_system
+            .expect_create_dir_all()
+            .returning(|_path| Err(Error::new(ErrorKind::Other, "create_dir_all error")));
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::new().write(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がErrであること
+        assert!(result.is_err());
+    }
+
+    // write_fileがErrを返す場合、AppConfig::writeがErrを返すことを確認
+    #[tokio::test]
+    async fn app_config_write_err_write_file() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        // config_local_dirのモック
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(
+                PathBuf::from_str("parent/config_local_dir_path").unwrap(),
+            ));
+
+        // create_dir_allのモック
+        mock_file_system
+            .expect_create_dir_all()
+            .returning(|_path| Ok(()));
+
+        // write_fileのモック
+        mock_file_system
+            .expect_write_file()
+            .returning(|_path, _contents| Err(Error::new(ErrorKind::Other, "write_file error")));
+
+        let file_system = Arc::new(mock_file_system);
+
+        // ######### 実行 #########
+        let result = super::AppConfig::new().write(file_system).await;
+
+        // ######### 検証 #########
+        // readの戻り値がErrであること
+        assert!(result.is_err());
     }
 }
