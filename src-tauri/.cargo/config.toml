@@ -1,2 +1,3 @@
 [alias]
 coverage = "llvm-cov --lcov --output-path ../lcov.info --branch --ignore-filename-regex tests"
+coverage-html = "llvm-cov --branch --ignore-filename-regex tests --html"
