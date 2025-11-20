@@ -180,3 +180,47 @@ async fn read_config_version(
         false => Ok(0),
     }
 }
+
+#[cfg(test)]
+#[coverage(off)]
+mod stack_meta_config_v1_tests {
+    use super::*;
+
+    /// StackMetaConfigV1の初期生成データが正しいことを確認
+    #[test]
+    fn stack_meta_config_v1_new() {
+        // ######### 準備 #########
+        let name = "ConfigName";
+
+        // ######### 実行 #########
+        let config_v1 = StackMetaConfigV1::new(name);
+
+        // ######### 検証 #########
+        assert_eq!(config_v1.version, 1);
+        assert_eq!(config_v1.name, name.to_string());
+        assert_eq!(config_v1.description, "".to_string());
+        assert_eq!(config_v1.reasons.is_empty(), true);
+    }
+
+    /// StackMetaConfigV1をマイグレーションしたときに、StackMetaConfigに変換できることを確認
+    #[test]
+    fn stack_meta_config_v1_migrate() {
+        // ######### 準備 #########
+        let name = "ConfigName";
+        let config_v1 = StackMetaConfigV1::new(name);
+
+        // ######### 実行 #########
+        let boxed: Box<dyn ConfigMigratable<Latest = StackMetaConfig>> = Box::new(config_v1);
+        let migrated = boxed.migrate_boxed();
+        let config_latest = migrated
+            .as_any()
+            .downcast::<StackMetaConfig>()
+            .expect("must be StackMetaConfig at latest");
+
+        // ######### 検証 #########
+        assert_eq!(config_latest.version, STACK_META_CONFIG_LATEST_VERSION);
+        assert_eq!(config_latest.name, name.to_string());
+        assert_eq!(config_latest.description, "".to_string());
+        assert_eq!(config_latest.reasons.is_empty(), true);
+    }
+}
