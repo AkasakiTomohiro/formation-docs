@@ -15,7 +15,7 @@ const WORKSPACE_CONFIG_LATEST_VERSION: u32 = 1;
 /// ワークスペースコンフィグ v1
 ///
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct WorkspaceConfigV1 {
     pub version: u32,
     // stack_id: stack_file_nameのマッピング
@@ -173,5 +173,63 @@ async fn read_config_version(
             Ok(version)
         }
         false => Ok(0),
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod workspace_config_v1 {
+    use super::*;
+
+    /// WorkspaceConfigV1::new で構造体が正しく作成されること
+    #[test]
+    fn workspace_config_v1_new() {
+        // ######### 準備 #########
+
+        // ######### 実行 #########
+        let result = WorkspaceConfigV1::new("test");
+
+        // ######### 検証 #########
+        assert_eq!(result.version, 1);
+        assert_eq!(result.stacks, HashMap::new());
+        assert_eq!(result.name, "test");
+        assert_eq!(result.description, "");
+    }
+
+    /// WorkspaceConfigV1::migrate_boxed で最新バージョンにマイグレーションされること
+    #[test]
+    fn workspace_config_v1_migrate_boxed() {
+        // ######### 準備 #########
+        let mut config = WorkspaceConfigV1::new("test");
+        config
+            .stacks
+            .insert("stack1".to_string(), "stack1.json".to_string());
+        config.description = "This is a test workspace".to_string();
+
+        // ######### 実行 #########
+        let migrated = Box::new(config.clone()).migrate_boxed();
+
+        // ######### 検証 #########
+        assert!(migrated.is_latest());
+
+        let downcast = migrated.as_any().downcast::<WorkspaceConfig>().unwrap();
+        assert_eq!(downcast.version, WORKSPACE_CONFIG_LATEST_VERSION);
+        assert_eq!(downcast.stacks, config.stacks);
+        assert_eq!(downcast.name, config.name);
+        assert_eq!(downcast.description, config.description);
+    }
+
+    /// WorkspaceConfigV1::as_any を使ってダウンキャストできること
+    #[test]
+    fn workspace_config_v1_as_any() {
+        // ######### 準備 #########
+        let config = WorkspaceConfigV1::new("test");
+
+        // ######### 実行 #########
+        let any_box = Box::new(config).as_any();
+        let downcast = any_box.downcast::<WorkspaceConfigV1>();
+
+        // ######### 検証 #########
+        assert!(downcast.is_ok());
     }
 }
