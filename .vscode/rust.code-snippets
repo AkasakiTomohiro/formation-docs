@@ -1,0 +1,49 @@
+{
+  "Rust Test Template": {
+    "prefix": "test",
+    "body": [
+      "#[test]",
+      "fn ${1:test_name}() {",
+      "    // ######### 準備 #########",
+      "    $2",
+      "",
+      "    // ######### 実行 #########",
+      "    $3",
+      "",
+      "    // ######### 検証 #########",
+      "    $0",
+      "}"
+    ],
+    "description": "Rust test function template"
+  },
+  "Rust Async Test Template": {
+    "prefix": "atest",
+    "body": [
+      "#[tokio::test]",
+      "async fn ${1:test_name}() {",
+      "    // ######### 準備 #########",
+      "    $2",
+      "",
+      "    // ######### 実行 #########",
+      "    $3",
+      "",
+      "    // ######### 検証 #########",
+      "    $0",
+      "}"
+    ],
+    "description": "Rust async test function template"
+  },
+  "Rust Test Module": {
+    "prefix": "testmod",
+    "body": [
+      "#[cfg(test)]",
+      "#[coverage(off)]",
+      "mod ${1:tests} {",
+      "    use super::*;",
+      "",
+      "    $0",
+      "}"
+    ],
+    "description": "Rust test module template"
+  }
+}
