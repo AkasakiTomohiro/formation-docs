@@ -183,6 +183,7 @@ async fn read_config_version(
 
 #[cfg(test)]
 #[coverage(off)]
+/// StackMetaConfigV1構造体用のテスト
 mod stack_meta_config_v1_tests {
     use super::*;
 
@@ -222,5 +223,217 @@ mod stack_meta_config_v1_tests {
         assert_eq!(config_latest.name, name.to_string());
         assert_eq!(config_latest.description, "".to_string());
         assert_eq!(config_latest.reasons.is_empty(), true);
+    }
+
+    #[test]
+    fn stack_meta_config_v1_as_any() {
+        // ######### 準備 #########
+        let name = "ConfigName";
+        let config_v1 = StackMetaConfigV1::new(name);
+
+        // ######### 実行 #########
+        let boxed: Box<dyn ConfigMigratable<Latest = StackMetaConfig>> = Box::new(config_v1);
+        let any_boxed = boxed.as_any();
+        let downcasted = any_boxed
+            .downcast::<StackMetaConfigV1>()
+            .expect("must be StackMetaConfigV1");
+
+        // ######### 検証 #########
+        assert_eq!(downcasted.version, 1);
+        assert_eq!(downcasted.name, name.to_string());
+        assert_eq!(downcasted.description, "".to_string());
+        assert_eq!(downcasted.reasons.is_empty(), true);
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+/// StackMetaConfig構造体用のテスト
+mod stack_meta_config_tests {
+    use super::*;
+
+    #[test]
+    fn stack_meta_config_new() {
+        // ######### 準備 #########
+        let name = "ConfigName";
+
+        // ######### 実行 #########
+        let config_latest = StackMetaConfig::new(name);
+
+        // ######### 検証 #########
+        assert_eq!(config_latest.version, STACK_META_CONFIG_LATEST_VERSION);
+        assert_eq!(config_latest.name, name.to_string());
+        assert_eq!(config_latest.description, "".to_string());
+        assert_eq!(config_latest.reasons.is_empty(), true);
+    }
+
+    #[test]
+    fn stack_meta_config_migrate_boxed() {
+        // ######### 準備 #########
+        let name = "ConfigName";
+        let config_latest = StackMetaConfig::new(name);
+
+        // ######### 実行 #########
+        let boxed: Box<dyn ConfigMigratable<Latest = StackMetaConfig>> = Box::new(config_latest);
+
+        // ######### 検証 #########
+        let migrated = boxed.migrate_boxed();
+        let downcasted = migrated.as_any().downcast::<StackMetaConfig>();
+
+        // downcastに成功していること
+        assert!(downcasted.is_ok());
+
+        // StackMetaConfigがStackMetaConfigに変換されていること
+        let config_latest = downcasted.unwrap();
+        assert_eq!(config_latest.version, STACK_META_CONFIG_LATEST_VERSION);
+        assert_eq!(config_latest.name, name.to_string());
+        assert_eq!(config_latest.description, "".to_string());
+        assert_eq!(config_latest.reasons.is_empty(), true);
+    }
+
+    mod write_func {
+        use std::str::FromStr;
+
+        use super::super::*;
+        use crate::utils::context::file::MockFileSystem;
+
+        #[tokio::test]
+        async fn stack_meta_config_write_normal() {
+            // ######### 準備 #########
+            let name = "ConfigName";
+            let workspace_dir = "workspace_dir";
+            let stack_name = "stack_name";
+            let mut mock_file_system = MockFileSystem::new();
+
+            // returningはvitestのimplmentationと同様の動作をする関数
+            mock_file_system
+                .expect_write_file()
+                .returning(|_path, _contents| Ok(()));
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result = StackMetaConfig::new(name)
+                .write(file_system, workspace_dir, stack_name)
+                .await;
+
+            // ######### 検証 #########
+            // readの戻り値がOkであること
+            assert!(result.is_ok());
+        }
+    }
+
+    mod read_func {
+        use super::super::*;
+        use crate::utils::context::file::MockFileSystem;
+        use tokio::io;
+
+        #[tokio::test]
+        async fn stack_meta_config_read_normal() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let stack_name: &str = "stack_name";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| true);
+
+            mock_file_system.expect_read_file().returning(move |_path| {
+                let config_json = r#"{
+                    "version": 1,
+                    "name": "name",
+                    "description": "description",
+                    "reasons": {}
+                }"#;
+                Ok(config_json.to_string())
+            });
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result = StackMetaConfig::read(file_system, workspace_dir, stack_name).await;
+
+            // ######### 検証 #########
+            // readの戻り値がOkであること
+            assert!(result.is_ok());
+
+            // readの戻り値の内容が期待通りであること
+            let config = result.unwrap();
+            assert_eq!(config.version, 1);
+            assert_eq!(config.name, "name".to_string());
+            assert_eq!(config.description, "description".to_string());
+            assert_eq!(config.reasons.is_empty(), true);
+        }
+
+        #[tokio::test]
+        async fn stack_meta_config_read_other_version() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let stack_name: &str = "stack_name";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system.expect_path_exists().return_const(true);
+
+            mock_file_system.expect_read_file().returning(move |_path| {
+                let config_json = r#"{
+                    "version": 0,
+                    "name": "name",
+                    "description": "description",
+                    "reasons": {}
+                }"#;
+                Ok(config_json.to_string())
+            });
+
+            mock_file_system
+                .expect_write_file()
+                .returning(|_path, _contents| Ok(()));
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result = StackMetaConfig::read(file_system, workspace_dir, stack_name).await;
+
+            // ######### 検証 #########
+            // readの戻り値がOkであること
+            assert!(result.is_ok());
+
+            // readの戻り値の内容が期待通りであること
+            let config = result.unwrap();
+            assert_eq!(config.version, 1);
+            assert_eq!(config.name, stack_name.to_string());
+            assert_eq!(config.description, "".to_string());
+            assert_eq!(config.reasons.is_empty(), true);
+        }
+
+        #[tokio::test]
+        async fn stack_meta_config_read_file_not_exist() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let stack_name: &str = "stack_name";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system.expect_path_exists().return_const(false);
+
+            mock_file_system
+                .expect_write_file()
+                .returning(|_path, _contents| Ok(()));
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result = StackMetaConfig::read(file_system, workspace_dir, stack_name).await;
+
+            // ######### 検証 #########
+            // readの戻り値がOkであること
+            assert!(result.is_ok());
+
+            // readの戻り値の内容が期待通りであること
+            let config = result.unwrap();
+            assert_eq!(config.version, 1);
+            assert_eq!(config.name, stack_name.to_string());
+            assert_eq!(config.description, "".to_string());
+            assert_eq!(config.reasons.is_empty(), true);
+        }
     }
 }
