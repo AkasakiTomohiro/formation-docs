@@ -4,7 +4,7 @@ use std::{
     io::{Read, Write},
     path::{Path, PathBuf},
 };
-use tokio::{fs::ReadDir, io};
+use tokio::io;
 
 #[mockall::automock]
 #[async_trait]

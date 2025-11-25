@@ -20,7 +20,7 @@ pub enum AppConfigCommandError {
 }
 
 pub async fn add_workspace_to_app_config(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
 ) -> Result<String, AppConfigCommandError> {
     let mut app_config = AppConfig::read(state.file_system.clone()).await?;
@@ -41,8 +41,8 @@ pub async fn add_workspace_to_app_config(
     return Ok(workspace_id);
 }
 
-pub async fn delete_workspace_from_app_config(
-    state: State<'_, AppContext>,
+async fn delete_workspace_from_app_config(
+    state: &AppContext,
     workspace_id: &str,
 ) -> Result<(), AppConfigCommandError> {
     let mut app_config = AppConfig::read(state.file_system.clone()).await?;
@@ -66,7 +66,7 @@ pub async fn delete_workspace_from_app_config_command(
     state: State<'_, AppContext>,
     workspace_id: &str,
 ) -> Result<CommandResult<()>, CommandResult<String>> {
-    return match delete_workspace_from_app_config(state, workspace_id).await {
+    return match delete_workspace_from_app_config(&state, workspace_id).await {
         Ok(_) => Ok(CommandResult::success(())),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };

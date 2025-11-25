@@ -52,7 +52,7 @@ enum StackError {
  *  3. メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
  */
 async fn load_stacks(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
 ) -> Result<Vec<Stack>, StackError> {
     // TODO: ディレクトリ配下のファイルをglobmatchで取得して、`stacks`に存在しないファイルも自動的に取り込む機能を追加する
@@ -69,14 +69,13 @@ async fn load_stacks(
     let mut stacks = Vec::new();
     for (id, file_name) in workspace.stacks.iter() {
         // スタックを読み込む
-        let stack =
-            match load_stack_from_info(state.clone(), workspace_directory, id, file_name).await {
-                Ok(stack) => stack,
-                Err(err) => {
-                    print!("error: {:?}", err);
-                    return Err(StackError::App(AppError::new("Failed to load stack")));
-                }
-            };
+        let stack = match load_stack_from_info(state, workspace_directory, id, file_name).await {
+            Ok(stack) => stack,
+            Err(err) => {
+                print!("error: {:?}", err);
+                return Err(StackError::App(AppError::new("Failed to load stack")));
+            }
+        };
 
         stacks.push(stack);
     }
@@ -85,7 +84,7 @@ async fn load_stacks(
 }
 
 async fn delete_stack(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<(), StackError> {
@@ -138,7 +137,7 @@ async fn delete_stack(
 }
 
 async fn import_stack(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_file_path: &str,
 ) -> Result<(), StackError> {
@@ -192,7 +191,7 @@ async fn import_stack(
 }
 
 async fn load_stack_from_info(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_id: &str,
     stack_file_name: &str,
@@ -236,7 +235,7 @@ async fn load_stack_from_info(
 }
 
 async fn load_stack_from_id(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Stack, StackError> {
@@ -265,7 +264,7 @@ pub struct TemplateSummary {
 }
 
 async fn load_template_summary(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
 ) -> Result<Vec<TemplateSummary>, StackError> {
     let mut templates = Vec::new();
@@ -327,7 +326,7 @@ async fn load_template_summary(
 }
 
 async fn get_stack_resource_list(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_id: &str,
     service_name: &str,
@@ -361,7 +360,7 @@ async fn get_stack_resource_list(
 }
 
 async fn get_stack_resource_properties(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_id: &str,
     logical_id: &str,
@@ -384,7 +383,7 @@ async fn get_stack_resource_properties(
 }
 
 async fn get_stack_resource_properties_reasons(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_id: &str,
     logical_id: &str,
@@ -411,7 +410,7 @@ async fn get_stack_resource_properties_reasons(
 }
 
 async fn get_stack_parameters(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Value, StackError> {
@@ -448,7 +447,7 @@ pub struct StackOutput {
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 /// - `stack_id` - スタックのID
 async fn get_stack_outputs(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Vec<StackOutput>, StackError> {
@@ -491,14 +490,14 @@ async fn get_stack_outputs(
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 async fn get_all_stack_outputs(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
 ) -> Result<HashMap<String, String>, StackError> {
     let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
     // {Outputsのexport_name: スタックID}の形で返す
     let mut result: HashMap<String, String> = HashMap::new();
     for (stack_id, _) in workspace.stacks.iter() {
-        let outputs = get_stack_outputs(state.clone(), workspace_directory, stack_id).await?;
+        let outputs = get_stack_outputs(state, workspace_directory, stack_id).await?;
         for output in outputs.iter().filter(|o| o.export_name.is_some()) {
             result.insert(
                 output.export_name.as_ref().unwrap().to_string(),
@@ -510,7 +509,7 @@ async fn get_all_stack_outputs(
 }
 
 async fn update_stack_reasons(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_id: &str,
     logical_id: &str,
@@ -533,7 +532,7 @@ async fn update_stack_reasons(
 }
 
 async fn update_stack_detail(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_id: &str,
     name: &str,
@@ -571,7 +570,7 @@ pub struct ParameterAndResourceList {
 }
 
 async fn load_parameter_and_resource_list(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<ParameterAndResourceList, StackError> {
@@ -631,7 +630,7 @@ pub async fn load_stacks_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match load_stacks(state, window_state.workspace_directory.as_str()).await {
+    return match load_stacks(&state, window_state.workspace_directory.as_str()).await {
         Ok(stacks) => Ok(CommandResult::success(stacks)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
@@ -649,7 +648,7 @@ pub async fn delete_stack_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match delete_stack(state, window_state.workspace_directory.as_str(), stack_id).await {
+    return match delete_stack(&state, window_state.workspace_directory.as_str(), stack_id).await {
         Ok(_) => Ok(CommandResult::success(())),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
@@ -668,7 +667,7 @@ pub async fn import_stack_command(
         }
     };
     return match import_stack(
-        state,
+        &state,
         window_state.workspace_directory.as_str(),
         stack_file_path,
     )
@@ -691,7 +690,7 @@ pub async fn load_stack_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match load_stack_from_id(state, window_state.workspace_directory.as_str(), stack_id)
+    return match load_stack_from_id(&state, window_state.workspace_directory.as_str(), stack_id)
         .await
     {
         Ok(stack) => Ok(CommandResult::success(stack)),
@@ -710,7 +709,7 @@ pub async fn load_template_summary_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match load_template_summary(state, window_state.workspace_directory.as_str()).await {
+    return match load_template_summary(&state, window_state.workspace_directory.as_str()).await {
         Ok(templates) => Ok(CommandResult::success(templates)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
@@ -731,7 +730,7 @@ pub async fn get_stack_resource_list_command(
         }
     };
     return match get_stack_resource_list(
-        state,
+        &state,
         window_state.workspace_directory.as_str(),
         stack_id,
         service_name,
@@ -758,7 +757,7 @@ pub async fn get_stack_resource_properties_command(
         }
     };
     return match get_stack_resource_properties(
-        state,
+        &state,
         window_state.workspace_directory.as_str(),
         stack_id,
         logical_id,
@@ -782,7 +781,7 @@ pub async fn get_stack_parameters_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_stack_parameters(state, window_state.workspace_directory.as_str(), stack_id)
+    return match get_stack_parameters(&state, window_state.workspace_directory.as_str(), stack_id)
         .await
     {
         Ok(parameters) => Ok(CommandResult::success(parameters)),
@@ -802,7 +801,8 @@ pub async fn get_stack_outputs_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_stack_outputs(state, window_state.workspace_directory.as_str(), stack_id).await
+    return match get_stack_outputs(&state, window_state.workspace_directory.as_str(), stack_id)
+        .await
     {
         Ok(parameters) => Ok(CommandResult::success(parameters)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
@@ -820,7 +820,7 @@ pub async fn get_all_stack_outputs_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_all_stack_outputs(state, window_state.workspace_directory.as_str()).await {
+    return match get_all_stack_outputs(&state, window_state.workspace_directory.as_str()).await {
         Ok(outputs) => Ok(CommandResult::success(outputs)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
@@ -841,7 +841,7 @@ pub async fn update_stack_meta_command(
         }
     };
     return match update_stack_reasons(
-        state,
+        &state,
         window_state.workspace_directory.as_str(),
         stack_id,
         logical_id,
@@ -868,7 +868,7 @@ pub async fn get_stack_resource_properties_reasons_command(
         }
     };
     return match get_stack_resource_properties_reasons(
-        state,
+        &state,
         window_state.workspace_directory.as_str(),
         stack_id,
         logical_id,
@@ -895,7 +895,7 @@ pub async fn update_stack_detail_command(
         }
     };
     return match update_stack_detail(
-        state,
+        &state,
         window_state.workspace_directory.as_str(),
         stack_id,
         name,
@@ -921,7 +921,7 @@ pub async fn load_parameter_and_resource_list_command(
         }
     };
     return match load_parameter_and_resource_list(
-        state,
+        &state,
         window_state.workspace_directory.as_str(),
         stack_id,
     )

@@ -16,7 +16,7 @@ pub enum ResourceProviderError {
     Cloudformation(#[from] super::super::api::cloudformation::schema::DlSchemaError),
 }
 
-async fn setup_app(state: State<'_, AppContext>) -> Result<(), ResourceProviderError> {
+async fn setup_app(state: &AppContext) -> Result<(), ResourceProviderError> {
     let mut app_config = AppConfig::read(state.file_system.clone()).await?;
     if app_config.initialized == false {
         cloudformation::schema::dl_resource_provider(&state, "us-east-1").await?;
@@ -29,7 +29,7 @@ async fn setup_app(state: State<'_, AppContext>) -> Result<(), ResourceProviderE
 
 #[tauri::command]
 pub async fn setup_app_command(state: State<'_, AppContext>) -> Result<(), ()> {
-    match setup_app(state).await {
+    match setup_app(&state).await {
         Ok(_) => Ok(()),
         Err(_) => Err(()),
     }

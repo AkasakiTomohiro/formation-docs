@@ -19,7 +19,7 @@ pub enum CloudFormationSchemaError {
 }
 
 pub async fn get_cloudformation_schema(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     service_name: &str,
     resource_name: &str,
 ) -> Result<String, CloudFormationSchemaError> {
@@ -41,7 +41,7 @@ pub async fn get_cloudformation_schema(
 }
 
 async fn get_aws_service_list(
-    state: State<'_, AppContext>,
+    state: &AppContext,
 ) -> Result<HashMap<String, Vec<String>>, CloudFormationSchemaError> {
     let schema_directory =
         super::super::api::cloudformation::schema::get_resource_provider_save_dir("us-east-1")?;
@@ -62,7 +62,7 @@ pub async fn get_cloudformation_schema_command(
     service_name: &str,
     resource_name: &str,
 ) -> Result<CommandResult<String>, CommandResult> {
-    return match get_cloudformation_schema(state, service_name, resource_name).await {
+    return match get_cloudformation_schema(&state, service_name, resource_name).await {
         Ok(schema_json) => Ok(CommandResult::success(schema_json)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
@@ -72,7 +72,7 @@ pub async fn get_cloudformation_schema_command(
 pub async fn get_aws_service_list_command(
     state: State<'_, AppContext>,
 ) -> Result<CommandResult<HashMap<String, Vec<String>>>, CommandResult> {
-    return match get_aws_service_list(state).await {
+    return match get_aws_service_list(&state).await {
         Ok(services) => Ok(CommandResult::success(services)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };

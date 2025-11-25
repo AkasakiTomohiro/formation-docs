@@ -39,7 +39,7 @@ pub enum WorkspaceCommandError {
 }
 
 async fn create_workspace(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     directory: &str,
 ) -> Result<WorkspaceMergeInfo, WorkspaceCommandError> {
     let workspace = WorkspaceConfig::read(state.file_system.clone(), directory).await?;
@@ -54,7 +54,7 @@ async fn create_workspace(
 }
 
 async fn load_workspace_merge_info(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_id: &str,
 ) -> Result<WorkspaceMergeInfo, WorkspaceCommandError> {
     let app_config = AppConfig::read(state.file_system.clone()).await?;
@@ -78,7 +78,7 @@ async fn load_workspace_merge_info(
 }
 
 async fn load_workspaces(
-    state: State<'_, AppContext>,
+    state: &AppContext,
 ) -> Result<Vec<WorkspaceMergeInfo>, WorkspaceCommandError> {
     let app_config = AppConfig::read(state.file_system.clone()).await?;
 
@@ -97,7 +97,7 @@ async fn load_workspaces(
 }
 
 pub async fn update_workspace(
-    state: State<'_, AppContext>,
+    state: &AppContext,
     workspace_directory: &str,
     name: &str,
     description: &str,
@@ -126,7 +126,7 @@ pub async fn open_workspace(
     } else {
         let app_context = handle.state::<AppContext>();
         let file_system = app_context.file_system.clone();
-        let workspace_info = load_workspace_merge_info(app_context, id).await?;
+        let workspace_info = load_workspace_merge_info(&app_context, id).await?;
         let path = Path::new(workspace_info.directory.as_str());
         log::info!("Open: {}", path.to_str().unwrap());
         if !file_system.path_exists(path) {
@@ -158,7 +158,7 @@ pub async fn create_workspace_command(
     state: State<'_, AppContext>,
     directory: &str,
 ) -> Result<CommandResult<WorkspaceMergeInfo>, CommandResult> {
-    match create_workspace(state, directory).await {
+    match create_workspace(&state, directory).await {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to create Workspace")),
     }
@@ -169,7 +169,7 @@ pub async fn load_workspace_merge_info_command(
     state: State<'_, AppContext>,
     workspace_id: &str,
 ) -> Result<CommandResult<WorkspaceMergeInfo>, CommandResult> {
-    match load_workspace_merge_info(state, workspace_id).await {
+    match load_workspace_merge_info(&state, workspace_id).await {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to load Workspace")),
     }
@@ -179,7 +179,7 @@ pub async fn load_workspace_merge_info_command(
 pub async fn load_workspaces_command(
     state: State<'_, AppContext>,
 ) -> Result<CommandResult<Vec<WorkspaceMergeInfo>>, CommandResult> {
-    match load_workspaces(state).await {
+    match load_workspaces(&state).await {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to load Workspaces")),
     }
@@ -199,7 +199,7 @@ pub async fn update_workspace_details_command(
         }
     };
     match update_workspace(
-        state,
+        &state,
         window_state.workspace_directory.as_str(),
         name,
         description,
