@@ -48,11 +48,8 @@ async fn get_aws_service_list(
     let summary_file_path =
         schema_directory.join(cloudformation::schema::SUMMARY_SERVICE_LIST_FILE);
     if !state.file_system.path_exists(&summary_file_path) {
-        cloudformation::schema::generate_summary_service_list(
-            state.clone(),
-            schema_directory.clone(),
-        )
-        .await?;
+        cloudformation::schema::generate_summary_service_list(&state, schema_directory.clone())
+            .await?;
     }
     let summary_json = state.file_system.read_file(&summary_file_path).await?;
     let summary_json = serde_json::from_str::<HashMap<String, Vec<String>>>(&summary_json)?;

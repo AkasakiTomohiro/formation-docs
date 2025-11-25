@@ -8,7 +8,6 @@ use std::{
     io::Cursor,
     path::PathBuf,
 };
-use tauri::State;
 use thiserror::Error;
 use zip::ZipArchive;
 
@@ -52,17 +51,17 @@ fn get_resource_provider_save_path(region: &str) -> Result<PathBuf, DlSchemaErro
 }
 
 pub async fn generate_summary_service_list(
-    state: State<'_, AppContext>,
+    cxt: &AppContext,
     output_dir: PathBuf,
 ) -> Result<(), DlSchemaError> {
     let mut result_map: HashMap<String, HashSet<String>> = HashMap::new();
     let re = Regex::new(r"aws-([a-z\d]+)-([a-z\d]+)\.json").unwrap();
-    let mut entries = state.file_system.read_dir(&output_dir).await?;
-    while let Some(entry) = entries.next_entry().await? {
-        if let Some(entry) = entry.file_name().to_str() {
+    let entries = cxt.file_system.read_dir(&output_dir).await?;
+    for path in entries {
+        if let Some(entry) = path.file_name().and_then(|f| f.to_str()) {
             if re.is_match(entry) {
                 let file_path = output_dir.join(entry);
-                let schema_json = state.file_system.read_file(&file_path).await?;
+                let schema_json = cxt.file_system.read_file(&file_path).await?;
                 let schema_json: Value = serde_json::from_str(&schema_json)?;
                 if schema_json.is_object() == true {
                     let type_name = schema_json["typeName"]
@@ -87,8 +86,7 @@ pub async fn generate_summary_service_list(
     }
     let summary_file_path = output_dir.join(SUMMARY_SERVICE_LIST_FILE);
     let summary_json = serde_json::to_string(&result_map)?;
-    state
-        .file_system
+    cxt.file_system
         .write_file(&summary_file_path, summary_json.as_bytes())
         .await?;
     return Ok(());
@@ -106,23 +104,20 @@ pub fn get_resource_provider_save_dir(region: &str) -> Result<PathBuf, DlSchemaE
     };
 }
 
-pub async fn dl_resource_provider(
-    state: State<'_, AppContext>,
-    region: &str,
-) -> Result<(), DlSchemaError> {
+pub async fn dl_resource_provider(ctx: &AppContext, region: &str) -> Result<(), DlSchemaError> {
     let url = get_resource_provider_dl_path(region);
     let save_path = get_resource_provider_save_path(region)?;
-    if state.file_system.path_exists(&save_path) {
-        state.file_system.remove_file(&save_path).await?
+    if ctx.file_system.path_exists(&save_path) {
+        ctx.file_system.remove_file(&save_path).await?
     }
 
     // Zipファイルをダウンロード
-    let response = state.http_client.get(url).await?;
+    let response = ctx.http_client.get(url).await?;
     let bytes = response.bytes().await?;
 
     let output_dir = get_resource_provider_save_dir(region)?;
     let output_dir_tmp = output_dir.clone();
-    let file_system = state.file_system.clone();
+    let file_system = ctx.file_system.clone();
 
     // ZIPファイルを解凍
     // 非同期処理内で同期処理を行うため（ZipArchiveが同期処理）、spawn_blockingで別スレッドに処理を移す
@@ -149,6 +144,6 @@ pub async fn dl_resource_provider(
     })
     .await??;
 
-    generate_summary_service_list(state, output_dir).await?;
+    generate_summary_service_list(&ctx, output_dir).await?;
     return Ok(());
 }
