@@ -86,7 +86,7 @@ impl StackMetaConfig {
     ) -> Result<StackMetaConfig, StackMetaConfigError> {
         let version =
             read_config_version(file_system.clone(), workspace_directory, stack_name).await?;
-        let config_path = stack_meta_config_path(workspace_directory, &stack_name)?;
+        let config_path = stack_meta_config_path(workspace_directory, &stack_name);
 
         match version {
             1 => {
@@ -115,7 +115,7 @@ impl StackMetaConfig {
         workspace_directory: &str,
         stack_name: &str,
     ) -> Result<(), StackMetaConfigError> {
-        let config_path = stack_meta_config_path(workspace_directory, stack_name)?;
+        let config_path = stack_meta_config_path(workspace_directory, stack_name);
         let config_json = serde_json::to_string(self)?;
         file_system
             .write_file(&config_path, config_json.as_bytes())
@@ -149,15 +149,12 @@ pub enum StackMetaConfigError {
 }
 
 /// ${スタック名}.meta.jsonのパスを取得
-fn stack_meta_config_path(
-    workspace_directory: &str,
-    stack_name: &str,
-) -> Result<PathBuf, StackMetaConfigError> {
+fn stack_meta_config_path(workspace_directory: &str, stack_name: &str) -> PathBuf {
     let meta_path = PathBuf::from(workspace_directory)
         .join(stack_name)
         .with_extension("meta.json");
     let meta_path = PathBuf::from(&meta_path);
-    return Ok(meta_path);
+    return meta_path;
 }
 
 /// ${スタック名}.meta.jsonのバージョンを取得
@@ -166,7 +163,7 @@ async fn read_config_version(
     workspace_directory: &str,
     stack_name: &str,
 ) -> Result<u32, StackMetaConfigError> {
-    let meta_path = stack_meta_config_path(workspace_directory, stack_name)?;
+    let meta_path = stack_meta_config_path(workspace_directory, stack_name);
     match file_system.path_exists(&meta_path) {
         true => {
             let config_json = file_system.read_file(&meta_path).await?;
@@ -292,8 +289,6 @@ mod stack_meta_config_tests {
     }
 
     mod write_func {
-        use std::str::FromStr;
-
         use super::super::*;
         use crate::utils::context::file::MockFileSystem;
 
@@ -326,7 +321,7 @@ mod stack_meta_config_tests {
     mod read_func {
         use super::super::*;
         use crate::utils::context::file::MockFileSystem;
-        use tokio::io;
+        use tokio::io::{Error, ErrorKind};
 
         #[tokio::test]
         async fn stack_meta_config_read_normal() {
@@ -434,6 +429,174 @@ mod stack_meta_config_tests {
             assert_eq!(config.name, stack_name.to_string());
             assert_eq!(config.description, "".to_string());
             assert_eq!(config.reasons.is_empty(), true);
+        }
+
+        #[tokio::test]
+        async fn read_config_version_read_file_err() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let stack_name: &str = "stack_name";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| true);
+
+            mock_file_system
+                .expect_read_file()
+                .returning(|_path| Err(Error::new(ErrorKind::Other, "read_file error")));
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result = StackMetaConfig::read(file_system, workspace_dir, stack_name).await;
+
+            // ######### 検証 #########
+            // readの戻り値がErrであること
+            assert!(result.is_err());
+        }
+
+        #[tokio::test]
+        async fn read_from_str_err() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let stack_name: &str = "stack_name";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| true);
+
+            // read_fileのモック
+            let mut call_count = 0;
+            mock_file_system
+                .expect_read_file()
+                .times(2)
+                .returning_st(move |_path| {
+                    call_count += 1;
+                    match call_count {
+                        1 => {
+                            let config_json = r#"{
+                                "version": 1,
+                                "name": "name",
+                                "description": "description",
+                                "reasons": {}
+                            }"#;
+                            Ok(config_json.to_string())
+                        }
+                        2 => {
+                            let config_json = r#"invalid json"#;
+                            Ok(config_json.to_string())
+                        }
+                        _ => panic!("Unexpected call"),
+                    }
+                });
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result = StackMetaConfig::read(file_system, workspace_dir, stack_name).await;
+
+            // ######### 検証 #########
+            // readの戻り値がErrであること
+            assert!(result.is_err());
+        }
+
+        #[tokio::test]
+        async fn read_config_version_from_str_err() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let stack_name: &str = "stack_name";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| true);
+
+            // read_fileのモック
+            mock_file_system.expect_read_file().returning(move |_path| {
+                let config_json = r#"invalid json"#;
+                Ok(config_json.to_string())
+            });
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result = StackMetaConfig::read(file_system, workspace_dir, stack_name).await;
+
+            // ######### 検証 #########
+            // readの戻り値がErrであること
+            assert!(result.is_err());
+        }
+
+        #[tokio::test]
+        async fn read_config_read_second_err_read_file() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let stack_name: &str = "stack_name";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| true);
+
+            // read_fileのモック
+            let mut call_count = 0;
+            mock_file_system
+                .expect_read_file()
+                .times(2)
+                .returning_st(move |_path| {
+                    call_count += 1;
+                    match call_count {
+                        1 => {
+                            let config_json = r#"{
+                                "version": 1,
+                                "name": "name",
+                                "description": "description",
+                                "reasons": {}
+                            }"#;
+                            Ok(config_json.to_string())
+                        }
+                        2 => Err(Error::new(ErrorKind::Other, "read_file error")), // 2回目の呼び出しでErrを返す
+                        _ => panic!("Unexpected call"),
+                    }
+                });
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result = StackMetaConfig::read(file_system, workspace_dir, stack_name).await;
+
+            // ######### 検証 #########
+            // readの戻り値がErrであること
+            assert!(result.is_err());
+        }
+
+        #[tokio::test]
+        async fn app_config_read_unexpected_version_write_file_err() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let stack_name: &str = "stack_name";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| false);
+
+            mock_file_system
+                .expect_write_file()
+                .returning(|_path, _contents| {
+                    Err(Error::new(ErrorKind::Other, "write_file error"))
+                });
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result = StackMetaConfig::read(file_system, workspace_dir, stack_name).await;
+
+            // ######### 検証 #########
+            // readの戻り値がErrであること
+            assert!(result.is_err());
         }
     }
 }
