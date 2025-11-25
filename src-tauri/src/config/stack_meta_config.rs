@@ -86,7 +86,7 @@ impl StackMetaConfig {
     ) -> Result<StackMetaConfig, StackMetaConfigError> {
         let version =
             read_config_version(file_system.clone(), workspace_directory, stack_name).await?;
-        let config_path = stack_meta_config_path(workspace_directory, &stack_name)?;
+        let config_path = stack_meta_config_path(workspace_directory, &stack_name);
 
         match version {
             1 => {
@@ -115,7 +115,7 @@ impl StackMetaConfig {
         workspace_directory: &str,
         stack_name: &str,
     ) -> Result<(), StackMetaConfigError> {
-        let config_path = stack_meta_config_path(workspace_directory, stack_name)?;
+        let config_path = stack_meta_config_path(workspace_directory, stack_name);
         let config_json = serde_json::to_string(self)?;
         file_system
             .write_file(&config_path, config_json.as_bytes())
@@ -149,15 +149,12 @@ pub enum StackMetaConfigError {
 }
 
 /// ${スタック名}.meta.jsonのパスを取得
-fn stack_meta_config_path(
-    workspace_directory: &str,
-    stack_name: &str,
-) -> Result<PathBuf, StackMetaConfigError> {
+fn stack_meta_config_path(workspace_directory: &str, stack_name: &str) -> PathBuf {
     let meta_path = PathBuf::from(workspace_directory)
         .join(stack_name)
         .with_extension("meta.json");
     let meta_path = PathBuf::from(&meta_path);
-    return Ok(meta_path);
+    return meta_path;
 }
 
 /// ${スタック名}.meta.jsonのバージョンを取得
@@ -166,7 +163,7 @@ async fn read_config_version(
     workspace_directory: &str,
     stack_name: &str,
 ) -> Result<u32, StackMetaConfigError> {
-    let meta_path = stack_meta_config_path(workspace_directory, stack_name)?;
+    let meta_path = stack_meta_config_path(workspace_directory, stack_name);
     match file_system.path_exists(&meta_path) {
         true => {
             let config_json = file_system.read_file(&meta_path).await?;
