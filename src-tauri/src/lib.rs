@@ -5,6 +5,7 @@ mod command;
 mod config;
 mod utils;
 
+use config::context::config_context::ConfigContext;
 use utils::context::app_context::AppContext;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -20,6 +21,7 @@ async fn open_workspace_command(handle: tauri::AppHandle, id: &str) -> Result<bo
 pub fn run() {
     tauri::Builder::default()
         .manage(AppContext::new())
+        .manage(ConfigContext::new())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_log::Builder::new().build())
