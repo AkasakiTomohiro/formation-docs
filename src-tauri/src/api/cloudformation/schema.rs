@@ -1,8 +1,9 @@
 use super::super::super::utils::AppError;
-use crate::config::app_config::APP_CONFIG_DIRECTORY_NAME;
 use crate::utils::context::app_context::AppContext;
+use crate::{config::app_config::APP_CONFIG_DIRECTORY_NAME, utils::context::file::FileSystem};
 use regex::Regex;
 use serde_json::Value;
+use std::sync::Arc;
 use std::{
     collections::{HashMap, HashSet},
     io::Cursor,
@@ -10,8 +11,6 @@ use std::{
 };
 use thiserror::Error;
 use zip::ZipArchive;
-
-use dirs::config_local_dir;
 
 #[derive(Debug, Error)]
 pub enum DlSchemaError {
@@ -39,8 +38,11 @@ fn get_resource_provider_dl_path(region: &str) -> String {
     );
 }
 
-fn get_resource_provider_save_path(region: &str) -> Result<PathBuf, DlSchemaError> {
-    return match config_local_dir() {
+fn get_resource_provider_save_path(
+    file_system: Arc<dyn FileSystem>,
+    region: &str,
+) -> Result<PathBuf, DlSchemaError> {
+    return match file_system.config_local_dir() {
         Some(dir) => Ok(dir
             .join(APP_CONFIG_DIRECTORY_NAME)
             .join(format!("CloudformationSchema-{}", region))),
@@ -92,8 +94,11 @@ pub async fn generate_summary_service_list(
     return Ok(());
 }
 
-pub fn get_resource_provider_save_dir(region: &str) -> Result<PathBuf, DlSchemaError> {
-    return match config_local_dir() {
+pub fn get_resource_provider_save_dir(
+    file_system: Arc<dyn FileSystem>,
+    region: &str,
+) -> Result<PathBuf, DlSchemaError> {
+    return match file_system.config_local_dir() {
         Some(dir) => Ok(dir
             .join(APP_CONFIG_DIRECTORY_NAME)
             .join("CloudformationSchema")
@@ -106,7 +111,7 @@ pub fn get_resource_provider_save_dir(region: &str) -> Result<PathBuf, DlSchemaE
 
 pub async fn dl_resource_provider(ctx: &AppContext, region: &str) -> Result<(), DlSchemaError> {
     let url = get_resource_provider_dl_path(region);
-    let save_path = get_resource_provider_save_path(region)?;
+    let save_path = get_resource_provider_save_path(ctx.file_system.clone(), region)?;
     if ctx.file_system.path_exists(&save_path) {
         ctx.file_system.remove_file(&save_path).await?
     }
@@ -115,7 +120,7 @@ pub async fn dl_resource_provider(ctx: &AppContext, region: &str) -> Result<(), 
     let response = ctx.http_client.get(url).await?;
     let bytes = response.bytes().await?;
 
-    let output_dir = get_resource_provider_save_dir(region)?;
+    let output_dir = get_resource_provider_save_dir(ctx.file_system.clone(), region)?;
     let output_dir_tmp = output_dir.clone();
     let file_system = ctx.file_system.clone();
 

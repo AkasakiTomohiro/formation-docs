@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use reqwest::{Response, Result};
 
+#[mockall::automock]
 #[async_trait]
 pub trait HttpClient: Send + Sync {
     async fn get(&self, url: String) -> Result<Response>;
