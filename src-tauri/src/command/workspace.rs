@@ -1,6 +1,5 @@
 use crate::config::app_config::AppConfigError;
 use crate::config::context::config_context::ConfigContext;
-use crate::config::workspace_config::WorkspaceConfig;
 use crate::config::workspace_config::WorkspaceConfigError;
 use crate::utils::context::app_context::AppContext;
 use crate::utils::get_window_state;
@@ -44,7 +43,10 @@ async fn create_workspace(
     config_context: &ConfigContext,
     directory: &str,
 ) -> Result<WorkspaceMergeInfo, WorkspaceCommandError> {
-    let workspace = WorkspaceConfig::read(app_context.file_system.clone(), directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), directory)
+        .await?;
     let workspace_result =
         super::app_config::add_workspace_to_app_config(app_context, config_context, directory)
             .await?;
@@ -70,11 +72,13 @@ async fn load_workspace_merge_info(
     // すでに登録されている場合は登録IDを返す
     let workspace_directory = app_config.workspaces.get(workspace_id);
     if workspace_directory.is_some() {
-        let workspace = WorkspaceConfig::read(
-            app_context.file_system.clone(),
-            workspace_directory.unwrap(),
-        )
-        .await?;
+        let workspace = config_context
+            .workspace_config_io
+            .read(
+                app_context.file_system.clone(),
+                workspace_directory.unwrap(),
+            )
+            .await?;
         return Ok(WorkspaceMergeInfo {
             id: workspace_id.to_string(),
             directory: workspace_directory.unwrap().to_string(),
@@ -99,7 +103,10 @@ async fn load_workspaces(
 
     let mut workspaces = Vec::new();
     for (id, directory) in app_config.workspaces.iter() {
-        let workspace = WorkspaceConfig::read(app_context.file_system.clone(), directory).await?;
+        let workspace = config_context
+            .workspace_config_io
+            .read(app_context.file_system.clone(), directory)
+            .await?;
         workspaces.push(WorkspaceMergeInfo {
             id: id.to_string(),
             directory: directory.to_string(),
@@ -112,17 +119,20 @@ async fn load_workspaces(
 }
 
 pub async fn update_workspace(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     name: &str,
     description: &str,
 ) -> Result<(), WorkspaceCommandError> {
-    let mut workspace =
-        WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let mut workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     workspace.name = name.to_string();
     workspace.description = description.to_string();
     workspace
-        .write(state.file_system.clone(), workspace_directory)
+        .write(app_context.file_system.clone(), workspace_directory)
         .await?;
     return Ok(());
 }
@@ -206,7 +216,8 @@ pub async fn load_workspaces_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_workspace_details_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     name: &str,
     description: &str,
@@ -218,7 +229,8 @@ pub async fn update_workspace_details_command(
         }
     };
     match update_workspace(
-        &state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         name,
         description,

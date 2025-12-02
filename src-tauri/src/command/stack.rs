@@ -5,7 +5,6 @@ use std::path::PathBuf;
 
 use crate::config::context::config_context::ConfigContext;
 use crate::config::stack_meta_config::StackMetaConfigError;
-use crate::config::workspace_config::WorkspaceConfig;
 use crate::config::workspace_config::WorkspaceConfigError;
 use crate::utils::context::app_context::AppContext;
 use crate::utils::get_window_state;
@@ -66,8 +65,10 @@ async fn load_stacks(
     //     }
     // };
     // let paths: Vec<_> = builder.into_iter().flatten().collect();
-    let workspace =
-        WorkspaceConfig::read(app_context.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let mut stacks = Vec::new();
     for (id, file_name) in workspace.stacks.iter() {
         // スタックを読み込む
@@ -94,18 +95,21 @@ async fn load_stacks(
 }
 
 async fn delete_stack(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<(), StackError> {
-    let mut workspace =
-        WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let mut workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
 
     match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => {
             let stack_file_path = PathBuf::from(workspace_directory).join(stack_file_name);
             // スタックファイルとメタデータファイルを削除する
-            if let Err(err) = state.file_system.remove_file(&stack_file_path).await {
+            if let Err(err) = app_context.file_system.remove_file(&stack_file_path).await {
                 match err.kind() {
                     ErrorKind::NotFound => {
                         // ファイルが見つからない場合は無視する
@@ -122,7 +126,7 @@ async fn delete_stack(
                     .clone()
                     .replace(".template.json", ".meta.json"),
             );
-            if let Err(err) = state.file_system.remove_file(&file_path).await {
+            if let Err(err) = app_context.file_system.remove_file(&file_path).await {
                 match err.kind() {
                     ErrorKind::NotFound => {
                         // ファイルが見つからない場合は無視する
@@ -137,7 +141,7 @@ async fn delete_stack(
             // workspace.jsonのstacksから削除する
             workspace.stacks.remove(stack_id);
             workspace
-                .write(state.file_system.clone(), workspace_directory)
+                .write(app_context.file_system.clone(), workspace_directory)
                 .await?;
         }
         None => return Err(StackError::App(AppError::new("Stack not found"))),
@@ -147,7 +151,8 @@ async fn delete_stack(
 }
 
 async fn import_stack(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_file_path: &str,
 ) -> Result<(), StackError> {
@@ -163,17 +168,20 @@ async fn import_stack(
     if copy_file_path.to_str().unwrap() != stack_file_path {
         if filename.ends_with(".yaml") || filename.ends_with(".yml") {
             // YAMLファイルをJSONに変換して保存
-            let yaml_content = state.file_system.read_file(&stack_file_path_buf).await?;
+            let yaml_content = app_context
+                .file_system
+                .read_file(&stack_file_path_buf)
+                .await?;
             let yaml_value: serde_yaml::Value = serde_yaml::from_str(&yaml_content)?;
             let json_content = serde_json::to_string_pretty(&yaml_value)?;
             copy_file_path.set_extension("json");
-            state
+            app_context
                 .file_system
                 .write_file(&copy_file_path, json_content.as_bytes())
                 .await?;
         } else {
             // 通常のコピー処理
-            state
+            app_context
                 .file_system
                 .copy_file(&stack_file_path_buf, &copy_file_path)
                 .await?;
@@ -181,8 +189,10 @@ async fn import_stack(
     }
 
     // workspace.jsonのstacksに追加する
-    let mut workspace =
-        WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let mut workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
 
     // スタックが存在する場合は追加しない
     if workspace.stacks.values().any(|v| v == filename) {
@@ -194,7 +204,7 @@ async fn import_stack(
         .stacks
         .insert(Uuid::new_v4().to_string(), filename.to_string());
     workspace
-        .write(state.file_system.clone(), workspace_directory)
+        .write(app_context.file_system.clone(), workspace_directory)
         .await?;
 
     return Ok(());
@@ -253,8 +263,10 @@ async fn load_stack_from_id(
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Stack, StackError> {
-    let workspace =
-        WorkspaceConfig::read(app_context.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     return match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => {
             load_stack_from_info(
@@ -291,8 +303,10 @@ async fn load_template_summary(
     workspace_directory: &str,
 ) -> Result<Vec<TemplateSummary>, StackError> {
     let mut templates = Vec::new();
-    let workspace =
-        WorkspaceConfig::read(app_context.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     for (id, stack_file_name) in workspace.stacks.iter() {
         let meta = config_context
             .stack_meta_config_io
@@ -352,13 +366,17 @@ async fn load_template_summary(
 }
 
 async fn get_stack_resource_list(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
     service_name: &str,
     resource_name: &str,
 ) -> Result<Vec<String>, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -366,7 +384,7 @@ async fn get_stack_resource_list(
         }
     };
     let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
-    let template_json = state.file_system.read_file(&template_path).await?;
+    let template_json = app_context.file_system.read_file(&template_path).await?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
     let resources_json = template_json["Resources"].clone();
     let mut result: Vec<String> = Vec::new();
@@ -386,12 +404,16 @@ async fn get_stack_resource_list(
 }
 
 async fn get_stack_resource_properties(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
     logical_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -399,7 +421,7 @@ async fn get_stack_resource_properties(
         }
     };
     let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
-    let template_json = state.file_system.read_file(&template_path).await?;
+    let template_json = app_context.file_system.read_file(&template_path).await?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
     let properties_json = template_json["Resources"][logical_id]["Properties"].clone();
     if properties_json.is_null() {
@@ -409,12 +431,16 @@ async fn get_stack_resource_properties(
 }
 
 async fn get_stack_resource_properties_reasons(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
     logical_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -426,7 +452,7 @@ async fn get_stack_resource_properties_reasons(
         workspace_directory,
         stack_file_name.replace(".template.json", "")
     ));
-    let meta_json = state.file_system.read_file(&meta_path).await?;
+    let meta_json = app_context.file_system.read_file(&meta_path).await?;
     let meta_json: Value = serde_json::from_str(&meta_json).unwrap_or_default();
     let reasons_json = meta_json["reasons"][logical_id].clone();
     if reasons_json.is_null() {
@@ -436,11 +462,15 @@ async fn get_stack_resource_properties_reasons(
 }
 
 async fn get_stack_parameters(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -448,7 +478,7 @@ async fn get_stack_parameters(
         }
     };
     let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
-    let template_json = state.file_system.read_file(&template_path).await?;
+    let template_json = app_context.file_system.read_file(&template_path).await?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
     let parameters_json = template_json["Parameters"].clone();
     if parameters_json.is_null() {
@@ -473,11 +503,15 @@ pub struct StackOutput {
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 /// - `stack_id` - スタックのID
 async fn get_stack_outputs(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Vec<StackOutput>, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -485,7 +519,7 @@ async fn get_stack_outputs(
         }
     };
     let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
-    let template_json = state.file_system.read_file(&template_path).await?;
+    let template_json = app_context.file_system.read_file(&template_path).await?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
     let outputs_json = template_json["Outputs"].clone();
 
@@ -516,14 +550,19 @@ async fn get_stack_outputs(
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 async fn get_all_stack_outputs(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
 ) -> Result<HashMap<String, String>, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     // {Outputsのexport_name: スタックID}の形で返す
     let mut result: HashMap<String, String> = HashMap::new();
     for (stack_id, _) in workspace.stacks.iter() {
-        let outputs = get_stack_outputs(state, workspace_directory, stack_id).await?;
+        let outputs =
+            get_stack_outputs(app_context, config_context, workspace_directory, stack_id).await?;
         for output in outputs.iter().filter(|o| o.export_name.is_some()) {
             result.insert(
                 output.export_name.as_ref().unwrap().to_string(),
@@ -542,8 +581,10 @@ async fn update_stack_reasons(
     logical_id: &str,
     reasons: HashMap<String, String>,
 ) -> Result<(), StackError> {
-    let workspace =
-        WorkspaceConfig::read(app_context.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name.replace(".template.json", ""),
         None => {
@@ -577,8 +618,10 @@ async fn update_stack_detail(
     name: &str,
     description: &str,
 ) -> Result<(), StackError> {
-    let workspace =
-        WorkspaceConfig::read(app_context.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name.replace(".template.json", ""),
         None => {
@@ -620,11 +663,15 @@ pub struct ParameterAndResourceList {
 }
 
 async fn load_parameter_and_resource_list(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<ParameterAndResourceList, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -632,7 +679,7 @@ async fn load_parameter_and_resource_list(
         }
     };
     let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
-    let template_json = state.file_system.read_file(&template_path).await?;
+    let template_json = app_context.file_system.read_file(&template_path).await?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
 
     let parameters_json = template_json["Parameters"].clone();
@@ -695,7 +742,8 @@ pub async fn load_stacks_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn delete_stack_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<()>, CommandResult> {
@@ -705,7 +753,14 @@ pub async fn delete_stack_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match delete_stack(&state, window_state.workspace_directory.as_str(), stack_id).await {
+    return match delete_stack(
+        &app_context_state,
+        &config_context_state,
+        window_state.workspace_directory.as_str(),
+        stack_id,
+    )
+    .await
+    {
         Ok(_) => Ok(CommandResult::success(())),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
@@ -713,7 +768,8 @@ pub async fn delete_stack_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn import_stack_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_file_path: &str,
 ) -> Result<CommandResult<()>, CommandResult> {
@@ -724,7 +780,8 @@ pub async fn import_stack_command(
         }
     };
     return match import_stack(
-        &state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_file_path,
     )
@@ -787,7 +844,8 @@ pub async fn load_template_summary_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_resource_list_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
     service_name: &str,
@@ -800,7 +858,8 @@ pub async fn get_stack_resource_list_command(
         }
     };
     return match get_stack_resource_list(
-        &state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
         service_name,
@@ -815,7 +874,8 @@ pub async fn get_stack_resource_list_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_resource_properties_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
     logical_id: &str,
@@ -827,7 +887,8 @@ pub async fn get_stack_resource_properties_command(
         }
     };
     return match get_stack_resource_properties(
-        &state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
         logical_id,
@@ -841,7 +902,8 @@ pub async fn get_stack_resource_properties_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_parameters_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<Value>, CommandResult> {
@@ -851,8 +913,13 @@ pub async fn get_stack_parameters_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_stack_parameters(&state, window_state.workspace_directory.as_str(), stack_id)
-        .await
+    return match get_stack_parameters(
+        &app_context_state,
+        &config_context_state,
+        window_state.workspace_directory.as_str(),
+        stack_id,
+    )
+    .await
     {
         Ok(parameters) => Ok(CommandResult::success(parameters)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
@@ -861,7 +928,8 @@ pub async fn get_stack_parameters_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_outputs_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<Vec<StackOutput>>, CommandResult> {
@@ -871,8 +939,13 @@ pub async fn get_stack_outputs_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_stack_outputs(&state, window_state.workspace_directory.as_str(), stack_id)
-        .await
+    return match get_stack_outputs(
+        &app_context_state,
+        &config_context_state,
+        window_state.workspace_directory.as_str(),
+        stack_id,
+    )
+    .await
     {
         Ok(parameters) => Ok(CommandResult::success(parameters)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
@@ -881,7 +954,8 @@ pub async fn get_stack_outputs_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_all_stack_outputs_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
 ) -> Result<CommandResult<HashMap<String, String>>, CommandResult> {
     let window_state = match get_window_state(window) {
@@ -890,7 +964,13 @@ pub async fn get_all_stack_outputs_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_all_stack_outputs(&state, window_state.workspace_directory.as_str()).await {
+    return match get_all_stack_outputs(
+        &app_context_state,
+        &config_context_state,
+        window_state.workspace_directory.as_str(),
+    )
+    .await
+    {
         Ok(outputs) => Ok(CommandResult::success(outputs)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
@@ -928,7 +1008,8 @@ pub async fn update_stack_meta_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_resource_properties_reasons_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
     logical_id: &str,
@@ -940,7 +1021,8 @@ pub async fn get_stack_resource_properties_reasons_command(
         }
     };
     return match get_stack_resource_properties_reasons(
-        &state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
         logical_id,
@@ -984,7 +1066,8 @@ pub async fn update_stack_detail_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_parameter_and_resource_list_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<ParameterAndResourceList>, CommandResult> {
@@ -995,7 +1078,8 @@ pub async fn load_parameter_and_resource_list_command(
         }
     };
     return match load_parameter_and_resource_list(
-        &state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
     )
