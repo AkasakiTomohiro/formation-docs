@@ -97,3 +97,72 @@ pub async fn delete_workspace_from_app_config_command(
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
+
+#[cfg(test)]
+#[coverage(off)]
+mod app_config_command_tests {
+    use std::{collections::HashMap, sync::Arc};
+
+    use crate::{
+        config::context::{
+            app_config_trait::MockAppConfigTrait,
+            stack_meta_config_trait::MockStackMetaConfigTrait,
+            workspace_config_trait::MockWorkspaceConfigTrait,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+
+    use super::*;
+
+    /// AppConfigにworkspaceを追加できることを確認
+    #[tokio::test]
+    async fn add_workspace_to_app_config_success() {
+        // ######### 準備 #########
+        let mut mock_app_config = MockAppConfigTrait::new();
+
+        // AppConfig::readのモック
+        mock_app_config.expect_read().returning(|_| {
+            let app_config = AppConfig {
+                version: 1,
+                initialized: true,
+                initialized_at: String::from("2023-01-01T00:00:00Z"),
+                workspaces: HashMap::new(),
+            };
+            Ok(app_config)
+        });
+
+        // AppConfig::writeのモック
+        mock_app_config
+            .expect_write()
+            .returning(|config, _| Ok(config));
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        let workspace_directory = "test_workspace_directory";
+
+        // ######### 実行 #########
+        let result =
+            add_workspace_to_app_config(&app_context, &config_context, workspace_directory).await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        // workspace_idがUUID形式であることを確認
+        let workspace_id = result.unwrap();
+        assert!(Uuid::parse_str(&workspace_id).is_ok());
+    }
+}

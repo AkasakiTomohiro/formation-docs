@@ -6,6 +6,7 @@ use crate::{
     utils::context::file::FileSystem,
 };
 
+#[mockall::automock]
 #[async_trait]
 pub trait WorkspaceConfigTrait: Send + Sync {
     async fn read(
