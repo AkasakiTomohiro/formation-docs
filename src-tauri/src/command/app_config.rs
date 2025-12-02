@@ -41,7 +41,10 @@ pub async fn add_workspace_to_app_config(
         String::from(workspace_id.clone()),
         workspace_directory.to_string(),
     );
-    app_config.write(app_context.file_system.clone()).await?;
+    config_context
+        .app_config_io
+        .write(app_config, app_context.file_system.clone())
+        .await?;
     return Ok(workspace_id);
 }
 
@@ -55,7 +58,10 @@ async fn delete_workspace_from_app_config(
         .read(app_context.file_system.clone())
         .await?;
     app_config.workspaces.remove(workspace_id);
-    app_config.write(app_context.file_system.clone()).await?;
+    config_context
+        .app_config_io
+        .write(app_config, app_context.file_system.clone())
+        .await?;
     return Ok(());
 }
 
