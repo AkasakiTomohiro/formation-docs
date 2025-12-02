@@ -14,6 +14,12 @@ pub trait WorkspaceConfigTrait: Send + Sync {
         file_system: Arc<dyn FileSystem>,
         workspace_directory: &str,
     ) -> Result<WorkspaceConfig, WorkspaceConfigError>;
+    async fn write(
+        &self,
+        config: WorkspaceConfig,
+        file_system: Arc<dyn FileSystem>,
+        workspace_directory: &str,
+    ) -> Result<WorkspaceConfig, WorkspaceConfigError>;
 }
 
 pub struct WorkspaceConfigIO;
@@ -25,5 +31,13 @@ impl WorkspaceConfigTrait for WorkspaceConfigIO {
         workspace_directory: &str,
     ) -> Result<WorkspaceConfig, WorkspaceConfigError> {
         WorkspaceConfig::read(file_system, workspace_directory).await
+    }
+    async fn write(
+        &self,
+        config: WorkspaceConfig,
+        file_system: Arc<dyn FileSystem>,
+        workspace_directory: &str,
+    ) -> Result<WorkspaceConfig, WorkspaceConfigError> {
+        WorkspaceConfig::write(config, file_system, workspace_directory).await
     }
 }
