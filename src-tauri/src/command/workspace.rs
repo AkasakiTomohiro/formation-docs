@@ -1,4 +1,4 @@
-use crate::config::app_config::{AppConfig, AppConfigError};
+use crate::config::app_config::AppConfigError;
 use crate::config::context::config_context::ConfigContext;
 use crate::config::workspace_config::WorkspaceConfig;
 use crate::config::workspace_config::WorkspaceConfigError;
@@ -58,16 +58,23 @@ async fn create_workspace(
 }
 
 async fn load_workspace_merge_info(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_id: &str,
 ) -> Result<WorkspaceMergeInfo, WorkspaceCommandError> {
-    let app_config = AppConfig::read(state.file_system.clone()).await?;
+    let app_config = config_context
+        .app_config_io
+        .read(app_context.file_system.clone())
+        .await?;
 
     // すでに登録されている場合は登録IDを返す
     let workspace_directory = app_config.workspaces.get(workspace_id);
     if workspace_directory.is_some() {
-        let workspace =
-            WorkspaceConfig::read(state.file_system.clone(), workspace_directory.unwrap()).await?;
+        let workspace = WorkspaceConfig::read(
+            app_context.file_system.clone(),
+            workspace_directory.unwrap(),
+        )
+        .await?;
         return Ok(WorkspaceMergeInfo {
             id: workspace_id.to_string(),
             directory: workspace_directory.unwrap().to_string(),
@@ -82,13 +89,17 @@ async fn load_workspace_merge_info(
 }
 
 async fn load_workspaces(
-    state: &AppContext,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
 ) -> Result<Vec<WorkspaceMergeInfo>, WorkspaceCommandError> {
-    let app_config = AppConfig::read(state.file_system.clone()).await?;
+    let app_config = config_context
+        .app_config_io
+        .read(app_context.file_system.clone())
+        .await?;
 
     let mut workspaces = Vec::new();
     for (id, directory) in app_config.workspaces.iter() {
-        let workspace = WorkspaceConfig::read(state.file_system.clone(), directory).await?;
+        let workspace = WorkspaceConfig::read(app_context.file_system.clone(), directory).await?;
         workspaces.push(WorkspaceMergeInfo {
             id: id.to_string(),
             directory: directory.to_string(),
@@ -129,8 +140,9 @@ pub async fn open_workspace(
         .title("formation-docs")
     } else {
         let app_context = handle.state::<AppContext>();
+        let config_context = handle.state::<ConfigContext>();
         let file_system = app_context.file_system.clone();
-        let workspace_info = load_workspace_merge_info(&app_context, id).await?;
+        let workspace_info = load_workspace_merge_info(&app_context, &config_context, id).await?;
         let path = Path::new(workspace_info.directory.as_str());
         log::info!("Open: {}", path.to_str().unwrap());
         if !file_system.path_exists(path) {
@@ -171,10 +183,11 @@ pub async fn create_workspace_command(
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_workspace_merge_info_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     workspace_id: &str,
 ) -> Result<CommandResult<WorkspaceMergeInfo>, CommandResult> {
-    match load_workspace_merge_info(&state, workspace_id).await {
+    match load_workspace_merge_info(&app_context_state, &config_context_state, workspace_id).await {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to load Workspace")),
     }
@@ -182,9 +195,10 @@ pub async fn load_workspace_merge_info_command(
 
 #[tauri::command]
 pub async fn load_workspaces_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
 ) -> Result<CommandResult<Vec<WorkspaceMergeInfo>>, CommandResult> {
-    match load_workspaces(&state).await {
+    match load_workspaces(&app_context_state, &config_context_state).await {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to load Workspaces")),
     }
