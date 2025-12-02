@@ -131,8 +131,13 @@ pub async fn update_workspace(
         .await?;
     workspace.name = name.to_string();
     workspace.description = description.to_string();
-    workspace
-        .write(app_context.file_system.clone(), workspace_directory)
+    config_context
+        .workspace_config_io
+        .write(
+            workspace,
+            app_context.file_system.clone(),
+            workspace_directory,
+        )
         .await?;
     return Ok(());
 }

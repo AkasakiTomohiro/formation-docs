@@ -140,8 +140,13 @@ async fn delete_stack(
             };
             // workspace.jsonのstacksから削除する
             workspace.stacks.remove(stack_id);
-            workspace
-                .write(app_context.file_system.clone(), workspace_directory)
+            config_context
+                .workspace_config_io
+                .write(
+                    workspace,
+                    app_context.file_system.clone(),
+                    workspace_directory,
+                )
                 .await?;
         }
         None => return Err(StackError::App(AppError::new("Stack not found"))),
@@ -203,8 +208,13 @@ async fn import_stack(
     workspace
         .stacks
         .insert(Uuid::new_v4().to_string(), filename.to_string());
-    workspace
-        .write(app_context.file_system.clone(), workspace_directory)
+    config_context
+        .workspace_config_io
+        .write(
+            workspace,
+            app_context.file_system.clone(),
+            workspace_directory,
+        )
         .await?;
 
     return Ok(());

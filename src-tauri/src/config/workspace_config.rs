@@ -102,10 +102,10 @@ impl WorkspaceConfig {
                 }
                 let name = name.unwrap();
                 let config_json = WorkspaceConfig::new(name);
-                config_json
-                    .write(file_system.clone(), workspace_directory)
-                    .await?;
-                Ok(config_json)
+                Ok(
+                    WorkspaceConfig::write(config_json, file_system.clone(), workspace_directory)
+                        .await?,
+                )
             }
         }
     }
@@ -114,16 +114,16 @@ impl WorkspaceConfig {
     ///
     /// - `workspace_directory`: ワークスペースディレクトリ
     pub async fn write(
-        &self,
+        config: WorkspaceConfig,
         file_system: Arc<dyn FileSystem>,
         workspace_directory: &str,
-    ) -> Result<(), WorkspaceConfigError> {
-        let workspace_config_json = serde_json::to_string::<WorkspaceConfig>(self)?;
+    ) -> Result<WorkspaceConfig, WorkspaceConfigError> {
+        let workspace_config_json = serde_json::to_string::<WorkspaceConfig>(&config)?;
         let workspace_config_path = workspace_config_path(workspace_directory);
         file_system
             .write_file(&workspace_config_path, workspace_config_json.as_bytes())
             .await?;
-        return Ok(());
+        return Ok(config);
     }
 }
 
@@ -693,7 +693,8 @@ mod workspace_config_tests {
             let config = WorkspaceConfig::new("test_workspace");
 
             // ######### 実行 #########
-            let result = config.write(file_system, "directory/workspace.json").await;
+            let result =
+                WorkspaceConfig::write(config, file_system, "directory/workspace.json").await;
 
             // ######### 検証 #########
             assert!(result.is_ok());
@@ -721,7 +722,8 @@ mod workspace_config_tests {
             let config = WorkspaceConfig::new("test_workspace");
 
             // ######### 実行 #########
-            let result = config.write(file_system, "directory/workspace.json").await;
+            let result =
+                WorkspaceConfig::write(config, file_system, "directory/workspace.json").await;
 
             // ######### 検証 #########
             assert!(result.is_err());
