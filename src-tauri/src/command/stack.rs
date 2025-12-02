@@ -600,8 +600,10 @@ async fn update_stack_reasons(
         )
         .await?;
     stack_meta.reasons.insert(logical_id.to_string(), reasons);
-    stack_meta
+    config_context
+        .stack_meta_config_io
         .write(
+            stack_meta,
             app_context.file_system.clone(),
             workspace_directory,
             &stack_name,
@@ -638,8 +640,10 @@ async fn update_stack_detail(
         .await?;
     stack_meta.name = name.to_string();
     stack_meta.description = description.to_string();
-    stack_meta
+    stack_meta = config_context
+        .stack_meta_config_io
         .write(
+            stack_meta,
             app_context.file_system.clone(),
             workspace_directory,
             &stack_name,

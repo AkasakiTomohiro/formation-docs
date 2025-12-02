@@ -97,10 +97,13 @@ impl StackMetaConfig {
             }
             _ => {
                 let config_json = StackMetaConfig::new(stack_name);
-                config_json
-                    .write(file_system.clone(), workspace_directory, stack_name)
-                    .await?;
-                Ok(config_json)
+                Ok(StackMetaConfig::write(
+                    config_json,
+                    file_system.clone(),
+                    workspace_directory,
+                    stack_name,
+                )
+                .await?)
             }
         }
     }
@@ -110,17 +113,17 @@ impl StackMetaConfig {
     /// - `workspace_directory`: ワークスペースディレクトリ
     /// - `stack_name`: スタック名
     pub async fn write(
-        &self,
+        config: StackMetaConfig,
         file_system: Arc<dyn FileSystem>,
         workspace_directory: &str,
         stack_name: &str,
-    ) -> Result<(), StackMetaConfigError> {
+    ) -> Result<StackMetaConfig, StackMetaConfigError> {
         let config_path = stack_meta_config_path(workspace_directory, stack_name);
-        let config_json = serde_json::to_string(self)?;
+        let config_json = serde_json::to_string(&config)?;
         file_system
             .write_file(&config_path, config_json.as_bytes())
             .await?;
-        return Ok(());
+        return Ok(config);
     }
 }
 
@@ -308,9 +311,13 @@ mod stack_meta_config_tests {
             let file_system = Arc::new(mock_file_system);
 
             // ######### 実行 #########
-            let result = StackMetaConfig::new(name)
-                .write(file_system, workspace_dir, stack_name)
-                .await;
+            let result = StackMetaConfig::write(
+                StackMetaConfig::new(name),
+                file_system,
+                workspace_dir,
+                stack_name,
+            )
+            .await;
 
             // ######### 検証 #########
             // readの戻り値がOkであること

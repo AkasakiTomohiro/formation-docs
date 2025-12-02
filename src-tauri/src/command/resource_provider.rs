@@ -1,3 +1,4 @@
+use crate::config::app_config::AppConfig;
 use crate::config::context::config_context::ConfigContext;
 use crate::utils::context::app_context::AppContext;
 use chrono::Utc;
@@ -28,7 +29,10 @@ async fn setup_app(
         cloudformation::schema::dl_resource_provider(&app_context, "us-east-1").await?;
         app_config.initialized = true;
         app_config.initialized_at = Utc::now().to_string();
-        app_config.write(app_context.file_system.clone()).await?;
+        config_context
+            .app_config_io
+            .write(app_config, app_context.file_system.clone())
+            .await?;
     }
     return Ok(());
 }

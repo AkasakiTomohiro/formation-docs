@@ -87,22 +87,23 @@ impl AppConfig {
                     Ok(boxed.migrate_until_latest())
                 } else {
                     let config_json = AppConfig::new();
-                    config_json.write(file_system).await?;
-                    Ok(config_json)
+                    Ok(AppConfig::write(config_json, file_system).await?)
                 }
             }
             _ => {
                 let config_json = AppConfig::new();
-                config_json.write(file_system).await?;
-                Ok(config_json)
+                Ok(AppConfig::write(config_json, file_system).await?)
             }
         }
     }
 
     /// app_config.jsonへ書き込む
-    pub async fn write(&self, file_system: Arc<dyn FileSystem>) -> Result<(), AppConfigError> {
+    pub async fn write(
+        config: AppConfig,
+        file_system: Arc<dyn FileSystem>,
+    ) -> Result<AppConfig, AppConfigError> {
         // AppConfigでシリアライズ時にエラーが発生しうる属性（Infinity、NaN等）がないためunwrapしてもpanicは発生しない
-        let app_config_json = serde_json::to_string::<AppConfig>(self).unwrap();
+        let app_config_json = serde_json::to_string::<AppConfig>(&config).unwrap();
         let app_config_path = app_config_path(file_system.clone())?;
 
         // ディレクトリが存在しないことがあるため作成する
@@ -113,7 +114,7 @@ impl AppConfig {
         file_system
             .write_file(&app_config_path, app_config_json.as_bytes())
             .await?;
-        Ok(())
+        Ok(config)
     }
 }
 
@@ -437,7 +438,7 @@ mod app_config {
             let file_system = Arc::new(mock_file_system);
 
             // ######### 実行 #########
-            let result = super::AppConfig::new().write(file_system).await;
+            let result = super::AppConfig::write(super::AppConfig::new(), file_system).await;
 
             // ######### 検証 #########
             // readの戻り値がOkであること
@@ -458,7 +459,7 @@ mod app_config {
             let file_system = Arc::new(mock_file_system);
 
             // ######### 実行 #########
-            let result = super::AppConfig::new().write(file_system).await;
+            let result = super::AppConfig::write(super::AppConfig::new(), file_system).await;
 
             // ######### 検証 #########
             // readの戻り値がErrであること
@@ -486,7 +487,7 @@ mod app_config {
             let file_system = Arc::new(mock_file_system);
 
             // ######### 実行 #########
-            let result = super::AppConfig::new().write(file_system).await;
+            let result = super::AppConfig::write(super::AppConfig::new(), file_system).await;
 
             // ######### 検証 #########
             // readの戻り値がErrであること
@@ -521,7 +522,7 @@ mod app_config {
             let file_system = Arc::new(mock_file_system);
 
             // ######### 実行 #########
-            let result = super::AppConfig::new().write(file_system).await;
+            let result = super::AppConfig::write(super::AppConfig::new(), file_system).await;
 
             // ######### 検証 #########
             // readの戻り値がErrであること
