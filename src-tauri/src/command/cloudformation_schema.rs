@@ -62,6 +62,7 @@ async fn get_aws_service_list(
     return Ok(summary_json);
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_cloudformation_schema_command(
     state: State<'_, AppContext>,
@@ -74,6 +75,7 @@ pub async fn get_cloudformation_schema_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_aws_service_list_command(
     state: State<'_, AppContext>,

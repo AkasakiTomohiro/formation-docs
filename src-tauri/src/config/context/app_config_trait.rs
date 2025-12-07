@@ -18,6 +18,7 @@ pub trait AppConfigTrait: Send + Sync {
 }
 
 pub struct AppConfigIO;
+#[coverage(off)]
 #[async_trait]
 impl AppConfigTrait for AppConfigIO {
     async fn read(&self, file_system: Arc<dyn FileSystem>) -> Result<AppConfig, AppConfigError> {

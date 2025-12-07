@@ -27,6 +27,7 @@ pub trait FileSystem: Send + Sync {
 }
 
 pub struct LocalFileSystem;
+#[coverage(off)]
 #[async_trait]
 impl FileSystem for LocalFileSystem {
     async fn read_file(&self, path: &Path) -> io::Result<String> {

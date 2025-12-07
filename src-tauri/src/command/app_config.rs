@@ -65,6 +65,7 @@ async fn delete_workspace_from_app_config(
     return Ok(());
 }
 
+#[coverage(off)]
 #[tauri::command]
 pub async fn read_app_config_command(
     app_context_state: State<'_, AppContext>,
@@ -80,6 +81,7 @@ pub async fn read_app_config_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn delete_workspace_from_app_config_command(
     app_context_state: State<'_, AppContext>,

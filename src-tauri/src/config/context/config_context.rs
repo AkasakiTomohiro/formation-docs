@@ -10,6 +10,7 @@ pub struct ConfigContext {
     pub workspace_config_io: Arc<dyn workspace_config_trait::WorkspaceConfigTrait>,
 }
 
+#[coverage(off)]
 impl ConfigContext {
     pub fn new() -> Self {
         Self {

@@ -8,6 +8,7 @@ pub trait HttpClient: Send + Sync {
 }
 
 pub struct RealHttpClient;
+#[coverage(off)]
 #[async_trait]
 impl HttpClient for RealHttpClient {
     async fn get(&self, url: String) -> Result<Response> {

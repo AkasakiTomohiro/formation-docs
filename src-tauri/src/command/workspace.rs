@@ -184,6 +184,7 @@ pub async fn open_workspace(
     return Ok(true);
 }
 
+#[coverage(off)]
 #[tauri::command]
 pub async fn create_workspace_command(
     app_context_state: State<'_, AppContext>,
@@ -196,6 +197,7 @@ pub async fn create_workspace_command(
     }
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_workspace_merge_info_command(
     app_context_state: State<'_, AppContext>,
@@ -208,6 +210,7 @@ pub async fn load_workspace_merge_info_command(
     }
 }
 
+#[coverage(off)]
 #[tauri::command]
 pub async fn load_workspaces_command(
     app_context_state: State<'_, AppContext>,
@@ -219,6 +222,7 @@ pub async fn load_workspaces_command(
     }
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_workspace_details_command(
     app_context_state: State<'_, AppContext>,
