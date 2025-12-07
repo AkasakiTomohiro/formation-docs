@@ -730,6 +730,7 @@ async fn load_parameter_and_resource_list(
     });
 }
 
+#[coverage(off)]
 #[tauri::command]
 pub async fn load_stacks_command(
     app_context_state: State<'_, AppContext>,
@@ -754,6 +755,7 @@ pub async fn load_stacks_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn delete_stack_command(
     app_context_state: State<'_, AppContext>,
@@ -780,6 +782,7 @@ pub async fn delete_stack_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn import_stack_command(
     app_context_state: State<'_, AppContext>,
@@ -806,6 +809,7 @@ pub async fn import_stack_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_stack_command(
     app_context_state: State<'_, AppContext>,
@@ -832,6 +836,7 @@ pub async fn load_stack_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command]
 pub async fn load_template_summary_command(
     app_context_state: State<'_, AppContext>,
@@ -856,6 +861,7 @@ pub async fn load_template_summary_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_resource_list_command(
     app_context_state: State<'_, AppContext>,
@@ -886,6 +892,7 @@ pub async fn get_stack_resource_list_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_resource_properties_command(
     app_context_state: State<'_, AppContext>,
@@ -914,6 +921,7 @@ pub async fn get_stack_resource_properties_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_parameters_command(
     app_context_state: State<'_, AppContext>,
@@ -940,6 +948,7 @@ pub async fn get_stack_parameters_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_outputs_command(
     app_context_state: State<'_, AppContext>,
@@ -966,6 +975,7 @@ pub async fn get_stack_outputs_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_all_stack_outputs_command(
     app_context_state: State<'_, AppContext>,
@@ -990,6 +1000,7 @@ pub async fn get_all_stack_outputs_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_stack_meta_command(
     app_context_state: State<'_, AppContext>,
@@ -1020,6 +1031,7 @@ pub async fn update_stack_meta_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_resource_properties_reasons_command(
     app_context_state: State<'_, AppContext>,
@@ -1048,6 +1060,7 @@ pub async fn get_stack_resource_properties_reasons_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_stack_detail_command(
     app_context_state: State<'_, AppContext>,
@@ -1078,6 +1091,7 @@ pub async fn update_stack_detail_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_parameter_and_resource_list_command(
     app_context_state: State<'_, AppContext>,

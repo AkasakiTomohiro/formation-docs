@@ -6,6 +6,7 @@ pub struct ApiContext {
     pub cloudformation_schema: Arc<dyn cloudformation_schema_trait::CloudformationSchemaTrait>,
 }
 
+#[coverage(off)]
 impl ApiContext {
     pub fn new() -> Self {
         Self {

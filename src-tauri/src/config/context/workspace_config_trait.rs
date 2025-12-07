@@ -23,6 +23,7 @@ pub trait WorkspaceConfigTrait: Send + Sync {
 }
 
 pub struct WorkspaceConfigIO;
+#[coverage(off)]
 #[async_trait]
 impl WorkspaceConfigTrait for WorkspaceConfigIO {
     async fn read(

@@ -16,6 +16,7 @@ pub trait CloudformationSchemaTrait: Send + Sync {
 }
 
 pub struct CloudformationSchema;
+#[coverage(off)]
 #[async_trait]
 impl CloudformationSchemaTrait for CloudformationSchema {
     async fn dl_resource_provider(

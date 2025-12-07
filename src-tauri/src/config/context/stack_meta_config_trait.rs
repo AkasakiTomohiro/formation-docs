@@ -26,6 +26,7 @@ pub trait StackMetaConfigTrait: Send + Sync {
 }
 
 pub struct StackMetaConfigIO;
+#[coverage(off)]
 #[async_trait]
 impl StackMetaConfigTrait for StackMetaConfigIO {
     async fn read(

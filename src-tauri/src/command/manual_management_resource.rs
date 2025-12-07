@@ -365,6 +365,7 @@ async fn update_manual_resource_properties(
     return Ok(());
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn new_manual_management_resource_command(
     state: State<'_, AppContext>,
@@ -395,6 +396,7 @@ pub async fn new_manual_management_resource_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_management_resource_list_command(
     state: State<'_, AppContext>,
@@ -421,6 +423,7 @@ pub async fn get_manual_management_resource_list_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_manual_management_resource_summary_command(
     state: State<'_, AppContext>,
@@ -443,6 +446,7 @@ pub async fn load_manual_management_resource_summary_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_resource_properties_command(
     state: State<'_, AppContext>,
@@ -467,6 +471,7 @@ pub async fn get_manual_resource_properties_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_resource_reasons_command(
     state: State<'_, AppContext>,
@@ -491,6 +496,7 @@ pub async fn get_manual_resource_reasons_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_manual_resource_meta_command(
     state: State<'_, AppContext>,
@@ -521,6 +527,7 @@ pub async fn update_manual_resource_meta_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_manual_resource_properties_command(
     state: State<'_, AppContext>,

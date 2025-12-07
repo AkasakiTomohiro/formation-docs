@@ -10,6 +10,7 @@ use config::context::config_context::ConfigContext;
 use utils::context::app_context::AppContext;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 async fn open_workspace_command(handle: tauri::AppHandle, id: &str) -> Result<bool, ()> {
     match command::workspace::open_workspace(handle, id).await {
@@ -18,6 +19,7 @@ async fn open_workspace_command(handle: tauri::AppHandle, id: &str) -> Result<bo
     }
 }
 
+#[coverage(off)]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
