@@ -1,11 +1,9 @@
-use crate::config::app_config::AppConfig;
+use crate::api::context::api_context::ApiContext;
 use crate::config::context::config_context::ConfigContext;
 use crate::utils::context::app_context::AppContext;
 use chrono::Utc;
 use tauri::State;
 use thiserror::Error;
-
-use super::super::api::cloudformation;
 
 #[derive(Debug, Error)]
 pub enum ResourceProviderError {
@@ -20,13 +18,17 @@ pub enum ResourceProviderError {
 async fn setup_app(
     app_context: &AppContext,
     config_context: &ConfigContext,
+    api_context: &ApiContext,
 ) -> Result<(), ResourceProviderError> {
     let mut app_config = config_context
         .app_config_io
         .read(app_context.file_system.clone())
         .await?;
     if app_config.initialized == false {
-        cloudformation::schema::dl_resource_provider(&app_context, "us-east-1").await?;
+        api_context
+            .cloudformation_schema
+            .dl_resource_provider(&app_context, "us-east-1")
+            .await?;
         app_config.initialized = true;
         app_config.initialized_at = Utc::now().to_string();
         config_context
@@ -38,11 +40,19 @@ async fn setup_app(
 }
 
 #[tauri::command]
+#[coverage(off)]
 pub async fn setup_app_command(
     app_context_state: State<'_, AppContext>,
     config_context_state: State<'_, ConfigContext>,
+    api_context_state: State<'_, ApiContext>,
 ) -> Result<(), ()> {
-    match setup_app(&app_context_state, &config_context_state).await {
+    match setup_app(
+        &app_context_state,
+        &config_context_state,
+        &api_context_state,
+    )
+    .await
+    {
         Ok(_) => Ok(()),
         Err(_) => Err(()),
     }

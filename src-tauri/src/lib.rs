@@ -5,6 +5,7 @@ mod command;
 mod config;
 mod utils;
 
+use api::context::api_context::ApiContext;
 use config::context::config_context::ConfigContext;
 use utils::context::app_context::AppContext;
 
@@ -22,6 +23,7 @@ pub fn run() {
     tauri::Builder::default()
         .manage(AppContext::new())
         .manage(ConfigContext::new())
+        .manage(ApiContext::new())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_log::Builder::new().build())
