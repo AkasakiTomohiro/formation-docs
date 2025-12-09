@@ -1117,3 +1117,93 @@ pub async fn load_parameter_and_resource_list_command(
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_stacks_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod delete_stack_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod import_stack_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_stack_from_info_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_stack_from_id_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_template_summary_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_stack_resource_list_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_stack_resource_properties_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_stack_resource_properties_reasons_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_stack_parameters_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_stack_outputs_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_all_stack_outputs_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod update_stack_reasons_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod update_stack_detail_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_parameter_and_resource_list_tests {
+    use super::*;
+}
