@@ -116,11 +116,13 @@ mod app_config_command_tests {
 
     use super::*;
 
-    /// AppConfigにworkspaceを追加できることを確認
+    /// AppConfigにworkspaceを新規作成できることを確認
     #[tokio::test]
     async fn add_workspace_to_app_config_success() {
         // ######### 準備 #########
         let mut mock_app_config = MockAppConfigTrait::new();
+
+        let workspace_directory = "test_workspace_directory";
 
         // AppConfig::readのモック
         mock_app_config.expect_read().returning(|_| {
@@ -155,8 +157,6 @@ mod app_config_command_tests {
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
         };
 
-        let workspace_directory = "test_workspace_directory";
-
         // ######### 実行 #########
         let result =
             add_workspace_to_app_config(&app_context, &config_context, workspace_directory).await;
@@ -164,7 +164,365 @@ mod app_config_command_tests {
         // ######### 検証 #########
         assert!(result.is_ok());
         // workspace_idがUUID形式であることを確認
-        let workspace_id = result.unwrap();
-        assert!(Uuid::parse_str(&workspace_id).is_ok());
+        let result_workspace_id = result.unwrap();
+        assert!(Uuid::parse_str(&result_workspace_id).is_ok());
+    }
+
+    /// AppConfigにworkspaceを追加できることを確認
+    #[tokio::test]
+    async fn add_workspace_to_app_config_add_workspace() {
+        // ######### 準備 #########
+        let mut mock_app_config = MockAppConfigTrait::new();
+
+        let workspace_directory = "test_workspace_directory";
+        let workspace_id: &str = "existing_workspace_id";
+        let new_workspace_directory = "new_workspace_directory";
+
+        let mut workspaces = HashMap::new();
+        workspaces.insert(
+            String::from(workspace_id),
+            String::from(workspace_directory),
+        );
+
+        // AppConfig::readのモック
+        mock_app_config.expect_read().returning(move |_| {
+            let app_config = AppConfig {
+                version: 1,
+                initialized: true,
+                initialized_at: String::from("2023-01-01T00:00:00Z"),
+                workspaces: workspaces.clone(),
+            };
+            Ok(app_config)
+        });
+
+        // AppConfig::writeのモック
+        mock_app_config
+            .expect_write()
+            .returning(|config, _| Ok(config));
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            add_workspace_to_app_config(&app_context, &config_context, new_workspace_directory)
+                .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        // workspace_idがUUID形式であることを確認
+        let result_workspace_id = result.unwrap();
+        assert!(Uuid::parse_str(&result_workspace_id).is_ok());
+    }
+
+    /// すでに登録されているworkspaceの場合、既存のIDが返されることを確認
+    #[tokio::test]
+    async fn add_workspace_to_app_config_existing_workspace() {
+        // ######### 準備 #########
+        let mut mock_app_config = MockAppConfigTrait::new();
+
+        let workspace_directory = "test_workspace_directory";
+        let workspace_id = "existing_workspace_id";
+
+        let mut workspaces = HashMap::new();
+        workspaces.insert(
+            String::from(workspace_id),
+            String::from(workspace_directory),
+        );
+
+        // AppConfig::readのモック
+        mock_app_config.expect_read().returning(move |_| {
+            let app_config = AppConfig {
+                version: 1,
+                initialized: true,
+                initialized_at: String::from("2023-01-01T00:00:00Z"),
+                workspaces: workspaces.clone(),
+            };
+            Ok(app_config)
+        });
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            add_workspace_to_app_config(&app_context, &config_context, workspace_directory).await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let result_workspace_id = result.unwrap();
+        assert!(result_workspace_id == workspace_id);
+    }
+
+    /// AppConfig::readが失敗した場合、エラーが返されることを確認
+    #[tokio::test]
+    async fn add_workspace_to_app_config_read_err() {
+        // ######### 準備 #########
+        let mut mock_app_config = MockAppConfigTrait::new();
+
+        // AppConfig::readのモック
+        mock_app_config
+            .expect_read()
+            .returning(|_| Err(AppConfigError::App(AppError::new("Read error"))));
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        let workspace_directory = "test_workspace_directory";
+
+        // ######### 実行 #########
+        let result =
+            add_workspace_to_app_config(&app_context, &config_context, workspace_directory).await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// AppConfig::writeが失敗した場合、エラーが返されることを確認
+    #[tokio::test]
+    async fn add_workspace_to_app_config_write_err() {
+        // ######### 準備 #########
+        let mut mock_app_config = MockAppConfigTrait::new();
+
+        // AppConfig::readのモック
+        mock_app_config.expect_read().returning(|_| {
+            let app_config = AppConfig {
+                version: 1,
+                initialized: true,
+                initialized_at: String::from("2023-01-01T00:00:00Z"),
+                workspaces: HashMap::new(),
+            };
+            Ok(app_config)
+        });
+
+        // AppConfig::writeのモック
+        mock_app_config
+            .expect_write()
+            .returning(|_, _| Err(AppConfigError::App(AppError::new("Write error"))));
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        let workspace_directory = "test_workspace_directory";
+
+        // ######### 実行 #########
+        let result =
+            add_workspace_to_app_config(&app_context, &config_context, workspace_directory).await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// AppConfigからworkspaceを削除できることを確認
+    #[tokio::test]
+    async fn delete_workspace_from_app_config_success() {
+        // ######### 準備 #########
+        let mut mock_app_config = MockAppConfigTrait::new();
+
+        let workspace_directory = "test_workspace_directory";
+        let workspace_id = "test_workspace_id";
+
+        let mut workspaces = HashMap::new();
+        workspaces.insert(
+            String::from(workspace_id),
+            String::from(workspace_directory),
+        );
+
+        // AppConfig::readのモック
+        mock_app_config.expect_read().returning(|_| {
+            let app_config = AppConfig {
+                version: 1,
+                initialized: true,
+                initialized_at: String::from("2023-01-01T00:00:00Z"),
+                workspaces: HashMap::new(),
+            };
+            Ok(app_config)
+        });
+
+        // AppConfig::writeのモック
+        mock_app_config
+            .expect_write()
+            .returning(|config, _| Ok(config));
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            delete_workspace_from_app_config(&app_context, &config_context, workspace_id).await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+    }
+
+    /// AppConfig::readが失敗した場合、エラーが返されることを確認
+    #[tokio::test]
+    async fn delete_workspace_from_app_config_read_err() {
+        // ######### 準備 #########
+        let mut mock_app_config = MockAppConfigTrait::new();
+
+        let workspace_directory = "test_workspace_directory";
+        let workspace_id = "test_workspace_id";
+
+        let mut workspaces = HashMap::new();
+        workspaces.insert(
+            String::from(workspace_id),
+            String::from(workspace_directory),
+        );
+
+        // AppConfig::readのモック
+        mock_app_config
+            .expect_read()
+            .returning(|_| Err(AppConfigError::App(AppError::new("Read error"))));
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            delete_workspace_from_app_config(&app_context, &config_context, workspace_id).await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// AppConfig::writeが失敗した場合、エラーが返されることを確認
+    #[tokio::test]
+    async fn delete_workspace_from_app_config_write_err() {
+        // ######### 準備 #########
+        let mut mock_app_config = MockAppConfigTrait::new();
+
+        let workspace_directory = "test_workspace_directory";
+        let workspace_id = "test_workspace_id";
+
+        let mut workspaces = HashMap::new();
+        workspaces.insert(
+            String::from(workspace_id),
+            String::from(workspace_directory),
+        );
+
+        // AppConfig::readのモック
+        mock_app_config.expect_read().returning(|_| {
+            let app_config = AppConfig {
+                version: 1,
+                initialized: true,
+                initialized_at: String::from("2023-01-01T00:00:00Z"),
+                workspaces: HashMap::new(),
+            };
+            Ok(app_config)
+        });
+
+        // AppConfig::writeのモック
+        mock_app_config
+            .expect_write()
+            .returning(|_, _| Err(AppConfigError::App(AppError::new("Write error"))));
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            delete_workspace_from_app_config(&app_context, &config_context, workspace_id).await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
     }
 }
