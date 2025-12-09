@@ -553,3 +553,63 @@ pub async fn update_manual_resource_properties_command(
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_manual_management_resources_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod save_manual_management_resources_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod new_manual_management_resource_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_manual_management_resource_list_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_manual_management_resource_summary_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_manual_resource_meta_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_manual_resource_properties_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_manual_resource_reasons_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod update_manual_resource_meta_tests {
+    use super::*;
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod update_manual_resource_properties_tests {
+    use super::*;
+}
