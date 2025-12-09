@@ -1,3 +1,4 @@
+use crate::api::context::api_context::ApiContext;
 use crate::command::cloudformation_schema::get_cloudformation_schema;
 use crate::command::stack::Resource;
 use crate::utils::context::app_context::AppContext;
@@ -126,7 +127,8 @@ async fn save_manual_management_resources(
 /// - `service_name` - サービス名(すべて小文字)
 /// - `resource_name` - リソース名(すべて小文字)
 async fn new_manual_management_resource(
-    state: &AppContext,
+    app_context: &AppContext,
+    api_context: &ApiContext,
     workspace_directory: &str,
     resource_id: &str,
     description: &str,
@@ -134,7 +136,8 @@ async fn new_manual_management_resource(
     resource_name: &str,
 ) -> Result<(), ManualManagementResourceError> {
     // 指定されたサービス名とリソース名に基づいてCloudFormationのスキーマを取得
-    let resource_schema = get_cloudformation_schema(state, service_name, resource_name).await?;
+    let resource_schema =
+        get_cloudformation_schema(app_context, api_context, service_name, resource_name).await?;
     let resource_schema: Value = serde_json::from_str(&resource_schema)?;
     if resource_schema.is_object() == false {
         return Err(ManualManagementResourceError::App(AppError::new(
@@ -153,7 +156,7 @@ async fn new_manual_management_resource(
 
     // 手動管理リソースのJSONファイルを取得し、リソースIDが既に存在しないことを確認してから新しいリソースを追加
     let mut manual_management_resources =
-        get_manual_management_resources(state, workspace_directory).await?;
+        get_manual_management_resources(app_context, workspace_directory).await?;
     if manual_management_resources
         .resources
         .contains_key(resource_id)
@@ -172,8 +175,12 @@ async fn new_manual_management_resource(
     );
 
     // 更新された手動管理リソースのJSONファイルを保存
-    save_manual_management_resources(state, workspace_directory, &manual_management_resources)
-        .await?;
+    save_manual_management_resources(
+        app_context,
+        workspace_directory,
+        &manual_management_resources,
+    )
+    .await?;
 
     return Ok(());
 }
@@ -368,7 +375,8 @@ async fn update_manual_resource_properties(
 #[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn new_manual_management_resource_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    api_context_state: State<'_, ApiContext>,
     window: tauri::Window,
     resource_id: &str,
     description: &str,
@@ -382,7 +390,8 @@ pub async fn new_manual_management_resource_command(
         }
     };
     return match new_manual_management_resource(
-        &state,
+        &app_context_state,
+        &api_context_state,
         window_state.workspace_directory.as_str(),
         resource_id,
         description,
