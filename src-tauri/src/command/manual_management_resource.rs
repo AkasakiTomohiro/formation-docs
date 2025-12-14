@@ -567,6 +567,171 @@ pub async fn update_manual_resource_properties_command(
 #[coverage(off)]
 mod get_manual_management_resources_tests {
     use super::*;
+    use crate::utils::context::file::MockFileSystem;
+    use crate::utils::context::http_client::MockHttpClient;
+    use std::collections::HashMap;
+    use std::sync::Arc;
+
+    #[tokio::test]
+    async fn test_get_manual_management_resources_creates_file_if_not_exists() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_file_system
+            .expect_write_file()
+            // 書き込み内容が期待通りであること
+            .withf(|_, contents| {
+                let contents = std::str::from_utf8(contents).unwrap();
+                let config = serde_json::from_str::<ManualManagementResources>(contents);
+                if config.is_ok() {
+                    return config.unwrap().resources.len() == 0;
+                } else {
+                    return false;
+                }
+            })
+            .returning(|_, _| Ok(()));
+
+        let initial_data = ManualManagementResources {
+            resources: HashMap::new(),
+        };
+        mock_file_system.expect_read_file().returning(move |_| {
+            let initial_json = serde_json::to_string(&initial_data).unwrap();
+            Ok(initial_json)
+        });
+
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let workspace_dir = "/test/workspace";
+
+        // ######### 実行 #########
+        let result = get_manual_management_resources(&app_context, workspace_dir).await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let resources = result.unwrap();
+        assert_eq!(resources.resources.len(), 0);
+    }
+
+    #[tokio::test]
+    async fn test_get_manual_management_resources_reads_existing_file() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        mock_file_system.expect_path_exists().return_const(true);
+
+        mock_file_system.expect_read_file().returning(|_| {
+            let existing_data = ManualManagementResources {
+                resources: {
+                    let mut map = HashMap::new();
+                    map.insert(
+                        "TestResource".to_string(),
+                        ManualManagementResource {
+                            description: "Test Description".to_string(),
+                            r#type: "AWS::S3::Bucket".to_string(),
+                            properties: HashMap::new(),
+                        },
+                    );
+                    map
+                },
+            };
+            let existing_json = serde_json::to_string(&existing_data).unwrap();
+            Ok(existing_json)
+        });
+
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let workspace_dir = "/test/workspace";
+
+        // ######### 実行 #########
+        let result = get_manual_management_resources(&app_context, workspace_dir).await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let resources = result.unwrap();
+        assert_eq!(resources.resources.len(), 1);
+        assert!(resources.resources.contains_key("TestResource"));
+        assert_eq!(
+            resources.resources.get("TestResource").unwrap().description,
+            "Test Description"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_get_manual_management_resources_handles_invalid_json() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        mock_file_system.expect_path_exists().return_const(true);
+
+        mock_file_system
+            .expect_read_file()
+            .returning(|_| Ok("{ invalid json }".to_string()));
+
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let workspace_dir = "/test/workspace";
+
+        // ######### 実行 #########
+        let result = get_manual_management_resources(&app_context, workspace_dir).await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ManualManagementResourceError::Json(_)
+        ));
+    }
+
+    #[tokio::test]
+    async fn test_get_manual_management_resources_handles_io_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        mock_file_system.expect_path_exists().return_const(true);
+
+        mock_file_system.expect_read_file().returning(|_| {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "File not found",
+            ))
+        });
+
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let workspace_dir = "/test/workspace";
+
+        // ######### 実行 #########
+        let result = get_manual_management_resources(&app_context, workspace_dir).await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ManualManagementResourceError::Io(_)
+        ));
+    }
 }
 
 #[cfg(test)]
