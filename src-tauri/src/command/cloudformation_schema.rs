@@ -308,6 +308,28 @@ mod get_cloudformation_schema_tests {
         // get_cloudformation_schemaの戻り値がErrであること
         assert!(result.is_err());
     }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_aws_service_list_tests {
+    use super::*;
+    use std::{
+        io::{Error, ErrorKind},
+        path::PathBuf,
+        str::FromStr,
+        sync::Arc,
+    };
+
+    use crate::{
+        api::{
+            cloudformation::schema::DlSchemaError,
+            context::cloudformation_schema_trait::MockCloudformationSchemaTrait,
+        },
+        utils::context::{
+            app_context::AppContext, file::MockFileSystem, http_client::MockHttpClient,
+        },
+    };
 
     /// aws service listを取得できることを確認
     #[tokio::test]
