@@ -738,6 +738,98 @@ mod get_manual_management_resources_tests {
 #[coverage(off)]
 mod save_manual_management_resources_tests {
     use super::*;
+    use crate::utils::context::file::MockFileSystem;
+    use crate::utils::context::http_client::MockHttpClient;
+    use std::sync::Arc;
+
+    #[tokio::test]
+    async fn test_save_manual_management_resources_succeeds() {
+        // ######### 準備 #########
+
+        let workspace_dir = "/test/workspace";
+        let manual_management_resources = ManualManagementResources {
+            resources: HashMap::new(),
+        };
+
+        let mut mock_file_system = MockFileSystem::new();
+
+        mock_file_system
+            .expect_write_file()
+            .withf(move |path, contents| {
+                let expected_path =
+                    PathBuf::from(workspace_dir).join(MANUAL_MANAGEMENT_RESOURCES_FILE);
+                if path != &expected_path {
+                    return false;
+                }
+                let contents_str = std::str::from_utf8(contents).unwrap();
+                let parsed: Result<ManualManagementResources, _> =
+                    serde_json::from_str(contents_str);
+                if parsed.is_err() {
+                    return false;
+                }
+                let parsed = parsed.unwrap();
+                parsed.resources.len() == 0
+            })
+            .returning(|_, _| Ok(()));
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = save_manual_management_resources(
+            &app_context,
+            workspace_dir,
+            &manual_management_resources,
+        );
+
+        // ######### 検証 #########
+        assert!(result.await.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_save_manual_management_resources_handles_write_error() {
+        // ######### 準備 #########
+
+        let workspace_dir = "/test/workspace";
+        let manual_management_resources = ManualManagementResources {
+            resources: HashMap::new(),
+        };
+
+        let mut mock_file_system = MockFileSystem::new();
+
+        mock_file_system
+            .expect_write_file()
+            .returning(|_, _| {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::PermissionDenied,
+                    "Permission denied",
+                ))
+            });
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = save_manual_management_resources(
+            &app_context,
+            workspace_dir,
+            &manual_management_resources,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ManualManagementResourceError::Io(_)
+        ));
+    }
 }
 
 #[cfg(test)]
