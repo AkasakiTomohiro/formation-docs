@@ -1,5 +1,6 @@
 use super::super::super::utils::AppError;
 use crate::utils::context::app_context::AppContext;
+use crate::utils::context::http_client;
 use crate::{config::app_config::APP_CONFIG_DIRECTORY_NAME, utils::context::file::FileSystem};
 use regex::Regex;
 use serde_json::Value;
@@ -16,8 +17,8 @@ use zip::ZipArchive;
 pub enum DlSchemaError {
     #[error("app error: {0}")]
     App(#[from] AppError),
-    #[error("reqwest error: {0}")]
-    Reqwest(#[from] reqwest::Error),
+    #[error("http client error: {0}")]
+    Reqwest(#[from] http_client::HttpClientError),
     #[error("io error: {0}")]
     Io(#[from] tokio::io::Error),
     #[error("zip error: {0:?}")]
@@ -118,7 +119,6 @@ pub async fn dl_resource_provider(ctx: &AppContext, region: &str) -> Result<(), 
 
     // Zipファイルをダウンロード
     let response = ctx.http_client.get(url).await?;
-    let bytes = response.bytes().await?;
 
     let output_dir = get_resource_provider_save_dir(ctx.file_system.clone(), region)?;
     let output_dir_tmp = output_dir.clone();
@@ -128,7 +128,7 @@ pub async fn dl_resource_provider(ctx: &AppContext, region: &str) -> Result<(), 
     // 非同期処理内で同期処理を行うため（ZipArchiveが同期処理）、spawn_blockingで別スレッドに処理を移す
     // spawn_blocking内では非同期関数は使えないため、tokioではなくstdクレートを使用
     tokio::task::spawn_blocking(move || {
-        let content = Cursor::new(bytes);
+        let content = Cursor::new(response);
         let mut archive = ZipArchive::new(content)?;
         for i in 0..archive.len() {
             let mut file = archive.by_index(i)?;
@@ -151,6 +151,67 @@ pub async fn dl_resource_provider(ctx: &AppContext, region: &str) -> Result<(), 
 
     generate_summary_service_list(&ctx, output_dir).await?;
     return Ok(());
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_resource_provider_save_path_tests {
+    use std::sync::Arc;
+
+    use crate::utils::context::{file::MockFileSystem, http_client::RealHttpClient};
+
+    use super::*;
+
+    /// resource provider を保存するファイルパスの作成に成功すること
+    #[test]
+    fn success() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        let config_local_dir = PathBuf::from("config_local_dir");
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(config_local_dir.clone()));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(RealHttpClient {}),
+        };
+
+        // ######### 実行 #########
+        let result = get_resource_provider_save_path(app_context.file_system, "us-west-1");
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        assert_eq!(
+            result.unwrap(),
+            config_local_dir
+                .join(APP_CONFIG_DIRECTORY_NAME)
+                .join("CloudformationSchema-us-west-1")
+        );
+    }
+
+    /// config_local_dir に失敗したとき、エラーを返すこと
+    #[test]
+    fn error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(None);
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(RealHttpClient {}),
+        };
+
+        // ######### 実行 #########
+        let result = get_resource_provider_save_path(app_context.file_system, "us-west-1");
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
 }
 
 #[cfg(test)]
@@ -315,7 +376,7 @@ mod generate_summary_service_list_tests {
     /// to_strは有効なUTF-8文字列でない場合にNoneを返すが、PathBufから無効なUTF-8ファイル名を作成するのは困難なため、このテストは実装しない
     /// 実際は無効なUTF-8ファイル名が存在する可能性があるが、その場合は正規表現にマッチしないため影響はない
     #[tokio::test]
-    #[ignore] // テスト不可能
+    #[ignore]
     async fn file_name_to_str_none() {
         // 実装不可能
     }
@@ -705,5 +766,772 @@ mod generate_summary_service_list_tests {
 
         // ######### 検証 #########
         assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_resource_provider_save_dir_tests {
+    use std::sync::Arc;
+
+    use crate::utils::context::{file::MockFileSystem, http_client::RealHttpClient};
+
+    use super::*;
+
+    /// resource provider を保存するディレクトリ名の作成に成功すること
+    #[test]
+    fn success() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        let config_local_dir = PathBuf::from("config_local_dir");
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(config_local_dir.clone()));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(RealHttpClient {}),
+        };
+
+        // ######### 実行 #########
+        let result = get_resource_provider_save_dir(app_context.file_system, "us-west-1");
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        assert_eq!(
+            result.unwrap(),
+            config_local_dir
+                .join(APP_CONFIG_DIRECTORY_NAME)
+                .join("CloudformationSchema")
+                .join("us-west-1")
+        );
+    }
+
+    /// config_local_dir に失敗したとき、エラーを返すこと
+    #[test]
+    fn error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(None);
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(RealHttpClient {}),
+        };
+
+        // ######### 実行 #########
+        let result = get_resource_provider_save_dir(app_context.file_system, "us-west-1");
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod dl_resource_provider_tests {
+    use crate::utils::context::{
+        file::MockFileSystem,
+        http_client::{HttpClientError, MockHttpClient},
+    };
+    use bytes::Bytes;
+    use std::{fs::File, io::Write};
+    use zip::write::SimpleFileOptions;
+
+    use super::*;
+
+    /// テスト用のZIPバイトデータを作成
+    fn create_test_zip_bytes() -> Vec<u8> {
+        let mut buffer = Vec::new();
+        let mut zip = zip::ZipWriter::new(std::io::Cursor::new(&mut buffer));
+
+        let options =
+            SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
+
+        // テスト用のスキーマファイルを追加
+        zip.start_file("aws-s3-bucket.json", options).unwrap();
+        zip.write_all(br#"{"typeName":"AWS::S3::Bucket"}"#).unwrap();
+
+        zip.start_file("aws-lambda-function.json", options).unwrap();
+        zip.write_all(br#"{"typeName":"AWS::Lambda::Function"}"#)
+            .unwrap();
+
+        zip.start_file("aws-ec2-instance.json", options).unwrap();
+        zip.write_all(br#"{"typeName":"AWS::EC2::Instance"}"#)
+            .unwrap();
+
+        zip.finish().unwrap();
+        return buffer;
+    }
+
+    /// テスト用のZIPバイトデータを作成
+    fn create_test_zip_bytes_with_dir() -> Vec<u8> {
+        let mut buffer = Vec::new();
+        let mut zip = zip::ZipWriter::new(std::io::Cursor::new(&mut buffer));
+
+        let options =
+            SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
+
+        // ディレクトリエントリを追加
+        zip.add_directory("schemas/", options).unwrap();
+
+        // テスト用のスキーマファイルを追加
+        zip.start_file("schemas/aws-s3-bucket.json", options)
+            .unwrap();
+        zip.write_all(br#"{"typeName":"AWS::S3::Bucket"}"#).unwrap();
+
+        zip.start_file("schemas/aws-lambda-function.json", options)
+            .unwrap();
+        zip.write_all(br#"{"typeName":"AWS::Lambda::Function"}"#)
+            .unwrap();
+
+        zip.start_file("schemas/aws-ec2-instance.json", options)
+            .unwrap();
+        zip.write_all(br#"{"typeName":"AWS::EC2::Instance"}"#)
+            .unwrap();
+
+        zip.finish().unwrap();
+        return buffer;
+    }
+
+    /// resource provider の1回目のダウンロードと展開に成功すること
+    #[tokio::test]
+    async fn success_first() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mut mock_http_client = MockHttpClient::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from("config_local_dir")));
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_file_system.expect_remove_file().times(0); // 呼び出しなし
+
+        let zip_bytes = create_test_zip_bytes();
+        mock_http_client
+            .expect_get()
+            .returning(move |_| Ok(Bytes::from(zip_bytes.clone())));
+
+        mock_file_system
+            .expect_create_dir_all_sync()
+            .returning(|_| Ok(()));
+
+        mock_file_system
+            .expect_touch_and_open_file()
+            .returning(|_| Ok(File::create(std::env::temp_dir().join("temp_file")).unwrap()));
+
+        mock_file_system
+            .expect_copy_file_stream()
+            .returning(|_, _| Ok(100));
+
+        // generate_summary_service_list内で呼び出される関数のモック
+
+        mock_file_system.expect_read_dir().returning(|_| {
+            Ok(vec![
+                PathBuf::from("aws-s3-bucket.json"),
+                PathBuf::from("aws-lambda-function.json"),
+            ])
+        });
+
+        mock_file_system.expect_read_file().returning(|path| {
+            let file_name = path.file_name().unwrap().to_str().unwrap();
+            match file_name {
+                "aws-s3-bucket.json" => Ok(r#"{ "typeName": "AWS::S3::Bucket" }"#.to_string()),
+                "aws-lambda-function.json" => {
+                    Ok(r#"{ "typeName": "AWS::Lambda::Function" }"#.to_string())
+                }
+                _ => panic!("Unexpected file: {}", file_name),
+            }
+        });
+
+        mock_file_system
+            .expect_write_file()
+            .returning(|_, _| Ok(()));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+    }
+
+    /// resource provider の2回目以降のダウンロードと展開に成功すること
+    #[tokio::test]
+    async fn success_second_and_later() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mut mock_http_client = MockHttpClient::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from("config_local_dir")));
+
+        mock_file_system.expect_path_exists().return_const(true);
+
+        mock_file_system
+            .expect_remove_file()
+            .times(1)
+            .returning(|_| Ok(()));
+
+        let zip_bytes = create_test_zip_bytes();
+        mock_http_client
+            .expect_get()
+            .returning(move |_| Ok(Bytes::from(zip_bytes.clone())));
+
+        mock_file_system
+            .expect_create_dir_all_sync()
+            .returning(|_| Ok(()));
+
+        mock_file_system
+            .expect_touch_and_open_file()
+            .returning(|_| Ok(File::create(std::env::temp_dir().join("temp_file")).unwrap()));
+
+        mock_file_system
+            .expect_copy_file_stream()
+            .returning(|_, _| Ok(100));
+
+        // generate_summary_service_list内で呼び出される関数のモック
+
+        mock_file_system.expect_read_dir().returning(|_| {
+            Ok(vec![
+                PathBuf::from("aws-s3-bucket.json"),
+                PathBuf::from("aws-lambda-function.json"),
+            ])
+        });
+
+        mock_file_system.expect_read_file().returning(|path| {
+            let file_name = path.file_name().unwrap().to_str().unwrap();
+            match file_name {
+                "aws-s3-bucket.json" => Ok(r#"{ "typeName": "AWS::S3::Bucket" }"#.to_string()),
+                "aws-lambda-function.json" => {
+                    Ok(r#"{ "typeName": "AWS::Lambda::Function" }"#.to_string())
+                }
+                _ => panic!("Unexpected file: {}", file_name),
+            }
+        });
+
+        mock_file_system
+            .expect_write_file()
+            .returning(|_, _| Ok(()));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+    }
+
+    /// Zipファイルにディレクトリが含まれる場合、resource provider のダウンロードと展開に成功すること
+    #[tokio::test]
+    async fn success_with_dir() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mut mock_http_client = MockHttpClient::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from("config_local_dir")));
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_file_system.expect_remove_file().times(0); // 呼び出しなし
+
+        let zip_bytes = create_test_zip_bytes_with_dir();
+        mock_http_client
+            .expect_get()
+            .returning(move |_| Ok(Bytes::from(zip_bytes.clone())));
+
+        mock_file_system
+            .expect_create_dir_all_sync()
+            .returning(|_| Ok(()));
+
+        mock_file_system
+            .expect_touch_and_open_file()
+            .returning(|_| Ok(File::create(std::env::temp_dir().join("temp_file")).unwrap()));
+
+        mock_file_system
+            .expect_copy_file_stream()
+            .returning(|_, _| Ok(100));
+
+        // generate_summary_service_list内で呼び出される関数のモック
+
+        mock_file_system.expect_read_dir().returning(|_| {
+            Ok(vec![
+                PathBuf::from("aws-s3-bucket.json"),
+                PathBuf::from("aws-lambda-function.json"),
+            ])
+        });
+
+        mock_file_system.expect_read_file().returning(|path| {
+            let file_name = path.file_name().unwrap().to_str().unwrap();
+            match file_name {
+                "aws-s3-bucket.json" => Ok(r#"{ "typeName": "AWS::S3::Bucket" }"#.to_string()),
+                "aws-lambda-function.json" => {
+                    Ok(r#"{ "typeName": "AWS::Lambda::Function" }"#.to_string())
+                }
+                _ => panic!("Unexpected file: {}", file_name),
+            }
+        });
+
+        mock_file_system
+            .expect_write_file()
+            .returning(|_, _| Ok(()));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+    }
+
+    /// get_resource_provider_save_path に失敗したとき、エラーを返すこと
+    #[tokio::test]
+    async fn get_resource_provider_save_path_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(None);
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(MockHttpClient::new()),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// remove_file に失敗したとき、エラーを返すこと
+    #[tokio::test]
+    async fn remove_file_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from("config_local_dir")));
+
+        mock_file_system.expect_path_exists().return_const(true);
+
+        mock_file_system
+            .expect_remove_file()
+            .times(1)
+            .returning(|_| {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "remove_file error",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(MockHttpClient::new()),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// resource provider のZipファイルダウンロードに失敗したとき、エラーを返すこと
+    #[tokio::test]
+    async fn http_client_get_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mut mock_http_client = MockHttpClient::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from("config_local_dir")));
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_http_client.expect_get().returning(|_| {
+            Err(HttpClientError::Reqwest(
+                "http client get error".to_string(),
+            ))
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// get_resource_provider_save_dir に失敗したとき、エラーを返すこと
+    #[tokio::test]
+    async fn get_resource_provider_save_dir_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mut mock_http_client = MockHttpClient::new();
+
+        let mut count = 0;
+        mock_file_system
+            .expect_config_local_dir()
+            .returning(move || {
+                count += 1;
+                if count < 2 {
+                    Some(PathBuf::from("config_local_dir"))
+                } else {
+                    None
+                }
+            });
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_file_system.expect_remove_file().times(0);
+
+        let zip_bytes = create_test_zip_bytes();
+        mock_http_client
+            .expect_get()
+            .times(1)
+            .returning(move |_| Ok(Bytes::from(zip_bytes.clone())));
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// ZipArchive::new に失敗したとき、エラーを返すこと
+    #[tokio::test]
+    async fn zip_archive_new_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mut mock_http_client = MockHttpClient::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from("config_local_dir")));
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_file_system.expect_remove_file().times(0);
+
+        // 不正なZIPデータ（ZIPマジックナンバー 0x50 0x4B で始まっていない）
+        let invalid_zip_bytes = vec![0u8, 1u8, 2u8, 3u8, 4u8];
+        mock_http_client
+            .expect_get()
+            .returning(move |_| Ok(Bytes::from(invalid_zip_bytes.clone())));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// ZipArchive.by_index に失敗したとき、エラーを返すこと
+    ///
+    /// by_index がエラーを返すのは以下の場合
+    /// 1. インデックスが範囲外（本コードでは起こりえない）
+    /// 2. ZIPファイルが破損（通常は ZipArchive::new で検出される）
+    /// 3. 暗号化されたエントリ（テスト用ZIPの作成が困難）
+    /// 4. 未サポートの圧縮方式（テスト用ZIPの作成が困難）
+    ///
+    /// これらのケースをテストすることは困難なため、このテストは実装しない
+    #[tokio::test]
+    #[ignore]
+    async fn zip_archive_by_index_err() {
+        // 実装不可能
+    }
+
+    /// Zipファイルにディレクトリが含まれ create_dir_all_sync に失敗したとき、エラーを返すこと
+    #[tokio::test]
+    async fn create_dir_all_sync_err_with_dir() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mut mock_http_client = MockHttpClient::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from("config_local_dir")));
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_file_system.expect_remove_file().times(0);
+
+        let zip_bytes = create_test_zip_bytes_with_dir();
+        mock_http_client
+            .expect_get()
+            .returning(move |_| Ok(Bytes::from(zip_bytes.clone())));
+
+        mock_file_system
+            .expect_create_dir_all_sync()
+            .returning(|_| {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "create_dir_all_sync error",
+                ))
+            });
+
+        mock_file_system
+            .expect_touch_and_open_file()
+            .returning(|_| Ok(File::create(std::env::temp_dir().join("temp_file")).unwrap()));
+
+        mock_file_system
+            .expect_copy_file_stream()
+            .returning(|_, _| Ok(100));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// Zipファイルにディレクトリが含まれず create_dir_all_sync に失敗したとき、エラーを返すこと
+    #[tokio::test]
+    async fn create_dir_all_sync_err_without_dir() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mut mock_http_client = MockHttpClient::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from("config_local_dir")));
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_file_system.expect_remove_file().times(0); // 呼び出しなし
+
+        let zip_bytes = create_test_zip_bytes();
+        mock_http_client
+            .expect_get()
+            .returning(move |_| Ok(Bytes::from(zip_bytes.clone())));
+
+        mock_file_system
+            .expect_create_dir_all_sync()
+            .returning(|_| {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "create_dir_all_sync error",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// touch_and_open_file に失敗したとき、エラーを返すこと
+    #[tokio::test]
+    async fn touch_and_open_file_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mut mock_http_client = MockHttpClient::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from("config_local_dir")));
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_file_system.expect_remove_file().times(0); // 呼び出しなし
+
+        let zip_bytes = create_test_zip_bytes();
+        mock_http_client
+            .expect_get()
+            .returning(move |_| Ok(Bytes::from(zip_bytes.clone())));
+
+        mock_file_system
+            .expect_create_dir_all_sync()
+            .returning(|_| Ok(()));
+
+        mock_file_system
+            .expect_touch_and_open_file()
+            .returning(|_| {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "remove_file error",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// copy_file_stream に失敗したとき、エラーを返すこと
+    #[tokio::test]
+    async fn copy_file_stream_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mut mock_http_client = MockHttpClient::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from("config_local_dir")));
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_file_system.expect_remove_file().times(0); // 呼び出しなし
+
+        let zip_bytes = create_test_zip_bytes();
+        mock_http_client
+            .expect_get()
+            .returning(move |_| Ok(Bytes::from(zip_bytes.clone())));
+
+        mock_file_system
+            .expect_create_dir_all_sync()
+            .returning(|_| Ok(()));
+
+        mock_file_system
+            .expect_touch_and_open_file()
+            .returning(|_| Ok(File::create(std::env::temp_dir().join("temp_file")).unwrap()));
+
+        mock_file_system
+            .expect_copy_file_stream()
+            .returning(|_, _| {
+                Err(std::io::Error::new(
+                    std::io::ErrorKind::Other,
+                    "remove_file error",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// out_path.parent() が None を返したとき、親ディレクトリの作成をスキップすること
+    ///
+    /// 本コードでは常に親ディレクトリが存在し None になることはないため、テストは実装しない
+    #[tokio::test]
+    #[ignore]
+    async fn out_path_parent_none() {
+        // 実装不要（起こりえないケース）
+    }
+
+    /// generate_summary_service_list に失敗したとき、エラーを返すこと
+    #[tokio::test]
+    async fn generate_summary_service_list_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mut mock_http_client = MockHttpClient::new();
+
+        mock_file_system
+            .expect_config_local_dir()
+            .return_const(Some(PathBuf::from("config_local_dir")));
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_file_system.expect_remove_file().times(0); // 呼び出しなし
+
+        let zip_bytes = create_test_zip_bytes();
+        mock_http_client
+            .expect_get()
+            .returning(move |_| Ok(Bytes::from(zip_bytes.clone())));
+
+        mock_file_system
+            .expect_create_dir_all_sync()
+            .returning(|_| Ok(()));
+
+        mock_file_system
+            .expect_touch_and_open_file()
+            .returning(|_| Ok(File::create(std::env::temp_dir().join("temp_file")).unwrap()));
+
+        mock_file_system
+            .expect_copy_file_stream()
+            .returning(|_, _| Ok(100));
+
+        // generate_summary_service_list内で呼び出される関数のモック
+        mock_file_system.expect_read_dir().returning(|_| {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "read_dir error",
+            ))
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = dl_resource_provider(&app_context, "us-west-1").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// spawn_blocking に失敗したとき、エラーを返すこと
+    ///
+    /// spawn_blocking はクロージャ内でパニックが発生した場合にエラーを返すが、
+    /// 本コードではパニックが発生するケースはないため、このテストは実装しない
+    #[tokio::test]
+    #[ignore]
+    async fn spawn_blocking_err() {
+        // 実装不可能
     }
 }
