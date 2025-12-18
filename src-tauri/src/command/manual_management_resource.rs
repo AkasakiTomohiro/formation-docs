@@ -1129,7 +1129,116 @@ mod get_manual_resource_properties_tests {
 #[cfg(test)]
 #[coverage(off)]
 mod get_manual_resource_reasons_tests {
+    use std::sync::Arc;
+
+    use crate::utils::context::{file::MockFileSystem, http_client::MockHttpClient};
+
     use super::*;
+
+    /// 指定されたリソースIDのreasonsが存在する場合、reasonsを返すこと
+    #[tokio::test]
+    async fn success_reasons_exist() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        mock_file_system.expect_path_exists().return_const(true);
+        mock_file_system.expect_read_file().returning(|_| {
+            Ok(r#"{ 
+                "reasons": { 
+                    "TestResource": { 
+                        "Reason1": "Old Reason"
+                    }
+                } 
+            }"#
+            .to_string())
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let workspace_directory = "/test/workspace";
+        let resource_id = "TestResource";
+
+        // ######### 実行 #########
+        let result =
+            get_manual_resource_reasons(&app_context, workspace_directory, resource_id).await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let reasons = result.unwrap();
+        assert_eq!(reasons, serde_json::json!({ "Reason1": "Old Reason" }));
+    }
+
+    /// 指定されたリソースIDのreasonsが存在しない場合、空のオブジェクトを返すこと
+    #[tokio::test]
+    async fn success_reasons_not_exist() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        mock_file_system.expect_path_exists().return_const(true);
+        mock_file_system.expect_read_file().returning(|_| {
+            Ok(r#"{ 
+                "reasons": { 
+                    "TestResource": { 
+                        "Reason1": "Old Reason"
+                    }
+                } 
+            }"#
+            .to_string())
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let workspace_directory = "/test/workspace";
+        let resource_id = "NonExistentResource";
+
+        // ######### 実行 #########
+        let result =
+            get_manual_resource_reasons(&app_context, workspace_directory, resource_id).await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let reasons = result.unwrap();
+        assert_eq!(reasons, Value::Object(serde_json::Map::new()));
+    }
+
+    /// load_manual_resource_meta に失敗し、エラーを返すこと
+    #[tokio::test]
+    async fn load_manual_resource_meta_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        mock_file_system.expect_path_exists().return_const(true);
+        mock_file_system.expect_read_file().returning(|_| {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "read_file error",
+            ))
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let workspace_directory = "/test/workspace";
+        let resource_id = "TestResource";
+
+        // ######### 実行 #########
+        let result =
+            get_manual_resource_reasons(&app_context, workspace_directory, resource_id).await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
 }
 
 #[cfg(test)]
