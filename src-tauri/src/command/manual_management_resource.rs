@@ -851,13 +851,279 @@ mod load_manual_management_resource_summary_tests {
 #[cfg(test)]
 #[coverage(off)]
 mod load_manual_resource_meta_tests {
+    use std::sync::Arc;
+
+    use crate::utils::context::{file::MockFileSystem, http_client::MockHttpClient};
+
     use super::*;
+
+    /// 既にファイルが存在するとき、手動管理リソースのmetaファイルを読み込みできること
+    #[tokio::test]
+    async fn file_exists() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        mock_file_system.expect_path_exists().return_const(true);
+        mock_file_system.expect_read_file().returning(|_| {
+            Ok(r#"{
+                "reasons": {
+                    "TestResource": {
+                        "Reason1": "test reason"
+                    }
+                }
+            }"#
+            .to_string())
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = load_manual_resource_meta(&app_context, "/test/workspace").await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let meta = result.unwrap();
+        let reasons = meta.reasons.get("TestResource").unwrap();
+        assert_eq!(reasons.get("Reason1").unwrap(), "test reason");
+    }
+
+    /// ファイルが存在しないとき、空のmetaファイルを作成してから読み込みできること
+    #[tokio::test]
+    async fn file_not_exists() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        mock_file_system.expect_path_exists().return_const(false);
+        mock_file_system
+            .expect_write_file()
+            .returning(|_, _| Ok(()));
+
+        mock_file_system
+            .expect_read_file()
+            .returning(|_| Ok(r#"{ "reasons": {} }"#.to_string()));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = load_manual_resource_meta(&app_context, "/test/workspace").await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let meta = result.unwrap();
+        assert_eq!(meta.reasons.len(), 0);
+    }
+
+    /// write_file に失敗し、エラーを返すこと
+    #[tokio::test]
+    async fn write_file_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        mock_file_system.expect_path_exists().return_const(false);
+        mock_file_system.expect_write_file().returning(|_, _| {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "write_file error",
+            ))
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = load_manual_resource_meta(&app_context, "/test/workspace").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// read_file に失敗し、エラーを返すこと
+    #[tokio::test]
+    async fn read_file_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        mock_file_system.expect_path_exists().return_const(true);
+        mock_file_system.expect_read_file().returning(|_| {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "read_file error",
+            ))
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = load_manual_resource_meta(&app_context, "/test/workspace").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// metaファイルの形式が不正なとき、serde_json::from_str に失敗しエラーを返すこと
+    #[tokio::test]
+    async fn from_str_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        mock_file_system.expect_path_exists().return_const(true);
+        mock_file_system.expect_read_file().returning(|_| {
+            Ok(r#"{
+                "invalid": {
+                    "TestResource": {
+                        "Reason1": "test reason"
+                    }
+                }
+            }"#
+            .to_string())
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = load_manual_resource_meta(&app_context, "/test/workspace").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
 }
 
 #[cfg(test)]
 #[coverage(off)]
 mod get_manual_resource_properties_tests {
+    use std::sync::Arc;
+
+    use crate::utils::context::{file::MockFileSystem, http_client::MockHttpClient};
+
     use super::*;
+
+    /// 手動作成リソースのプロパティを取得できること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        // get_manual_management_resources のモック
+        mock_file_system.expect_path_exists().return_const(true);
+        mock_file_system.expect_read_file().returning(|_| {
+            Ok(r#"{ 
+                "Resources": { 
+                    "TestResource": { 
+                        "Description": "Test Description", 
+                        "Type": "AWS::S3::Bucket", 
+                        "Properties": { 
+                            "BucketName": "test-bucket" 
+                        } 
+                    } 
+                } 
+            }"#
+            .to_string())
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result =
+            get_manual_resource_properties(&app_context, "/test/workspace", "TestResource").await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let properties = result.unwrap();
+        assert_eq!(properties.get("BucketName").unwrap(), "test-bucket");
+    }
+
+    /// get_manual_management_resources に失敗し、エラーを返すこと
+    #[tokio::test]
+    async fn get_manual_management_resources_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        // get_manual_management_resources のモック
+        mock_file_system.expect_path_exists().return_const(true);
+        mock_file_system.expect_read_file().returning(|_| {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "read_file error",
+            ))
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result =
+            get_manual_resource_properties(&app_context, "/test/workspace", "TestResource").await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// 指定したリソースIDが存在しない場合、エラーを返すこと
+    #[tokio::test]
+    async fn resource_id_not_found() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        // get_manual_management_resources のモック
+        mock_file_system.expect_path_exists().return_const(true);
+        mock_file_system.expect_read_file().returning(|_| {
+            Ok(r#"{ 
+                "Resources": { 
+                    "TestResource": { 
+                        "Description": "Test Description", 
+                        "Type": "AWS::S3::Bucket", 
+                        "Properties": { 
+                            "BucketName": "test-bucket" 
+                        } 
+                    } 
+                } 
+            }"#
+            .to_string())
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        // ######### 実行 #########
+        let result = get_manual_resource_properties(
+            &app_context,
+            "/test/workspace",
+            "NonExistentResourceID",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
 }
 
 #[cfg(test)]
