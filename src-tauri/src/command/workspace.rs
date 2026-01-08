@@ -261,3 +261,191 @@ pub async fn update_workspace_details_command(
         Err(_) => Err(CommandResult::failed("Failed to update Workspace")),
     }
 }
+
+#[cfg(test)]
+#[coverage(off)]
+mod create_workspace_tests {
+    use std::sync::Arc;
+
+    use crate::{
+        command::{
+            app_config::AppConfigCommandError,
+            context::{
+                app_config_command_trait::MockAppConfigCommandTrait,
+                stack_command_trait::MockStackCommandTrait,
+            },
+        },
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+
+    use super::*;
+
+    /// ワークスペースの作成に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "Test Workspace".to_string(),
+                description: "This is a test workspace.".to_string(),
+                stacks: HashMap::new(),
+            })
+        });
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        let mut mock_app_config_command = MockAppConfigCommandTrait::new();
+        mock_app_config_command
+            .expect_add_workspace_to_app_config()
+            .returning(|_, _, _| Ok("workspace_id".to_string()));
+        let mock_stack_command = MockStackCommandTrait::new();
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config_command),
+            stack: Arc::new(mock_stack_command),
+        };
+
+        // ######### 実行 #########
+        let result = create_workspace(
+            &app_context,
+            &config_context,
+            &command_context,
+            "test_directory",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let workspace_info = result.unwrap();
+        assert_eq!(workspace_info.id, "workspace_id");
+        assert_eq!(workspace_info.directory, "test_directory");
+        assert_eq!(workspace_info.name, "Test Workspace");
+        assert_eq!(workspace_info.description, "This is a test workspace.");
+        assert!(workspace_info.stacks.is_empty());
+    }
+
+    /// workspace_config の読み込みに失敗する場合、Err を返すこと
+    #[tokio::test]
+    async fn fail_read_workspace_config() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            Err(WorkspaceConfigError::Io(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "Failed to read workspace config",
+            )))
+        });
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        let mock_app_config_command = MockAppConfigCommandTrait::new();
+        let mock_stack_command = MockStackCommandTrait::new();
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config_command),
+            stack: Arc::new(mock_stack_command),
+        };
+
+        // ######### 実行 #########
+        let result = create_workspace(
+            &app_context,
+            &config_context,
+            &command_context,
+            "test_directory",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// app_config へのワークスペース追加に失敗する場合、Err を返すこと
+    #[tokio::test]
+    async fn fail_add_workspace_to_app_config() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "Test Workspace".to_string(),
+                description: "This is a test workspace.".to_string(),
+                stacks: HashMap::new(),
+            })
+        });
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        let mut mock_app_config_command = MockAppConfigCommandTrait::new();
+        mock_app_config_command
+            .expect_add_workspace_to_app_config()
+            .returning(|_, _, _| {
+                Err(AppConfigCommandError::AppConfig(AppConfigError::Io(
+                    std::io::Error::new(
+                        std::io::ErrorKind::Other,
+                        "Failed to add workspace to app config",
+                    ),
+                )))
+            });
+        let mock_stack_command = MockStackCommandTrait::new();
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config_command),
+            stack: Arc::new(mock_stack_command),
+        };
+
+        // ######### 実行 #########
+        let result = create_workspace(
+            &app_context,
+            &config_context,
+            &command_context,
+            "test_directory",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+}
