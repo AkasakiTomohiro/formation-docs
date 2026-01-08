@@ -1,3 +1,4 @@
+use crate::command::context::command_context::CommandContext;
 use crate::config::app_config::AppConfigError;
 use crate::config::context::config_context::ConfigContext;
 use crate::config::workspace_config::WorkspaceConfigError;
@@ -41,15 +42,17 @@ pub enum WorkspaceCommandError {
 async fn create_workspace(
     app_context: &AppContext,
     config_context: &ConfigContext,
+    command_context: &CommandContext,
     directory: &str,
 ) -> Result<WorkspaceMergeInfo, WorkspaceCommandError> {
     let workspace = config_context
         .workspace_config_io
         .read(app_context.file_system.clone(), directory)
         .await?;
-    let workspace_result =
-        super::app_config::add_workspace_to_app_config(app_context, config_context, directory)
-            .await?;
+    let workspace_result = command_context
+        .app_config
+        .add_workspace_to_app_config(app_context, config_context, directory)
+        .await?;
     return Ok(WorkspaceMergeInfo {
         id: workspace_result,
         directory: directory.to_string(),
@@ -189,9 +192,17 @@ pub async fn open_workspace(
 pub async fn create_workspace_command(
     app_context_state: State<'_, AppContext>,
     config_context_state: State<'_, ConfigContext>,
+    command_context_state: State<'_, CommandContext>,
     directory: &str,
 ) -> Result<CommandResult<WorkspaceMergeInfo>, CommandResult> {
-    match create_workspace(&app_context_state, &config_context_state, directory).await {
+    match create_workspace(
+        &app_context_state,
+        &config_context_state,
+        &command_context_state,
+        directory,
+    )
+    .await
+    {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to create Workspace")),
     }
