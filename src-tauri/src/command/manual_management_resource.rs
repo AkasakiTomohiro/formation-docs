@@ -50,7 +50,7 @@ pub struct ManualManagementMetaUpdate {
 }
 
 #[derive(Debug, Error)]
-enum ManualManagementResourceError {
+pub enum ManualManagementResourceError {
     #[error("app error: {0}")]
     App(#[from] AppError),
     #[error("io error: {0}")]
@@ -68,7 +68,7 @@ enum ManualManagementResourceError {
 /// 対象のJSONファイルが存在しない場合は新規にファイルを作成してから読み込む
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
-async fn get_manual_management_resources(
+pub async fn get_manual_management_resources(
     state: &AppContext,
     workspace_directory: &str,
 ) -> Result<ManualManagementResources, ManualManagementResourceError> {
@@ -104,7 +104,7 @@ async fn get_manual_management_resources(
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 /// - `manual_management_resources` - 保存する手動管理リソースのデータ
-async fn save_manual_management_resources(
+pub async fn save_manual_management_resources(
     state: &AppContext,
     workspace_directory: &str,
     manual_management_resources: &ManualManagementResources,
