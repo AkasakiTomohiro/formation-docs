@@ -1412,7 +1412,268 @@ mod new_manual_management_resource_tests {
 
 #[cfg(test)]
 #[coverage(off)]
-mod get_manual_management_resource_list_tests {}
+mod get_manual_management_resource_list_tests {
+    use std::sync::Arc;
+
+    use crate::{
+        command::context::{
+            app_config_command_trait::MockAppConfigCommandTrait,
+            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
+            manual_management_resource_trait::MockManualManagementResourceTrait,
+            stack_command_trait::MockStackCommandTrait,
+        },
+        utils::context::{
+            app_context::AppContext, file::MockFileSystem, http_client::MockHttpClient,
+        },
+    };
+
+    use super::*;
+
+    /// 指定したサービス名・リソースタイプの手動管理リソース一覧を取得できること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                let mut resources = HashMap::new();
+                let mut properties = HashMap::new();
+                properties.insert("BucketName".to_string(), serde_json::json!("test-bucket"));
+                resources.insert(
+                    "TestBucket".to_string(),
+                    ManualManagementResource {
+                        description: "Test S3 Bucket".to_string(),
+                        r#type: "AWS::S3::Bucket".to_string(),
+                        properties,
+                    },
+                );
+                resources.insert(
+                    "TestFunction".to_string(),
+                    ManualManagementResource {
+                        description: "Test Lambda Function".to_string(),
+                        r#type: "AWS::Lambda::Function".to_string(),
+                        properties: HashMap::new(),
+                    },
+                );
+                Ok(ManualManagementResources { resources })
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = get_manual_management_resource_list(
+            &app_context,
+            &command_context,
+            "/test/workspace",
+            "S3",
+            "Bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let list = result.unwrap();
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].resource_id, "TestBucket");
+        assert_eq!(list[0].r#type, "AWS::S3::Bucket");
+        assert_eq!(list[0].description, "Test S3 Bucket");
+    }
+
+    /// 一致するリソースがない場合、空のベクターを返すこと
+    #[tokio::test]
+    async fn empty_result() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                let mut resources = HashMap::new();
+                resources.insert(
+                    "TestFunction".to_string(),
+                    ManualManagementResource {
+                        description: "Test Lambda Function".to_string(),
+                        r#type: "AWS::Lambda::Function".to_string(),
+                        properties: HashMap::new(),
+                    },
+                );
+                Ok(ManualManagementResources { resources })
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = get_manual_management_resource_list(
+            &app_context,
+            &command_context,
+            "/test/workspace",
+            "S3",
+            "Bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let list = result.unwrap();
+        assert_eq!(list.len(), 0);
+    }
+
+    /// 複数の一致するリソースがある場合、すべて返すこと
+    #[tokio::test]
+    async fn multiple_resources() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                let mut resources = HashMap::new();
+                resources.insert(
+                    "Bucket1".to_string(),
+                    ManualManagementResource {
+                        description: "First Bucket".to_string(),
+                        r#type: "AWS::S3::Bucket".to_string(),
+                        properties: HashMap::new(),
+                    },
+                );
+                resources.insert(
+                    "Bucket2".to_string(),
+                    ManualManagementResource {
+                        description: "Second Bucket".to_string(),
+                        r#type: "AWS::S3::Bucket".to_string(),
+                        properties: HashMap::new(),
+                    },
+                );
+                resources.insert(
+                    "Function1".to_string(),
+                    ManualManagementResource {
+                        description: "Lambda Function".to_string(),
+                        r#type: "AWS::Lambda::Function".to_string(),
+                        properties: HashMap::new(),
+                    },
+                );
+                Ok(ManualManagementResources { resources })
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = get_manual_management_resource_list(
+            &app_context,
+            &command_context,
+            "/test/workspace",
+            "S3",
+            "Bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let list = result.unwrap();
+        assert_eq!(list.len(), 2);
+        // ハッシュマップの順序は保証されないため、いずれかのバケットが含まれていることを確認
+        assert!(list.iter().any(|r| r.resource_id == "Bucket1"));
+        assert!(list.iter().any(|r| r.resource_id == "Bucket2"));
+        assert!(list.iter().all(|r| r.r#type == "AWS::S3::Bucket"));
+    }
+
+    /// get_manual_management_resourcesに失敗した場合、エラーを返すこと
+    #[tokio::test]
+    async fn get_manual_management_resources_err() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                Err(ManualManagementResourceError::Io(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "File not found",
+                )))
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = get_manual_management_resource_list(
+            &app_context,
+            &command_context,
+            "/test/workspace",
+            "S3",
+            "Bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+}
 
 #[cfg(test)]
 #[coverage(off)]
