@@ -874,7 +874,541 @@ mod save_manual_management_resources_tests {
 
 #[cfg(test)]
 #[coverage(off)]
-mod new_manual_management_resource_tests {}
+mod new_manual_management_resource_tests {
+    use std::sync::Arc;
+
+    use crate::{
+        api::context::{
+            api_context::ApiContext, cloudformation_schema_trait::MockCloudformationSchemaTrait,
+        },
+        command::context::{
+            app_config_command_trait::MockAppConfigCommandTrait,
+            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
+            manual_management_resource_trait::MockManualManagementResourceTrait,
+            stack_command_trait::MockStackCommandTrait,
+        },
+        utils::context::{
+            app_context::AppContext, file::MockFileSystem, http_client::MockHttpClient,
+        },
+    };
+
+    use super::{
+        new_manual_management_resource, CommandContext, HashMap, ManualManagementResource,
+        ManualManagementResourceError, ManualManagementResources,
+    };
+
+    /// 新しい手動管理リソースを作成できること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+
+        let api_context = ApiContext {
+            cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mut mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_cloudformation_schema
+            .expect_get_cloudformation_schema()
+            .returning(|_, _, _, _| {
+                Ok(r#"{
+                    "typeName": "AWS::S3::Bucket",
+                    "properties": {}
+                }"#
+                .to_string())
+            });
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                Ok(ManualManagementResources {
+                    resources: HashMap::new(),
+                })
+            });
+
+        mock_manual_management_resource
+            .expect_save_manual_management_resources()
+            .returning(|_, _, _| Ok(()));
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = new_manual_management_resource(
+            &app_context,
+            &api_context,
+            &command_context,
+            "/test/workspace",
+            "TestResource",
+            "Test Description",
+            "s3",
+            "bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+    }
+
+    /// リソーススキーマがオブジェクトでない場合、エラーを返すこと
+    #[tokio::test]
+    async fn resource_schema_not_object() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+
+        let api_context = ApiContext {
+            cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mut mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_cloudformation_schema
+            .expect_get_cloudformation_schema()
+            .returning(|_, _, _, _| Ok(r#"[]"#.to_string())); // 配列を返す
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = new_manual_management_resource(
+            &app_context,
+            &api_context,
+            &command_context,
+            "/test/workspace",
+            "TestResource",
+            "Test Description",
+            "s3",
+            "bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ManualManagementResourceError::App(_)
+        ));
+    }
+
+    /// リソーススキーマにtypeNameが含まれていない場合、エラーを返すこと
+    #[tokio::test]
+    async fn resource_schema_no_type_name() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+
+        let api_context = ApiContext {
+            cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mut mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_cloudformation_schema
+            .expect_get_cloudformation_schema()
+            .returning(|_, _, _, _| {
+                Ok(r#"{
+                    "properties": {}
+                }"#
+                .to_string())
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = new_manual_management_resource(
+            &app_context,
+            &api_context,
+            &command_context,
+            "/test/workspace",
+            "TestResource",
+            "Test Description",
+            "s3",
+            "bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ManualManagementResourceError::App(_)
+        ));
+    }
+
+    /// リソースIDが既に存在する場合、エラーを返すこと
+    #[tokio::test]
+    async fn resource_id_already_exists() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+
+        let api_context = ApiContext {
+            cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mut mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_cloudformation_schema
+            .expect_get_cloudformation_schema()
+            .returning(|_, _, _, _| {
+                Ok(r#"{
+                    "typeName": "AWS::S3::Bucket",
+                    "properties": {}
+                }"#
+                .to_string())
+            });
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                let mut resources = HashMap::new();
+                resources.insert(
+                    "TestResource".to_string(),
+                    ManualManagementResource {
+                        description: "Existing Resource".to_string(),
+                        r#type: "AWS::S3::Bucket".to_string(),
+                        properties: HashMap::new(),
+                    },
+                );
+                Ok(ManualManagementResources { resources })
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = new_manual_management_resource(
+            &app_context,
+            &api_context,
+            &command_context,
+            "/test/workspace",
+            "TestResource",
+            "Test Description",
+            "s3",
+            "bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ManualManagementResourceError::App(_)
+        ));
+    }
+
+    /// get_cloudformation_schemaに失敗した場合、エラーを返すこと
+    #[tokio::test]
+    async fn get_cloudformation_schema_err() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+
+        let api_context = ApiContext {
+            cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mut mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_cloudformation_schema
+            .expect_get_cloudformation_schema()
+            .returning(|_, _, _, _| {
+                Err(
+                    crate::command::cloudformation_schema::CloudFormationSchemaError::Io(
+                        std::io::Error::new(std::io::ErrorKind::NotFound, "Schema not found"),
+                    ),
+                )
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = new_manual_management_resource(
+            &app_context,
+            &api_context,
+            &command_context,
+            "/test/workspace",
+            "TestResource",
+            "Test Description",
+            "s3",
+            "bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// get_manual_management_resourcesに失敗した場合、エラーを返すこと
+    #[tokio::test]
+    async fn get_manual_management_resources_err() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+
+        let api_context = ApiContext {
+            cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mut mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_cloudformation_schema
+            .expect_get_cloudformation_schema()
+            .returning(|_, _, _, _| {
+                Ok(r#"{
+                    "typeName": "AWS::S3::Bucket",
+                    "properties": {}
+                }"#
+                .to_string())
+            });
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                Err(ManualManagementResourceError::Io(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "File not found",
+                )))
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = new_manual_management_resource(
+            &app_context,
+            &api_context,
+            &command_context,
+            "/test/workspace",
+            "TestResource",
+            "Test Description",
+            "s3",
+            "bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// save_manual_management_resourcesに失敗した場合、エラーを返すこと
+    #[tokio::test]
+    async fn save_manual_management_resources_err() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+
+        let api_context = ApiContext {
+            cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mut mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_cloudformation_schema
+            .expect_get_cloudformation_schema()
+            .returning(|_, _, _, _| {
+                Ok(r#"{
+                    "typeName": "AWS::S3::Bucket",
+                    "properties": {}
+                }"#
+                .to_string())
+            });
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                Ok(ManualManagementResources {
+                    resources: HashMap::new(),
+                })
+            });
+
+        mock_manual_management_resource
+            .expect_save_manual_management_resources()
+            .returning(|_, _, _| {
+                Err(ManualManagementResourceError::Io(std::io::Error::new(
+                    std::io::ErrorKind::PermissionDenied,
+                    "Permission denied",
+                )))
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = new_manual_management_resource(
+            &app_context,
+            &api_context,
+            &command_context,
+            "/test/workspace",
+            "TestResource",
+            "Test Description",
+            "s3",
+            "bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// JSONのパースに失敗した場合、エラーを返すこと
+    #[tokio::test]
+    async fn json_parse_err() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+
+        let api_context = ApiContext {
+            cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mut mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_cloudformation_schema
+            .expect_get_cloudformation_schema()
+            .returning(|_, _, _, _| Ok(r#"invalid json"#.to_string()));
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = new_manual_management_resource(
+            &app_context,
+            &api_context,
+            &command_context,
+            "/test/workspace",
+            "TestResource",
+            "Test Description",
+            "s3",
+            "bucket",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ManualManagementResourceError::Json(_)
+        ));
+    }
+}
 
 #[cfg(test)]
 #[coverage(off)]
