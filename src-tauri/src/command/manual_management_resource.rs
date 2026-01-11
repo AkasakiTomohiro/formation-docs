@@ -1064,25 +1064,8 @@ mod get_manual_resource_properties_tests {
     #[tokio::test]
     async fn success() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-
-        // get_manual_management_resources のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "Resources": { 
-                    "TestResource": { 
-                        "Description": "Test Description", 
-                        "Type": "AWS::S3::Bucket", 
-                        "Properties": { 
-                            "BucketName": "test-bucket" 
-                        } 
-                    } 
-                } 
-            }"#
-            .to_string())
-        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -1092,7 +1075,25 @@ mod get_manual_resource_properties_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        // get_manual_management_resources のモック
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                let mut resources = HashMap::new();
+                let mut properties = HashMap::new();
+                properties.insert("BucketName".to_string(), serde_json::json!("test-bucket"));
+                resources.insert(
+                    "TestResource".to_string(),
+                    ManualManagementResource {
+                        description: "Test Description".to_string(),
+                        r#type: "AWS::S3::Bucket".to_string(),
+                        properties,
+                    },
+                );
+                Ok(ManualManagementResources { resources })
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1175,25 +1176,8 @@ mod get_manual_resource_properties_tests {
     #[tokio::test]
     async fn resource_id_not_found() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-
-        // get_manual_management_resources のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "Resources": { 
-                    "TestResource": { 
-                        "Description": "Test Description", 
-                        "Type": "AWS::S3::Bucket", 
-                        "Properties": { 
-                            "BucketName": "test-bucket" 
-                        } 
-                    } 
-                } 
-            }"#
-            .to_string())
-        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -1264,20 +1248,8 @@ mod get_manual_resource_reasons_tests {
     #[tokio::test]
     async fn success_reasons_exist() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "reasons": { 
-                    "TestResource": { 
-                        "Reason1": "Old Reason"
-                    }
-                } 
-            }"#
-            .to_string())
-        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -1287,7 +1259,17 @@ mod get_manual_resource_reasons_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_load_manual_resource_meta()
+            .returning(|_, _| {
+                let mut reasons = HashMap::new();
+                let mut resource_reasons = HashMap::new();
+                resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
+                reasons.insert("TestResource".to_string(), resource_reasons);
+                Ok(ManualManagementMeta { reasons })
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1318,20 +1300,8 @@ mod get_manual_resource_reasons_tests {
     #[tokio::test]
     async fn success_reasons_not_exist() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "reasons": { 
-                    "TestResource": { 
-                        "Reason1": "Old Reason"
-                    }
-                } 
-            }"#
-            .to_string())
-        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -1341,7 +1311,15 @@ mod get_manual_resource_reasons_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_load_manual_resource_meta()
+            .returning(|_, _| {
+                Ok(ManualManagementMeta {
+                    reasons: HashMap::new(),
+                })
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1372,16 +1350,8 @@ mod get_manual_resource_reasons_tests {
     #[tokio::test]
     async fn load_manual_resource_meta_err() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                "read_file error",
-            ))
-        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -1391,7 +1361,16 @@ mod get_manual_resource_reasons_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_load_manual_resource_meta()
+            .returning(|_, _| {
+                Err(ManualManagementResourceError::Io(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "read_file error",
+                )))
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1441,19 +1420,6 @@ mod update_manual_resource_meta_tests {
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
 
-        // load_manual_resource_meta のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "reasons": { 
-                    "TestResource": { 
-                        "Reason1": "Old Reason"
-                    }
-                } 
-            }"#
-            .to_string())
-        });
-
         mock_file_system
             .expect_write_file()
             .returning(|_, _| Ok(()));
@@ -1466,7 +1432,17 @@ mod update_manual_resource_meta_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_load_manual_resource_meta()
+            .returning(|_, _| {
+                let mut reasons = HashMap::new();
+                let mut resource_reasons = HashMap::new();
+                resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
+                reasons.insert("TestResource".to_string(), resource_reasons);
+                Ok(ManualManagementMeta { reasons })
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1503,19 +1479,6 @@ mod update_manual_resource_meta_tests {
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
 
-        // load_manual_resource_meta のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "reasons": { 
-                    "TestResource": { 
-                        "Reason1": "Old Reason"
-                    }
-                } 
-            }"#
-            .to_string())
-        });
-
         mock_file_system
             .expect_write_file()
             .returning(|_, _| Ok(()));
@@ -1528,7 +1491,17 @@ mod update_manual_resource_meta_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_load_manual_resource_meta()
+            .returning(|_, _| {
+                let mut reasons = HashMap::new();
+                let mut resource_reasons = HashMap::new();
+                resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
+                reasons.insert("TestResource".to_string(), resource_reasons);
+                Ok(ManualManagementMeta { reasons })
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1553,17 +1526,8 @@ mod update_manual_resource_meta_tests {
     #[tokio::test]
     async fn load_manual_resource_meta_err() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-
-        // load_manual_resource_meta のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                "read_file error",
-            ))
-        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -1573,7 +1537,16 @@ mod update_manual_resource_meta_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_load_manual_resource_meta()
+            .returning(|_, _| {
+                Err(ManualManagementResourceError::Io(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "read_file error",
+                )))
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1609,19 +1582,6 @@ mod update_manual_resource_meta_tests {
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
 
-        // load_manual_resource_meta のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "reasons": { 
-                    "TestResource": { 
-                        "Reason1": "Old Reason"
-                    }
-                } 
-            }"#
-            .to_string())
-        });
-
         mock_file_system.expect_write_file().returning(|_, _| {
             Err(std::io::Error::new(
                 std::io::ErrorKind::PermissionDenied,
@@ -1637,7 +1597,17 @@ mod update_manual_resource_meta_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_load_manual_resource_meta()
+            .returning(|_, _| {
+                let mut reasons = HashMap::new();
+                let mut resource_reasons = HashMap::new();
+                resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
+                reasons.insert("TestResource".to_string(), resource_reasons);
+                Ok(ManualManagementMeta { reasons })
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1691,23 +1661,6 @@ mod update_manual_resource_properties_tests {
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
 
-        // get_manual_management_resources のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "Resources": { 
-                    "TestResource": { 
-                        "Description": "Test Description",
-                        "Type": "AWS::S3::Bucket", 
-                        "Properties": {
-                            "OldKey": "oldValue"
-                        }
-                    }
-                } 
-            }"#
-            .to_string())
-        });
-
         // save_manual_management_resources のモック
         mock_file_system
             .expect_write_file()
@@ -1721,7 +1674,24 @@ mod update_manual_resource_properties_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                let mut resources = HashMap::new();
+                let mut properties = HashMap::new();
+                properties.insert("OldKey".to_string(), serde_json::json!("oldValue"));
+                resources.insert(
+                    "TestResource".to_string(),
+                    ManualManagementResource {
+                        description: "Test Description".to_string(),
+                        r#type: "AWS::S3::Bucket".to_string(),
+                        properties,
+                    },
+                );
+                Ok(ManualManagementResources { resources })
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1752,17 +1722,8 @@ mod update_manual_resource_properties_tests {
     #[tokio::test]
     async fn get_manual_management_resources_err() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-
-        // get_manual_management_resources のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::NotFound,
-                "read_file error",
-            ))
-        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -1772,7 +1733,16 @@ mod update_manual_resource_properties_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                Err(ManualManagementResourceError::Io(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "read_file error",
+                )))
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1803,23 +1773,8 @@ mod update_manual_resource_properties_tests {
     #[tokio::test]
     async fn resource_id_not_found() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-
-        // get_manual_management_resources のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "Resources": { 
-                    "AnotherResource": { 
-                        "Description": "Test Description",
-                        "Type": "AWS::S3::Bucket", 
-                        "Properties": {}
-                    }
-                } 
-            }"#
-            .to_string())
-        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -1829,7 +1784,22 @@ mod update_manual_resource_properties_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                let mut resources = HashMap::new();
+                resources.insert(
+                    "AnotherResource".to_string(),
+                    ManualManagementResource {
+                        description: "Test Description".to_string(),
+                        r#type: "AWS::S3::Bucket".to_string(),
+                        properties: HashMap::new(),
+                    },
+                );
+                Ok(ManualManagementResources { resources })
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1860,23 +1830,8 @@ mod update_manual_resource_properties_tests {
     #[tokio::test]
     async fn from_str_err() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-
-        // get_manual_management_resources のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "Resources": { 
-                    "TestResource": { 
-                        "Description": "Test Description",
-                        "Type": "AWS::S3::Bucket", 
-                        "Properties": {}
-                    }
-                } 
-            }"#
-            .to_string())
-        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -1886,7 +1841,22 @@ mod update_manual_resource_properties_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                let mut resources = HashMap::new();
+                resources.insert(
+                    "TestResource".to_string(),
+                    ManualManagementResource {
+                        description: "Test Description".to_string(),
+                        r#type: "AWS::S3::Bucket".to_string(),
+                        properties: HashMap::new(),
+                    },
+                );
+                Ok(ManualManagementResources { resources })
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1917,23 +1887,8 @@ mod update_manual_resource_properties_tests {
     #[tokio::test]
     async fn properties_not_object() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-
-        // get_manual_management_resources のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "Resources": { 
-                    "TestResource": { 
-                        "Description": "Test Description",
-                        "Type": "AWS::S3::Bucket", 
-                        "Properties": {}
-                    }
-                } 
-            }"#
-            .to_string())
-        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -1943,7 +1898,22 @@ mod update_manual_resource_properties_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                let mut resources = HashMap::new();
+                resources.insert(
+                    "TestResource".to_string(),
+                    ManualManagementResource {
+                        description: "Test Description".to_string(),
+                        r#type: "AWS::S3::Bucket".to_string(),
+                        properties: HashMap::new(),
+                    },
+                );
+                Ok(ManualManagementResources { resources })
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
@@ -1977,21 +1947,6 @@ mod update_manual_resource_properties_tests {
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
 
-        // get_manual_management_resources のモック
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{ 
-                "Resources": { 
-                    "TestResource": { 
-                        "Description": "Test Description",
-                        "Type": "AWS::S3::Bucket", 
-                        "Properties": {}
-                    }
-                } 
-            }"#
-            .to_string())
-        });
-
         // save_manual_management_resources のモック
         mock_file_system.expect_write_file().returning(|_, _| {
             Err(std::io::Error::new(
@@ -2008,7 +1963,22 @@ mod update_manual_resource_properties_tests {
         let mock_app_config = MockAppConfigCommandTrait::new();
         let mock_stack = MockStackCommandTrait::new();
         let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                let mut resources = HashMap::new();
+                resources.insert(
+                    "TestResource".to_string(),
+                    ManualManagementResource {
+                        description: "Test Description".to_string(),
+                        r#type: "AWS::S3::Bucket".to_string(),
+                        properties: HashMap::new(),
+                    },
+                );
+                Ok(ManualManagementResources { resources })
+            });
 
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config),
