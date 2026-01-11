@@ -145,6 +145,7 @@ pub async fn update_workspace(
     return Ok(());
 }
 
+#[coverage(off)]
 pub async fn open_workspace(
     handle: tauri::AppHandle,
     id: &str,
@@ -1007,3 +1008,8 @@ mod update_workspace_tests {
         assert!(result.is_err());
     }
 }
+
+// open_workspace の単体テストは以下の理由により作成不可
+// - 外部クレートの構造体 `tauri::WebviewWindowBuilder` を使用しておりモックができない
+// - 引数に `tauri::AppHandle` を取っておりこの生成ができない
+// またこの関数はウィンドウを開く関数であるため、実際にアプリケーションを起動しての結合テストで検証できれば十分であると判断
