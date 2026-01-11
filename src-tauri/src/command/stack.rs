@@ -1145,6 +1145,8 @@ mod load_stacks_tests {
     use crate::{
         command::context::{
             app_config_command_trait::MockAppConfigCommandTrait,
+            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
+            manual_management_resource_trait::MockManualManagementResourceTrait,
             stack_command_trait::MockStackCommandTrait,
         },
         config::{
@@ -1235,6 +1237,8 @@ mod load_stacks_tests {
         let command_context = CommandContext {
             app_config: Arc::new(mock_command_app_config),
             stack: Arc::new(mock_command_stack),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
         };
 
         // ######### 実行 #########
@@ -1309,6 +1313,8 @@ mod load_stacks_tests {
         let command_context = CommandContext {
             app_config: Arc::new(mock_command_app_config),
             stack: Arc::new(mock_command_stack),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
         };
 
         // ######### 実行 #########
@@ -1365,6 +1371,8 @@ mod load_stacks_tests {
         let command_context = CommandContext {
             app_config: Arc::new(mock_command_app_config),
             stack: Arc::new(mock_command_stack),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
         };
 
         // ######### 実行 #########
@@ -1448,6 +1456,8 @@ mod load_stacks_tests {
         let command_context = CommandContext {
             app_config: Arc::new(mock_command_app_config),
             stack: Arc::new(mock_command_stack),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
         };
 
         // ######### 実行 #########

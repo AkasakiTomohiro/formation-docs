@@ -272,6 +272,8 @@ mod create_workspace_tests {
             app_config::AppConfigCommandError,
             context::{
                 app_config_command_trait::MockAppConfigCommandTrait,
+                cloudformation_schema_trait::MockCloudFormationSchemaTrait,
+                manual_management_resource_trait::MockManualManagementResourceTrait,
                 stack_command_trait::MockStackCommandTrait,
             },
         },
@@ -324,6 +326,8 @@ mod create_workspace_tests {
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config_command),
             stack: Arc::new(mock_stack_command),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
         };
 
         // ######### 実行 #########
@@ -376,6 +380,8 @@ mod create_workspace_tests {
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config_command),
             stack: Arc::new(mock_stack_command),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
         };
 
         // ######### 実行 #########
@@ -434,6 +440,8 @@ mod create_workspace_tests {
         let command_context = CommandContext {
             app_config: Arc::new(mock_app_config_command),
             stack: Arc::new(mock_stack_command),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
         };
 
         // ######### 実行 #########
