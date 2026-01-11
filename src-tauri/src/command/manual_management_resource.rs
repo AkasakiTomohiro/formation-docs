@@ -1,5 +1,6 @@
 use crate::api::context::api_context::ApiContext;
-use crate::command::cloudformation_schema::get_cloudformation_schema;
+use crate::command::context::command_context;
+use crate::command::context::command_context::CommandContext;
 use crate::command::stack::Resource;
 use crate::utils::context::app_context::AppContext;
 use crate::utils::get_window_state;
@@ -129,6 +130,7 @@ pub async fn save_manual_management_resources(
 async fn new_manual_management_resource(
     app_context: &AppContext,
     api_context: &ApiContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
     resource_id: &str,
     description: &str,
@@ -136,8 +138,10 @@ async fn new_manual_management_resource(
     resource_name: &str,
 ) -> Result<(), ManualManagementResourceError> {
     // 指定されたサービス名とリソース名に基づいてCloudFormationのスキーマを取得
-    let resource_schema =
-        get_cloudformation_schema(app_context, api_context, service_name, resource_name).await?;
+    let resource_schema = command_context
+        .cloudformation_schema
+        .get_cloudformation_schema(app_context, api_context, service_name, resource_name)
+        .await?;
     let resource_schema: Value = serde_json::from_str(&resource_schema)?;
     if resource_schema.is_object() == false {
         return Err(ManualManagementResourceError::App(AppError::new(
@@ -155,8 +159,10 @@ async fn new_manual_management_resource(
     let type_name = type_name.unwrap().to_string();
 
     // 手動管理リソースのJSONファイルを取得し、リソースIDが既に存在しないことを確認してから新しいリソースを追加
-    let mut manual_management_resources =
-        get_manual_management_resources(app_context, workspace_directory).await?;
+    let mut manual_management_resources = command_context
+        .manual_management_resource
+        .get_manual_management_resources(app_context, workspace_directory)
+        .await?;
     if manual_management_resources
         .resources
         .contains_key(resource_id)
@@ -175,12 +181,14 @@ async fn new_manual_management_resource(
     );
 
     // 更新された手動管理リソースのJSONファイルを保存
-    save_manual_management_resources(
-        app_context,
-        workspace_directory,
-        &manual_management_resources,
-    )
-    .await?;
+    command_context
+        .manual_management_resource
+        .save_manual_management_resources(
+            app_context,
+            workspace_directory,
+            &manual_management_resources,
+        )
+        .await?;
 
     return Ok(());
 }
@@ -198,12 +206,15 @@ pub struct ManualManagementResourceSummary {
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 async fn get_manual_management_resource_list(
     state: &AppContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
     service_name: &str,
     resource_name: &str,
 ) -> Result<Vec<ManualManagementResourceSummary>, ManualManagementResourceError> {
-    let manual_management_resources =
-        get_manual_management_resources(state, workspace_directory).await?;
+    let manual_management_resources = command_context
+        .manual_management_resource
+        .get_manual_management_resources(state, workspace_directory)
+        .await?;
     let mut result: Vec<ManualManagementResourceSummary> = Vec::new();
 
     let r#type = format!("AWS::{}::{}", service_name, resource_name);
@@ -225,10 +236,13 @@ async fn get_manual_management_resource_list(
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 async fn load_manual_management_resource_summary(
     state: &AppContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
 ) -> Result<Vec<Resource>, ManualManagementResourceError> {
-    let manual_management_resources =
-        get_manual_management_resources(state, workspace_directory).await?;
+    let manual_management_resources = command_context
+        .manual_management_resource
+        .get_manual_management_resources(state, workspace_directory)
+        .await?;
     let mut resources = HashMap::<String, HashSet<String>>::new();
     for (_, manual_management_resource) in manual_management_resources.resources.iter() {
         let parts: Vec<&str> = manual_management_resource.r#type.split("::").collect();
@@ -260,7 +274,7 @@ async fn load_manual_management_resource_summary(
     return Ok(result);
 }
 
-async fn load_manual_resource_meta(
+pub async fn load_manual_resource_meta(
     state: &AppContext,
     workspace_directory: &str,
 ) -> Result<ManualManagementMeta, ManualManagementResourceError> {
@@ -286,11 +300,14 @@ async fn load_manual_resource_meta(
 
 async fn get_manual_resource_properties(
     state: &AppContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
     resource_id: &str,
 ) -> Result<HashMap<String, Value>, ManualManagementResourceError> {
-    let manual_management_resources =
-        get_manual_management_resources(state, workspace_directory).await?;
+    let manual_management_resources = command_context
+        .manual_management_resource
+        .get_manual_management_resources(state, workspace_directory)
+        .await?;
     let resource = manual_management_resources
         .resources
         .get(resource_id)
@@ -302,10 +319,14 @@ async fn get_manual_resource_properties(
 
 async fn get_manual_resource_reasons(
     state: &AppContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
     resource_id: &str,
 ) -> Result<Value, ManualManagementResourceError> {
-    let meta_json = load_manual_resource_meta(state, workspace_directory).await?;
+    let meta_json = command_context
+        .manual_management_resource
+        .load_manual_resource_meta(state, workspace_directory)
+        .await?;
     if let Some(reasons) = meta_json.reasons.get(resource_id) {
         // 指定されたリソースIDのreasonsが存在する場合はそのまま返す
         return Ok(serde_json::to_value(reasons.clone())?);
@@ -317,10 +338,14 @@ async fn get_manual_resource_reasons(
 
 async fn update_manual_resource_meta(
     state: &AppContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
     update_manual_resource_meta: ManualManagementMetaUpdate,
 ) -> Result<(), ManualManagementResourceError> {
-    let manual_resource_meta = load_manual_resource_meta(state, workspace_directory).await?;
+    let manual_resource_meta = command_context
+        .manual_management_resource
+        .load_manual_resource_meta(state, workspace_directory)
+        .await?;
     let new_manual_resource_meta = ManualManagementMeta {
         reasons: match update_manual_resource_meta.reasons {
             Some(update_meta) => {
@@ -342,12 +367,15 @@ async fn update_manual_resource_meta(
 
 async fn update_manual_resource_properties(
     state: &AppContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
     resource_id: &str,
     properties: String,
 ) -> Result<(), ManualManagementResourceError> {
-    let mut manual_management_resources =
-        get_manual_management_resources(&state, workspace_directory).await?;
+    let mut manual_management_resources = command_context
+        .manual_management_resource
+        .get_manual_management_resources(state, workspace_directory)
+        .await?;
     let resource = manual_management_resources
         .resources
         .get_mut(resource_id)
@@ -377,6 +405,7 @@ async fn update_manual_resource_properties(
 pub async fn new_manual_management_resource_command(
     app_context_state: State<'_, AppContext>,
     api_context_state: State<'_, ApiContext>,
+    command_context_state: State<'_, command_context::CommandContext>,
     window: tauri::Window,
     resource_id: &str,
     description: &str,
@@ -392,6 +421,7 @@ pub async fn new_manual_management_resource_command(
     return match new_manual_management_resource(
         &app_context_state,
         &api_context_state,
+        &command_context_state,
         window_state.workspace_directory.as_str(),
         resource_id,
         description,
@@ -408,7 +438,8 @@ pub async fn new_manual_management_resource_command(
 #[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_management_resource_list_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    command_context_state: State<'_, command_context::CommandContext>,
     window: tauri::Window,
     service_name: &str,
     resource_name: &str,
@@ -420,7 +451,8 @@ pub async fn get_manual_management_resource_list_command(
         }
     };
     return match get_manual_management_resource_list(
-        &state,
+        &app_context_state,
+        &command_context_state,
         window_state.workspace_directory.as_str(),
         service_name,
         resource_name,
@@ -435,7 +467,8 @@ pub async fn get_manual_management_resource_list_command(
 #[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_manual_management_resource_summary_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    command_context_state: State<'_, command_context::CommandContext>,
     window: tauri::Window,
 ) -> Result<CommandResult<Vec<Resource>>, CommandResult> {
     let window_state = match get_window_state(window) {
@@ -445,7 +478,8 @@ pub async fn load_manual_management_resource_summary_command(
         }
     };
     return match load_manual_management_resource_summary(
-        &state,
+        &app_context_state,
+        &command_context_state,
         window_state.workspace_directory.as_str(),
     )
     .await
@@ -458,7 +492,8 @@ pub async fn load_manual_management_resource_summary_command(
 #[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_resource_properties_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    command_context_state: State<'_, command_context::CommandContext>,
     window: tauri::Window,
     resource_id: &str,
 ) -> Result<CommandResult<HashMap<String, Value>>, CommandResult> {
@@ -469,7 +504,8 @@ pub async fn get_manual_resource_properties_command(
         }
     };
     return match get_manual_resource_properties(
-        &state,
+        &app_context_state,
+        &command_context_state,
         window_state.workspace_directory.as_str(),
         resource_id,
     )
@@ -483,7 +519,8 @@ pub async fn get_manual_resource_properties_command(
 #[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_resource_reasons_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    command_context_state: State<'_, command_context::CommandContext>,
     window: tauri::Window,
     resource_id: &str,
 ) -> Result<CommandResult<Value>, CommandResult> {
@@ -494,7 +531,8 @@ pub async fn get_manual_resource_reasons_command(
         }
     };
     return match get_manual_resource_reasons(
-        &state,
+        &app_context_state,
+        &command_context_state,
         window_state.workspace_directory.as_str(),
         resource_id,
     )
@@ -508,7 +546,8 @@ pub async fn get_manual_resource_reasons_command(
 #[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_manual_resource_meta_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    command_context_state: State<'_, command_context::CommandContext>,
     window: tauri::Window,
     resource_id: &str,
     reasons: HashMap<String, String>,
@@ -520,7 +559,8 @@ pub async fn update_manual_resource_meta_command(
         }
     };
     return match update_manual_resource_meta(
-        &state,
+        &app_context_state,
+        &command_context_state,
         window_state.workspace_directory.as_str(),
         ManualManagementMetaUpdate {
             reasons: Some(ManualManagementMetaReasonsUpdate {
@@ -539,7 +579,8 @@ pub async fn update_manual_resource_meta_command(
 #[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_manual_resource_properties_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    command_context_state: State<'_, command_context::CommandContext>,
     window: tauri::Window,
     resource_id: &str,
     properties: String,
@@ -551,7 +592,8 @@ pub async fn update_manual_resource_properties_command(
         }
     };
     return match update_manual_resource_properties(
-        &state,
+        &app_context_state,
+        &command_context_state,
         window_state.workspace_directory.as_str(),
         resource_id,
         properties,
@@ -832,21 +874,15 @@ mod save_manual_management_resources_tests {
 
 #[cfg(test)]
 #[coverage(off)]
-mod new_manual_management_resource_tests {
-    use super::*;
-}
+mod new_manual_management_resource_tests {}
 
 #[cfg(test)]
 #[coverage(off)]
-mod get_manual_management_resource_list_tests {
-    use super::*;
-}
+mod get_manual_management_resource_list_tests {}
 
 #[cfg(test)]
 #[coverage(off)]
-mod load_manual_management_resource_summary_tests {
-    use super::*;
-}
+mod load_manual_management_resource_summary_tests {}
 
 #[cfg(test)]
 #[coverage(off)]
@@ -1012,7 +1048,15 @@ mod load_manual_resource_meta_tests {
 mod get_manual_resource_properties_tests {
     use std::sync::Arc;
 
-    use crate::utils::context::{file::MockFileSystem, http_client::MockHttpClient};
+    use crate::{
+        command::context::{
+            app_config_command_trait::MockAppConfigCommandTrait,
+            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
+            manual_management_resource_trait::MockManualManagementResourceTrait,
+            stack_command_trait::MockStackCommandTrait,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
 
     use super::*;
 
@@ -1045,9 +1089,26 @@ mod get_manual_resource_properties_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         // ######### 実行 #########
-        let result =
-            get_manual_resource_properties(&app_context, "/test/workspace", "TestResource").await;
+        let result = get_manual_resource_properties(
+            &app_context,
+            &command_context,
+            "/test/workspace",
+            "TestResource",
+        )
+        .await;
 
         // ######### 検証 #########
         assert!(result.is_ok());
@@ -1076,9 +1137,35 @@ mod get_manual_resource_properties_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                Err(ManualManagementResourceError::Io(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "read_file error",
+                )))
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         // ######### 実行 #########
-        let result =
-            get_manual_resource_properties(&app_context, "/test/workspace", "TestResource").await;
+        let result = get_manual_resource_properties(
+            &app_context,
+            &command_context,
+            "/test/workspace",
+            "TestResource",
+        )
+        .await;
 
         // ######### 検証 #########
         assert!(result.is_err());
@@ -1113,9 +1200,39 @@ mod get_manual_resource_properties_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_get_manual_management_resources()
+            .returning(|_, _| {
+                let mut resources = HashMap::new();
+                let mut properties = HashMap::new();
+                properties.insert("BucketName".to_string(), serde_json::json!("test-bucket"));
+                resources.insert(
+                    "TestResource".to_string(),
+                    ManualManagementResource {
+                        description: "Test Description".to_string(),
+                        r#type: "AWS::S3::Bucket".to_string(),
+                        properties,
+                    },
+                );
+                Ok(ManualManagementResources { resources })
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         // ######### 実行 #########
         let result = get_manual_resource_properties(
             &app_context,
+            &command_context,
             "/test/workspace",
             "NonExistentResourceID",
         )
@@ -1131,7 +1248,15 @@ mod get_manual_resource_properties_tests {
 mod get_manual_resource_reasons_tests {
     use std::sync::Arc;
 
-    use crate::utils::context::{file::MockFileSystem, http_client::MockHttpClient};
+    use crate::{
+        command::context::{
+            app_config_command_trait::MockAppConfigCommandTrait,
+            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
+            manual_management_resource_trait::MockManualManagementResourceTrait,
+            stack_command_trait::MockStackCommandTrait,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
 
     use super::*;
 
@@ -1159,12 +1284,29 @@ mod get_manual_resource_reasons_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "TestResource";
 
         // ######### 実行 #########
-        let result =
-            get_manual_resource_reasons(&app_context, workspace_directory, resource_id).await;
+        let result = get_manual_resource_reasons(
+            &app_context,
+            &command_context,
+            workspace_directory,
+            resource_id,
+        )
+        .await;
 
         // ######### 検証 #########
         assert!(result.is_ok());
@@ -1196,12 +1338,29 @@ mod get_manual_resource_reasons_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "NonExistentResource";
 
         // ######### 実行 #########
-        let result =
-            get_manual_resource_reasons(&app_context, workspace_directory, resource_id).await;
+        let result = get_manual_resource_reasons(
+            &app_context,
+            &command_context,
+            workspace_directory,
+            resource_id,
+        )
+        .await;
 
         // ######### 検証 #########
         assert!(result.is_ok());
@@ -1229,12 +1388,29 @@ mod get_manual_resource_reasons_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "TestResource";
 
         // ######### 実行 #########
-        let result =
-            get_manual_resource_reasons(&app_context, workspace_directory, resource_id).await;
+        let result = get_manual_resource_reasons(
+            &app_context,
+            &command_context,
+            workspace_directory,
+            resource_id,
+        )
+        .await;
 
         // ######### 検証 #########
         assert!(result.is_err());
@@ -1246,7 +1422,15 @@ mod get_manual_resource_reasons_tests {
 mod update_manual_resource_meta_tests {
     use std::sync::Arc;
 
-    use crate::utils::context::{file::MockFileSystem, http_client::MockHttpClient};
+    use crate::{
+        command::context::{
+            app_config_command_trait::MockAppConfigCommandTrait,
+            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
+            manual_management_resource_trait::MockManualManagementResourceTrait,
+            stack_command_trait::MockStackCommandTrait,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
 
     use super::*;
 
@@ -1279,6 +1463,18 @@ mod update_manual_resource_meta_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "TestResource";
         let mut reasons = HashMap::new();
@@ -1292,7 +1488,9 @@ mod update_manual_resource_meta_tests {
         };
 
         // ######### 実行 #########
-        let result = update_manual_resource_meta(&app_context, workspace_directory, meta).await;
+        let result =
+            update_manual_resource_meta(&app_context, &command_context, workspace_directory, meta)
+                .await;
 
         // ######### 検証 #########
         assert!(result.is_ok());
@@ -1327,11 +1525,25 @@ mod update_manual_resource_meta_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let meta = ManualManagementMetaUpdate { reasons: None };
 
         // ######### 実行 #########
-        let result = update_manual_resource_meta(&app_context, workspace_directory, meta).await;
+        let result =
+            update_manual_resource_meta(&app_context, &command_context, workspace_directory, meta)
+                .await;
 
         // ######### 検証 #########
         assert!(result.is_ok());
@@ -1358,6 +1570,18 @@ mod update_manual_resource_meta_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "TestResource";
         let mut reasons = HashMap::new();
@@ -1370,7 +1594,9 @@ mod update_manual_resource_meta_tests {
         };
 
         // ######### 実行 #########
-        let result = update_manual_resource_meta(&app_context, workspace_directory, meta).await;
+        let result =
+            update_manual_resource_meta(&app_context, &command_context, workspace_directory, meta)
+                .await;
 
         // ######### 検証 #########
         assert!(result.is_err());
@@ -1408,6 +1634,18 @@ mod update_manual_resource_meta_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "TestResource";
         let mut reasons = HashMap::new();
@@ -1420,7 +1658,9 @@ mod update_manual_resource_meta_tests {
         };
 
         // ######### 実行 #########
-        let result = update_manual_resource_meta(&app_context, workspace_directory, meta).await;
+        let result =
+            update_manual_resource_meta(&app_context, &command_context, workspace_directory, meta)
+                .await;
 
         // ######### 検証 #########
         assert!(result.is_err());
@@ -1432,7 +1672,15 @@ mod update_manual_resource_meta_tests {
 mod update_manual_resource_properties_tests {
     use std::sync::Arc;
 
-    use crate::utils::context::{file::MockFileSystem, http_client::MockHttpClient};
+    use crate::{
+        command::context::{
+            app_config_command_trait::MockAppConfigCommandTrait,
+            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
+            manual_management_resource_trait::MockManualManagementResourceTrait,
+            stack_command_trait::MockStackCommandTrait,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
 
     use super::*;
 
@@ -1470,6 +1718,18 @@ mod update_manual_resource_properties_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "TestResource";
         let properties = r#"{"Key1": "value1", "Key2": 2}"#.to_string();
@@ -1477,6 +1737,7 @@ mod update_manual_resource_properties_tests {
         // ######### 実行 #########
         let result = update_manual_resource_properties(
             &app_context,
+            &command_context,
             workspace_directory,
             resource_id,
             properties,
@@ -1508,6 +1769,18 @@ mod update_manual_resource_properties_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "TestResource";
         let properties = r#"{"Key1": "value1", "Key2": 2}"#.to_string();
@@ -1515,6 +1788,7 @@ mod update_manual_resource_properties_tests {
         // ######### 実行 #########
         let result = update_manual_resource_properties(
             &app_context,
+            &command_context,
             workspace_directory,
             resource_id,
             properties,
@@ -1552,6 +1826,18 @@ mod update_manual_resource_properties_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "TestResource"; // 存在しないリソースID
         let properties = r#"{"Key1": "value1", "Key2": 2}"#.to_string();
@@ -1559,6 +1845,7 @@ mod update_manual_resource_properties_tests {
         // ######### 実行 #########
         let result = update_manual_resource_properties(
             &app_context,
+            &command_context,
             workspace_directory,
             resource_id,
             properties,
@@ -1596,6 +1883,18 @@ mod update_manual_resource_properties_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "TestResource";
         let properties = r#"invalid json"#.to_string(); // 無効なJSON
@@ -1603,6 +1902,7 @@ mod update_manual_resource_properties_tests {
         // ######### 実行 #########
         let result = update_manual_resource_properties(
             &app_context,
+            &command_context,
             workspace_directory,
             resource_id,
             properties,
@@ -1640,6 +1940,18 @@ mod update_manual_resource_properties_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "TestResource";
         let properties = r#"[]"#.to_string(); // オブジェクトでないJSON
@@ -1647,6 +1959,7 @@ mod update_manual_resource_properties_tests {
         // ######### 実行 #########
         let result = update_manual_resource_properties(
             &app_context,
+            &command_context,
             workspace_directory,
             resource_id,
             properties,
@@ -1692,6 +2005,18 @@ mod update_manual_resource_properties_tests {
             http_client: Arc::new(mock_http_client),
         };
 
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
         let workspace_directory = "/test/workspace";
         let resource_id = "TestResource";
         let properties = r#"{"Key1": "value1", "Key2": 2}"#.to_string();
@@ -1699,6 +2024,7 @@ mod update_manual_resource_properties_tests {
         // ######### 実行 #########
         let result = update_manual_resource_properties(
             &app_context,
+            &command_context,
             workspace_directory,
             resource_id,
             properties,
