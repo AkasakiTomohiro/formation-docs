@@ -569,6 +569,7 @@ pub async fn get_stack_outputs(
 async fn get_all_stack_outputs(
     app_context: &AppContext,
     config_context: &ConfigContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
 ) -> Result<HashMap<String, String>, StackError> {
     let workspace = config_context
@@ -578,8 +579,10 @@ async fn get_all_stack_outputs(
     // {Outputsのexport_name: スタックID}の形で返す
     let mut result: HashMap<String, String> = HashMap::new();
     for (stack_id, _) in workspace.stacks.iter() {
-        let outputs =
-            get_stack_outputs(app_context, config_context, workspace_directory, stack_id).await?;
+        let outputs = command_context
+            .stack
+            .get_stack_outputs(app_context, config_context, workspace_directory, stack_id)
+            .await?;
         for output in outputs.iter().filter(|o| o.export_name.is_some()) {
             result.insert(
                 output.export_name.as_ref().unwrap().to_string(),
@@ -964,6 +967,7 @@ pub async fn get_stack_parameters_command(
 pub async fn get_stack_outputs_command(
     app_context_state: State<'_, AppContext>,
     config_context_state: State<'_, ConfigContext>,
+    command_context_state: State<'_, CommandContext>,
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<Vec<StackOutput>>, CommandResult> {
@@ -973,13 +977,15 @@ pub async fn get_stack_outputs_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_stack_outputs(
-        &app_context_state,
-        &config_context_state,
-        window_state.workspace_directory.as_str(),
-        stack_id,
-    )
-    .await
+    return match command_context_state
+        .stack
+        .get_stack_outputs(
+            &app_context_state,
+            &config_context_state,
+            window_state.workspace_directory.as_str(),
+            stack_id,
+        )
+        .await
     {
         Ok(parameters) => Ok(CommandResult::success(parameters)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
@@ -991,6 +997,7 @@ pub async fn get_stack_outputs_command(
 pub async fn get_all_stack_outputs_command(
     app_context_state: State<'_, AppContext>,
     config_context_state: State<'_, ConfigContext>,
+    command_context_state: State<'_, CommandContext>,
     window: tauri::Window,
 ) -> Result<CommandResult<HashMap<String, String>>, CommandResult> {
     let window_state = match get_window_state(window) {
@@ -1002,6 +1009,7 @@ pub async fn get_all_stack_outputs_command(
     return match get_all_stack_outputs(
         &app_context_state,
         &config_context_state,
+        &command_context_state,
         window_state.workspace_directory.as_str(),
     )
     .await
