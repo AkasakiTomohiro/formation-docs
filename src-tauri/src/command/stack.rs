@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use std::io::ErrorKind;
 use std::path::PathBuf;
 
+use crate::command::context::command_context::CommandContext;
 use crate::config::context::config_context::ConfigContext;
 use crate::config::stack_meta_config::StackMetaConfigError;
 use crate::config::workspace_config::WorkspaceConfigError;
@@ -27,7 +28,7 @@ pub struct Stack {
 }
 
 #[derive(Debug, Error)]
-enum StackError {
+pub enum StackError {
     #[error("app error: {0}")]
     App(#[from] AppError),
     #[error("io error: {0}")]
@@ -53,6 +54,7 @@ enum StackError {
 async fn load_stacks(
     app_context: &AppContext,
     config_context: &ConfigContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
 ) -> Result<Vec<Stack>, StackError> {
     // TODO: ディレクトリ配下のファイルをglobmatchで取得して、`stacks`に存在しないファイルも自動的に取り込む機能を追加する
@@ -72,14 +74,16 @@ async fn load_stacks(
     let mut stacks = Vec::new();
     for (id, file_name) in workspace.stacks.iter() {
         // スタックを読み込む
-        let stack = match load_stack_from_info(
-            app_context,
-            config_context,
-            workspace_directory,
-            id,
-            file_name,
-        )
-        .await
+        let stack = match command_context
+            .stack
+            .load_stack_from_info(
+                app_context,
+                config_context,
+                workspace_directory,
+                id,
+                file_name,
+            )
+            .await
         {
             Ok(stack) => stack,
             Err(err) => {
@@ -220,7 +224,7 @@ async fn import_stack(
     return Ok(());
 }
 
-async fn load_stack_from_info(
+pub async fn load_stack_from_info(
     app_context: &AppContext,
     config_context: &ConfigContext,
     workspace_directory: &str,
@@ -270,6 +274,7 @@ async fn load_stack_from_info(
 async fn load_stack_from_id(
     app_context: &AppContext,
     config_context: &ConfigContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Stack, StackError> {
@@ -279,14 +284,16 @@ async fn load_stack_from_id(
         .await?;
     return match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => {
-            load_stack_from_info(
-                app_context,
-                config_context,
-                workspace_directory,
-                stack_id,
-                stack_file_name,
-            )
-            .await
+            command_context
+                .stack
+                .load_stack_from_info(
+                    app_context,
+                    config_context,
+                    workspace_directory,
+                    stack_id,
+                    stack_file_name,
+                )
+                .await
         }
         None => Err(StackError::App(AppError::new("Stack not found"))),
     };
@@ -512,7 +519,7 @@ pub struct StackOutput {
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 /// - `stack_id` - スタックのID
-async fn get_stack_outputs(
+pub async fn get_stack_outputs(
     app_context: &AppContext,
     config_context: &ConfigContext,
     workspace_directory: &str,
@@ -735,6 +742,7 @@ async fn load_parameter_and_resource_list(
 pub async fn load_stacks_command(
     app_context_state: State<'_, AppContext>,
     config_context_state: State<'_, ConfigContext>,
+    command_context_state: State<'_, CommandContext>,
     window: tauri::Window,
 ) -> Result<CommandResult<Vec<Stack>>, CommandResult> {
     let window_state = match get_window_state(window) {
@@ -746,6 +754,7 @@ pub async fn load_stacks_command(
     return match load_stacks(
         &app_context_state,
         &config_context_state,
+        &command_context_state,
         window_state.workspace_directory.as_str(),
     )
     .await
@@ -814,6 +823,7 @@ pub async fn import_stack_command(
 pub async fn load_stack_command(
     app_context_state: State<'_, AppContext>,
     config_context_state: State<'_, ConfigContext>,
+    command_context_state: State<'_, CommandContext>,
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<Stack>, CommandResult> {
@@ -826,6 +836,7 @@ pub async fn load_stack_command(
     return match load_stack_from_id(
         &app_context_state,
         &config_context_state,
+        &command_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
     )
@@ -1124,13 +1135,16 @@ mod load_stacks_tests {
     use std::sync::Arc;
 
     use crate::{
+        command::context::{
+            app_config_command_trait::MockAppConfigCommandTrait,
+            stack_command_trait::MockStackCommandTrait,
+        },
         config::{
             context::{
                 app_config_trait::MockAppConfigTrait,
                 stack_meta_config_trait::MockStackMetaConfigTrait,
                 workspace_config_trait::MockWorkspaceConfigTrait,
             },
-            stack_meta_config::StackMetaConfig,
             workspace_config::WorkspaceConfig,
         },
         utils::context::{file::MockFileSystem, http_client::MockHttpClient},
@@ -1142,27 +1156,22 @@ mod load_stacks_tests {
     #[tokio::test]
     async fn success() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
-        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_command_app_config = MockAppConfigCommandTrait::new();
+        let mut mock_command_stack = MockStackCommandTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
         let stack_id = "sample_stack_id";
         let stack_file_name = "sample_stack";
-        let stack_file_name_json = format!("{}.template.json", stack_file_name);
         let mut stacks = HashMap::new();
         // 最後の一文字を変えて2つのスタックを用意
-        stacks.insert(
-            format!("{}1", stack_id),
-            format!("{}1", stack_file_name_json),
-        );
-        stacks.insert(
-            format!("{}2", stack_id),
-            format!("{}2", stack_file_name_json),
-        );
+        stacks.insert(format!("{}1", stack_id), format!("{}1", stack_file_name));
+        stacks.insert(format!("{}2", stack_id), format!("{}2", stack_file_name));
 
         // workspace_configのreadのモック設定
         mock_workspace_config
@@ -1177,62 +1186,29 @@ mod load_stacks_tests {
                 })
             });
 
-        // === load_stack_from_info用のモック設定 ===
-        let stack_name: &str = "Sample Stack Name";
+        // load_stack_from_infoのモック設定
         let description_from_meta = "description_from_meta sample";
         let description_from_stack = "description_from_stack sample";
-        // file_systemのread_fileのモック設定
-        mock_file_system
-            .expect_read_file()
+        mock_command_stack
+            .expect_load_stack_from_info()
             .times(2)
-            .withf(move |path| {
-                let template_path1 =
-                    PathBuf::from(workspace_directory).join(format!("{}1", stack_file_name_json));
-                let template_path2 =
-                    PathBuf::from(workspace_directory).join(format!("{}2", stack_file_name_json));
-                path == &template_path1 || path == &template_path2
-            })
+            .withf(
+                move |_app_context, _config_context, workspace_dir, id, file_name| {
+                    workspace_dir == workspace_directory
+                        && (id == format!("{}1", stack_id.to_string(),)
+                            || id == format!("{}2", stack_id.to_string(),))
+                        && (file_name == format!("{}1", stack_file_name)
+                            || file_name == format!("{}2", stack_file_name))
+                },
+            )
             .returning({
-                move |path| {
-                    let file_name = path
-                        .file_name()
-                        .and_then(|s| s.to_str())
-                        .unwrap_or_default();
-                    // 最後の一文字を取得
-                    let suffix = file_name
-                        .chars()
-                        .last()
-                        .map(|c| c.to_string())
-                        .unwrap_or_default();
-                    let template_json = serde_json::json!({
-                        "Description": format!("{}{}", description_from_stack, suffix),
-                        "Resources": {}
-                    });
-                    Ok(template_json.to_string())
-                }
-            });
-        // stack_meta_configのreadのモック設定
-        mock_stack_meta_config
-            .expect_read()
-            .times(2)
-            .withf(move |_file_system, workspace_dir, stack_name| {
-                workspace_dir == workspace_directory
-                    && (stack_name == format!("{}1", stack_file_name)
-                        || stack_name == format!("{}2", stack_file_name))
-            })
-            .returning({
-                move |_file_system, _workspace_dir, stack_name_param| {
-                    // 最後の一文字を取得
-                    let suffix = stack_name_param
-                        .chars()
-                        .last()
-                        .map(|c| c.to_string())
-                        .unwrap_or_default();
-                    Ok(StackMetaConfig {
-                        version: 1,
-                        name: format!("{}{}", stack_name.to_string(), suffix),
-                        description: format!("{}{}", description_from_meta.to_string(), suffix),
-                        reasons: HashMap::new(),
+                move |_app_context, _config_context, _workspace_dir, id, file_name| {
+                    Ok(Stack {
+                        id: id.to_string(),
+                        name: file_name.to_string(),
+                        description_from_meta: Some(description_from_meta.to_string()),
+                        description_from_stack: Some(description_from_stack.to_string()),
+                        exist: true,
                     })
                 }
             });
@@ -1248,8 +1224,19 @@ mod load_stacks_tests {
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
         };
 
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_command_app_config),
+            stack: Arc::new(mock_command_stack),
+        };
+
         // ######### 実行 #########
-        let result = load_stacks(&app_context, &config_context, workspace_directory).await;
+        let result = load_stacks(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
 
         // ######### 検証 #########
         // stacksが正しく取得できていること
@@ -1260,14 +1247,14 @@ mod load_stacks_tests {
         for (i, stack) in stacks.iter().enumerate() {
             let index = i + 1;
             assert_eq!(stack.id, format!("{}{}", stack_id, index));
-            assert_eq!(stack.name, format!("{}{}", stack_name, index));
+            assert_eq!(stack.name, format!("{}{}", stack_file_name, index));
             assert_eq!(
                 stack.description_from_meta,
-                Some(format!("{}{}", description_from_meta, index))
+                Some(description_from_meta.to_string())
             );
             assert_eq!(
                 stack.description_from_stack,
-                Some(format!("{}{}", description_from_stack, index))
+                Some(description_from_stack.to_string())
             );
             assert_eq!(stack.exist, true);
         }
@@ -1282,6 +1269,8 @@ mod load_stacks_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_command_app_config = MockAppConfigCommandTrait::new();
+        let mock_command_stack = MockStackCommandTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
@@ -1309,8 +1298,19 @@ mod load_stacks_tests {
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
         };
 
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_command_app_config),
+            stack: Arc::new(mock_command_stack),
+        };
+
         // ######### 実行 #########
-        let result = load_stacks(&app_context, &config_context, workspace_directory).await;
+        let result = load_stacks(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
 
         // ######### 検証 #########
         // 空配列が返ること
@@ -1328,6 +1328,8 @@ mod load_stacks_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_command_app_config = MockAppConfigCommandTrait::new();
+        let mock_command_stack = MockStackCommandTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
@@ -1352,8 +1354,19 @@ mod load_stacks_tests {
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
         };
 
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_command_app_config),
+            stack: Arc::new(mock_command_stack),
+        };
+
         // ######### 実行 #########
-        let result = load_stacks(&app_context, &config_context, workspace_directory).await;
+        let result = load_stacks(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
 
         // ######### 検証 #########
         // エラーになること
@@ -1364,11 +1377,13 @@ mod load_stacks_tests {
     #[tokio::test]
     async fn load_stack_from_info_error() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
-        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_command_app_config = MockAppConfigCommandTrait::new();
+        let mut mock_command_stack = MockStackCommandTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
@@ -1398,76 +1413,18 @@ mod load_stacks_tests {
                 })
             });
 
-        // === load_stack_from_info用のモック設定 ===
-        // let stack_file_name = "sample_stack.template.json";
-        let stack_name: &str = "Sample Stack Name";
-        let description_from_meta = "description_from_meta sample";
-        let description_from_stack = "description_from_stack sample";
-        // file_systemのread_fileのモック設定
-        mock_file_system
-            .expect_read_file()
-            .times(2)
-            .withf(move |path| {
-                let template_path1 =
-                    PathBuf::from(workspace_directory).join(format!("{}1", stack_file_name_json));
-                let template_path2 =
-                    PathBuf::from(workspace_directory).join(format!("{}2", stack_file_name_json));
-                path == &template_path1 || path == &template_path2
-            })
-            .returning({
-                let mut call_count = 0;
-                move |path| {
-                    call_count += 1;
-                    match call_count {
-                        1 => {
-                            let file_name = path
-                                .file_name()
-                                .and_then(|s| s.to_str())
-                                .unwrap_or_default();
-                            // 最後の一文字を取得
-                            let suffix = file_name
-                                .chars()
-                                .last()
-                                .map(|c| c.to_string())
-                                .unwrap_or_default();
-                            let template_json = serde_json::json!({
-                                "Description": format!("{}{}", description_from_stack, suffix),
-                                "Resources": {}
-                            });
-                            Ok(template_json.to_string())
-                        }
-                        2 => Err(tokio::io::Error::new(
-                            tokio::io::ErrorKind::Other,
-                            "read_file error",
-                        )), // 2回目の呼び出しでErrを返す
-                        _ => panic!("Unexpected call"),
-                    }
-                }
-            });
-        // stack_meta_configのreadのモック設定
-        mock_stack_meta_config
-            .expect_read()
-            .times(1)
-            .withf(move |_file_system, workspace_dir, stack_name| {
-                workspace_dir == workspace_directory
-                    && (stack_name == format!("{}1", stack_file_name)
-                        || stack_name == format!("{}2", stack_file_name))
-            })
-            .returning({
-                move |_file_system, _workspace_dir, stack_name_param| {
-                    let suffix = stack_name_param
-                        .chars()
-                        .last()
-                        .map(|c| c.to_string())
-                        .unwrap_or_default();
-                    Ok(StackMetaConfig {
-                        version: 1,
-                        name: format!("{}{}", stack_name.to_string(), suffix),
-                        description: format!("{}{}", description_from_meta.to_string(), suffix),
-                        reasons: HashMap::new(),
-                    })
-                }
-            });
+        // load_stack_from_infoのモック設定
+        mock_command_stack.expect_load_stack_from_info().returning({
+            move |_app_context, _config_context, _workspace_dir, id, file_name| {
+                Err(StackError::App(AppError::new(
+                    format!(
+                        "Failed to load stack from info: id={}, file_name={}",
+                        id, file_name
+                    )
+                    .as_str(),
+                )))
+            }
+        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -1480,8 +1437,19 @@ mod load_stacks_tests {
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
         };
 
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_command_app_config),
+            stack: Arc::new(mock_command_stack),
+        };
+
         // ######### 実行 #########
-        let result = load_stacks(&app_context, &config_context, workspace_directory).await;
+        let result = load_stacks(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
 
         // ######### 検証 #########
         // load_stackがエラーになること
