@@ -774,6 +774,40 @@ mod get_manual_management_resources_tests {
             ManualManagementResourceError::Io(_)
         ));
     }
+
+    #[tokio::test]
+    async fn test_get_manual_management_resources_handles_write_file_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+
+        mock_file_system.expect_path_exists().return_const(false);
+
+        mock_file_system.expect_write_file().returning(|_, _| {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::PermissionDenied,
+                "Permission denied",
+            ))
+        });
+
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let workspace_dir = "/test/workspace";
+
+        // ######### 実行 #########
+        let result = get_manual_management_resources(&app_context, workspace_dir).await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            ManualManagementResourceError::Io(_)
+        ));
+    }
 }
 
 #[cfg(test)]
