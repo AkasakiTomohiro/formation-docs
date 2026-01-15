@@ -3470,4 +3470,101 @@ mod load_parameter_and_resource_list_tests {
         // ######### 検証 #########
         assert!(result.is_err());
     }
+
+    /// 指定したスタックIDがワークスペースに存在しない場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_not_found_stack_id() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().times(0);
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "test stack".to_string(),
+                description: "test stack description".to_string(),
+                stacks: HashMap::new(), // 空のスタックマップ
+            })
+        });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = load_parameter_and_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// スタックのテンプレート読み込みに失敗した場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_template_read() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().returning(|_| {
+            Err(tokio::io::Error::new(
+                tokio::io::ErrorKind::Other,
+                "read_file error",
+            ))
+        });
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks =
+                HashMap::from([(stack_id.to_string(), "stack_file.template.yaml".to_string())]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "test stack".to_string(),
+                description: "test stack description".to_string(),
+                stacks,
+            })
+        });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = load_parameter_and_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
 }
