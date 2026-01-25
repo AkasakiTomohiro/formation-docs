@@ -8,6 +8,7 @@ pub enum HttpClientError {
     Reqwest(String),
 }
 
+#[coverage(off)]
 impl From<reqwest::Error> for HttpClientError {
     fn from(err: reqwest::Error) -> Self {
         HttpClientError::Reqwest(err.to_string())

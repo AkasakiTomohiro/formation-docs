@@ -24,9 +24,7 @@ pub trait StackCommandTrait: Send + Sync {
         config_context: &ConfigContext,
         workspace_directory: &str,
         stack_id: &str,
-    ) -> Result<Vec<StackOutput>, StackError> {
-        get_stack_outputs(app_context, config_context, workspace_directory, stack_id).await
-    }
+    ) -> Result<Vec<StackOutput>, StackError>;
 }
 
 pub struct StackCommand;
