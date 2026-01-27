@@ -24,19 +24,8 @@
     "package.json": "pnpm-lock.yaml",
     "Cargo.toml": "Cargo.lock"
   },
-  "importSorter.generalConfiguration.sortOnBeforeSave": true,
-  "importSorter.sortConfiguration.customOrderingRules.rules": [
-    {
-      "regex": "^ace-builds/src-noconflict/ace$",
-      "orderLevel": 10
-    },
-    {
-      "regex": "^[@]",
-      "orderLevel": 30
-    },
-    {
-      "regex": "^[.]",
-      "orderLevel": 40
-    }
-  ]
+  "testing.coverageToolbarEnabled": true,
+  "coverage-gutters.showGutterCoverage": true,
+  "coverage-gutters.showLineCoverage": true,
+  "coverage-gutters.showRulerCoverage": true
 }

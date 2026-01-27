@@ -1,11 +1,17 @@
+#![feature(coverage_attribute)]
+
 mod api;
 mod command;
 mod config;
 mod utils;
 
+use api::context::api_context::ApiContext;
+use command::context::command_context::CommandContext;
+use config::context::config_context::ConfigContext;
 use utils::context::app_context::AppContext;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 async fn open_workspace_command(handle: tauri::AppHandle, id: &str) -> Result<bool, ()> {
     match command::workspace::open_workspace(handle, id).await {
@@ -14,10 +20,14 @@ async fn open_workspace_command(handle: tauri::AppHandle, id: &str) -> Result<bo
     }
 }
 
+#[coverage(off)]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .manage(AppContext::new())
+        .manage(ConfigContext::new())
+        .manage(ApiContext::new())
+        .manage(CommandContext::new())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_log::Builder::new().build())

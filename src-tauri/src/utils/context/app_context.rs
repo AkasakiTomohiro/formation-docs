@@ -8,6 +8,7 @@ pub struct AppContext {
     pub http_client: Arc<dyn HttpClient>,
 }
 
+#[coverage(off)]
 impl AppContext {
     pub fn new() -> Self {
         Self {

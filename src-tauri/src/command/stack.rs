@@ -3,9 +3,9 @@ use std::collections::HashSet;
 use std::io::ErrorKind;
 use std::path::PathBuf;
 
-use crate::config::stack_meta_config::StackMetaConfig;
+use crate::command::context::command_context::CommandContext;
+use crate::config::context::config_context::ConfigContext;
 use crate::config::stack_meta_config::StackMetaConfigError;
-use crate::config::workspace_config::WorkspaceConfig;
 use crate::config::workspace_config::WorkspaceConfigError;
 use crate::utils::context::app_context::AppContext;
 use crate::utils::get_window_state;
@@ -28,7 +28,7 @@ pub struct Stack {
 }
 
 #[derive(Debug, Error)]
-enum StackError {
+pub enum StackError {
     #[error("app error: {0}")]
     App(#[from] AppError),
     #[error("io error: {0}")]
@@ -52,7 +52,9 @@ enum StackError {
  *  3. メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
  */
 async fn load_stacks(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
 ) -> Result<Vec<Stack>, StackError> {
     // TODO: ディレクトリ配下のファイルをglobmatchで取得して、`stacks`に存在しないファイルも自動的に取り込む機能を追加する
@@ -65,18 +67,30 @@ async fn load_stacks(
     //     }
     // };
     // let paths: Vec<_> = builder.into_iter().flatten().collect();
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let mut stacks = Vec::new();
     for (id, file_name) in workspace.stacks.iter() {
         // スタックを読み込む
-        let stack =
-            match load_stack_from_info(state.clone(), workspace_directory, id, file_name).await {
-                Ok(stack) => stack,
-                Err(err) => {
-                    print!("error: {:?}", err);
-                    return Err(StackError::App(AppError::new("Failed to load stack")));
-                }
-            };
+        let stack = match command_context
+            .stack
+            .load_stack_from_info(
+                app_context,
+                config_context,
+                workspace_directory,
+                id,
+                file_name,
+            )
+            .await
+        {
+            Ok(stack) => stack,
+            Err(err) => {
+                print!("error: {:?}", err);
+                return Err(StackError::App(AppError::new("Failed to load stack")));
+            }
+        };
 
         stacks.push(stack);
     }
@@ -85,18 +99,21 @@ async fn load_stacks(
 }
 
 async fn delete_stack(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<(), StackError> {
-    let mut workspace =
-        WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let mut workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
 
     match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => {
             let stack_file_path = PathBuf::from(workspace_directory).join(stack_file_name);
             // スタックファイルとメタデータファイルを削除する
-            if let Err(err) = state.file_system.remove_file(&stack_file_path).await {
+            if let Err(err) = app_context.file_system.remove_file(&stack_file_path).await {
                 match err.kind() {
                     ErrorKind::NotFound => {
                         // ファイルが見つからない場合は無視する
@@ -113,7 +130,7 @@ async fn delete_stack(
                     .clone()
                     .replace(".template.json", ".meta.json"),
             );
-            if let Err(err) = state.file_system.remove_file(&file_path).await {
+            if let Err(err) = app_context.file_system.remove_file(&file_path).await {
                 match err.kind() {
                     ErrorKind::NotFound => {
                         // ファイルが見つからない場合は無視する
@@ -127,8 +144,13 @@ async fn delete_stack(
             };
             // workspace.jsonのstacksから削除する
             workspace.stacks.remove(stack_id);
-            workspace
-                .write(state.file_system.clone(), workspace_directory)
+            config_context
+                .workspace_config_io
+                .write(
+                    workspace,
+                    app_context.file_system.clone(),
+                    workspace_directory,
+                )
                 .await?;
         }
         None => return Err(StackError::App(AppError::new("Stack not found"))),
@@ -138,7 +160,8 @@ async fn delete_stack(
 }
 
 async fn import_stack(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_file_path: &str,
 ) -> Result<(), StackError> {
@@ -154,17 +177,20 @@ async fn import_stack(
     if copy_file_path.to_str().unwrap() != stack_file_path {
         if filename.ends_with(".yaml") || filename.ends_with(".yml") {
             // YAMLファイルをJSONに変換して保存
-            let yaml_content = state.file_system.read_file(&stack_file_path_buf).await?;
+            let yaml_content = app_context
+                .file_system
+                .read_file(&stack_file_path_buf)
+                .await?;
             let yaml_value: serde_yaml::Value = serde_yaml::from_str(&yaml_content)?;
             let json_content = serde_json::to_string_pretty(&yaml_value)?;
             copy_file_path.set_extension("json");
-            state
+            app_context
                 .file_system
                 .write_file(&copy_file_path, json_content.as_bytes())
                 .await?;
         } else {
             // 通常のコピー処理
-            state
+            app_context
                 .file_system
                 .copy_file(&stack_file_path_buf, &copy_file_path)
                 .await?;
@@ -172,8 +198,10 @@ async fn import_stack(
     }
 
     // workspace.jsonのstacksに追加する
-    let mut workspace =
-        WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let mut workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
 
     // スタックが存在する場合は追加しない
     if workspace.stacks.values().any(|v| v == filename) {
@@ -184,15 +212,21 @@ async fn import_stack(
     workspace
         .stacks
         .insert(Uuid::new_v4().to_string(), filename.to_string());
-    workspace
-        .write(state.file_system.clone(), workspace_directory)
+    config_context
+        .workspace_config_io
+        .write(
+            workspace,
+            app_context.file_system.clone(),
+            workspace_directory,
+        )
         .await?;
 
     return Ok(());
 }
 
-async fn load_stack_from_info(
-    state: State<'_, AppContext>,
+pub async fn load_stack_from_info(
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
     stack_file_name: &str,
@@ -200,23 +234,25 @@ async fn load_stack_from_info(
     let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
 
     // テンプレートファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_stack）
-    let template_json = state.file_system.read_file(&template_path).await?;
+    let template_json = app_context.file_system.read_file(&template_path).await?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
     let description_from_stack: Option<String> = template_json["Description"]
         .as_str()
         .and_then(|desc| Some(desc.to_string()));
 
     // メタファイルのdescriptionフィールドを取得する。Optionalな場合もある。（description_from_meta）
-    let meta_json = match StackMetaConfig::read(
-        state.file_system.clone(),
-        workspace_directory,
-        stack_file_name
-            .to_string()
-            .clone()
-            .replace(".template.json", "")
-            .as_str(),
-    )
-    .await
+    let meta_json = match config_context
+        .stack_meta_config_io
+        .read(
+            app_context.file_system.clone(),
+            workspace_directory,
+            stack_file_name
+                .to_string()
+                .clone()
+                .replace(".template.json", "")
+                .as_str(),
+        )
+        .await
     {
         Ok(meta_json) => meta_json,
         Err(_) => {
@@ -236,14 +272,28 @@ async fn load_stack_from_info(
 }
 
 async fn load_stack_from_id(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Stack, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     return match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => {
-            load_stack_from_info(state, workspace_directory, stack_id, stack_file_name).await
+            command_context
+                .stack
+                .load_stack_from_info(
+                    app_context,
+                    config_context,
+                    workspace_directory,
+                    stack_id,
+                    stack_file_name,
+                )
+                .await
         }
         None => Err(StackError::App(AppError::new("Stack not found"))),
     };
@@ -265,21 +315,27 @@ pub struct TemplateSummary {
 }
 
 async fn load_template_summary(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
 ) -> Result<Vec<TemplateSummary>, StackError> {
     let mut templates = Vec::new();
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
-    for (id, stack_file_name) in workspace.stacks.iter() {
-        let meta = StackMetaConfig::read(
-            state.file_system.clone(),
-            workspace_directory,
-            stack_file_name.replace(".template.json", "").as_str(),
-        )
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
         .await?;
+    for (id, stack_file_name) in workspace.stacks.iter() {
+        let meta = config_context
+            .stack_meta_config_io
+            .read(
+                app_context.file_system.clone(),
+                workspace_directory,
+                stack_file_name.replace(".template.json", "").as_str(),
+            )
+            .await?;
 
         let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
-        let template_json = state.file_system.read_file(&template_path).await?;
+        let template_json = app_context.file_system.read_file(&template_path).await?;
         let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
         let resources_json: Value = template_json["Resources"].clone();
 
@@ -327,13 +383,17 @@ async fn load_template_summary(
 }
 
 async fn get_stack_resource_list(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
     service_name: &str,
     resource_name: &str,
 ) -> Result<Vec<String>, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -341,7 +401,7 @@ async fn get_stack_resource_list(
         }
     };
     let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
-    let template_json = state.file_system.read_file(&template_path).await?;
+    let template_json = app_context.file_system.read_file(&template_path).await?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
     let resources_json = template_json["Resources"].clone();
     let mut result: Vec<String> = Vec::new();
@@ -361,12 +421,16 @@ async fn get_stack_resource_list(
 }
 
 async fn get_stack_resource_properties(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
     logical_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -374,7 +438,7 @@ async fn get_stack_resource_properties(
         }
     };
     let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
-    let template_json = state.file_system.read_file(&template_path).await?;
+    let template_json = app_context.file_system.read_file(&template_path).await?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
     let properties_json = template_json["Resources"][logical_id]["Properties"].clone();
     if properties_json.is_null() {
@@ -384,12 +448,16 @@ async fn get_stack_resource_properties(
 }
 
 async fn get_stack_resource_properties_reasons(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
     logical_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -401,7 +469,7 @@ async fn get_stack_resource_properties_reasons(
         workspace_directory,
         stack_file_name.replace(".template.json", "")
     ));
-    let meta_json = state.file_system.read_file(&meta_path).await?;
+    let meta_json = app_context.file_system.read_file(&meta_path).await?;
     let meta_json: Value = serde_json::from_str(&meta_json).unwrap_or_default();
     let reasons_json = meta_json["reasons"][logical_id].clone();
     if reasons_json.is_null() {
@@ -411,11 +479,15 @@ async fn get_stack_resource_properties_reasons(
 }
 
 async fn get_stack_parameters(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Value, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -423,7 +495,7 @@ async fn get_stack_parameters(
         }
     };
     let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
-    let template_json = state.file_system.read_file(&template_path).await?;
+    let template_json = app_context.file_system.read_file(&template_path).await?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
     let parameters_json = template_json["Parameters"].clone();
     if parameters_json.is_null() {
@@ -447,12 +519,16 @@ pub struct StackOutput {
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 /// - `stack_id` - スタックのID
-async fn get_stack_outputs(
-    state: State<'_, AppContext>,
+pub async fn get_stack_outputs(
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<Vec<StackOutput>, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -460,7 +536,7 @@ async fn get_stack_outputs(
         }
     };
     let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
-    let template_json = state.file_system.read_file(&template_path).await?;
+    let template_json = app_context.file_system.read_file(&template_path).await?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
     let outputs_json = template_json["Outputs"].clone();
 
@@ -491,14 +567,22 @@ async fn get_stack_outputs(
 ///
 /// - `workspace_directory` - ワークスペースのディレクトリパス
 async fn get_all_stack_outputs(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
+    command_context: &CommandContext,
     workspace_directory: &str,
 ) -> Result<HashMap<String, String>, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     // {Outputsのexport_name: スタックID}の形で返す
     let mut result: HashMap<String, String> = HashMap::new();
     for (stack_id, _) in workspace.stacks.iter() {
-        let outputs = get_stack_outputs(state.clone(), workspace_directory, stack_id).await?;
+        let outputs = command_context
+            .stack
+            .get_stack_outputs(app_context, config_context, workspace_directory, stack_id)
+            .await?;
         for output in outputs.iter().filter(|o| o.export_name.is_some()) {
             result.insert(
                 output.export_name.as_ref().unwrap().to_string(),
@@ -510,48 +594,80 @@ async fn get_all_stack_outputs(
 }
 
 async fn update_stack_reasons(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
     logical_id: &str,
     reasons: HashMap<String, String>,
 ) -> Result<(), StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name.replace(".template.json", ""),
         None => {
             return Err(StackError::App(AppError::new("Stack not found")));
         }
     };
-    let mut stack_meta =
-        StackMetaConfig::read(state.file_system.clone(), workspace_directory, &stack_name).await?;
+    let mut stack_meta = config_context
+        .stack_meta_config_io
+        .read(
+            app_context.file_system.clone(),
+            workspace_directory,
+            &stack_name,
+        )
+        .await?;
     stack_meta.reasons.insert(logical_id.to_string(), reasons);
-    stack_meta
-        .write(state.file_system.clone(), workspace_directory, &stack_name)
+    config_context
+        .stack_meta_config_io
+        .write(
+            stack_meta,
+            app_context.file_system.clone(),
+            workspace_directory,
+            &stack_name,
+        )
         .await?;
     return Ok(());
 }
 
 async fn update_stack_detail(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
     name: &str,
     description: &str,
 ) -> Result<(), StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name.replace(".template.json", ""),
         None => {
             return Err(StackError::App(AppError::new("Stack not found")));
         }
     };
-    let mut stack_meta =
-        StackMetaConfig::read(state.file_system.clone(), workspace_directory, &stack_name).await?;
+    let mut stack_meta = config_context
+        .stack_meta_config_io
+        .read(
+            app_context.file_system.clone(),
+            workspace_directory,
+            &stack_name,
+        )
+        .await?;
     stack_meta.name = name.to_string();
     stack_meta.description = description.to_string();
-    stack_meta
-        .write(state.file_system.clone(), workspace_directory, &stack_name)
+    stack_meta = config_context
+        .stack_meta_config_io
+        .write(
+            stack_meta,
+            app_context.file_system.clone(),
+            workspace_directory,
+            &stack_name,
+        )
         .await?;
     return Ok(());
 }
@@ -571,11 +687,15 @@ pub struct ParameterAndResourceList {
 }
 
 async fn load_parameter_and_resource_list(
-    state: State<'_, AppContext>,
+    app_context: &AppContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
 ) -> Result<ParameterAndResourceList, StackError> {
-    let workspace = WorkspaceConfig::read(state.file_system.clone(), workspace_directory).await?;
+    let workspace = config_context
+        .workspace_config_io
+        .read(app_context.file_system.clone(), workspace_directory)
+        .await?;
     let stack_file_name = match workspace.stacks.get(stack_id) {
         Some(stack_file_name) => stack_file_name,
         None => {
@@ -583,7 +703,7 @@ async fn load_parameter_and_resource_list(
         }
     };
     let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
-    let template_json = state.file_system.read_file(&template_path).await?;
+    let template_json = app_context.file_system.read_file(&template_path).await?;
     let template_json: Value = serde_json::from_str(&template_json).unwrap_or_default();
 
     let parameters_json = template_json["Parameters"].clone();
@@ -620,9 +740,12 @@ async fn load_parameter_and_resource_list(
     });
 }
 
+#[coverage(off)]
 #[tauri::command]
 pub async fn load_stacks_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
+    command_context_state: State<'_, CommandContext>,
     window: tauri::Window,
 ) -> Result<CommandResult<Vec<Stack>>, CommandResult> {
     let window_state = match get_window_state(window) {
@@ -631,15 +754,24 @@ pub async fn load_stacks_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match load_stacks(state, window_state.workspace_directory.as_str()).await {
+    return match load_stacks(
+        &app_context_state,
+        &config_context_state,
+        &command_context_state,
+        window_state.workspace_directory.as_str(),
+    )
+    .await
+    {
         Ok(stacks) => Ok(CommandResult::success(stacks)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn delete_stack_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<()>, CommandResult> {
@@ -649,15 +781,24 @@ pub async fn delete_stack_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match delete_stack(state, window_state.workspace_directory.as_str(), stack_id).await {
+    return match delete_stack(
+        &app_context_state,
+        &config_context_state,
+        window_state.workspace_directory.as_str(),
+        stack_id,
+    )
+    .await
+    {
         Ok(_) => Ok(CommandResult::success(())),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn import_stack_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_file_path: &str,
 ) -> Result<CommandResult<()>, CommandResult> {
@@ -668,7 +809,8 @@ pub async fn import_stack_command(
         }
     };
     return match import_stack(
-        state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_file_path,
     )
@@ -679,9 +821,12 @@ pub async fn import_stack_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_stack_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
+    command_context_state: State<'_, CommandContext>,
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<Stack>, CommandResult> {
@@ -691,17 +836,25 @@ pub async fn load_stack_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match load_stack_from_id(state, window_state.workspace_directory.as_str(), stack_id)
-        .await
+    return match load_stack_from_id(
+        &app_context_state,
+        &config_context_state,
+        &command_context_state,
+        window_state.workspace_directory.as_str(),
+        stack_id,
+    )
+    .await
     {
         Ok(stack) => Ok(CommandResult::success(stack)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
 
+#[coverage(off)]
 #[tauri::command]
 pub async fn load_template_summary_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
 ) -> Result<CommandResult<Vec<TemplateSummary>>, CommandResult> {
     let window_state = match get_window_state(window) {
@@ -710,15 +863,23 @@ pub async fn load_template_summary_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match load_template_summary(state, window_state.workspace_directory.as_str()).await {
+    return match load_template_summary(
+        &app_context_state,
+        &config_context_state,
+        window_state.workspace_directory.as_str(),
+    )
+    .await
+    {
         Ok(templates) => Ok(CommandResult::success(templates)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_resource_list_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
     service_name: &str,
@@ -731,7 +892,8 @@ pub async fn get_stack_resource_list_command(
         }
     };
     return match get_stack_resource_list(
-        state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
         service_name,
@@ -744,9 +906,11 @@ pub async fn get_stack_resource_list_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_resource_properties_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
     logical_id: &str,
@@ -758,7 +922,8 @@ pub async fn get_stack_resource_properties_command(
         }
     };
     return match get_stack_resource_properties(
-        state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
         logical_id,
@@ -770,9 +935,11 @@ pub async fn get_stack_resource_properties_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_parameters_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<Value>, CommandResult> {
@@ -782,17 +949,25 @@ pub async fn get_stack_parameters_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_stack_parameters(state, window_state.workspace_directory.as_str(), stack_id)
-        .await
+    return match get_stack_parameters(
+        &app_context_state,
+        &config_context_state,
+        window_state.workspace_directory.as_str(),
+        stack_id,
+    )
+    .await
     {
         Ok(parameters) => Ok(CommandResult::success(parameters)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_outputs_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
+    command_context_state: State<'_, CommandContext>,
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<Vec<StackOutput>>, CommandResult> {
@@ -802,16 +977,27 @@ pub async fn get_stack_outputs_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_stack_outputs(state, window_state.workspace_directory.as_str(), stack_id).await
+    return match command_context_state
+        .stack
+        .get_stack_outputs(
+            &app_context_state,
+            &config_context_state,
+            window_state.workspace_directory.as_str(),
+            stack_id,
+        )
+        .await
     {
         Ok(parameters) => Ok(CommandResult::success(parameters)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_all_stack_outputs_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
+    command_context_state: State<'_, CommandContext>,
     window: tauri::Window,
 ) -> Result<CommandResult<HashMap<String, String>>, CommandResult> {
     let window_state = match get_window_state(window) {
@@ -820,15 +1006,24 @@ pub async fn get_all_stack_outputs_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_all_stack_outputs(state, window_state.workspace_directory.as_str()).await {
+    return match get_all_stack_outputs(
+        &app_context_state,
+        &config_context_state,
+        &command_context_state,
+        window_state.workspace_directory.as_str(),
+    )
+    .await
+    {
         Ok(outputs) => Ok(CommandResult::success(outputs)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_stack_meta_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
     logical_id: &str,
@@ -841,7 +1036,8 @@ pub async fn update_stack_meta_command(
         }
     };
     return match update_stack_reasons(
-        state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
         logical_id,
@@ -854,9 +1050,11 @@ pub async fn update_stack_meta_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_stack_resource_properties_reasons_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
     logical_id: &str,
@@ -868,7 +1066,8 @@ pub async fn get_stack_resource_properties_reasons_command(
         }
     };
     return match get_stack_resource_properties_reasons(
-        state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
         logical_id,
@@ -880,9 +1079,11 @@ pub async fn get_stack_resource_properties_reasons_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_stack_detail_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
     name: &str,
@@ -895,7 +1096,8 @@ pub async fn update_stack_detail_command(
         }
     };
     return match update_stack_detail(
-        state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
         name,
@@ -908,9 +1110,11 @@ pub async fn update_stack_detail_command(
     };
 }
 
+#[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_parameter_and_resource_list_command(
-    state: State<'_, AppContext>,
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
 ) -> Result<CommandResult<ParameterAndResourceList>, CommandResult> {
@@ -921,7 +1125,8 @@ pub async fn load_parameter_and_resource_list_command(
         }
     };
     return match load_parameter_and_resource_list(
-        state,
+        &app_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
     )
@@ -930,4 +1135,5938 @@ pub async fn load_parameter_and_resource_list_command(
         Ok(result) => Ok(CommandResult::success(result)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_stacks_tests {
+    use std::sync::Arc;
+
+    use crate::{
+        command::context::{
+            app_config_command_trait::MockAppConfigCommandTrait,
+            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
+            manual_management_resource_trait::MockManualManagementResourceTrait,
+            stack_command_trait::MockStackCommandTrait,
+        },
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+
+    use super::*;
+
+    /// stacksの取得に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_command_app_config = MockAppConfigCommandTrait::new();
+        let mut mock_command_stack = MockStackCommandTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        let stack_id = "sample_stack_id";
+        let stack_file_name = "sample_stack";
+        let mut stacks = HashMap::new();
+        // 最後の一文字を変えて2つのスタックを用意
+        stacks.insert(format!("{}1", stack_id), format!("{}1", stack_file_name));
+        stacks.insert(format!("{}2", stack_id), format!("{}2", stack_file_name));
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // load_stack_from_infoのモック設定
+        let description_from_meta = "description_from_meta sample";
+        let description_from_stack = "description_from_stack sample";
+        mock_command_stack
+            .expect_load_stack_from_info()
+            .times(2)
+            .withf(
+                move |_app_context, _config_context, workspace_dir, id, file_name| {
+                    workspace_dir == workspace_directory
+                        && (id == format!("{}1", stack_id.to_string(),)
+                            || id == format!("{}2", stack_id.to_string(),))
+                        && (file_name == format!("{}1", stack_file_name)
+                            || file_name == format!("{}2", stack_file_name))
+                },
+            )
+            .returning({
+                move |_app_context, _config_context, _workspace_dir, id, file_name| {
+                    Ok(Stack {
+                        id: id.to_string(),
+                        name: file_name.to_string(),
+                        description_from_meta: Some(description_from_meta.to_string()),
+                        description_from_stack: Some(description_from_stack.to_string()),
+                        exist: true,
+                    })
+                }
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_command_app_config),
+            stack: Arc::new(mock_command_stack),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
+        };
+
+        // ######### 実行 #########
+        let result = load_stacks(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stacksが正しく取得できていること
+        assert!(result.is_ok());
+        let mut stacks = result.unwrap();
+        assert_eq!(stacks.len(), 2);
+        stacks.sort_by(|a, b| a.id.cmp(&b.id)); // IDでソートして順序を固定
+        for (i, stack) in stacks.iter().enumerate() {
+            let index = i + 1;
+            assert_eq!(stack.id, format!("{}{}", stack_id, index));
+            assert_eq!(stack.name, format!("{}{}", stack_file_name, index));
+            assert_eq!(
+                stack.description_from_meta,
+                Some(description_from_meta.to_string())
+            );
+            assert_eq!(
+                stack.description_from_stack,
+                Some(description_from_stack.to_string())
+            );
+            assert_eq!(stack.exist, true);
+        }
+    }
+
+    // workspaceにスタックがない場合、空配列が返ること
+    #[tokio::test]
+    async fn success_no_stacks() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_command_app_config = MockAppConfigCommandTrait::new();
+        let mock_command_stack = MockStackCommandTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: HashMap::new(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_command_app_config),
+            stack: Arc::new(mock_command_stack),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
+        };
+
+        // ######### 実行 #########
+        let result = load_stacks(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
+
+        // ######### 検証 #########
+        // 空配列が返ること
+        assert!(result.is_ok());
+        let stacks = result.unwrap();
+        assert_eq!(stacks.len(), 0);
+    }
+
+    // workspace_configのreadに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn workspace_config_read_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_command_app_config = MockAppConfigCommandTrait::new();
+        let mock_command_stack = MockStackCommandTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to read workspace config",
+                )))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_command_app_config),
+            stack: Arc::new(mock_command_stack),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
+        };
+
+        // ######### 実行 #########
+        let result = load_stacks(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
+
+        // ######### 検証 #########
+        // エラーになること
+        assert!(result.is_err());
+    }
+
+    // load_stack_from_infoでエラーが発生した場合、エラーになること
+    #[tokio::test]
+    async fn load_stack_from_info_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_command_app_config = MockAppConfigCommandTrait::new();
+        let mut mock_command_stack = MockStackCommandTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        let stack_id = "sample_stack_id";
+        let stack_file_name = "sample_stack";
+        let stack_file_name_json = format!("{}.template.json", stack_file_name);
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            format!("{}1", stack_id),
+            format!("{}1", stack_file_name_json),
+        );
+        stacks.insert(
+            format!("{}2", stack_id),
+            format!("{}2", stack_file_name_json),
+        );
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // load_stack_from_infoのモック設定
+        mock_command_stack.expect_load_stack_from_info().returning({
+            move |_app_context, _config_context, _workspace_dir, id, file_name| {
+                Err(StackError::App(AppError::new(
+                    format!(
+                        "Failed to load stack from info: id={}, file_name={}",
+                        id, file_name
+                    )
+                    .as_str(),
+                )))
+            }
+        });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_command_app_config),
+            stack: Arc::new(mock_command_stack),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
+        };
+
+        // ######### 実行 #########
+        let result = load_stacks(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
+
+        // ######### 検証 #########
+        // load_stackがエラーになること
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod delete_stack_tests {
+    use std::sync::Arc;
+
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+
+    use super::*;
+
+    // stackの削除に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        let stack_id = "sample_stack_id";
+        let stack_file_name = "sample_stack";
+        let stack_file_name_json = format!("{}.template.json", stack_file_name);
+        let meta_file_name_json = format!("{}.meta.json", stack_file_name);
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name_json.clone());
+        stacks.insert(
+            "other_stack_id".to_string(),
+            "other_stack.template.json".to_string(),
+        );
+        let deleted_workspace = WorkspaceConfig {
+            version: 1,
+            stacks: stacks.clone(),
+            name: "Sample Workspace".to_string(),
+            description: "workspace_description sample".to_string(),
+        };
+
+        // workspace_configのreadのモック設定
+        let deleted_workspace_clone = deleted_workspace.clone();
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| Ok(deleted_workspace_clone.clone()));
+
+        // remove_fileのモック設定
+        let stack_file_path = PathBuf::from(workspace_directory).join(stack_file_name_json);
+        let stack_meta_file_path = PathBuf::from(workspace_directory).join(meta_file_name_json);
+        mock_file_system
+            .expect_remove_file()
+            .times(2)
+            .withf(move |path| path == &stack_file_path || path == &stack_meta_file_path)
+            .returning(move |_path| Ok(()));
+
+        // workspace_configのwriteのモック設定
+        let updated_stacks = {
+            let mut map = HashMap::new();
+            map.insert(
+                "other_stack_id".to_string(),
+                "other_stack.template.json".to_string(),
+            );
+            map
+        };
+        let updated_stacks_clone = updated_stacks.clone();
+        let deleted_workspace_clone1 = deleted_workspace.clone();
+        mock_workspace_config
+            .expect_write()
+            .withf(move |workspace, _file_system, workspace_dir| {
+                return workspace.version == 1
+                    && workspace.stacks == updated_stacks_clone
+                    && workspace.name == deleted_workspace.name
+                    && workspace.description == deleted_workspace.description
+                    && workspace_dir == workspace_directory;
+            })
+            .returning(move |_workspace, _file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: updated_stacks.clone(),
+                    name: deleted_workspace_clone1.name.clone(),
+                    description: deleted_workspace_clone1.description.clone(),
+                })
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            delete_stack(&app_context, &config_context, workspace_directory, stack_id).await;
+
+        // ######### 検証 #########
+        // stackが正しく削除できていること
+        assert!(result.is_ok());
+    }
+
+    // remove_fileでファイルが見つからない場合でも成功すること
+    #[tokio::test]
+    async fn success_remove_file_not_found() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        let stack_id = "sample_stack_id";
+        let stack_file_name = "sample_stack";
+        let stack_file_name_json = format!("{}.template.json", stack_file_name);
+        let meta_file_name_json = format!("{}.meta.json", stack_file_name);
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name_json.clone());
+        stacks.insert(
+            "other_stack_id".to_string(),
+            "other_stack.template.json".to_string(),
+        );
+        let deleted_workspace = WorkspaceConfig {
+            version: 1,
+            stacks: stacks.clone(),
+            name: "Sample Workspace".to_string(),
+            description: "workspace_description sample".to_string(),
+        };
+
+        // workspace_configのreadのモック設定
+        let deleted_workspace_clone = deleted_workspace.clone();
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| Ok(deleted_workspace_clone.clone()));
+
+        // remove_fileのモック設定
+        let stack_file_path = PathBuf::from(workspace_directory).join(stack_file_name_json);
+        let stack_meta_file_path = PathBuf::from(workspace_directory).join(meta_file_name_json);
+        mock_file_system
+            .expect_remove_file()
+            .times(2)
+            .withf(move |path| path == &stack_file_path || path == &stack_meta_file_path)
+            .returning(move |_path| {
+                Err(tokio::io::Error::new(
+                    tokio::io::ErrorKind::NotFound,
+                    "file not found",
+                ))
+            });
+
+        // workspace_configのwriteのモック設定
+        let updated_stacks = {
+            let mut map = HashMap::new();
+            map.insert(
+                "other_stack_id".to_string(),
+                "other_stack.template.json".to_string(),
+            );
+            map
+        };
+        let updated_stacks_clone = updated_stacks.clone();
+        let deleted_workspace_clone1 = deleted_workspace.clone();
+        mock_workspace_config
+            .expect_write()
+            .withf(move |workspace, _file_system, workspace_dir| {
+                return workspace.version == 1
+                    && workspace.stacks == updated_stacks_clone
+                    && workspace.name == deleted_workspace.name
+                    && workspace.description == deleted_workspace.description
+                    && workspace_dir == workspace_directory;
+            })
+            .returning(move |_workspace, _file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: updated_stacks.clone(),
+                    name: deleted_workspace_clone1.name.clone(),
+                    description: deleted_workspace_clone1.description.clone(),
+                })
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            delete_stack(&app_context, &config_context, workspace_directory, stack_id).await;
+
+        // ######### 検証 #########
+        // エラーを返さないこと
+        assert!(result.is_ok());
+    }
+
+    // workspace_configのreadに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn workspace_config_read_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        let stack_id = "sample_stack_id";
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to read workspace config",
+                )))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            delete_stack(&app_context, &config_context, workspace_directory, stack_id).await;
+
+        // ######### 検証 #########
+        // delete_stackがエラーになること
+        assert!(result.is_err());
+    }
+
+    // stack_idが一致するスタックがworkspaceに存在しない場合、エラーになること
+    #[tokio::test]
+    async fn stack_none_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        let stack_id = "sample_stack_id";
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "other_stack_id".to_string(),
+            "other_stack.template.json".to_string(),
+        );
+        let deleted_workspace = WorkspaceConfig {
+            version: 1,
+            stacks: stacks.clone(),
+            name: "Sample Workspace".to_string(),
+            description: "workspace_description sample".to_string(),
+        };
+
+        // workspace_configのreadのモック設定
+        let deleted_workspace_clone = deleted_workspace.clone();
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| Ok(deleted_workspace_clone.clone()));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            delete_stack(&app_context, &config_context, workspace_directory, stack_id).await;
+
+        // ######### 検証 #########
+        // delete_stackがエラーになること
+        assert!(result.is_err());
+    }
+
+    // 1回目のremove_fileでその他のエラーが発生した場合、エラーになること
+    #[tokio::test]
+    async fn remove_file_other_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        let stack_id = "sample_stack_id";
+        let stack_file_name = "sample_stack";
+        let stack_file_name_json = format!("{}.template.json", stack_file_name);
+        let meta_file_name_json = format!("{}.meta.json", stack_file_name);
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name_json.clone());
+        stacks.insert(
+            "other_stack_id".to_string(),
+            "other_stack.template.json".to_string(),
+        );
+        let deleted_workspace = WorkspaceConfig {
+            version: 1,
+            stacks: stacks.clone(),
+            name: "Sample Workspace".to_string(),
+            description: "workspace_description sample".to_string(),
+        };
+
+        // workspace_configのreadのモック設定
+        let deleted_workspace_clone = deleted_workspace.clone();
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| Ok(deleted_workspace_clone.clone()));
+
+        // remove_fileのモック設定
+        let stack_file_path = PathBuf::from(workspace_directory).join(stack_file_name_json);
+        let stack_meta_file_path = PathBuf::from(workspace_directory).join(meta_file_name_json);
+        mock_file_system
+            .expect_remove_file()
+            .times(1)
+            .withf(move |path| path == &stack_file_path || path == &stack_meta_file_path)
+            .returning({
+                let mut call_count = 0;
+                move |_path| {
+                    call_count += 1;
+                    match call_count {
+                        1 => Err(tokio::io::Error::new(
+                            tokio::io::ErrorKind::Other,
+                            "remove_file error",
+                        )), // 1回目の呼び出しでErrを返す
+                        _ => panic!("Unexpected call"),
+                    }
+                }
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            delete_stack(&app_context, &config_context, workspace_directory, stack_id).await;
+
+        // ######### 検証 #########
+        // delete_stackがエラーになること
+        assert!(result.is_err());
+    }
+
+    // 2回目のremove_fileでその他のエラーが発生した場合、エラーになること
+    #[tokio::test]
+    async fn remove_file_other_error_second() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        let stack_id = "sample_stack_id";
+        let stack_file_name = "sample_stack";
+        let stack_file_name_json = format!("{}.template.json", stack_file_name);
+        let meta_file_name_json = format!("{}.meta.json", stack_file_name);
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name_json.clone());
+        stacks.insert(
+            "other_stack_id".to_string(),
+            "other_stack.template.json".to_string(),
+        );
+        let deleted_workspace = WorkspaceConfig {
+            version: 1,
+            stacks: stacks.clone(),
+            name: "Sample Workspace".to_string(),
+            description: "workspace_description sample".to_string(),
+        };
+
+        // workspace_configのreadのモック設定
+        let deleted_workspace_clone = deleted_workspace.clone();
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| Ok(deleted_workspace_clone.clone()));
+
+        // remove_fileのモック設定
+        let stack_file_path = PathBuf::from(workspace_directory).join(stack_file_name_json);
+        let stack_meta_file_path = PathBuf::from(workspace_directory).join(meta_file_name_json);
+        mock_file_system
+            .expect_remove_file()
+            .times(2)
+            .withf(move |path| path == &stack_file_path || path == &stack_meta_file_path)
+            .returning({
+                let mut call_count = 0;
+                move |_path| {
+                    call_count += 1;
+                    match call_count {
+                        1 => Ok(()),
+                        2 => Err(tokio::io::Error::new(
+                            tokio::io::ErrorKind::Other,
+                            "remove_file error",
+                        )), // 2回目の呼び出しでErrを返す
+                        _ => panic!("Unexpected call"),
+                    }
+                }
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            delete_stack(&app_context, &config_context, workspace_directory, stack_id).await;
+
+        // ######### 検証 #########
+        // delete_stackがエラーになること
+        assert!(result.is_err());
+    }
+
+    // workspace_configのwriteに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn workspace_config_write_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        let stack_id = "sample_stack_id";
+        let stack_file_name = "sample_stack";
+        let stack_file_name_json = format!("{}.template.json", stack_file_name);
+        let meta_file_name_json = format!("{}.meta.json", stack_file_name);
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name_json.clone());
+        stacks.insert(
+            "other_stack_id".to_string(),
+            "other_stack.template.json".to_string(),
+        );
+        let deleted_workspace = WorkspaceConfig {
+            version: 1,
+            stacks: stacks.clone(),
+            name: "Sample Workspace".to_string(),
+            description: "workspace_description sample".to_string(),
+        };
+
+        // workspace_configのreadのモック設定
+        let deleted_workspace_clone = deleted_workspace.clone();
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| Ok(deleted_workspace_clone.clone()));
+
+        // remove_fileのモック設定
+        let stack_file_path = PathBuf::from(workspace_directory).join(stack_file_name_json);
+        let stack_meta_file_path = PathBuf::from(workspace_directory).join(meta_file_name_json);
+        mock_file_system
+            .expect_remove_file()
+            .times(2)
+            .withf(move |path| path == &stack_file_path || path == &stack_meta_file_path)
+            .returning(move |_path| Ok(()));
+
+        // workspace_configのwriteのモック設定
+        let updated_stacks = {
+            let mut map = HashMap::new();
+            map.insert(
+                "other_stack_id".to_string(),
+                "other_stack.template.json".to_string(),
+            );
+            map
+        };
+        let updated_stacks_clone = updated_stacks.clone();
+        mock_workspace_config
+            .expect_write()
+            .withf(move |workspace, _file_system, workspace_dir| {
+                return workspace.version == 1
+                    && workspace.stacks == updated_stacks_clone
+                    && workspace.name == deleted_workspace.name
+                    && workspace.description == deleted_workspace.description
+                    && workspace_dir == workspace_directory;
+            })
+            .returning(move |_workspace, _file_system, _workspace_dir| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to write workspace config",
+                )))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            delete_stack(&app_context, &config_context, workspace_directory, stack_id).await;
+
+        // ######### 検証 #########
+        // delete_stackがエラーになること
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod import_stack_tests {
+    use super::*;
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+    use std::sync::Arc;
+
+    // stackのインポートに成功すること
+    // インポート元と先が同じファイルパス
+    #[tokio::test]
+    async fn success_import_same_path() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "sample_workspace";
+        let file_name = "new_stack.template.json";
+        let stack_file_path_buf = PathBuf::from(workspace_directory).join(file_name);
+        let stack_file_path = stack_file_path_buf.to_str().unwrap().to_string();
+
+        let workspace_config_before = WorkspaceConfig {
+            version: 1,
+            stacks: HashMap::new(),
+            name: "Sample Workspace".to_string(),
+            description: "workspace_description sample".to_string(),
+        };
+
+        // workspace_configのreadのモック設定
+        let workspace_config_before_clone = workspace_config_before.clone();
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(workspace_config_before_clone.clone())
+            });
+
+        // workspace_configのwriteのモック設定
+        let updated_stacks = {
+            let mut map = HashMap::new();
+            map.insert(
+                "imported_stack".to_string(),
+                "new_stack.template.json".to_string(),
+            );
+            map
+        };
+        mock_workspace_config
+            .expect_write()
+            .withf(move |workspace, _file_system, workspace_dir| {
+                // stack_idがUUID形式であることを確認
+                let stack_id = workspace.stacks.keys().next().unwrap();
+                let is_uuid = uuid::Uuid::parse_str(stack_id).is_ok();
+
+                let stack_name = workspace.stacks.values().next().unwrap();
+                return is_uuid
+                    && stack_name == "new_stack.template.json"
+                    && workspace_dir == workspace_directory;
+            })
+            .returning(move |_workspace, _file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: workspace_config_before.version,
+                    stacks: updated_stacks.clone(),
+                    name: workspace_config_before.name.clone(),
+                    description: workspace_config_before.description.clone(),
+                })
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = import_stack(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_file_path.as_str(),
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackが正しくインポートできていること
+        assert!(result.is_ok());
+    }
+
+    // stackが存在する場合、追加されずに成功すること
+    // インポート元と先が異なるファイルパス
+    #[tokio::test]
+    async fn success_import_different_paths_json() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "sample_workspace";
+        let file_name = "existing_stack.template.json";
+        let stack_file_path_buf = PathBuf::from("sample_workspace2").join(file_name);
+        let stack_file_path = stack_file_path_buf.to_str().unwrap().to_string();
+
+        let mut stacks_before = HashMap::new();
+        // スタックは登録済み
+        stacks_before.insert("existing_stack_id".to_string(), file_name.to_string());
+        let workspace_config_before = WorkspaceConfig {
+            version: 1,
+            stacks: stacks_before,
+            name: "Sample Workspace".to_string(),
+            description: "workspace_description sample".to_string(),
+        };
+
+        // file_systemのcopy_fileのモック設定
+        let copy_file_path = PathBuf::from(workspace_directory).join(file_name);
+        let stack_file_path_cloned = stack_file_path.clone();
+        mock_file_system
+            .expect_copy_file()
+            .withf(move |src, dest| {
+                src == PathBuf::from(stack_file_path_cloned.clone()) && dest == &copy_file_path
+            })
+            .returning(move |_src, _dest| Ok(1024));
+
+        // workspace_configのreadのモック設定
+        let workspace_config_before_clone = workspace_config_before.clone();
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(workspace_config_before_clone.clone())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = import_stack(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_file_path.as_str(),
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackが正しくインポートできていること
+        assert!(result.is_ok());
+    }
+
+    // yamlファイル形式のstackのインポートに成功すること
+    // インポート元と先が異なるファイルパス
+    #[tokio::test]
+    async fn success_import_different_paths_yaml() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "sample_workspace";
+        let file_name = "existing_stack.template.yaml";
+        let stack_file_path_buf = PathBuf::from("sample_workspace2").join(file_name);
+        let stack_file_path = stack_file_path_buf.to_str().unwrap().to_string();
+
+        let mut stacks_before = HashMap::new();
+        // スタックは登録済み
+        stacks_before.insert("existing_stack_id".to_string(), file_name.to_string());
+        let workspace_config_before = WorkspaceConfig {
+            version: 1,
+            stacks: stacks_before,
+            name: "Sample Workspace".to_string(),
+            description: "workspace_description sample".to_string(),
+        };
+
+        // file_systemのread_fileのモック設定
+        let stack_content = r#"{
+            "name": "New Stack",
+            "description": "A new stack",
+            "version": "1"
+        }"#;
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == stack_file_path_buf)
+            .returning(move |_path| Ok(stack_content.to_string()));
+
+        // file_systemのwrite_fileのモック設定
+        mock_file_system
+            .expect_write_file()
+            .withf(move |path, content| {
+                let is_correct_path = path
+                    == &PathBuf::from(workspace_directory).join("existing_stack.template.json");
+                // バイト列をJSONとしてパースして比較
+                let is_correct_content = match serde_json::from_slice::<serde_json::Value>(content)
+                {
+                    Ok(got_json) => serde_json::from_str::<serde_json::Value>(stack_content)
+                        .map(|expected| expected == got_json)
+                        .unwrap_or(false),
+                    Err(_) => false,
+                };
+                is_correct_path && is_correct_content
+            })
+            .returning(move |_path, _content| Ok(()));
+
+        // workspace_configのreadのモック設定
+        let workspace_config_before_clone = workspace_config_before.clone();
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(workspace_config_before_clone.clone())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = import_stack(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_file_path.as_str(),
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackが正しくインポートできていること
+        assert!(result.is_ok());
+    }
+
+    // ymlファイル形式のstackのread_fileが失敗した場合、エラーになること
+    // インポート元と先が異なるファイルパス
+    #[tokio::test]
+    async fn import_different_paths_yml_read_file_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config: MockAppConfigTrait = MockAppConfigTrait::new();
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "sample_workspace";
+        let file_name = "existing_stack.template.yml";
+        let stack_file_path_buf = PathBuf::from("sample_workspace2").join(file_name);
+        let stack_file_path = stack_file_path_buf.to_str().unwrap().to_string();
+
+        // file_systemのread_fileのモック設定
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == stack_file_path_buf)
+            .returning(move |_path| {
+                Err(tokio::io::Error::new(
+                    tokio::io::ErrorKind::NotFound,
+                    "read_file error",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = import_stack(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_file_path.as_str(),
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackのインポートがエラーになること
+        assert!(result.is_err());
+    }
+
+    // ymlファイル形式のstackのwrite_fileが失敗した場合、エラーになること
+    // インポート元と先が異なるファイルパス
+    #[tokio::test]
+    async fn import_different_paths_yml_write_file_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "sample_workspace";
+        let file_name = "existing_stack.template.yaml";
+        let stack_file_path_buf = PathBuf::from("sample_workspace2").join(file_name);
+        let stack_file_path = stack_file_path_buf.to_str().unwrap().to_string();
+
+        // file_systemのread_fileのモック設定
+        let stack_content = r#"{
+            "name": "New Stack",
+            "description": "A new stack",
+            "version": "1"
+        }"#;
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == stack_file_path_buf)
+            .returning(move |_path| Ok(stack_content.to_string()));
+
+        // file_systemのwrite_fileのモック設定
+        mock_file_system
+            .expect_write_file()
+            .returning(move |_path, _content| {
+                Err(tokio::io::Error::new(
+                    tokio::io::ErrorKind::Other,
+                    "write_file error",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = import_stack(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_file_path.as_str(),
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackのインポートがエラーになること
+        assert!(result.is_err());
+    }
+
+    // jsonファイル形式のstackのcopy_fileが失敗した場合、エラーになること
+    // インポート元と先が異なるファイルパス
+    #[tokio::test]
+    async fn import_different_paths_json_copy_file_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "sample_workspace";
+        let file_name = "existing_stack.template.json";
+        let stack_file_path_buf = PathBuf::from("sample_workspace2").join(file_name);
+        let stack_file_path = stack_file_path_buf.to_str().unwrap().to_string();
+
+        // file_systemのcopy_fileのモック設定
+        let copy_file_path = PathBuf::from(workspace_directory).join(file_name);
+        let stack_file_path_cloned = stack_file_path.clone();
+        mock_file_system
+            .expect_copy_file()
+            .withf(move |src, dest| {
+                src == PathBuf::from(stack_file_path_cloned.clone()) && dest == &copy_file_path
+            })
+            .returning(move |_src, _dest| {
+                Err(tokio::io::Error::new(
+                    tokio::io::ErrorKind::Other,
+                    "copy_file error",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = import_stack(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_file_path.as_str(),
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackのインポートがエラーになること
+        assert!(result.is_err());
+    }
+
+    // workspace_configのreadに失敗した場合、エラーになること
+    // インポート元と先が同じファイルパス
+    #[tokio::test]
+    async fn import_same_path_workspace_config_read_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "sample_workspace";
+        let file_name = "new_stack.template.json";
+        let stack_file_path_buf = PathBuf::from(workspace_directory).join(file_name);
+        let stack_file_path = stack_file_path_buf.to_str().unwrap().to_string();
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to read workspace config",
+                )))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = import_stack(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_file_path.as_str(),
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackのインポートがエラーになること
+        assert!(result.is_err());
+    }
+
+    // workspace_configのwriteに失敗した場合、エラーになること
+    // インポート元と先が同じファイルパス
+    #[tokio::test]
+    async fn import_same_path_workspace_config_write_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "sample_workspace";
+        let file_name = "new_stack.template.json";
+        let stack_file_path_buf = PathBuf::from(workspace_directory).join(file_name);
+        let stack_file_path = stack_file_path_buf.to_str().unwrap().to_string();
+
+        let workspace_config_before = WorkspaceConfig {
+            version: 1,
+            stacks: HashMap::new(),
+            name: "Sample Workspace".to_string(),
+            description: "workspace_description sample".to_string(),
+        };
+
+        // workspace_configのreadのモック設定
+        let workspace_config_before_clone = workspace_config_before.clone();
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(workspace_config_before_clone.clone())
+            });
+
+        // workspace_configのwriteのモック設定
+        mock_workspace_config.expect_write().returning(
+            move |_workspace, _file_system, _workspace_dir| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to write workspace config",
+                )))
+            },
+        );
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = import_stack(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_file_path.as_str(),
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackのインポートがエラーになること
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_stack_from_info_tests {
+    use std::sync::Arc;
+
+    use super::*;
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            stack_meta_config::StackMetaConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+
+    /// stackの取得に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "sample_stack_id";
+        let stack_file_name = "sample_stack.template.json";
+
+        let stack_name: &str = "Sample Stack Name";
+        let description_from_meta = "description_from_meta sample";
+        let description_from_stack = "description_from_stack sample";
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Description": description_from_stack,
+                    "Resources": {}
+                });
+                Ok(template_json.to_string())
+            });
+
+        // stack_meta_configのreadのモック設定
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "sample_stack"
+            })
+            .returning(|_file_system, _workspace_dir, _stack_name| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: stack_name.to_string(),
+                    description: description_from_meta.to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = load_stack_from_info(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            stack_file_name,
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackが正しく取得できていること
+        assert!(result.is_ok());
+        let stack = result.unwrap();
+        assert_eq!(stack.id, stack_id.to_string());
+        assert_eq!(stack.name, stack_name.to_string());
+        assert_eq!(
+            stack.description_from_meta,
+            Some(description_from_meta.to_string())
+        );
+        assert_eq!(
+            stack.description_from_stack,
+            Some(description_from_stack.to_string())
+        );
+        assert_eq!(stack.exist, true);
+    }
+
+    // descriptionがstackにない場合、Noneになること
+    #[tokio::test]
+    async fn success_stack_description_none() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "sample_stack_id";
+        let stack_file_name = "sample_stack.template.json";
+
+        let stack_name: &str = "Sample Stack Name";
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {}
+                });
+                Ok(template_json.to_string())
+            });
+
+        // stack_meta_configのreadのモック設定
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "sample_stack"
+            })
+            .returning(|_file_system, _workspace_dir, _stack_name| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: stack_name.to_string(),
+                    description: "".to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = load_stack_from_info(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            stack_file_name,
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackが正しく取得できていること
+        assert!(result.is_ok());
+        let stack = result.unwrap();
+        assert_eq!(stack.id, stack_id.to_string());
+        assert_eq!(stack.name, stack_name.to_string());
+        assert_eq!(stack.description_from_meta, Some("".to_string()));
+        assert_eq!(stack.description_from_stack, None);
+        assert_eq!(stack.exist, true);
+    }
+
+    // read_fileが失敗した場合、エラーになること
+    #[tokio::test]
+    async fn read_file_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "sample_stack_id";
+        let stack_file_name = "sample_stack.template.json";
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                Err(tokio::io::Error::new(
+                    tokio::io::ErrorKind::Other,
+                    "read_file error",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = load_stack_from_info(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            stack_file_name,
+        )
+        .await;
+
+        // ######### 検証 #########
+        // load_stack_from_infoがエラーになること
+        assert!(result.is_err());
+    }
+
+    // stack_meta_configのreadが失敗した場合、エラーになること
+    #[tokio::test]
+    async fn stack_meta_config_read_err() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "sample_stack_id";
+        let stack_file_name = "sample_stack.template.json";
+
+        let description_from_stack = "description_from_stack sample";
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Description": description_from_stack,
+                    "Resources": {}
+                });
+                Ok(template_json.to_string())
+            });
+
+        // stack_meta_configのreadのモック設定
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "sample_stack"
+            })
+            .returning(|_file_system, _workspace_dir, _stack_name| {
+                Err(StackMetaConfigError::App(AppError::new("Read error")))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = load_stack_from_info(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            stack_file_name,
+        )
+        .await;
+
+        // ######### 検証 #########
+        // load_stack_from_infoがエラーになること
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_stack_from_id_tests {
+    use std::sync::Arc;
+
+    use super::*;
+    use crate::{
+        command::context::{
+            app_config_command_trait::MockAppConfigCommandTrait,
+            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
+            manual_management_resource_trait::MockManualManagementResourceTrait,
+            stack_command_trait::MockStackCommandTrait,
+        },
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+
+    /// stackの取得に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_command_app_config = MockAppConfigCommandTrait::new();
+        let mut mock_command_stack = MockStackCommandTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "sample_stack_id";
+
+        let stack_file_name = "sample_stack.template.json";
+        let stack_name: &str = "Sample Stack Name";
+        let description_from_meta = "description_from_meta sample";
+        let description_from_stack = "description_from_stack sample";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // load_stack_from_infoのモック設定
+        mock_command_stack
+            .expect_load_stack_from_info()
+            .withf(
+                move |_app_context,
+                      _config_context,
+                      workspace_dir,
+                      stack_id_arg,
+                      stack_file_name_arg| {
+                    workspace_dir == workspace_directory
+                        && stack_id_arg == stack_id
+                        && stack_file_name_arg == stack_file_name
+                },
+            )
+            .returning(
+                move |_app_context,
+                      _config_context,
+                      _workspace_dir,
+                      _stack_id_arg,
+                      _stack_file_name_arg| {
+                    Ok(Stack {
+                        id: stack_id.to_string(),
+                        name: stack_name.to_string(),
+                        description_from_meta: Some(description_from_meta.to_string()),
+                        description_from_stack: Some(description_from_stack.to_string()),
+                        exist: true,
+                    })
+                },
+            );
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_command_app_config),
+            stack: Arc::new(mock_command_stack),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
+        };
+
+        // ######### 実行 #########
+        let result = load_stack_from_id(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+            stack_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackが正しく取得できていること
+        assert!(result.is_ok());
+        let stack = result.unwrap();
+        assert_eq!(stack.id, stack_id.to_string());
+        assert_eq!(stack.name, stack_name.to_string());
+        assert_eq!(
+            stack.description_from_meta,
+            Some(description_from_meta.to_string())
+        );
+        assert_eq!(
+            stack.description_from_stack,
+            Some(description_from_stack.to_string())
+        );
+        assert_eq!(stack.exist, true);
+    }
+
+    // workspace_configのreadが失敗した場合、エラーになること
+    #[tokio::test]
+    async fn workspace_config_read_err() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_command_app_config = MockAppConfigCommandTrait::new();
+        let mock_command_stack = MockStackCommandTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "sample_stack_id";
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to read workspace config",
+                )))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_command_app_config),
+            stack: Arc::new(mock_command_stack),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
+        };
+
+        // ######### 実行 #########
+        let result = load_stack_from_id(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+            stack_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackの取得がエラーになること
+        assert!(result.is_err());
+    }
+
+    // stack_idがworkspace_configに存在しない場合、エラーになること
+    #[tokio::test]
+    async fn stack_id_not_found_err() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_command_app_config = MockAppConfigCommandTrait::new();
+        let mock_command_stack = MockStackCommandTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "sample_stack_id";
+
+        let stack_file_name = "sample_stack.template.json";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "different_stack_id".to_string(),
+            stack_file_name.to_string(),
+        );
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_command_app_config),
+            stack: Arc::new(mock_command_stack),
+            cloudformation_schema: Arc::new(MockCloudFormationSchemaTrait::new()),
+            manual_management_resource: Arc::new(MockManualManagementResourceTrait::new()),
+        };
+
+        // ######### 実行 #########
+        let result = load_stack_from_id(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+            stack_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackの取得がエラーになること
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_template_summary_tests {
+    use super::*;
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            stack_meta_config::StackMetaConfig,
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+    use std::sync::Arc;
+
+    /// テンプレートサマリーの取得に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id_1 = "stack_id_1";
+        let stack_file_name_1 = "stack1.template.json";
+        let stack_id_2 = "stack_id_2";
+        let stack_file_name_2 = "stack2.template.json";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id_1.to_string(), stack_file_name_1.to_string());
+        stacks.insert(stack_id_2.to_string(), stack_file_name_2.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // stack_meta_configのreadのモック設定 (stack1用)
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "stack1"
+            })
+            .returning(|_file_system, _workspace_dir, _stack_name| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "Stack 1 Name".to_string(),
+                    description: "Stack 1 Description".to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+
+        // stack_meta_configのreadのモック設定 (stack2用)
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "stack2"
+            })
+            .returning(|_file_system, _workspace_dir, _stack_name| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "Stack 2 Name".to_string(),
+                    description: "Stack 2 Description".to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定 (stack1用)
+        let template_path_1 = PathBuf::from(workspace_directory).join(stack_file_name_1);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path_1)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {
+                        "MyS3Bucket": {
+                            "Type": "AWS::S3::Bucket"
+                        },
+                        "MyDynamoDBTable": {
+                            "Type": "AWS::DynamoDB::Table"
+                        }
+                    }
+                });
+                Ok(template_json.to_string())
+            });
+
+        // file_systemのread_fileのモック設定 (stack2用)
+        let template_path_2 = PathBuf::from(workspace_directory).join(stack_file_name_2);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path_2)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {
+                        "MyLambdaFunction": {
+                            "Type": "AWS::Lambda::Function"
+                        },
+                        "MyS3BucketAnother": {
+                            "Type": "AWS::S3::Bucket"
+                        }
+                    }
+                });
+                Ok(template_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            load_template_summary(&app_context, &config_context, workspace_directory).await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let templates = result.unwrap();
+        assert_eq!(templates.len(), 2);
+
+        // stack1のリソース検証
+        let stack1 = templates
+            .iter()
+            .find(|t| t.id == stack_id_1)
+            .expect("Stack 1 should exist");
+        assert_eq!(stack1.section_group_name, "Stack 1 Name");
+        assert_eq!(stack1.resources.len(), 2);
+
+        // stack2のリソース検証
+        let stack2 = templates
+            .iter()
+            .find(|t| t.id == stack_id_2)
+            .expect("Stack 2 should exist");
+        assert_eq!(stack2.section_group_name, "Stack 2 Name");
+        assert_eq!(stack2.resources.len(), 2);
+    }
+
+    /// リソースが空のスタックでも正しく処理されること
+    #[tokio::test]
+    async fn success_empty_resources() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "empty_stack.template.json";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // stack_meta_configのreadのモック設定
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "empty_stack"
+            })
+            .returning(|_file_system, _workspace_dir, _stack_name| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "Empty Stack".to_string(),
+                    description: "Stack with no resources".to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {}
+                });
+                Ok(template_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            load_template_summary(&app_context, &config_context, workspace_directory).await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let templates = result.unwrap();
+        assert_eq!(templates.len(), 1);
+        assert_eq!(templates[0].id, stack_id);
+        assert_eq!(templates[0].section_group_name, "Empty Stack");
+        assert_eq!(templates[0].resources.len(), 0);
+    }
+
+    /// workspace_configのreadに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn workspace_config_read_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to read workspace config",
+                )))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            load_template_summary(&app_context, &config_context, workspace_directory).await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// stack_meta_configのreadに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn stack_meta_config_read_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {}
+                });
+                Ok(template_json.to_string())
+            });
+
+        // stack_meta_configのreadのモック設定（エラーを返す）
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "stack"
+            })
+            .returning(|_file_system, _workspace_dir, _stack_name| {
+                Err(StackMetaConfigError::App(AppError::new(
+                    "Failed to read stack meta",
+                )))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            load_template_summary(&app_context, &config_context, workspace_directory).await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// read_fileに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn read_file_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // stack_meta_configのreadのモック設定
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "stack"
+            })
+            .returning(|_file_system, _workspace_dir, _stack_name| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "Stack Name".to_string(),
+                    description: "Stack Description".to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定（エラーを返す）
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                Err(tokio::io::Error::new(
+                    tokio::io::ErrorKind::NotFound,
+                    "File not found",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            load_template_summary(&app_context, &config_context, workspace_directory).await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// 不正な形式のリソースタイプが含まれていてもスキップして正しく処理されること
+    #[tokio::test]
+    async fn success_with_invalid_resource_types() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "mixed_stack.template.json";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // stack_meta_configのreadのモック設定
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "mixed_stack"
+            })
+            .returning(|_file_system, _workspace_dir, _stack_name| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "Mixed Stack".to_string(),
+                    description: "Stack with valid and invalid resource types".to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {
+                        "ValidS3Bucket": {
+                            "Type": "AWS::S3::Bucket"
+                        },
+                        "InvalidType1": {
+                            "Type": "InvalidType"
+                        },
+                        "InvalidType2": {
+                            "Type": "AWS::S3"
+                        },
+                        "ValidLambda": {
+                            "Type": "AWS::Lambda::Function"
+                        },
+                        "InvalidType3": {
+                            "Type": "AWS::S3::Bucket::Extra::Part"
+                        }
+                    }
+                });
+                Ok(template_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            load_template_summary(&app_context, &config_context, workspace_directory).await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let templates = result.unwrap();
+        assert_eq!(templates.len(), 1);
+        assert_eq!(templates[0].id, stack_id);
+        assert_eq!(templates[0].section_group_name, "Mixed Stack");
+        // 不正な形式のリソースタイプはスキップされ、有効な2つのみがカウントされること
+        assert_eq!(templates[0].resources.len(), 2);
+
+        // S3とLambdaのリソースが含まれていることを確認
+        let has_s3 = templates[0]
+            .resources
+            .iter()
+            .any(|r| r.service_name == "S3");
+        let has_lambda = templates[0]
+            .resources
+            .iter()
+            .any(|r| r.service_name == "Lambda");
+        assert!(has_s3, "S3 resource should be included");
+        assert!(has_lambda, "Lambda resource should be included");
+    }
+
+    /// 同じサービス名で複数のリソースタイプがある場合、正しく集約されること
+    #[tokio::test]
+    async fn success_with_multiple_resource_types_same_service() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "multi_type_stack.template.json";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // stack_meta_configのreadのモック設定
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "multi_type_stack"
+            })
+            .returning(|_file_system, _workspace_dir, _stack_name| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "Multi Type Stack".to_string(),
+                    description: "Stack with multiple resource types in same service".to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {
+                        "MyS3Bucket": {
+                            "Type": "AWS::S3::Bucket"
+                        },
+                        "MyS3BucketPolicy": {
+                            "Type": "AWS::S3::BucketPolicy"
+                        },
+                        "AnotherS3Bucket": {
+                            "Type": "AWS::S3::Bucket"
+                        },
+                        "MyLambdaFunction": {
+                            "Type": "AWS::Lambda::Function"
+                        },
+                        "MyLambdaPermission": {
+                            "Type": "AWS::Lambda::Permission"
+                        }
+                    }
+                });
+                Ok(template_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result =
+            load_template_summary(&app_context, &config_context, workspace_directory).await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let templates = result.unwrap();
+        assert_eq!(templates.len(), 1);
+        assert_eq!(templates[0].id, stack_id);
+        assert_eq!(templates[0].section_group_name, "Multi Type Stack");
+        // S3とLambdaの2つのサービスがあること
+        assert_eq!(templates[0].resources.len(), 2);
+
+        // S3サービスのリソースタイプを確認
+        let s3_resource = templates[0]
+            .resources
+            .iter()
+            .find(|r| r.service_name == "S3")
+            .expect("S3 service should exist");
+        // BucketとBucketPolicyの2つのタイプがあること（同じBucketが2つあっても1つにまとめられる）
+        assert_eq!(s3_resource.recourse_type.len(), 2);
+        assert!(s3_resource.recourse_type.contains(&"Bucket".to_string()));
+        assert!(s3_resource
+            .recourse_type
+            .contains(&"BucketPolicy".to_string()));
+
+        // Lambdaサービスのリソースタイプを確認
+        let lambda_resource = templates[0]
+            .resources
+            .iter()
+            .find(|r| r.service_name == "Lambda")
+            .expect("Lambda service should exist");
+        // FunctionとPermissionの2つのタイプがあること
+        assert_eq!(lambda_resource.recourse_type.len(), 2);
+        assert!(lambda_resource
+            .recourse_type
+            .contains(&"Function".to_string()));
+        assert!(lambda_resource
+            .recourse_type
+            .contains(&"Permission".to_string()));
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_stack_resource_list_tests {
+    use super::*;
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+    use std::sync::Arc;
+
+    /// 指定されたリソースタイプのリソースIDリストの取得に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+        let service_name = "S3";
+        let resource_name = "Bucket";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {
+                        "MyBucket1": {
+                            "Type": "AWS::S3::Bucket",
+                            "Properties": {}
+                        },
+                        "MyBucket2": {
+                            "Type": "AWS::S3::Bucket",
+                            "Properties": {}
+                        },
+                        "MyFunction": {
+                            "Type": "AWS::Lambda::Function",
+                            "Properties": {}
+                        }
+                    }
+                });
+                Ok(template_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            service_name,
+            resource_name,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let resource_list = result.unwrap();
+        assert_eq!(resource_list.len(), 2);
+        assert!(resource_list.contains(&"MyBucket1".to_string()));
+        assert!(resource_list.contains(&"MyBucket2".to_string()));
+    }
+
+    /// 該当するリソースが存在しない場合、空のリストが返ること
+    #[tokio::test]
+    async fn success_no_matching_resources() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+        let service_name = "DynamoDB";
+        let resource_name = "Table";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {
+                        "MyBucket": {
+                            "Type": "AWS::S3::Bucket",
+                            "Properties": {}
+                        },
+                        "MyFunction": {
+                            "Type": "AWS::Lambda::Function",
+                            "Properties": {}
+                        }
+                    }
+                });
+                Ok(template_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            service_name,
+            resource_name,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let resource_list = result.unwrap();
+        assert_eq!(resource_list.len(), 0);
+    }
+
+    /// Resourcesが空の場合、空のリストが返ること
+    #[tokio::test]
+    async fn success_empty_resources() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+        let service_name = "S3";
+        let resource_name = "Bucket";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {}
+                });
+                Ok(template_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            service_name,
+            resource_name,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let resource_list = result.unwrap();
+        assert_eq!(resource_list.len(), 0);
+    }
+
+    /// workspace_configのreadに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn workspace_config_read_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let service_name = "S3";
+        let resource_name = "Bucket";
+
+        // workspace_configのreadのモック設定（エラーを返す）
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to read workspace config",
+                )))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            service_name,
+            resource_name,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// stack_idが存在しない場合、エラーになること
+    #[tokio::test]
+    async fn stack_not_found_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "non_existent_stack_id";
+        let service_name = "S3";
+        let resource_name = "Bucket";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "different_stack_id".to_string(),
+            "stack.template.json".to_string(),
+        );
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            service_name,
+            resource_name,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// read_fileに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn read_file_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+        let service_name = "S3";
+        let resource_name = "Bucket";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定（エラーを返す）
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                Err(tokio::io::Error::new(
+                    tokio::io::ErrorKind::NotFound,
+                    "File not found",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            service_name,
+            resource_name,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_stack_resource_properties_tests {
+    use super::*;
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+    use std::sync::Arc;
+
+    /// リソースのPropertiesの取得に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+        let logical_id = "MyBucket";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {
+                        "MyBucket": {
+                            "Type": "AWS::S3::Bucket",
+                            "Properties": {
+                                "BucketName": "my-test-bucket",
+                                "VersioningConfiguration": {
+                                    "Status": "Enabled"
+                                }
+                            }
+                        }
+                    }
+                });
+                Ok(template_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_properties(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let properties = result.unwrap();
+        assert_eq!(properties["BucketName"].as_str().unwrap(), "my-test-bucket");
+        assert_eq!(
+            properties["VersioningConfiguration"]["Status"]
+                .as_str()
+                .unwrap(),
+            "Enabled"
+        );
+    }
+
+    /// Propertiesが存在しない場合、空のオブジェクトが返ること
+    #[tokio::test]
+    async fn success_no_properties() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+        let logical_id = "MyResource";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                let template_json = serde_json::json!({
+                    "Resources": {
+                        "MyResource": {
+                            "Type": "AWS::CloudFormation::WaitConditionHandle"
+                        }
+                    }
+                });
+                Ok(template_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_properties(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let properties = result.unwrap();
+        assert!(properties.is_object());
+        assert_eq!(properties.as_object().unwrap().len(), 0);
+    }
+
+    /// workspace_configのreadに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn workspace_config_read_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let logical_id = "MyBucket";
+
+        // workspace_configのreadのモック設定（エラーを返す）
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to read workspace config",
+                )))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_properties(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// stack_idが存在しない場合、エラーになること
+    #[tokio::test]
+    async fn stack_not_found_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "non_existent_stack_id";
+        let logical_id = "MyBucket";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "different_stack_id".to_string(),
+            "stack.template.json".to_string(),
+        );
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_properties(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// read_fileに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn read_file_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+        let logical_id = "MyBucket";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定（エラーを返す）
+        let template_path = PathBuf::from(workspace_directory).join(stack_file_name);
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &template_path)
+            .returning(move |_path| {
+                Err(tokio::io::Error::new(
+                    tokio::io::ErrorKind::NotFound,
+                    "File not found",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_properties(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_stack_resource_properties_reasons_tests {
+    use super::*;
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+    use std::sync::Arc;
+
+    /// リソースプロパティのreasonsの取得に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+        let logical_id = "MyBucket";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定（メタファイル用）
+        let meta_path = PathBuf::from(format!(
+            "{}/{}.meta.json",
+            workspace_directory,
+            stack_file_name.replace(".template.json", "")
+        ));
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &meta_path)
+            .returning(move |_path| {
+                let meta_json = serde_json::json!({
+                    "reasons": {
+                        "MyBucket": {
+                            "BucketName": "This is the reason for BucketName",
+                            "VersioningConfiguration": "Versioning is enabled for compliance"
+                        }
+                    }
+                });
+                Ok(meta_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_properties_reasons(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let reasons = result.unwrap();
+        assert_eq!(
+            reasons["BucketName"].as_str().unwrap(),
+            "This is the reason for BucketName"
+        );
+        assert_eq!(
+            reasons["VersioningConfiguration"].as_str().unwrap(),
+            "Versioning is enabled for compliance"
+        );
+    }
+
+    /// reasonsが存在しない場合、空のオブジェクトが返ること
+    #[tokio::test]
+    async fn success_no_reasons() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+        let logical_id = "MyResource";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定（メタファイル用）
+        let meta_path = PathBuf::from(format!(
+            "{}/{}.meta.json",
+            workspace_directory,
+            stack_file_name.replace(".template.json", "")
+        ));
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &meta_path)
+            .returning(move |_path| {
+                let meta_json = serde_json::json!({
+                    "reasons": {}
+                });
+                Ok(meta_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_properties_reasons(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let reasons = result.unwrap();
+        assert!(reasons.is_object());
+        assert_eq!(reasons.as_object().unwrap().len(), 0);
+    }
+
+    /// workspace_configのreadに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn workspace_config_read_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let logical_id = "MyBucket";
+
+        // workspace_configのreadのモック設定（エラーを返す）
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to read workspace config",
+                )))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_properties_reasons(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// stack_idが存在しない場合、エラーになること
+    #[tokio::test]
+    async fn stack_not_found_error() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "non_existent_stack_id";
+        let logical_id = "MyBucket";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "different_stack_id".to_string(),
+            "stack.template.json".to_string(),
+        );
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_properties_reasons(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// read_fileに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn read_file_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+        let logical_id = "MyBucket";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定（エラーを返す）
+        let meta_path = PathBuf::from(format!(
+            "{}/{}.meta.json",
+            workspace_directory,
+            stack_file_name.replace(".template.json", "")
+        ));
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &meta_path)
+            .returning(move |_path| {
+                Err(tokio::io::Error::new(
+                    tokio::io::ErrorKind::NotFound,
+                    "File not found",
+                ))
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_resource_properties_reasons(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_stack_parameters_tests {
+    use super::*;
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+    use std::sync::Arc;
+
+    /// 指定したスタックのParametersの取得に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ########## 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().returning(|_path| {
+            let template_json = serde_json::json!({
+                "Parameters": {
+                    "InstanceType": {
+                        "Type": "String",
+                        "Default": "t2.micro",
+                        "Description": "EC2 instance type"
+                    },
+                    "KeyName": {
+                        "Type": "String",
+                        "Description": "Name of an existing EC2 KeyPair"
+                    }
+                }
+            });
+            Ok(template_json.to_string())
+        });
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "test_stack".to_string(),
+            "test_stack.template.json".to_string(),
+        );
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "test_workspace".to_string(),
+                    stacks: stacks.clone(),
+                    description: "test description".to_string(),
+                })
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_parameters(
+            &app_context,
+            &config_context,
+            "test/workspace",
+            "test_stack",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let parameters = result.unwrap();
+        assert!(parameters.is_object());
+        let params_obj = parameters.as_object().unwrap();
+        assert_eq!(params_obj.len(), 2);
+        assert!(params_obj.contains_key("InstanceType"));
+        assert!(params_obj.contains_key("KeyName"));
+        assert_eq!(
+            params_obj["InstanceType"]["Type"].as_str().unwrap(),
+            "String"
+        );
+        assert_eq!(
+            params_obj["InstanceType"]["Default"].as_str().unwrap(),
+            "t2.micro"
+        );
+        assert_eq!(params_obj["KeyName"]["Type"].as_str().unwrap(), "String");
+    }
+
+    /// Parametersが存在しない場合、空のオブジェクトが返されること
+    #[tokio::test]
+    async fn success_no_parameters() {
+        // ########## 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().returning(|_path| {
+            let template_json = serde_json::json!({});
+            Ok(template_json.to_string())
+        });
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "test_stack".to_string(),
+            "test_stack.template.json".to_string(),
+        );
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "test_workspace".to_string(),
+                    stacks: stacks.clone(),
+                    description: "test description".to_string(),
+                })
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_parameters(
+            &app_context,
+            &config_context,
+            "test/workspace",
+            "test_stack",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let parameters = result.unwrap();
+        assert!(parameters.is_object());
+        assert_eq!(parameters.as_object().unwrap().len(), 0);
+    }
+
+    /// ワークスペースの読み取りに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn workspace_config_read_error() {
+        // ########## 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to read workspace config",
+                )))
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_parameters(
+            &app_context,
+            &config_context,
+            "test/workspace",
+            "test_stack",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// 指定したスタックが存在しない場合、エラーになること
+    #[tokio::test]
+    async fn stack_not_found_error() {
+        // ########## 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "different_stack".to_string(),
+            "different_stack.template.json".to_string(),
+        );
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "test_workspace".to_string(),
+                    stacks: stacks.clone(),
+                    description: "test description".to_string(),
+                })
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_parameters(
+            &app_context,
+            &config_context,
+            "test/workspace",
+            "non_existing_stack",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// テンプレートファイルの読み取りに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn read_file_error() {
+        // ########## 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().returning(|_path| {
+            Err(tokio::io::Error::new(
+                tokio::io::ErrorKind::NotFound,
+                "File not found",
+            ))
+        });
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "test_stack".to_string(),
+            "test_stack.template.json".to_string(),
+        );
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "test_workspace".to_string(),
+                    stacks: stacks.clone(),
+                    description: "test description".to_string(),
+                })
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_parameters(
+            &app_context,
+            &config_context,
+            "test/workspace",
+            "test_stack",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_stack_outputs_tests {
+    use std::sync::Arc;
+
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+
+    use super::*;
+
+    /// 指定したスタックのOutputsの取得に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ########## 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().returning(|_path| {
+            let template_json = serde_json::json!({
+                "Outputs": {
+                    "Output1": {
+                        "Value": "Value1",
+                        "Description": "Description1",
+                        "Export": {
+                            "Name": "ExportName1"
+                        }
+                    },
+                    "Output2": {
+                        "Value": "Value2",
+                        "Description": "Description2",
+                        "Export": {
+                            "Name": "ExportName2"
+                        }
+                    }
+                }
+            });
+            Ok(template_json.to_string())
+        });
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "test_stack".to_string(),
+            "test_stack.template.json".to_string(),
+        );
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "Test Workspace".to_string(),
+                    description: "Test Description".to_string(),
+                    stacks: stacks.clone(),
+                })
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_outputs(
+            &app_context,
+            &config_context,
+            "test/workspace",
+            "test_stack",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let outputs = result.unwrap();
+        assert_eq!(outputs.len(), 2);
+        assert_eq!(outputs[0].name, "Output1");
+        assert_eq!(outputs[0].description, Some("Description1".to_string()));
+        assert_eq!(outputs[0].export_name, Some("ExportName1".to_string()));
+        assert_eq!(outputs[0].value, serde_json::json!("Value1"));
+        assert_eq!(outputs[1].name, "Output2");
+        assert_eq!(outputs[1].description, Some("Description2".to_string()));
+        assert_eq!(outputs[1].export_name, Some("ExportName2".to_string()));
+        assert_eq!(outputs[1].value, serde_json::json!("Value2"));
+    }
+
+    /// Outputsが存在しない場合、空のVecが返されること
+    #[tokio::test]
+    async fn success_no_outputs() {
+        // ########## 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().returning(|_path| {
+            let template_json = serde_json::json!({
+                "Resources": {
+                    "Resource1": {
+                        "Type": "AWS::SQS::Queue",
+                        "Properties": {
+                            "FifoQueue": true,
+                            "VisibilityTimeout": 300
+                        }
+                    }
+                }
+            });
+            Ok(template_json.to_string())
+        });
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "test_stack".to_string(),
+            "test_stack.template.json".to_string(),
+        );
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "Test Workspace".to_string(),
+                    description: "Test Description".to_string(),
+                    stacks: stacks.clone(),
+                })
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_outputs(
+            &app_context,
+            &config_context,
+            "test/workspace",
+            "test_stack",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let outputs = result.unwrap();
+        assert_eq!(outputs.len(), 0);
+    }
+
+    /// ワークスペースの読み取りに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn workspace_config_read_error() {
+        // ########## 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to read workspace config",
+                )))
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_outputs(
+            &app_context,
+            &config_context,
+            "test/workspace",
+            "test_stack",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// 指定したスタックが存在しない場合、エラーになること
+    #[tokio::test]
+    async fn stack_not_found_error() {
+        // ########## 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "different_stack".to_string(),
+            "different_stack.template.json".to_string(),
+        );
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "Test Workspace".to_string(),
+                    description: "Test Description".to_string(),
+                    stacks: stacks.clone(),
+                })
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_outputs(
+            &app_context,
+            &config_context,
+            "test/workspace",
+            "non_existing_stack",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// テンプレートファイルの読み取りに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn read_file_error() {
+        // ########## 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().returning(|_path| {
+            Err(tokio::io::Error::new(
+                tokio::io::ErrorKind::NotFound,
+                "File not found",
+            ))
+        });
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut stacks = HashMap::new();
+        stacks.insert(
+            "test_stack".to_string(),
+            "test_stack.template.json".to_string(),
+        );
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "Test Workspace".to_string(),
+                    description: "Test Description".to_string(),
+                    stacks: stacks.clone(),
+                })
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_outputs(
+            &app_context,
+            &config_context,
+            "test/workspace",
+            "test_stack",
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod get_all_stack_outputs_tests {
+    use super::*;
+    use crate::{
+        command::context::{
+            app_config_command_trait::MockAppConfigCommandTrait,
+            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
+            manual_management_resource_trait::MockManualManagementResourceTrait,
+            stack_command_trait::MockStackCommandTrait,
+        },
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+    use std::sync::Arc;
+
+    /// 全スタックのOutputsを正しく取得できること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+
+        let mut stacks = HashMap::new();
+        stacks.insert("stack1".to_string(), "stack1.template.json".to_string());
+        stacks.insert("stack2".to_string(), "stack2.template.json".to_string());
+
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "Test Workspace".to_string(),
+                    description: "Test Description".to_string(),
+                    stacks: stacks.clone(),
+                })
+            });
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        let mock_app_config_command = MockAppConfigCommandTrait::new();
+        let mut mock_stack_command = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_stack_command
+            .expect_get_stack_outputs()
+            .withf(|_, _, _, stack_id| stack_id == "stack1")
+            .returning(|_, _, _, _| {
+                Ok(vec![
+                    StackOutput {
+                        name: "Output1".to_string(),
+                        description: Some("Description 1".to_string()),
+                        export_name: Some("ExportName1".to_string()),
+                        value: serde_json::json!("Value1"),
+                    },
+                    StackOutput {
+                        name: "Output2".to_string(),
+                        description: None,
+                        export_name: None,
+                        value: serde_json::json!("Value2"),
+                    },
+                ])
+            });
+
+        mock_stack_command
+            .expect_get_stack_outputs()
+            .withf(|_, _, _, stack_id| stack_id == "stack2")
+            .returning(|_, _, _, _| {
+                Ok(vec![StackOutput {
+                    name: "Output3".to_string(),
+                    description: Some("Description 3".to_string()),
+                    export_name: Some("ExportName3".to_string()),
+                    value: serde_json::json!("Value3"),
+                }])
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config_command),
+            stack: Arc::new(mock_stack_command),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = get_all_stack_outputs(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let outputs = result.unwrap();
+        assert_eq!(outputs.len(), 2);
+        assert_eq!(outputs.get("ExportName1"), Some(&"stack1".to_string()));
+        assert_eq!(outputs.get("ExportName3"), Some(&"stack2".to_string()));
+    }
+
+    /// Outputsがないスタックが含まれていても正しく動作すること
+    #[tokio::test]
+    async fn success_with_no_outputs() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+
+        let mut stacks = HashMap::new();
+        stacks.insert("stack1".to_string(), "stack1.template.json".to_string());
+        stacks.insert("stack2".to_string(), "stack2.template.json".to_string());
+
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "Test Workspace".to_string(),
+                    description: "Test Description".to_string(),
+                    stacks: stacks.clone(),
+                })
+            });
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        let mock_app_config_command = MockAppConfigCommandTrait::new();
+        let mut mock_stack_command = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_stack_command
+            .expect_get_stack_outputs()
+            .withf(|_, _, _, stack_id| stack_id == "stack1")
+            .returning(|_, _, _, _| Ok(vec![]));
+
+        mock_stack_command
+            .expect_get_stack_outputs()
+            .withf(|_, _, _, stack_id| stack_id == "stack2")
+            .returning(|_, _, _, _| {
+                Ok(vec![StackOutput {
+                    name: "Output1".to_string(),
+                    description: None,
+                    export_name: Some("ExportName1".to_string()),
+                    value: serde_json::json!("Value1"),
+                }])
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config_command),
+            stack: Arc::new(mock_stack_command),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = get_all_stack_outputs(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let outputs = result.unwrap();
+        assert_eq!(outputs.len(), 1);
+        assert_eq!(outputs.get("ExportName1"), Some(&"stack2".to_string()));
+    }
+
+    /// export_nameがないOutputsは結果に含まれないこと
+    #[tokio::test]
+    async fn success_exclude_outputs_without_export_name() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+
+        let mut stacks = HashMap::new();
+        stacks.insert("stack1".to_string(), "stack1.template.json".to_string());
+
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "Test Workspace".to_string(),
+                    description: "Test Description".to_string(),
+                    stacks: stacks.clone(),
+                })
+            });
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        let mock_app_config_command = MockAppConfigCommandTrait::new();
+        let mut mock_stack_command = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_stack_command
+            .expect_get_stack_outputs()
+            .withf(|_, _, _, stack_id| stack_id == "stack1")
+            .returning(|_, _, _, _| {
+                Ok(vec![
+                    StackOutput {
+                        name: "Output1".to_string(),
+                        description: Some("Description 1".to_string()),
+                        export_name: Some("ExportName1".to_string()),
+                        value: serde_json::json!("Value1"),
+                    },
+                    StackOutput {
+                        name: "Output2".to_string(),
+                        description: None,
+                        export_name: None,
+                        value: serde_json::json!("Value2"),
+                    },
+                    StackOutput {
+                        name: "Output3".to_string(),
+                        description: None,
+                        export_name: None,
+                        value: serde_json::json!("Value3"),
+                    },
+                ])
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config_command),
+            stack: Arc::new(mock_stack_command),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = get_all_stack_outputs(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let outputs = result.unwrap();
+        assert_eq!(outputs.len(), 1);
+        assert_eq!(outputs.get("ExportName1"), Some(&"stack1".to_string()));
+    }
+
+    /// スタックが存在しない場合、空のHashMapを返すこと
+    #[tokio::test]
+    async fn success_no_stacks() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "Test Workspace".to_string(),
+                    description: "Test Description".to_string(),
+                    stacks: HashMap::new(),
+                })
+            });
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        let mock_app_config_command = MockAppConfigCommandTrait::new();
+        let mock_stack_command = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config_command),
+            stack: Arc::new(mock_stack_command),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = get_all_stack_outputs(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let outputs = result.unwrap();
+        assert_eq!(outputs.len(), 0);
+    }
+
+    /// workspace_config_ioのreadに失敗した場合、エラーを返すこと
+    #[tokio::test]
+    async fn workspace_config_read_error() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Err(WorkspaceConfigError::App(AppError::new(
+                    "Failed to read workspace config",
+                )))
+            });
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        let mock_app_config_command = MockAppConfigCommandTrait::new();
+        let mock_stack_command = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config_command),
+            stack: Arc::new(mock_stack_command),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = get_all_stack_outputs(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// get_stack_outputsに失敗した場合、エラーを返すこと
+    #[tokio::test]
+    async fn get_stack_outputs_error() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+
+        let mut stacks = HashMap::new();
+        stacks.insert("stack1".to_string(), "stack1.template.json".to_string());
+
+        mock_workspace_config_io
+            .expect_read()
+            .returning(move |_, _| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    name: "Test Workspace".to_string(),
+                    description: "Test Description".to_string(),
+                    stacks: stacks.clone(),
+                })
+            });
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        let mock_app_config_command = MockAppConfigCommandTrait::new();
+        let mut mock_stack_command = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_stack_command
+            .expect_get_stack_outputs()
+            .returning(|_, _, _, _| {
+                Err(StackError::App(AppError::new(
+                    "Failed to get stack outputs",
+                )))
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config_command),
+            stack: Arc::new(mock_stack_command),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        // ######### 実行 #########
+        let result = get_all_stack_outputs(
+            &app_context,
+            &config_context,
+            &command_context,
+            workspace_directory,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod update_stack_reasons_tests {
+    use std::sync::Arc;
+
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            stack_meta_config::StackMetaConfig,
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+
+    use super::*;
+
+    /// スタックの reason 情報の更新に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+        let logical_id = "Resource1";
+        let reasons = HashMap::from([("PropertyA".to_string(), "New reason".to_string())]);
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mut mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks = HashMap::from([(
+                "stack_id".to_string(),
+                "stack_file.template.json".to_string(),
+            )]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "TestWorkspace".to_string(),
+                description: "TestWorkspace description".to_string(),
+                stacks,
+            })
+        });
+        let old_reasons = HashMap::from([(
+            "Resource1".to_string(),
+            HashMap::from([("PropertyA".to_string(), "Old reason".to_string())]),
+        )]);
+        let mut new_reasons = old_reasons.clone();
+        new_reasons.insert(logical_id.to_string(), reasons.clone());
+        mock_stack_meta_config_io
+            .expect_read()
+            .returning(move |_, _, _| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "TestStack".to_string(),
+                    description: "TestStack description".to_string(),
+                    reasons: old_reasons.clone(),
+                })
+            });
+        mock_stack_meta_config_io
+            .expect_write()
+            .withf(move |stack_meta, _, workspace_dir, stack_name| {
+                stack_meta.reasons == new_reasons
+                    && workspace_dir == workspace_directory
+                    && stack_name == "stack_file"
+            })
+            .returning(|_, _, _, _| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "TestStack".to_string(),
+                    description: "TestStack description".to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = update_stack_reasons(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+            reasons,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+    }
+
+    /// ワークスペースの読み込みに失敗した場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_workspace_config_read() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+        let logical_id = "Resource1";
+        let reasons = HashMap::from([("PropertyA".to_string(), "New reason".to_string())]);
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mut mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            Err(WorkspaceConfigError::App(AppError::new(
+                "Failed to read workspace config",
+            )))
+        });
+        mock_stack_meta_config_io.expect_read().times(0);
+        mock_stack_meta_config_io.expect_write().times(0);
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = update_stack_reasons(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+            reasons,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// 指定したスタックIDがワークスペースに存在しない場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_stack_id_not_found() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+        let logical_id = "Resource1";
+        let reasons = HashMap::from([("PropertyA".to_string(), "New reason".to_string())]);
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mut mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks = HashMap::from([(
+                "different_stack_id".to_string(),
+                "stack_file.template.json".to_string(),
+            )]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "Test Workspace".to_string(),
+                description: "Test Workspace description".to_string(),
+                stacks,
+            })
+        });
+        mock_stack_meta_config_io.expect_read().times(0);
+        mock_stack_meta_config_io.expect_write().times(0);
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = update_stack_reasons(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+            reasons,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// スタックメタ情報の読み込みに失敗した場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_stack_meta_config_read() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+        let logical_id = "Resource1";
+        let reasons = HashMap::from([("PropertyA".to_string(), "New reason".to_string())]);
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mut mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks = HashMap::from([(
+                "stack_id".to_string(),
+                "stack_file.template.json".to_string(),
+            )]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "Test Workspace".to_string(),
+                description: "Test Workspace description".to_string(),
+                stacks,
+            })
+        });
+        mock_stack_meta_config_io
+            .expect_read()
+            .returning(|_, _, _| {
+                Err(StackMetaConfigError::App(AppError::new(
+                    "Failed to read stack meta config",
+                )))
+            });
+        mock_stack_meta_config_io.expect_write().times(0);
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = update_stack_reasons(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+            reasons,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// スタックメタ情報の書き込みに失敗した場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_stack_meta_config_write() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+        let logical_id = "Resource1";
+        let reasons = HashMap::from([("PropertyA".to_string(), "New reason".to_string())]);
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mut mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks = HashMap::from([(
+                "stack_id".to_string(),
+                "stack_file.template.json".to_string(),
+            )]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "Test Workspace".to_string(),
+                description: "Test Workspace description".to_string(),
+                stacks,
+            })
+        });
+        mock_stack_meta_config_io
+            .expect_read()
+            .returning(|_, _, _| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "TestStack".to_string(),
+                    description: "TestStack description".to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+        mock_stack_meta_config_io
+            .expect_write()
+            .returning(|_, _, _, _| {
+                Err(StackMetaConfigError::App(AppError::new(
+                    "Failed to write stack meta config",
+                )))
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = update_stack_reasons(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+            reasons,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod update_stack_detail_tests {
+    use std::sync::Arc;
+
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            stack_meta_config::StackMetaConfig,
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+
+    use super::*;
+
+    /// スタックのメタ情報の更新に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let name = "New Stack Name";
+        let description = "New description";
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mut mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks = HashMap::from([(
+                "stack_id".to_string(),
+                "stack_file.template.json".to_string(),
+            )]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "Test Workspace".to_string(),
+                description: "Test Workspace description".to_string(),
+                stacks,
+            })
+        });
+        mock_stack_meta_config_io
+            .expect_read()
+            .returning(|_, _, _| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "Old Stack Name".to_string(),
+                    description: "Old description".to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+        mock_stack_meta_config_io
+            .expect_write()
+            .withf(move |stack_meta, _, workspace_dir, stack_name| {
+                stack_meta.name == name.to_string()
+                    && stack_meta.description == description.to_string()
+                    && workspace_dir == workspace_directory
+                    && stack_name == "stack_file"
+            })
+            .returning(|_, _, _, _| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: name.to_string(),
+                    description: description.to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = update_stack_detail(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            "stack_id",
+            name,
+            description,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+    }
+
+    /// ワークスペースの読み込みに失敗した場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_workspace_config_read() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let name = "New Stack Name";
+        let description = "New description";
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mut mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            Err(WorkspaceConfigError::App(AppError::new(
+                "Failed to read workspace config",
+            )))
+        });
+        mock_stack_meta_config_io.expect_read().times(0);
+        mock_stack_meta_config_io.expect_write().times(0);
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = update_stack_detail(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            "stack_id",
+            name,
+            description,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// 指定したスタックIDがワークスペースに存在しない場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_stack_id_not_found() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let name = "New Stack Name";
+        let description = "New description";
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mut mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks = HashMap::from([(
+                "different_stack_id".to_string(),
+                "stack_file.template.json".to_string(),
+            )]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "Test Workspace".to_string(),
+                description: "Test Workspace description".to_string(),
+                stacks,
+            })
+        });
+        mock_stack_meta_config_io.expect_read().times(0);
+        mock_stack_meta_config_io.expect_write().times(0);
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = update_stack_detail(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            "stack_id",
+            name,
+            description,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// スタックメタ情報の読み込みに失敗した場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_stack_meta_config_read() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let name = "New Stack Name";
+        let description = "New description";
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mut mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks = HashMap::from([(
+                "stack_id".to_string(),
+                "stack_file.template.json".to_string(),
+            )]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "Test Workspace".to_string(),
+                description: "Test Workspace description".to_string(),
+                stacks,
+            })
+        });
+        mock_stack_meta_config_io
+            .expect_read()
+            .returning(|_, _, _| {
+                Err(StackMetaConfigError::App(AppError::new(
+                    "Failed to read stack meta config",
+                )))
+            });
+        mock_stack_meta_config_io.expect_write().times(0);
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = update_stack_detail(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            "stack_id",
+            name,
+            description,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// スタックメタ情報の書き込みに失敗した場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_stack_meta_config_write() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let name = "New Stack Name";
+        let description = "New description";
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mut mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks = HashMap::from([(
+                "stack_id".to_string(),
+                "stack_file.template.json".to_string(),
+            )]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "Test Workspace".to_string(),
+                description: "Test Workspace description".to_string(),
+                stacks,
+            })
+        });
+        mock_stack_meta_config_io
+            .expect_read()
+            .returning(|_, _, _| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "Old Stack Name".to_string(),
+                    description: "Old description".to_string(),
+                    reasons: HashMap::new(),
+                })
+            });
+        mock_stack_meta_config_io
+            .expect_write()
+            .returning(|_, _, _, _| {
+                Err(StackMetaConfigError::App(AppError::new(
+                    "Failed to write stack meta config",
+                )))
+            });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = update_stack_detail(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            "stack_id",
+            name,
+            description,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+mod load_parameter_and_resource_list_tests {
+    use std::sync::Arc;
+
+    use crate::{
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            workspace_config::WorkspaceConfig,
+        },
+        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+    };
+
+    use super::*;
+
+    /// スタックのパラメータとリソースリストの取得に成功すること
+    #[tokio::test]
+    async fn success() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().returning(|_| {
+            let template_json = serde_json::json!({
+                "Parameters": {
+                    "Param1": {
+                        "Type": "String",
+                        "Description": "Value1"
+                    },
+                    "Param2": {
+                        "Type": "Number",
+                        "Description": "Value2"
+                    }
+                },
+                "Resources": {
+                    "MyBucket": {
+                        "Type": "AWS::S3::Bucket",
+                        "Properties": {
+                            "BucketName": "my-bucket"
+                        }
+                    },
+                    "MyLambda": {
+                        "Type": "AWS::Lambda::Function",
+                        "Properties": {
+                            "FunctionName": "my-function",
+                        }
+                    }
+                }
+            });
+            Ok(template_json.to_string())
+        });
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks =
+                HashMap::from([(stack_id.to_string(), "stack_file.template.yaml".to_string())]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "test stack".to_string(),
+                description: "test stack description".to_string(),
+                stacks,
+            })
+        });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = load_parameter_and_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let unwrap_result = result.unwrap();
+        assert_eq!(unwrap_result.parameters.len(), 2);
+        assert_eq!(unwrap_result.parameters[0], "Param1");
+        assert_eq!(unwrap_result.parameters[1], "Param2");
+        assert_eq!(unwrap_result.resources.len(), 2);
+        let resource1 = unwrap_result.resources.get("MyBucket").unwrap();
+        assert_eq!(resource1.service_name, "S3");
+        assert_eq!(resource1.recourse_type, "Bucket");
+        let resource2 = unwrap_result.resources.get("MyLambda").unwrap();
+        assert_eq!(resource2.service_name, "Lambda");
+        assert_eq!(resource2.recourse_type, "Function");
+    }
+
+    /// スタックにパラメータが存在しない場合に、空のパラメータリストを返すこと
+    #[tokio::test]
+    async fn success_no_parameters() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().returning(|_| {
+            let template_json = serde_json::json!({
+                "Resources": {
+                    "MyBucket": {
+                        "Type": "AWS::S3::Bucket",
+                        "Properties": {
+                            "BucketName": "my-bucket"
+                        }
+                    }
+                }
+            });
+            Ok(template_json.to_string())
+        });
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks =
+                HashMap::from([(stack_id.to_string(), "stack_file.template.yaml".to_string())]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "test stack".to_string(),
+                description: "test stack description".to_string(),
+                stacks,
+            })
+        });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = load_parameter_and_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let unwrap_result = result.unwrap();
+        assert_eq!(unwrap_result.parameters.len(), 0);
+        assert_eq!(unwrap_result.resources.len(), 1);
+        let resource1 = unwrap_result.resources.get("MyBucket").unwrap();
+        assert_eq!(resource1.service_name, "S3");
+        assert_eq!(resource1.recourse_type, "Bucket");
+    }
+
+    /// リソースの "Type" が不正な場合に、そのリソースを無視して処理を継続すること
+    #[tokio::test]
+    async fn success_invalid_resource_type() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().returning(|_| {
+            let template_json = serde_json::json!({
+                "Resources": {
+                    "InvalidResource": {
+                        "Type": "Invalid::Type", // 不正なリソースタイプ
+                        "Properties": {}
+                    },
+                    "MyBucket": {
+                        "Type": "AWS::S3::Bucket",
+                        "Properties": {
+                            "BucketName": "my-bucket"
+                        }
+                    }
+                }
+            });
+            Ok(template_json.to_string())
+        });
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks =
+                HashMap::from([(stack_id.to_string(), "stack_file.template.yaml".to_string())]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "test stack".to_string(),
+                description: "test stack description".to_string(),
+                stacks,
+            })
+        });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = load_parameter_and_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let unwrap_result = result.unwrap();
+        assert_eq!(unwrap_result.parameters.len(), 0);
+        assert_eq!(unwrap_result.resources.len(), 1);
+        let resource1 = unwrap_result.resources.get("MyBucket").unwrap();
+        assert_eq!(resource1.service_name, "S3");
+        assert_eq!(resource1.recourse_type, "Bucket");
+    }
+
+    /// ワークスペースの読み込みに失敗した場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_workspace_config_read() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().times(0);
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io
+            .expect_read()
+            .returning(|_, _| Err(WorkspaceConfigError::App(AppError::new("Read error"))));
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = load_parameter_and_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// 指定したスタックIDがワークスペースに存在しない場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_not_found_stack_id() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().times(0);
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "test stack".to_string(),
+                description: "test stack description".to_string(),
+                stacks: HashMap::new(), // 空のスタックマップ
+            })
+        });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = load_parameter_and_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// スタックのテンプレート読み込みに失敗した場合、Err を返すこと
+    #[tokio::test]
+    async fn failed_template_read() {
+        // ######### 準備 #########
+        let workspace_directory = "test/workspace";
+        let stack_id = "stack_id";
+
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        mock_file_system.expect_read_file().returning(|_| {
+            Err(tokio::io::Error::new(
+                tokio::io::ErrorKind::Other,
+                "read_file error",
+            ))
+        });
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config_io = MockAppConfigTrait::new();
+        let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
+        let mut mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        mock_workspace_config_io.expect_read().returning(|_, _| {
+            let stacks =
+                HashMap::from([(stack_id.to_string(), "stack_file.template.yaml".to_string())]);
+            Ok(WorkspaceConfig {
+                version: 1,
+                name: "test stack".to_string(),
+                description: "test stack description".to_string(),
+                stacks,
+            })
+        });
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config_io),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+        };
+
+        // ######### 実行 #########
+        let result = load_parameter_and_resource_list(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
 }

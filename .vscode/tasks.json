@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Rust Coverage",
+      "type": "shell",
+      "command": "cargo",
+      "args": ["coverage"],
+      "options": {
+        "cwd": "${workspaceFolder}/src-tauri"
+      },
+      "problemMatcher": ["$rustc"],
+      "group": "test"
+    }
+  ]
+}

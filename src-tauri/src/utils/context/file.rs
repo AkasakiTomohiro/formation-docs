@@ -4,8 +4,9 @@ use std::{
     io::{Read, Write},
     path::{Path, PathBuf},
 };
-use tokio::{fs::ReadDir, io};
+use tokio::io;
 
+#[mockall::automock]
 #[async_trait]
 pub trait FileSystem: Send + Sync {
     async fn read_file(&self, path: &Path) -> io::Result<String>;
@@ -18,7 +19,7 @@ pub trait FileSystem: Send + Sync {
         to: &mut (dyn Write + Send),
     ) -> std::io::Result<u64>;
     fn touch_and_open_file(&self, path: &Path) -> std::io::Result<File>;
-    async fn read_dir(&self, path: &Path) -> io::Result<ReadDir>;
+    async fn read_dir(&self, path: &Path) -> io::Result<Vec<PathBuf>>;
     async fn create_dir_all(&self, path: &Path) -> io::Result<()>;
     fn create_dir_all_sync(&self, path: &Path) -> std::io::Result<()>;
     fn config_local_dir(&self) -> Option<PathBuf>;
@@ -26,6 +27,7 @@ pub trait FileSystem: Send + Sync {
 }
 
 pub struct LocalFileSystem;
+#[coverage(off)]
 #[async_trait]
 impl FileSystem for LocalFileSystem {
     async fn read_file(&self, path: &Path) -> io::Result<String> {
@@ -56,8 +58,13 @@ impl FileSystem for LocalFileSystem {
         return std::fs::File::create(path);
     }
 
-    async fn read_dir(&self, path: &Path) -> io::Result<ReadDir> {
-        return tokio::fs::read_dir(path).await;
+    async fn read_dir(&self, path: &Path) -> io::Result<Vec<PathBuf>> {
+        let mut entries = tokio::fs::read_dir(path).await?;
+        let mut results = vec![];
+        while let Some(entry) = entries.next_entry().await? {
+            results.push(entry.path());
+        }
+        return Ok(results);
     }
 
     async fn create_dir_all(&self, path: &Path) -> io::Result<()> {

@@ -12,14 +12,15 @@
     "globmatch",
     "globset",
     "indexmap",
+    "mockall",
+    "noconflict",
     "reqwest",
+    "revalidator",
     "rlib",
     "serde",
     "staticlib",
     "tauri",
-    "thiserror",
-    "revalidator",
-    "noconflict"
+    "thiserror"
   ],
   "ignoreWords": [],
   "import": []
