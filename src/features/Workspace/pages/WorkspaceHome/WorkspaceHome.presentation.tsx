@@ -98,18 +98,18 @@ export const WorkspaceHomePresentation = ({
         columnDefinitions={[
           {
             id: 'Name',
-            header: 'Stack name',
+            header: 'スタック名',
             cell: (e) => <Link onClick={onClickStackName(e)}>{e.name}</Link>,
             isRowHeader: true,
           },
           {
             id: 'DescriptionForMeta',
-            header: 'Description for Meta',
+            header: 'メタデータの説明',
             cell: (e) => e.description_from_meta,
           },
           {
             id: 'DescriptionForStack',
-            header: 'Description for Stack',
+            header: 'スタックの説明',
             cell: (e) => e.description_from_stack,
           },
         ]}
@@ -117,12 +117,12 @@ export const WorkspaceHomePresentation = ({
         selectedItems={selectedItems}
         onSelectionChange={onSelectionChange}
         items={tableCollection.items}
-        loadingText="Loading workspace"
+        loadingText="読み込み中..."
         trackBy="name"
         empty={
           <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
             <SpaceBetween size="m">
-              <b>No resources</b>
+              <b>スタックがありません</b>
             </SpaceBetween>
           </Box>
         }

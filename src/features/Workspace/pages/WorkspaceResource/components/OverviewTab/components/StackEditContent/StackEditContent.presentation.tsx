@@ -45,7 +45,7 @@ export const StackEditContentPresentation = ({
     <ContentLayout
       header={
         <SpaceBetween size="m">
-          <Header>Stackの編集</Header>
+          <Header>スタックの編集</Header>
         </SpaceBetween>
       }
     >
@@ -58,7 +58,7 @@ export const StackEditContentPresentation = ({
                 control={control}
                 render={({ field, fieldState: { invalid } }) => (
                   <FormField
-                    label="Stack name"
+                    label="スタック名"
                     errorText={invalid ? '1文字以上256文字以下で入力してください' : undefined}
                   >
                     <Input {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
@@ -69,10 +69,7 @@ export const StackEditContentPresentation = ({
                 name="description"
                 control={control}
                 render={({ field, fieldState: { invalid } }) => (
-                  <FormField
-                    label="Stack description"
-                    errorText={invalid ? '256文字以下で入力してください' : undefined}
-                  >
+                  <FormField label="スタックの説明" errorText={invalid ? '256文字以下で入力してください' : undefined}>
                     <Input {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
                   </FormField>
                 )}

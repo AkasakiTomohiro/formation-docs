@@ -1,9 +1,7 @@
 import {
   Box,
-  Button,
   CollectionPreferences,
   Link,
-  SpaceBetween,
   StatusIndicator,
   Table,
   Textarea,
@@ -74,23 +72,15 @@ export const PropertyTablePresentation = ({
 }: PropertyTablePresentationProps): JSX.Element => {
   return (
     <Table
-      renderAriaLive={({ firstIndex, lastIndex, totalItemsCount }) =>
-        `Displaying items ${firstIndex} to ${lastIndex} of ${totalItemsCount}`
-      }
-      renderLoaderPending={() => (
-        <Button variant="inline-link" iconName="add-plus">
-          Show more
-        </Button>
-      )}
-      renderLoaderLoading={() => <StatusIndicator type="loading">Loading items</StatusIndicator>}
-      renderLoaderError={() => <StatusIndicator type="error">Loading error</StatusIndicator>}
-      renderLoaderEmpty={() => <Box>No resources found</Box>}
+      renderLoaderLoading={() => <StatusIndicator type="loading">読み込み中</StatusIndicator>}
+      renderLoaderError={() => <StatusIndicator type="error">読み込みエラー</StatusIndicator>}
+      renderLoaderEmpty={() => <Box>プロパティが見つかりません</Box>}
       expandableRows={expandableRows}
       resizableColumns
       columnDefinitions={[
         {
           id: 'property',
-          header: 'Property',
+          header: 'プロパティ',
           cell: (e) => e.property,
           isRowHeader: true,
           width: 250,
@@ -98,20 +88,20 @@ export const PropertyTablePresentation = ({
         },
         {
           id: 'type',
-          header: 'Type',
+          header: '型',
           cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.type}</div>,
           width: 150,
           minWidth: 100,
         },
         {
           id: 'description',
-          header: 'Description',
+          header: '説明',
           cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>,
           width: 500,
         },
         {
           id: 'value',
-          header: 'Value',
+          header: '値',
           cell: (e) => {
             const tableItemValue = e.value;
             if (tableItemValue === undefined) {
@@ -145,7 +135,7 @@ export const PropertyTablePresentation = ({
         },
         {
           id: 'reason',
-          header: 'Reason',
+          header: '設定理由',
           cell: (e) => {
             if (editingReasons !== undefined) {
               return <Textarea onChange={onChangeReason(e)} value={editingReasons?.[e.id] ?? ''} />;
@@ -160,37 +150,34 @@ export const PropertyTablePresentation = ({
       stickyHeader
       enableKeyboardNavigation
       items={properties}
-      loadingText="Loading resources"
+      loadingText="リソースを読み込み中..."
       trackBy="id"
       empty={
         <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
-          <SpaceBetween size="m">
-            <b>No resources</b>
-            <Button>Create resource</Button>
-          </SpaceBetween>
+          <b>プロパティがありません</b>
         </Box>
       }
-      filter={<TextFilter filteringPlaceholder="Find resources" filteringText="" countText="0 matches" />}
+      filter={<TextFilter filteringPlaceholder="プロパティ検索" filteringText="" countText="0 件の一致" />}
       header={header}
       preferences={
         <CollectionPreferences
-          title="Preferences"
-          confirmLabel="Confirm"
-          cancelLabel="Cancel"
+          title="設定"
+          confirmLabel="確認"
+          cancelLabel="キャンセル"
           preferences={preferences}
           onConfirm={onConfirmPreferences}
           contentDisplayPreference={{
-            description: 'Customize the visibility and order of the columns.',
+            description: '列の表示／非表示や並び順をカスタマイズする',
             options: [
               {
                 id: 'property',
-                label: 'Property',
+                label: 'プロパティ',
                 alwaysVisible: true,
               },
-              { id: 'type', label: 'Type' },
-              { id: 'description', label: 'Description' },
-              { id: 'value', label: 'Value' },
-              { id: 'reason', label: 'Reason' },
+              { id: 'type', label: '型' },
+              { id: 'description', label: '説明' },
+              { id: 'value', label: '値' },
+              { id: 'reason', label: '設定理由' },
             ],
           }}
         />

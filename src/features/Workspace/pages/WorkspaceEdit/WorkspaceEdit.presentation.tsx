@@ -40,7 +40,7 @@ export const WorkspaceEditPresentation = ({
       defaultPadding
       header={
         <SpaceBetween size="m">
-          <Header>Workspaceの編集</Header>
+          <Header>ワークスペースの編集</Header>
         </SpaceBetween>
       }
     >
@@ -53,7 +53,7 @@ export const WorkspaceEditPresentation = ({
                 control={control}
                 render={({ field, fieldState: { invalid } }) => (
                   <FormField
-                    label="Workspace name"
+                    label="ワークスペース名"
                     errorText={invalid ? '1文字以上256文字以下で入力してください' : undefined}
                   >
                     <Input {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
@@ -64,10 +64,7 @@ export const WorkspaceEditPresentation = ({
                 name="description"
                 control={control}
                 render={({ field, fieldState: { invalid } }) => (
-                  <FormField
-                    label="Workspace description"
-                    errorText={invalid ? '256文字以下で入力してください' : undefined}
-                  >
+                  <FormField label="説明" errorText={invalid ? '256文字以下で入力してください' : undefined}>
                     <Input {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
                   </FormField>
                 )}

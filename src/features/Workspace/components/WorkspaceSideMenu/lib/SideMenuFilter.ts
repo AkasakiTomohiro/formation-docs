@@ -16,7 +16,7 @@ export const filterSideMenu = (sideMenu: TemplateSummary[], searchValues: string
     const newChildren: SectionGroupItem[] = [
       {
         type: 'link',
-        text: 'Overview',
+        text: '概要',
         href:
           item.id === ManualManagementId
             ? hrefBuilder({

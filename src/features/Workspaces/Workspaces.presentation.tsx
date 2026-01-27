@@ -76,7 +76,6 @@ export const WorkspacesPresentation = ({
       defaultPadding
       header={
         <SpaceBetween size="m">
-          <Header variant="h1">Home</Header>
           <Flashbar items={flashbarItems} />
         </SpaceBetween>
       }
@@ -86,18 +85,18 @@ export const WorkspacesPresentation = ({
         columnDefinitions={[
           {
             id: 'Name',
-            header: 'Workspace name',
+            header: 'ワークスペース名',
             cell: (e) => <Link onClick={onClickWorkspaceLink(e)}>{e.name}</Link>,
             isRowHeader: true,
           },
           {
             id: 'Directory',
-            header: 'directory',
+            header: 'ディレクトリ',
             cell: (e) => e.directory,
           },
           {
             id: 'Description',
-            header: 'Description',
+            header: '説明',
             cell: (e) => e.description,
           },
         ]}
@@ -105,12 +104,12 @@ export const WorkspacesPresentation = ({
         selectedItems={selectedItems}
         onSelectionChange={onSelectionChange}
         items={tableCollection.items}
-        loadingText="Loading workspace"
+        loadingText="読み込み中..."
         trackBy="name"
         empty={
           <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
             <SpaceBetween size="m">
-              <b>No resources</b>
+              <b>リソースがありません</b>
             </SpaceBetween>
           </Box>
         }

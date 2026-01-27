@@ -80,7 +80,7 @@ export const StackDisplayContentPresentation = ({
           columnDefinitions={[
             {
               id: 'parameterName',
-              header: 'Parameter Name',
+              header: 'Parameter',
               cell: (e) => e.name,
               isRowHeader: true,
               width: 250,
@@ -108,7 +108,7 @@ export const StackDisplayContentPresentation = ({
           empty={
             <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
               <SpaceBetween size="m">
-                <b>No Parameters</b>
+                <b>Parameterがありません</b>
               </SpaceBetween>
             </Box>
           }
@@ -119,7 +119,7 @@ export const StackDisplayContentPresentation = ({
           columnDefinitions={[
             {
               id: 'outputName',
-              header: 'Output Name',
+              header: 'Output',
               cell: (e) => e.name,
               isRowHeader: true,
               width: 250,
@@ -163,11 +163,11 @@ export const StackDisplayContentPresentation = ({
           empty={
             <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
               <SpaceBetween size="m">
-                <b>No Outputs</b>
+                <b>Outputがありません</b>
               </SpaceBetween>
             </Box>
           }
-          header={<Header>Outputs</Header>}
+          header={<Header>Output</Header>}
         />
       </SpaceBetween>
     </ContentLayout>

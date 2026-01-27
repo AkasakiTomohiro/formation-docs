@@ -1,1 +1,1 @@
-export * from './StackContent';
+export * from './StackDisplayContent';

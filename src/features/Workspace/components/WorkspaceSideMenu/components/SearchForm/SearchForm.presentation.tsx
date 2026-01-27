@@ -34,8 +34,8 @@ export const SearchFormPresentation = (props: SearchFormPresentationProps): JSX.
       <Input
         type="search"
         value={props.searchValue}
-        placeholder="Search Resource"
-        ariaLabel="Search Resource"
+        placeholder="リソース検索"
+        ariaLabel="リソース検索"
         onChange={props.onChangeInput}
         onKeyDown={props.onKeyDownInput}
       />

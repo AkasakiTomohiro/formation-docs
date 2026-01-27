@@ -144,11 +144,11 @@ export const ManualResourceCreateContentPresentation = ({
               render={({ field, fieldState: { invalid, error } }) => {
                 return (
                   <FormField
-                    label="Resource ID"
+                    label="リソースID"
                     errorText={
                       invalid
                         ? error?.type === 'already_exists'
-                          ? 'このResource IDはすでに存在します'
+                          ? 'このリソースIDはすでに存在します'
                           : '1文字以上256文字以下の半角英数字で入力してください'
                         : undefined
                     }
@@ -163,7 +163,7 @@ export const ManualResourceCreateContentPresentation = ({
               control={formControl}
               render={({ field, fieldState: { invalid } }) => {
                 return (
-                  <FormField label="Description" errorText={invalid && '256文字以下で入力してください'}>
+                  <FormField label="説明" errorText={invalid && '256文字以下で入力してください'}>
                     <Textarea {...field} onChange={(event) => field.onChange(event.detail.value)} invalid={invalid} />
                   </FormField>
                 );

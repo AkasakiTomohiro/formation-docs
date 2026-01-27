@@ -72,7 +72,7 @@ export const LogicalIdTablePresentation = ({
           columnDefinitions={[
             {
               id: 'logicalId',
-              header: 'logical id',
+              header: '論理ID',
               cell: (item: string) => (
                 <Link href="#" onClick={onCliCkLogicalId(item)}>
                   {item}
@@ -84,19 +84,19 @@ export const LogicalIdTablePresentation = ({
           ]}
           enableKeyboardNavigation
           items={resourceList}
-          loadingText="Loading resources"
+          loadingText="読み込み中..."
           loading={isLoading}
           sortingDisabled
           empty={
             <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
               <SpaceBetween size="m">
-                <b>No resources</b>
+                <b>リソースがありません</b>
               </SpaceBetween>
             </Box>
           }
           filter={
             <TextFilter
-              filteringPlaceholder="Search Resource"
+              filteringPlaceholder="リソース検索"
               filteringText={filteringText}
               onChange={onChangeFilteringText}
             />

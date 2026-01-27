@@ -77,7 +77,7 @@ export const ResourceIdTablePresentation = ({
           columnDefinitions={[
             {
               id: 'resourceId',
-              header: 'resource id',
+              header: 'リソースID',
               cell: (item) => (
                 <Link href="#" onClick={onClickResourceId(item)}>
                   {item.resourceId}
@@ -89,19 +89,19 @@ export const ResourceIdTablePresentation = ({
           ]}
           enableKeyboardNavigation
           items={resourceList}
-          loadingText="Loading resources"
+          loadingText="リソースを読み込み中..."
           loading={isLoading}
           sortingDisabled
           empty={
             <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
               <SpaceBetween size="m">
-                <b>No resources</b>
+                <b>リソースがありません</b>
               </SpaceBetween>
             </Box>
           }
           filter={
             <TextFilter
-              filteringPlaceholder="Search Resource"
+              filteringPlaceholder="リソース検索"
               filteringText={filteringText}
               onChange={onChangeFilteringText}
             />

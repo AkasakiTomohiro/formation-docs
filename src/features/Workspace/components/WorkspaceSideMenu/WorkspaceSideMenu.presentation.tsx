@@ -45,7 +45,7 @@ export const WorkspaceSideMenuPresentation = (props: WorkspaceSideMenuPresentati
       itemsControl={
         <SpaceBetween direction="vertical" size="m">
           <StyledLink href="#" onClick={props.onClickSideMenuHome}>
-            Home
+            ホーム
           </StyledLink>
           <SearchForm />
         </SpaceBetween>
