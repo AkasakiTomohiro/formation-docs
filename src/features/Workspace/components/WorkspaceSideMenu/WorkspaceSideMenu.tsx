@@ -61,7 +61,7 @@ export const WorkspaceSideMenu = (): JSX.Element => {
             tabId: href,
             serviceName: hrefParts.serviceName,
             resourceName: hrefParts.resourceType,
-            viewMode: 'value',
+            viewMode: 'reason',
           };
           break;
         }

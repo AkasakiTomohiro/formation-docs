@@ -92,6 +92,7 @@ export const ManualResourceCreateContent = ({ setRegistering }: ManualResourceCr
           serviceName: data.serviceName,
           resourceName: data.resourceName,
           selectedResourceId: data.resourceId,
+          viewMode: 'reason',
         };
         addResourceTab(newTab);
         setRegistering(false);

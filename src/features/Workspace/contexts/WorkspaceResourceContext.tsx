@@ -244,6 +244,14 @@ export const WorkspaceResourceProvider = ({ children }: WorkspaceResourceProvide
           // type='resource'で、selectedLogicalIdが異なる場合は更新する
           return prev.map((tab) => (tab.tabId === newTab.tabId ? newTab : tab));
         }
+        if (
+          newTab.type === 'manualResource' &&
+          existingTab.type === 'manualResource' &&
+          existingTab.selectedResourceId !== newTab.selectedResourceId
+        ) {
+          // type='manualResource'で、selectedResourceIdが異なる場合は更新する
+          return prev.map((tab) => (tab.tabId === newTab.tabId ? newTab : tab));
+        }
         return prev;
       }
       return [...prev, newTab];
