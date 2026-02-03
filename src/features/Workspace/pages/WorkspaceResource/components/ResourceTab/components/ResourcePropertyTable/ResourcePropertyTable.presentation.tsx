@@ -1,4 +1,4 @@
-import { Button, ContentLayout, Header, SpaceBetween } from '@cloudscape-design/components';
+import { Button, ContentLayout, Header, Input, SpaceBetween } from '@cloudscape-design/components';
 import { PropertyTable } from '../../../PropertyTable';
 import type { ButtonProps, TableProps } from '@cloudscape-design/components';
 import type { ResourceTableItem } from '../../../../lib/CreateResourceTableItems';
@@ -28,6 +28,16 @@ export type ResourcePropertyTablePresentationProps = {
    * 編集中のReasonの値
    */
   editingReasons?: Record<string, string>;
+
+  /**
+   * リソースの説明
+   */
+  description: string;
+
+  /**
+   * リソースの説明を設定する関数
+   */
+  setDescription: (description: string) => void;
 
   /**
    * ネストされた行の開閉関連イベント
@@ -66,6 +76,8 @@ export const ResourcePropertyTablePresentation = ({
   reasons,
   setExpandedItems,
   editingReasons,
+  description,
+  setDescription,
 }: ResourcePropertyTablePresentationProps): JSX.Element => {
   return (
     <ContentLayout
@@ -86,19 +98,29 @@ export const ResourcePropertyTablePresentation = ({
               )}
             </SpaceBetween>
           }
+          description={editingReasons === undefined ? description : undefined}
         >
           {selectedLogicalId}
         </Header>
       }
     >
-      <PropertyTable
-        tabId={tabId}
-        properties={properties}
-        reasons={reasons}
-        editingReasons={editingReasons}
-        expandedItems={expandedItems}
-        setExpandedItems={setExpandedItems}
-      />
+      <SpaceBetween direction="vertical" size="m">
+        {editingReasons !== undefined && (
+          <Input
+            onChange={({ detail }) => setDescription(detail.value)}
+            value={description}
+            placeholder="リソースの説明"
+          />
+        )}
+        <PropertyTable
+          tabId={tabId}
+          properties={properties}
+          reasons={reasons}
+          editingReasons={editingReasons}
+          expandedItems={expandedItems}
+          setExpandedItems={setExpandedItems}
+        />
+      </SpaceBetween>
     </ContentLayout>
   );
 };

@@ -447,13 +447,20 @@ async fn get_stack_resource_properties(
     return Ok(properties_json);
 }
 
-async fn get_stack_resource_properties_reasons(
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StackMeta {
+    pub reasons: Value,
+    pub description: String,
+}
+
+async fn get_stack_meta(
     app_context: &AppContext,
     config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
     logical_id: &str,
-) -> Result<Value, StackError> {
+) -> Result<StackMeta, StackError> {
     let workspace = config_context
         .workspace_config_io
         .read(app_context.file_system.clone(), workspace_directory)
@@ -471,11 +478,16 @@ async fn get_stack_resource_properties_reasons(
     ));
     let meta_json = app_context.file_system.read_file(&meta_path).await?;
     let meta_json: Value = serde_json::from_str(&meta_json).unwrap_or_default();
-    let reasons_json = meta_json["reasons"][logical_id].clone();
+    let mut reasons_json = meta_json["reasons"][logical_id].clone();
     if reasons_json.is_null() {
-        return Ok(Value::Object(serde_json::Map::new()));
+        reasons_json = Value::Object(serde_json::Map::new());
     }
-    return Ok(reasons_json);
+    let description = meta_json["descriptions"][logical_id].clone();
+
+    return Ok(StackMeta {
+        reasons: reasons_json,
+        description: description.to_string(),
+    });
 }
 
 async fn get_stack_parameters(
@@ -593,13 +605,14 @@ async fn get_all_stack_outputs(
     return Ok(result);
 }
 
-async fn update_stack_reasons(
+async fn update_stack_meta(
     app_context: &AppContext,
     config_context: &ConfigContext,
     workspace_directory: &str,
     stack_id: &str,
     logical_id: &str,
     reasons: HashMap<String, String>,
+    description: String,
 ) -> Result<(), StackError> {
     let workspace = config_context
         .workspace_config_io
@@ -620,6 +633,9 @@ async fn update_stack_reasons(
         )
         .await?;
     stack_meta.reasons.insert(logical_id.to_string(), reasons);
+    stack_meta
+        .descriptions
+        .insert(logical_id.to_string(), description);
     config_context
         .stack_meta_config_io
         .write(
@@ -1028,6 +1044,7 @@ pub async fn update_stack_meta_command(
     stack_id: &str,
     logical_id: &str,
     reasons: HashMap<String, String>,
+    description: String,
 ) -> Result<CommandResult<()>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
@@ -1035,13 +1052,14 @@ pub async fn update_stack_meta_command(
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match update_stack_reasons(
+    return match update_stack_meta(
         &app_context_state,
         &config_context_state,
         window_state.workspace_directory.as_str(),
         stack_id,
         logical_id,
         reasons,
+        description,
     )
     .await
     {
@@ -1052,20 +1070,20 @@ pub async fn update_stack_meta_command(
 
 #[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
-pub async fn get_stack_resource_properties_reasons_command(
+pub async fn get_stack_meta_command(
     app_context_state: State<'_, AppContext>,
     config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     stack_id: &str,
     logical_id: &str,
-) -> Result<CommandResult<Value>, CommandResult> {
+) -> Result<CommandResult<StackMeta>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
         None => {
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_stack_resource_properties_reasons(
+    return match get_stack_meta(
         &app_context_state,
         &config_context_state,
         window_state.workspace_directory.as_str(),
@@ -1074,7 +1092,7 @@ pub async fn get_stack_resource_properties_reasons_command(
     )
     .await
     {
-        Ok(reasons) => Ok(CommandResult::success(reasons)),
+        Ok(meta) => Ok(CommandResult::success(meta)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
@@ -2641,6 +2659,7 @@ mod load_stack_from_info_tests {
                     name: stack_name.to_string(),
                     description: description_from_meta.to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
 
@@ -2722,6 +2741,7 @@ mod load_stack_from_info_tests {
                     name: stack_name.to_string(),
                     description: "".to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
 
@@ -3201,6 +3221,7 @@ mod load_template_summary_tests {
                     name: "Stack 1 Name".to_string(),
                     description: "Stack 1 Description".to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
 
@@ -3216,6 +3237,7 @@ mod load_template_summary_tests {
                     name: "Stack 2 Name".to_string(),
                     description: "Stack 2 Description".to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
 
@@ -3336,6 +3358,7 @@ mod load_template_summary_tests {
                     name: "Empty Stack".to_string(),
                     description: "Stack with no resources".to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
 
@@ -3531,6 +3554,7 @@ mod load_template_summary_tests {
                     name: "Stack Name".to_string(),
                     description: "Stack Description".to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
 
@@ -3607,6 +3631,7 @@ mod load_template_summary_tests {
                     name: "Mixed Stack".to_string(),
                     description: "Stack with valid and invalid resource types".to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
 
@@ -3717,6 +3742,7 @@ mod load_template_summary_tests {
                     name: "Multi Type Stack".to_string(),
                     description: "Stack with multiple resource types in same service".to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
 
@@ -4659,7 +4685,8 @@ mod get_stack_resource_properties_reasons_tests {
                             "BucketName": "This is the reason for BucketName",
                             "VersioningConfiguration": "Versioning is enabled for compliance"
                         }
-                    }
+                    },
+                    "description": "This stack contains S3 bucket with versioning enabled."
                 });
                 Ok(meta_json.to_string())
             });
@@ -4676,7 +4703,7 @@ mod get_stack_resource_properties_reasons_tests {
         };
 
         // ######### 実行 #########
-        let result = get_stack_resource_properties_reasons(
+        let result = get_stack_meta(
             &app_context,
             &config_context,
             workspace_directory,
@@ -4687,7 +4714,9 @@ mod get_stack_resource_properties_reasons_tests {
 
         // ######### 検証 #########
         assert!(result.is_ok());
-        let reasons = result.unwrap();
+        let stack_meta = result.unwrap();
+        let reasons = stack_meta.reasons;
+        let description = stack_meta.description;
         assert_eq!(
             reasons["BucketName"].as_str().unwrap(),
             "This is the reason for BucketName"
@@ -4695,6 +4724,10 @@ mod get_stack_resource_properties_reasons_tests {
         assert_eq!(
             reasons["VersioningConfiguration"].as_str().unwrap(),
             "Versioning is enabled for compliance"
+        );
+        assert_eq!(
+            description.as_str(),
+            "This stack contains S3 bucket with versioning enabled."
         );
     }
 
@@ -4757,7 +4790,7 @@ mod get_stack_resource_properties_reasons_tests {
         };
 
         // ######### 実行 #########
-        let result = get_stack_resource_properties_reasons(
+        let result = get_stack_meta(
             &app_context,
             &config_context,
             workspace_directory,
@@ -4768,9 +4801,12 @@ mod get_stack_resource_properties_reasons_tests {
 
         // ######### 検証 #########
         assert!(result.is_ok());
-        let reasons = result.unwrap();
+        let stack_meta = result.unwrap();
+        let reasons = stack_meta.reasons;
+        let description = stack_meta.description;
         assert!(reasons.is_object());
         assert_eq!(reasons.as_object().unwrap().len(), 0);
+        assert_eq!(description.as_str(), "");
     }
 
     /// workspace_configのreadに失敗した場合、エラーになること
@@ -4809,7 +4845,7 @@ mod get_stack_resource_properties_reasons_tests {
         };
 
         // ######### 実行 #########
-        let result = get_stack_resource_properties_reasons(
+        let result = get_stack_meta(
             &app_context,
             &config_context,
             workspace_directory,
@@ -4867,7 +4903,7 @@ mod get_stack_resource_properties_reasons_tests {
         };
 
         // ######### 実行 #########
-        let result = get_stack_resource_properties_reasons(
+        let result = get_stack_meta(
             &app_context,
             &config_context,
             workspace_directory,
@@ -4939,7 +4975,7 @@ mod get_stack_resource_properties_reasons_tests {
         };
 
         // ######### 実行 #########
-        let result = get_stack_resource_properties_reasons(
+        let result = get_stack_meta(
             &app_context,
             &config_context,
             workspace_directory,
@@ -6064,6 +6100,7 @@ mod update_stack_reasons_tests {
         let stack_id = "stack_id";
         let logical_id = "Resource1";
         let reasons = HashMap::from([("PropertyA".to_string(), "New reason".to_string())]);
+        let description = "resource descriptions".to_string();
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
@@ -6101,6 +6138,7 @@ mod update_stack_reasons_tests {
                     name: "TestStack".to_string(),
                     description: "TestStack description".to_string(),
                     reasons: old_reasons.clone(),
+                    descriptions: HashMap::new(),
                 })
             });
         mock_stack_meta_config_io
@@ -6116,6 +6154,7 @@ mod update_stack_reasons_tests {
                     name: "TestStack".to_string(),
                     description: "TestStack description".to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
         let config_context = ConfigContext {
@@ -6125,13 +6164,14 @@ mod update_stack_reasons_tests {
         };
 
         // ######### 実行 #########
-        let result = update_stack_reasons(
+        let result = update_stack_meta(
             &app_context,
             &config_context,
             workspace_directory,
             stack_id,
             logical_id,
             reasons,
+            description,
         )
         .await;
 
@@ -6147,6 +6187,7 @@ mod update_stack_reasons_tests {
         let stack_id = "stack_id";
         let logical_id = "Resource1";
         let reasons = HashMap::from([("PropertyA".to_string(), "New reason".to_string())]);
+        let description = "resource descriptions".to_string();
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
@@ -6172,13 +6213,14 @@ mod update_stack_reasons_tests {
         };
 
         // ######### 実行 #########
-        let result = update_stack_reasons(
+        let result = update_stack_meta(
             &app_context,
             &config_context,
             workspace_directory,
             stack_id,
             logical_id,
             reasons,
+            description,
         )
         .await;
 
@@ -6194,6 +6236,7 @@ mod update_stack_reasons_tests {
         let stack_id = "stack_id";
         let logical_id = "Resource1";
         let reasons = HashMap::from([("PropertyA".to_string(), "New reason".to_string())]);
+        let description = "resource descriptions".to_string();
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
@@ -6226,13 +6269,14 @@ mod update_stack_reasons_tests {
         };
 
         // ######### 実行 #########
-        let result = update_stack_reasons(
+        let result = update_stack_meta(
             &app_context,
             &config_context,
             workspace_directory,
             stack_id,
             logical_id,
             reasons,
+            description,
         )
         .await;
 
@@ -6248,6 +6292,7 @@ mod update_stack_reasons_tests {
         let stack_id = "stack_id";
         let logical_id = "Resource1";
         let reasons = HashMap::from([("PropertyA".to_string(), "New reason".to_string())]);
+        let description = "resource descriptions".to_string();
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
@@ -6286,13 +6331,14 @@ mod update_stack_reasons_tests {
         };
 
         // ######### 実行 #########
-        let result = update_stack_reasons(
+        let result = update_stack_meta(
             &app_context,
             &config_context,
             workspace_directory,
             stack_id,
             logical_id,
             reasons,
+            description,
         )
         .await;
 
@@ -6308,6 +6354,7 @@ mod update_stack_reasons_tests {
         let stack_id = "stack_id";
         let logical_id = "Resource1";
         let reasons = HashMap::from([("PropertyA".to_string(), "New reason".to_string())]);
+        let description = "New description".to_string();
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
@@ -6339,6 +6386,7 @@ mod update_stack_reasons_tests {
                     name: "TestStack".to_string(),
                     description: "TestStack description".to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
         mock_stack_meta_config_io
@@ -6355,13 +6403,14 @@ mod update_stack_reasons_tests {
         };
 
         // ######### 実行 #########
-        let result = update_stack_reasons(
+        let result = update_stack_meta(
             &app_context,
             &config_context,
             workspace_directory,
             stack_id,
             logical_id,
             reasons,
+            description,
         )
         .await;
 
@@ -6428,6 +6477,7 @@ mod update_stack_detail_tests {
                     name: "Old Stack Name".to_string(),
                     description: "Old description".to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
         mock_stack_meta_config_io
@@ -6444,6 +6494,7 @@ mod update_stack_detail_tests {
                     name: name.to_string(),
                     description: description.to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
         let config_context = ConfigContext {
@@ -6663,6 +6714,7 @@ mod update_stack_detail_tests {
                     name: "Old Stack Name".to_string(),
                     description: "Old description".to_string(),
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
         mock_stack_meta_config_io

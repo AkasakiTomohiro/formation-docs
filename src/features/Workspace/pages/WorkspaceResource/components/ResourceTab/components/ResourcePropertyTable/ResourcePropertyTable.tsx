@@ -3,8 +3,8 @@ import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFor
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
 import { createExpandedItems } from '../../../PropertyTable';
+import { getStackMeta } from './lib/GetStackMeta';
 import { getStackResourceProperties } from './lib/GetStackResourceProperties';
-import { getStackResourcePropertiesReasons } from './lib/GetStackResourcePropertiesReasons';
 import { loadParameterAndResourceList } from './lib/LoadParameterAndResourceList';
 import { updateStackMeta } from './lib/UpdateStackMeta';
 import { ResourcePropertyTablePresentation } from './ResourcePropertyTable.presentation';
@@ -75,6 +75,9 @@ export const ResourcePropertyTable = ({
     resources: {},
   });
 
+  // リソースの説明を管理するためのステート
+  const [description, setDescription] = useState<string>('');
+
   const { sideMenu, allStackOutputs, modifyResourceTab } = useWorkspaceResourceContext();
 
   useEffect(() => {
@@ -84,14 +87,14 @@ export const ResourcePropertyTable = ({
         stack_id: stackId,
         logical_id: selectedLogicalId,
       }),
-      getStackResourcePropertiesReasons({
+      getStackMeta({
         stack_id: stackId,
         logical_id: selectedLogicalId,
       }),
       loadParameterAndResourceList({ stack_id: stackId }),
-    ]).then(([schemaStr, properties, reasons, parameterAndResourceList]) => {
+    ]).then(([schemaStr, properties, stackMeta, parameterAndResourceList]) => {
       console.log('properties', properties);
-      console.log('reasons', reasons);
+      console.log('stackMeta', stackMeta);
       console.log('parameterAndResourceList', parameterAndResourceList);
       const schemaParsed = JSON.parse(schemaStr) as CloudFormationSchema;
       const resourceTableItems = createResourceTableItems(schemaParsed, properties, {
@@ -102,7 +105,8 @@ export const ResourcePropertyTable = ({
       });
       setProperties(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
-      setReasons(reasons);
+      setReasons(stackMeta.reasons);
+      setDescription(stackMeta.description);
       setParameterAndResourceList(parameterAndResourceList);
     });
   }, [stackId, stackName, serviceName, resourceName, selectedLogicalId, allStackOutputs, sideMenu]);
@@ -112,6 +116,7 @@ export const ResourcePropertyTable = ({
       stack_id: stackId,
       logical_id: selectedLogicalId as string,
       reasons: editingValues?.reasons ?? {},
+      description,
     });
 
     // 編集中の値をクリア
@@ -128,11 +133,11 @@ export const ResourcePropertyTable = ({
         stack_id: stackId,
         logical_id: selectedLogicalId as string,
       }),
-      getStackResourcePropertiesReasons({
+      getStackMeta({
         stack_id: stackId,
         logical_id: selectedLogicalId,
       }),
-    ]).then(([schemaStr, properties, reasons]) => {
+    ]).then(([schemaStr, properties, stackMeta]) => {
       const schemaParsed = JSON.parse(schemaStr) as CloudFormationSchema;
       const resourceTableItems = createResourceTableItems(schemaParsed, properties, {
         ...parameterAndResourceList,
@@ -141,7 +146,8 @@ export const ResourcePropertyTable = ({
         externalResources: createExternalResources(allStackOutputs, sideMenu),
       });
       setProperties(resourceTableItems);
-      setReasons(reasons);
+      setReasons(stackMeta.reasons);
+      setDescription(stackMeta.description);
     });
   };
 
@@ -176,6 +182,8 @@ export const ResourcePropertyTable = ({
       onClickEdit={onClickEdit}
       expandedItems={expandedItems}
       setExpandedItems={setExpandedItems}
+      description={description}
+      setDescription={setDescription}
     />
   );
 };

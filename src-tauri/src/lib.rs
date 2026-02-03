@@ -53,7 +53,7 @@ pub fn run() {
             command::stack::get_all_stack_outputs_command,
             command::stack::update_stack_meta_command,
             command::stack::update_stack_detail_command,
-            command::stack::get_stack_resource_properties_reasons_command,
+            command::stack::get_stack_meta_command,
             command::stack::load_parameter_and_resource_list_command,
             command::cloudformation_schema::get_cloudformation_schema_command,
             command::cloudformation_schema::get_aws_service_list_command,
