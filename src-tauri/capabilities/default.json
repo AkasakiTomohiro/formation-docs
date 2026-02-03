@@ -17,10 +17,7 @@
           "url": "https://schema.cloudformation.*.amazonaws.com/CloudformationSchema.zip"
         },
         {
-          "url": "https://api.github.com/repos/*/*/branches/*"
-        },
-        {
-          "url": "https://api.github.com/repos/*/*/zipball/*"
+          "url": "https://raw.githubusercontent.com/AkasakiTomohiro/formation-docs/refs/heads/feature/version-check/version.json"
         }
       ]
     }
