@@ -4630,7 +4630,7 @@ mod get_stack_resource_properties_tests {
 
 #[cfg(test)]
 #[coverage(off)]
-mod get_stack_resource_properties_reasons_tests {
+mod get_stack_meta_tests {
     use super::*;
     use crate::{
         config::{
@@ -4693,7 +4693,9 @@ mod get_stack_resource_properties_reasons_tests {
                             "VersioningConfiguration": "Versioning is enabled for compliance"
                         }
                     },
-                    "description": "This stack contains S3 bucket with versioning enabled."
+                    "descriptions": {
+                        "MyBucket": "This stack contains S3 bucket with versioning enabled."
+                    }
                 });
                 Ok(meta_json.to_string())
             });
@@ -4780,7 +4782,8 @@ mod get_stack_resource_properties_reasons_tests {
             .withf(move |path| path == &meta_path)
             .returning(move |_path| {
                 let meta_json = serde_json::json!({
-                    "reasons": {}
+                    "reasons": {},
+                    "descriptions": {}
                 });
                 Ok(meta_json.to_string())
             });
@@ -6081,7 +6084,7 @@ mod get_all_stack_outputs_tests {
 
 #[cfg(test)]
 #[coverage(off)]
-mod update_stack_reasons_tests {
+mod update_stack_meta_tests {
     use std::sync::Arc;
 
     use crate::{
