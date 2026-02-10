@@ -75,8 +75,10 @@ export const ResourcePropertyTable = ({
     resources: {},
   });
 
-  // リソースの説明を管理するためのステート
+  // リソースの説明（編集中の値）を管理するためのステート
   const [description, setDescription] = useState<string>('');
+  // リソースの説明（ファイルに保存されている値）を管理するためのステート
+  const [savedDescription, setSavedDescription] = useState<string>('');
 
   const { sideMenu, allStackOutputs, modifyResourceTab } = useWorkspaceResourceContext();
 
@@ -106,6 +108,7 @@ export const ResourcePropertyTable = ({
       setProperties(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
       setReasons(stackMeta.reasons);
+      setSavedDescription(stackMeta.description);
       setDescription(stackMeta.description);
       setParameterAndResourceList(parameterAndResourceList);
     });
@@ -147,6 +150,7 @@ export const ResourcePropertyTable = ({
       });
       setProperties(resourceTableItems);
       setReasons(stackMeta.reasons);
+      setSavedDescription(stackMeta.description);
       setDescription(stackMeta.description);
     });
   };
@@ -159,6 +163,7 @@ export const ResourcePropertyTable = ({
         editingValues: undefined,
       };
     });
+    setDescription(savedDescription);
   };
 
   const onClickEdit = () => {
