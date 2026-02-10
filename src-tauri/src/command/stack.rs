@@ -482,11 +482,18 @@ async fn get_stack_meta(
     if reasons_json.is_null() {
         reasons_json = Value::Object(serde_json::Map::new());
     }
-    let description = meta_json["descriptions"][logical_id].clone();
+    let description_value = meta_json["descriptions"][logical_id].clone();
+    let description = if description_value.is_string() {
+        description_value.as_str().unwrap_or_default().to_string()
+    } else if description_value.is_null() {
+        String::new()
+    } else {
+        serde_json::to_string(&description_value).unwrap_or_default()
+    };
 
     return Ok(StackMeta {
         reasons: reasons_json,
-        description: description.to_string(),
+        description,
     });
 }
 
