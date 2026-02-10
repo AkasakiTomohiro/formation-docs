@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use thiserror::Error;
 
-const STACK_META_CONFIG_LATEST_VERSION: u32 = 1;
+const STACK_META_CONFIG_LATEST_VERSION: u32 = 2;
 
 ///
 /// スタックメタコンフィグ v1
@@ -261,9 +261,13 @@ mod stack_meta_config_v1_tests {
         let config_v1 = StackMetaConfigV1::new(name);
 
         // ######### 実行 #########
+        // V1 -> V2へマイグレーション
         let boxed: Box<dyn ConfigMigratable<Latest = StackMetaConfig>> = Box::new(config_v1);
-        let migrated = boxed.migrate_boxed();
-        let config_latest = migrated
+        let v2 = boxed.migrate_boxed();
+
+        // V2 -> StackMetaConfigへマイグレーション
+        let config_latest = v2
+            .migrate_boxed()
             .as_any()
             .downcast::<StackMetaConfig>()
             .expect("must be StackMetaConfig at latest");
@@ -273,6 +277,7 @@ mod stack_meta_config_v1_tests {
         assert_eq!(config_latest.name, name.to_string());
         assert_eq!(config_latest.description, "".to_string());
         assert_eq!(config_latest.reasons.is_empty(), true);
+        assert_eq!(config_latest.descriptions.is_empty(), true);
     }
 
     #[test]
@@ -396,7 +401,8 @@ mod stack_meta_config_tests {
                     "version": 1,
                     "name": "name",
                     "description": "description",
-                    "reasons": {}
+                    "reasons": {},
+                    "descriptions": {}
                 }"#;
                 Ok(config_json.to_string())
             });
@@ -412,10 +418,11 @@ mod stack_meta_config_tests {
 
             // readの戻り値の内容が期待通りであること
             let config = result.unwrap();
-            assert_eq!(config.version, 1);
+            assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
             assert_eq!(config.name, "name".to_string());
             assert_eq!(config.description, "description".to_string());
             assert_eq!(config.reasons.is_empty(), true);
+            assert_eq!(config.descriptions.is_empty(), true);
         }
 
         #[tokio::test]
@@ -452,10 +459,11 @@ mod stack_meta_config_tests {
 
             // readの戻り値の内容が期待通りであること
             let config = result.unwrap();
-            assert_eq!(config.version, 1);
+            assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
             assert_eq!(config.name, stack_name.to_string());
             assert_eq!(config.description, "".to_string());
             assert_eq!(config.reasons.is_empty(), true);
+            assert_eq!(config.descriptions.is_empty(), true);
         }
 
         #[tokio::test]
@@ -482,10 +490,11 @@ mod stack_meta_config_tests {
 
             // readの戻り値の内容が期待通りであること
             let config = result.unwrap();
-            assert_eq!(config.version, 1);
+            assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
             assert_eq!(config.name, stack_name.to_string());
             assert_eq!(config.description, "".to_string());
             assert_eq!(config.reasons.is_empty(), true);
+            assert_eq!(config.descriptions.is_empty(), true);
         }
 
         #[tokio::test]
