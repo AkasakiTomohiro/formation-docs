@@ -2603,6 +2603,109 @@ mod import_stack_tests {
         // stackのインポートがエラーになること
         assert!(result.is_err());
     }
+
+    // yaml_contentのパースに失敗した場合、エラーになること
+    #[tokio::test]
+    async fn import_different_paths_yaml_parse_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "sample_workspace";
+        let file_name = "existing_stack.template.yaml";
+        let stack_file_path_buf = PathBuf::from("sample_workspace2").join(file_name);
+        let stack_file_path = stack_file_path_buf.to_str().unwrap().to_string();
+
+        // file_systemのread_fileのモック設定
+        let invalid_yaml_content = r#"
+            name: "New Stack"
+            description: "A new stack
+            version: "1"
+        "#; // 無効なYAML
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == stack_file_path_buf)
+            .returning(move |_path| Ok(invalid_yaml_content.to_string()));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = import_stack(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_file_path.as_str(),
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackのインポートがエラーになること
+        assert!(result.is_err());
+    }
+
+    // yaml_valueのjsonへの変換に失敗した場合、エラーになること
+    #[tokio::test]
+    async fn import_different_paths_yaml_to_json_error() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "sample_workspace";
+        let file_name = "existing_stack.template.yaml";
+        let stack_file_path_buf = PathBuf::from("sample_workspace2").join(file_name);
+        let stack_file_path = stack_file_path_buf.to_str().unwrap().to_string();
+
+        // file_systemのread_fileのモック設定
+        let yaml_content_with_unserializable_value = r#"
+            name: "New Stack"
+            description: "A new stack"
+            version: 1
+            ? [1, 2]: "invalid mapping"
+        "#; // キーに配列があるとJSONへの変換に失敗する
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == stack_file_path_buf)
+            .returning(move |_path| Ok(yaml_content_with_unserializable_value.to_string()));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = import_stack(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_file_path.as_str(),
+        )
+        .await;
+
+        // ######### 検証 #########
+        // stackのインポートがエラーになること
+        assert!(result.is_err());
+    }
 }
 
 #[cfg(test)]
@@ -4996,6 +5099,98 @@ mod get_stack_meta_tests {
 
         // ######### 検証 #########
         assert!(result.is_err());
+    }
+
+    /// descriptionがstringでもnullでもない場合にも文字列として返ること
+    #[tokio::test]
+    async fn success_description_not_string() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_app_config = MockAppConfigTrait::new();
+        let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+
+        let workspace_directory = "test/sample_workspace";
+        let stack_id = "stack_id";
+        let stack_file_name = "stack.template.json";
+        let logical_id = "MyBucket";
+
+        let mut stacks = HashMap::new();
+        stacks.insert(stack_id.to_string(), stack_file_name.to_string());
+
+        // workspace_configのreadのモック設定
+        mock_workspace_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir| workspace_dir == workspace_directory)
+            .returning(move |_file_system, _workspace_dir| {
+                Ok(WorkspaceConfig {
+                    version: 1,
+                    stacks: stacks.clone(),
+                    name: "Sample Workspace".to_string(),
+                    description: "workspace_description sample".to_string(),
+                })
+            });
+
+        // file_systemのread_fileのモック設定（メタファイル用）
+        let meta_path = PathBuf::from(format!(
+            "{}/{}.meta.json",
+            workspace_directory,
+            stack_file_name.replace(".template.json", "")
+        ));
+        mock_file_system
+            .expect_read_file()
+            .withf(move |path| path == &meta_path)
+            .returning(move |_path| {
+                let meta_json = serde_json::json!({
+                    "reasons": {
+                        "MyBucket": {
+                            "BucketName": "This is the reason for BucketName",
+                            "VersioningConfiguration": "Versioning is enabled for compliance"
+                        }
+                    },
+                    "descriptions": {
+                        "MyBucket": 100
+                    }
+                });
+                Ok(meta_json.to_string())
+            });
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+        };
+
+        // ######### 実行 #########
+        let result = get_stack_meta(
+            &app_context,
+            &config_context,
+            workspace_directory,
+            stack_id,
+            logical_id,
+        )
+        .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+        let stack_meta = result.unwrap();
+        let reasons = stack_meta.reasons;
+        let description = stack_meta.description;
+        assert_eq!(
+            reasons["BucketName"].as_str().unwrap(),
+            "This is the reason for BucketName"
+        );
+        assert_eq!(
+            reasons["VersioningConfiguration"].as_str().unwrap(),
+            "Versioning is enabled for compliance"
+        );
+        assert_eq!(description.as_str(), "100");
     }
 }
 
