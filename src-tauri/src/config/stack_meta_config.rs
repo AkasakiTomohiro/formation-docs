@@ -8,7 +8,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use thiserror::Error;
 
-const STACK_META_CONFIG_LATEST_VERSION: u32 = 2;
+const STACK_META_CONFIG_LATEST_VERSION: u32 = 1;
 
 ///
 /// スタックメタコンフィグ v1
@@ -20,6 +20,7 @@ struct StackMetaConfigV1 {
     pub name: String,
     pub description: String,
     pub reasons: HashMap<String, HashMap<String, String>>,
+    pub descriptions: HashMap<String, String>,
 }
 
 impl StackMetaConfigV1 {
@@ -29,53 +30,12 @@ impl StackMetaConfigV1 {
             name: name.to_string(),
             description: "".to_string(),
             reasons: HashMap::new(),
+            descriptions: HashMap::new(),
         }
     }
 }
 
 impl ConfigMigratable for StackMetaConfigV1 {
-    type Latest = StackMetaConfig;
-
-    fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable<Latest = Self::Latest>> {
-        Box::new(StackMetaConfigV2 {
-            version: STACK_META_CONFIG_LATEST_VERSION,
-            name: self.name,
-            description: self.description,
-            reasons: self.reasons,
-            descriptions: HashMap::new(),
-        })
-    }
-    fn as_any(self: Box<Self>) -> Box<dyn Any> {
-        self
-    }
-}
-
-///
-/// スタックメタコンフィグ v2
-///
-
-#[derive(Debug, Serialize, Deserialize)]
-struct StackMetaConfigV2 {
-    pub version: u32,
-    pub name: String,
-    pub description: String,
-    pub reasons: HashMap<String, HashMap<String, String>>,
-    pub descriptions: HashMap<String, String>,
-}
-
-impl StackMetaConfigV2 {
-    pub fn new(name: &str) -> Self {
-        StackMetaConfigV2 {
-            version: 2,
-            name: name.to_string(),
-            description: "".to_string(),
-            reasons: HashMap::new(),
-            descriptions: HashMap::new(),
-        }
-    }
-}
-
-impl ConfigMigratable for StackMetaConfigV2 {
     type Latest = StackMetaConfig;
 
     fn migrate_boxed(self: Box<Self>) -> Box<dyn ConfigMigratable<Latest = Self::Latest>> {
@@ -108,7 +68,7 @@ pub struct StackMetaConfig {
 impl StackMetaConfig {
     pub fn new(name: &str) -> Self {
         let config: Box<dyn ConfigMigratable<Latest = StackMetaConfig>> =
-            Box::new(StackMetaConfigV2::new(name));
+            Box::new(StackMetaConfigV1::new(name));
         *config
             .migrate_boxed()
             .as_any()
@@ -136,12 +96,6 @@ impl StackMetaConfig {
             1 => {
                 let config_json = file_system.read_file(&config_path).await?;
                 let config_json = serde_json::from_str::<StackMetaConfigV1>(&config_json)?;
-                let boxed = Box::new(config_json);
-                Ok(boxed.migrate_until_latest())
-            }
-            2 => {
-                let config_json = file_system.read_file(&config_path).await?;
-                let config_json = serde_json::from_str::<StackMetaConfigV2>(&config_json)?;
                 let boxed = Box::new(config_json);
                 Ok(boxed.migrate_until_latest())
             }
@@ -261,13 +215,11 @@ mod stack_meta_config_v1_tests {
         let config_v1 = StackMetaConfigV1::new(name);
 
         // ######### 実行 #########
-        // V1 -> V2へマイグレーション
         let boxed: Box<dyn ConfigMigratable<Latest = StackMetaConfig>> = Box::new(config_v1);
-        let v2 = boxed.migrate_boxed();
+        let migrated = boxed.migrate_boxed();
 
-        // V2 -> StackMetaConfigへマイグレーション
-        let config_latest = v2
-            .migrate_boxed()
+        // V1 -> StackMetaConfigへマイグレーション
+        let config_latest = migrated
             .as_any()
             .downcast::<StackMetaConfig>()
             .expect("must be StackMetaConfig at latest");
