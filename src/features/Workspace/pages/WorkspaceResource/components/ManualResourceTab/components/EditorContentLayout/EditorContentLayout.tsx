@@ -6,7 +6,7 @@ import { createResourceTableItems } from '../../../../lib/CreateResourceTableIte
 import { createExpandedItems } from '../../../PropertyTable';
 import { EditorContentLayoutPresentation } from './EditorContentLayout.presentation';
 import { getManualManagementResourceProperties } from './lib/GetManualManagementResourceProperties';
-import { getManualManagementResourceReasons } from './lib/GetManualManagementResourceReasons';
+import { getManualManagementResourceMeta } from './lib/getManualManagementResourceMeta';
 import { updateManualResourceMeta } from './lib/UpdateManualResourceMeta';
 import { updateManualResourceProperties } from './lib/UpdateManualResourceProperties';
 import type { ManualResourceTabInfo, ViewMode } from '../../../../../../contexts';
@@ -40,6 +40,10 @@ export const EditorContentLayout = ({
   const { addFlashbarItem } = useFlashbarContext();
   const [isValid, setIsValid] = useState(true);
   const { viewMode, setViewMode, modifyResourceTab } = useWorkspaceResourceContext();
+  // リソースの説明（編集中の値）を管理するためのステート
+  const [description, setDescription] = useState<string>('');
+  // リソースの説明（ファイルに保存されている値）を管理するためのステート
+  const [savedDescription, setSavedDescription] = useState<string>('');
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
@@ -48,17 +52,19 @@ export const EditorContentLayout = ({
       getManualManagementResourceProperties({
         resource_id: selectedResourceId,
       }),
-      getManualManagementResourceReasons({
+      getManualManagementResourceMeta({
         resource_id: selectedResourceId,
       }),
-    ]).then(([cloudformationSchema, properties, reasons]) => {
+    ]).then(([cloudformationSchema, properties, resourceMeta]) => {
       console.log('properties', properties);
-      console.log('reasons', reasons);
+      console.log('meta', resourceMeta);
       setSchema(cloudformationSchema);
       const resourceTableItems = createResourceTableItems(cloudformationSchema, properties);
       setProperties(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
-      setReasons(reasons);
+      setReasons(resourceMeta.reasons);
+      setSavedDescription(resourceMeta.description);
+      setDescription(resourceMeta.description);
       setValues(JSON.stringify(properties, undefined, 2));
     });
   }, [selectedResourceId]);
@@ -82,6 +88,7 @@ export const EditorContentLayout = ({
         editingValues: undefined,
       };
     });
+    setDescription(savedDescription);
   };
 
   const onSave = async () => {
@@ -95,7 +102,8 @@ export const EditorContentLayout = ({
     }
     await updateManualResourceMeta({
       resource_id: selectedResourceId as string,
-      reasons: editingValues?.reasons || {},
+      reasons: editingValues?.reasons,
+      description: description,
     });
     await updateManualResourceProperties({
       resource_id: selectedResourceId as string,
@@ -118,11 +126,13 @@ export const EditorContentLayout = ({
       getManualManagementResourceProperties({
         resource_id: selectedResourceId,
       }),
-      getManualManagementResourceReasons({
+      getManualManagementResourceMeta({
         resource_id: selectedResourceId,
       }),
-    ]).then(([properties, reasons]) => {
-      setReasons(reasons);
+    ]).then(([properties, resourceMeta]) => {
+      setReasons(resourceMeta.reasons);
+      setSavedDescription(resourceMeta.description);
+      setDescription(resourceMeta.description);
       setValues(JSON.stringify(properties, undefined, 2));
     });
   };
@@ -146,6 +156,8 @@ export const EditorContentLayout = ({
       tabId={tabId}
       selectedResourceId={selectedResourceId}
       viewMode={viewMode(tabId)}
+      description={description}
+      setDescription={setDescription}
       onClickEdit={onEdit}
       onClickCancel={onCancel}
       onClickSave={onSave}

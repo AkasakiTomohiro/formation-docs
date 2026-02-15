@@ -61,7 +61,7 @@ pub fn run() {
             command::manual_management_resource::get_manual_management_resource_list_command,
             command::manual_management_resource::load_manual_management_resource_summary_command,
             command::manual_management_resource::get_manual_resource_properties_command,
-            command::manual_management_resource::get_manual_resource_reasons_command,
+            command::manual_management_resource::get_manual_resource_meta_command,
             command::manual_management_resource::update_manual_resource_meta_command,
             command::manual_management_resource::update_manual_resource_properties_command,
         ])
