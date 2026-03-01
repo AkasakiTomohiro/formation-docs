@@ -20,6 +20,7 @@ export type EditorContentLayoutProps = {
   serviceName: string;
   resourceName: string;
   editingValues?: {
+    description: string;
     properties: string;
     reasons: Record<string, string>;
   };
@@ -40,10 +41,8 @@ export const EditorContentLayout = ({
   const { addFlashbarItem } = useFlashbarContext();
   const [isValid, setIsValid] = useState(true);
   const { viewMode, setViewMode, modifyResourceTab } = useWorkspaceResourceContext();
-  // リソースの説明（編集中の値）を管理するためのステート
+  // リソースの説明を管理するためのステート
   const [description, setDescription] = useState<string>('');
-  // リソースの説明（ファイルに保存されている値）を管理するためのステート
-  const [savedDescription, setSavedDescription] = useState<string>('');
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
@@ -63,7 +62,6 @@ export const EditorContentLayout = ({
       setProperties(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
       setReasons(resourceMeta.reasons);
-      setSavedDescription(resourceMeta.description);
       setDescription(resourceMeta.description);
       setValues(JSON.stringify(properties, undefined, 2));
     });
@@ -74,6 +72,7 @@ export const EditorContentLayout = ({
       return {
         ...originTab,
         editingValues: {
+          description: description,
           reasons: reasons,
           properties: values,
         },
@@ -88,7 +87,6 @@ export const EditorContentLayout = ({
         editingValues: undefined,
       };
     });
-    setDescription(savedDescription);
   };
 
   const onSave = async () => {
@@ -103,7 +101,7 @@ export const EditorContentLayout = ({
     await updateManualResourceMeta({
       resource_id: selectedResourceId as string,
       reasons: editingValues?.reasons,
-      description: description,
+      description: editingValues?.description,
     });
     await updateManualResourceProperties({
       resource_id: selectedResourceId as string,
@@ -131,7 +129,6 @@ export const EditorContentLayout = ({
       }),
     ]).then(([properties, resourceMeta]) => {
       setReasons(resourceMeta.reasons);
-      setSavedDescription(resourceMeta.description);
       setDescription(resourceMeta.description);
       setValues(JSON.stringify(properties, undefined, 2));
     });
@@ -144,8 +141,22 @@ export const EditorContentLayout = ({
       return {
         ...originTab,
         editingValues: {
+          description: editingValues?.description || '',
           reasons: editingValues?.reasons || {},
           properties: detail.value,
+        },
+      };
+    });
+  };
+
+  const onChangeDescription: EditorContentLayoutPresentationProps['setDescription'] = (description) => {
+    modifyResourceTab(tabId, (originTab: ManualResourceTabInfo) => {
+      return {
+        ...originTab,
+        editingValues: {
+          description: description,
+          reasons: editingValues?.reasons || {},
+          properties: editingValues?.properties || '{}',
         },
       };
     });
@@ -157,7 +168,8 @@ export const EditorContentLayout = ({
       selectedResourceId={selectedResourceId}
       viewMode={viewMode(tabId)}
       description={description}
-      setDescription={setDescription}
+      editingDescription={editingValues?.description ?? ''}
+      setDescription={onChangeDescription}
       onClickEdit={onEdit}
       onClickCancel={onCancel}
       onClickSave={onSave}

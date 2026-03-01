@@ -25,9 +25,12 @@ export type ResourcePropertyTablePresentationProps = {
   reasons: Record<string, string>;
 
   /**
-   * 編集中のReasonの値
+   * 編集中のDescription・Reasonsの値
    */
-  editingReasons?: Record<string, string>;
+  editingValues?: {
+    description: string;
+    reasons: Record<string, string>;
+  };
 
   /**
    * リソースの説明
@@ -75,7 +78,7 @@ export const ResourcePropertyTablePresentation = ({
   onClickSave,
   reasons,
   setExpandedItems,
-  editingReasons,
+  editingValues,
   description,
   setDescription,
 }: ResourcePropertyTablePresentationProps): JSX.Element => {
@@ -86,7 +89,7 @@ export const ResourcePropertyTablePresentation = ({
         <Header
           actions={
             <SpaceBetween direction="horizontal" size="xs">
-              {editingReasons === undefined ? (
+              {editingValues === undefined ? (
                 <Button onClick={onClickEdit}>編集</Button>
               ) : (
                 <>
@@ -98,17 +101,17 @@ export const ResourcePropertyTablePresentation = ({
               )}
             </SpaceBetween>
           }
-          description={editingReasons === undefined ? description : undefined}
+          description={editingValues === undefined ? description : undefined}
         >
           {selectedLogicalId}
         </Header>
       }
     >
       <SpaceBetween direction="vertical" size="m">
-        {editingReasons !== undefined && (
+        {editingValues !== undefined && (
           <Input
             onChange={({ detail }) => setDescription(detail.value)}
-            value={description}
+            value={editingValues.description}
             placeholder="リソースの説明"
           />
         )}
@@ -116,7 +119,7 @@ export const ResourcePropertyTablePresentation = ({
           tabId={tabId}
           properties={properties}
           reasons={reasons}
-          editingReasons={editingReasons}
+          editingReasons={editingValues?.reasons}
           expandedItems={expandedItems}
           setExpandedItems={setExpandedItems}
         />
