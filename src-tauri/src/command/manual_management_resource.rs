@@ -833,6 +833,8 @@ mod get_manual_management_resources_tests {
             ManualManagementResourceError::Io(_)
         ));
     }
+
+    // serde_json::to_stringが失敗するケースは通常起こりえないためテストは実装しない
 }
 
 #[cfg(test)]
@@ -2075,7 +2077,6 @@ mod load_manual_resource_meta_tests {
     use super::*;
 
     /// 既にファイルが存在するとき、手動管理リソースのmetaファイルを読み込みできること
-    // TODO:修正
     #[tokio::test]
     async fn file_exists() {
         // ######### 準備 #########
@@ -2089,6 +2090,9 @@ mod load_manual_resource_meta_tests {
                     "TestResource": {
                         "Reason1": "test reason"
                     }
+                },
+                "descriptions": {
+                    "TestResource": "Test Description"
                 }
             }"#
             .to_string())
@@ -2107,10 +2111,11 @@ mod load_manual_resource_meta_tests {
         let meta = result.unwrap();
         let reasons = meta.reasons.get("TestResource").unwrap();
         assert_eq!(reasons.get("Reason1").unwrap(), "test reason");
+        let descriptions = meta.descriptions.get("TestResource").unwrap();
+        assert_eq!(descriptions, "Test Description");
     }
 
     /// ファイルが存在しないとき、空のmetaファイルを作成してから読み込みできること
-    // TODO:修正
     #[tokio::test]
     async fn file_not_exists() {
         // ######### 準備 #########
@@ -2124,7 +2129,7 @@ mod load_manual_resource_meta_tests {
 
         mock_file_system
             .expect_read_file()
-            .returning(|_| Ok(r#"{ "reasons": {} }"#.to_string()));
+            .returning(|_| Ok(r#"{ "reasons": {}, "descriptions": {} }"#.to_string()));
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -2138,6 +2143,7 @@ mod load_manual_resource_meta_tests {
         assert!(result.is_ok());
         let meta = result.unwrap();
         assert_eq!(meta.reasons.len(), 0);
+        assert_eq!(meta.descriptions.len(), 0);
     }
 
     /// write_file に失敗し、エラーを返すこと
