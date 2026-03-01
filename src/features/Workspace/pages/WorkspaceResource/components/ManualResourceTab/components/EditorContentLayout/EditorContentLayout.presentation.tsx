@@ -1,4 +1,4 @@
-import { Button, ContentLayout, Header, SegmentedControl, SpaceBetween } from '@cloudscape-design/components';
+import { Button, ContentLayout, Header, Input, SegmentedControl, SpaceBetween } from '@cloudscape-design/components';
 import { PropertyTable } from '../../../PropertyTable';
 import { ResourcePropertyEditor } from './components';
 import type { ButtonProps, SegmentedControlProps } from '@cloudscape-design/components';
@@ -21,6 +21,16 @@ export type EditorContentLayoutPresentationProps = {
    * コンテンツで表示する種別
    */
   viewMode: ViewMode;
+
+  /**
+   * リソースの説明
+   */
+  description: string;
+
+  /**
+   * リソースの説明を設定する関数
+   */
+  setDescription: (description: string) => void;
 
   /**
    * セグメントコントロールの変更イベントハンドラ
@@ -63,6 +73,8 @@ export const EditorContentLayoutPresentation = ({
   selectedResourceId,
   propertyTableProps,
   viewMode,
+  description,
+  setDescription,
   onClickEdit,
   onClickCancel,
   onClickSave,
@@ -88,53 +100,63 @@ export const EditorContentLayoutPresentation = ({
               )}
             </SpaceBetween>
           }
+          description={propertyTableProps.editingReasons === undefined ? description : undefined}
         >
           {selectedResourceId}
         </Header>
       }
     >
-      {viewMode === 'reason' && (
-        <PropertyTable
-          tabId={tabId}
-          properties={propertyTableProps.properties}
-          reasons={propertyTableProps.reasons}
-          expandedItems={propertyTableProps.expandedItems}
-          setExpandedItems={propertyTableProps.setExpandedItems}
-          editingReasons={propertyTableProps.editingReasons}
-          header={
-            <Header
-              variant="h2"
-              actions={
-                <SegmentedControl
-                  selectedId={viewMode}
-                  onChange={onChangeSegmentedControl}
-                  options={selectModeOptions}
-                />
-              }
-            />
-          }
-        />
-      )}
-      {viewMode === 'value' && (
-        <ResourcePropertyEditor
-          values={resourcePropertyEditorProps.values}
-          editingValues={resourcePropertyEditorProps.editingValues}
-          onDelayedChange={resourcePropertyEditorProps.onDelayedChange}
-          onValidate={resourcePropertyEditorProps.onValidate}
-          header={
-            <Header
-              variant="h2"
-              actions={
-                <SegmentedControl
-                  selectedId={viewMode}
-                  onChange={onChangeSegmentedControl}
-                  options={selectModeOptions}
-                />
-              }
-            />
-          }
-        />
-      )}
+      <SpaceBetween direction="vertical" size="m">
+        {propertyTableProps.editingReasons !== undefined && (
+          <Input
+            onChange={({ detail }) => setDescription(detail.value)}
+            value={description}
+            placeholder="リソースの説明"
+          />
+        )}
+        {viewMode === 'reason' && (
+          <PropertyTable
+            tabId={tabId}
+            properties={propertyTableProps.properties}
+            reasons={propertyTableProps.reasons}
+            expandedItems={propertyTableProps.expandedItems}
+            setExpandedItems={propertyTableProps.setExpandedItems}
+            editingReasons={propertyTableProps.editingReasons}
+            header={
+              <Header
+                variant="h2"
+                actions={
+                  <SegmentedControl
+                    selectedId={viewMode}
+                    onChange={onChangeSegmentedControl}
+                    options={selectModeOptions}
+                  />
+                }
+              />
+            }
+          />
+        )}
+        {viewMode === 'value' && (
+          <ResourcePropertyEditor
+            values={resourcePropertyEditorProps.values}
+            editingValues={resourcePropertyEditorProps.editingValues}
+            onDelayedChange={resourcePropertyEditorProps.onDelayedChange}
+            onValidate={resourcePropertyEditorProps.onValidate}
+            header={
+              <Header
+                variant="h2"
+                actions={
+                  <SegmentedControl
+                    selectedId={viewMode}
+                    onChange={onChangeSegmentedControl}
+                    options={selectModeOptions}
+                  />
+                }
+              />
+            }
+          />
+        )}
+      </SpaceBetween>
     </ContentLayout>
   );
 };
