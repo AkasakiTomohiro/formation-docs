@@ -55,6 +55,7 @@ export const PropertyTable = ({
           return {
             ...originTab,
             editingValues: {
+              description: originTab.editingValues?.description || '',
               reasons: {
                 ...editingReasons,
                 [item.id]: detail.value,
@@ -66,6 +67,7 @@ export const PropertyTable = ({
         return {
           ...originTab,
           editingValues: {
+            description: originTab.editingValues?.description || '',
             reasons: {
               ...editingReasons,
               [item.id]: detail.value,

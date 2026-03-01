@@ -28,6 +28,11 @@ export type EditorContentLayoutPresentationProps = {
   description: string;
 
   /**
+   * リソースの説明（編集中の値）
+   */
+  editingDescription: string;
+
+  /**
    * リソースの説明を設定する関数
    */
   setDescription: (description: string) => void;
@@ -74,6 +79,7 @@ export const EditorContentLayoutPresentation = ({
   propertyTableProps,
   viewMode,
   description,
+  editingDescription,
   setDescription,
   onClickEdit,
   onClickCancel,
@@ -110,7 +116,7 @@ export const EditorContentLayoutPresentation = ({
         {propertyTableProps.editingReasons !== undefined && (
           <Input
             onChange={({ detail }) => setDescription(detail.value)}
-            value={description}
+            value={editingDescription}
             placeholder="リソースの説明"
           />
         )}

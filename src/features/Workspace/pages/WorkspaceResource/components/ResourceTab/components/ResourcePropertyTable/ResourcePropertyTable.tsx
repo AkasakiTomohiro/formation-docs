@@ -75,10 +75,8 @@ export const ResourcePropertyTable = ({
     resources: {},
   });
 
-  // リソースの説明（編集中の値）を管理するためのステート
+  // ファイルに保存されているリソースの説明を管理するためのステート
   const [description, setDescription] = useState<string>('');
-  // リソースの説明（ファイルに保存されている値）を管理するためのステート
-  const [savedDescription, setSavedDescription] = useState<string>('');
 
   const { sideMenu, allStackOutputs, modifyResourceTab } = useWorkspaceResourceContext();
 
@@ -108,7 +106,6 @@ export const ResourcePropertyTable = ({
       setProperties(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
       setReasons(stackMeta.reasons);
-      setSavedDescription(stackMeta.description);
       setDescription(stackMeta.description);
       setParameterAndResourceList(parameterAndResourceList);
     });
@@ -119,7 +116,7 @@ export const ResourcePropertyTable = ({
       stack_id: stackId,
       logical_id: selectedLogicalId as string,
       reasons: editingValues?.reasons ?? {},
-      description,
+      description: editingValues?.description ?? '',
     });
 
     // 編集中の値をクリア
@@ -150,7 +147,6 @@ export const ResourcePropertyTable = ({
       });
       setProperties(resourceTableItems);
       setReasons(stackMeta.reasons);
-      setSavedDescription(stackMeta.description);
       setDescription(stackMeta.description);
     });
   };
@@ -163,14 +159,25 @@ export const ResourcePropertyTable = ({
         editingValues: undefined,
       };
     });
-    setDescription(savedDescription);
   };
 
   const onClickEdit = () => {
     modifyResourceTab(tabId, (originTab: ResourceTabInfo) => {
       return {
         ...originTab,
-        editingValues: { reasons },
+        editingValues: { reasons, description },
+      };
+    });
+  };
+
+  const onChangeDescription = (description: string) => {
+    modifyResourceTab(tabId, (originTab: ResourceTabInfo) => {
+      return {
+        ...originTab,
+        editingValues: {
+          reasons: originTab.editingValues?.reasons ?? {},
+          description,
+        },
       };
     });
   };
@@ -181,14 +188,14 @@ export const ResourcePropertyTable = ({
       properties={properties}
       selectedLogicalId={selectedLogicalId}
       reasons={reasons}
-      editingReasons={editingValues?.reasons}
+      editingValues={editingValues}
       onClickSave={onSave}
       onClickCancel={onCancel}
       onClickEdit={onClickEdit}
       expandedItems={expandedItems}
       setExpandedItems={setExpandedItems}
       description={description}
-      setDescription={setDescription}
+      setDescription={onChangeDescription}
     />
   );
 };

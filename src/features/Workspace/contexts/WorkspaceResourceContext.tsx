@@ -29,6 +29,7 @@ export type ResourceTabAttr = {
   resourceName: string;
   selectedLogicalId?: string;
   editingValues?: {
+    description: string;
     reasons: Record<string, string>;
   };
 };
@@ -38,6 +39,7 @@ export type ManualResourceTabAttr = {
   resourceName: string;
   selectedResourceId?: string;
   editingValues?: {
+    description: string;
     properties: string;
     reasons: Record<string, string>;
   };
