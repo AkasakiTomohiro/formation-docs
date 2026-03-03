@@ -100,6 +100,7 @@ mod setup_app_tests {
                 initialized: false, // 初期化されていない状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from(""),
             };
             return Ok(app_config);
         });
@@ -169,6 +170,7 @@ mod setup_app_tests {
                 initialized: true, // 初期化済みの状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from(""),
             };
             return Ok(app_config);
         });
@@ -273,6 +275,7 @@ mod setup_app_tests {
                 initialized: false, // 初期化されていない状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from(""),
             };
             return Ok(app_config);
         });
@@ -333,6 +336,7 @@ mod setup_app_tests {
                 initialized: false, // 初期化されていない状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from(""),
             };
             return Ok(app_config);
         });

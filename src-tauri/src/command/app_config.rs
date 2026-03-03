@@ -131,6 +131,7 @@ mod app_config_command_tests {
                 initialized: true,
                 initialized_at: String::from("2023-01-01T00:00:00Z"),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from("2023-01-01T00:00:00Z"),
             };
             Ok(app_config)
         });
@@ -190,6 +191,7 @@ mod app_config_command_tests {
                 version: 1,
                 initialized: true,
                 initialized_at: String::from("2023-01-01T00:00:00Z"),
+                cf_schema_downloaded_at: String::from("2023-01-01T00:00:00Z"),
                 workspaces: workspaces.clone(),
             };
             Ok(app_config)
@@ -251,6 +253,7 @@ mod app_config_command_tests {
                 initialized: true,
                 initialized_at: String::from("2023-01-01T00:00:00Z"),
                 workspaces: workspaces.clone(),
+                cf_schema_downloaded_at: String::from("2023-01-01T00:00:00Z"),
             };
             Ok(app_config)
         });
@@ -333,6 +336,7 @@ mod app_config_command_tests {
                 initialized: true,
                 initialized_at: String::from("2023-01-01T00:00:00Z"),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from("2023-01-01T00:00:00Z"),
             };
             Ok(app_config)
         });
@@ -391,6 +395,7 @@ mod app_config_command_tests {
                 initialized: true,
                 initialized_at: String::from("2023-01-01T00:00:00Z"),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from("2023-01-01T00:00:00Z"),
             };
             Ok(app_config)
         });
@@ -492,6 +497,7 @@ mod app_config_command_tests {
                 initialized: true,
                 initialized_at: String::from("2023-01-01T00:00:00Z"),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from("2023-01-01T00:00:00Z"),
             };
             Ok(app_config)
         });

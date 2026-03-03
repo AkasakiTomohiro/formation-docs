@@ -502,6 +502,7 @@ mod load_workspace_merge_info_tests {
                 workspaces,
                 initialized: true,
                 initialized_at: "1".to_string(),
+                cf_schema_downloaded_at: "1".to_string(),
             })
         });
         mock_workspace_config_io.expect_read().returning(|_, _| {
@@ -557,6 +558,7 @@ mod load_workspace_merge_info_tests {
                 workspaces,
                 initialized: true,
                 initialized_at: "1".to_string(),
+                cf_schema_downloaded_at: "1".to_string(),
             })
         });
         mock_workspace_config_io.expect_read().times(0);
@@ -633,6 +635,7 @@ mod load_workspace_merge_info_tests {
                 workspaces,
                 initialized: true,
                 initialized_at: "1".to_string(),
+                cf_schema_downloaded_at: "1".to_string(),
             })
         });
         mock_workspace_config_io.expect_read().returning(|_, _| {
@@ -698,6 +701,7 @@ mod load_workspaces_tests {
                 workspaces,
                 initialized: true,
                 initialized_at: "1".to_string(),
+                cf_schema_downloaded_at: "1".to_string(),
             })
         });
         mock_workspace_config_io
@@ -809,6 +813,7 @@ mod load_workspaces_tests {
                 workspaces,
                 initialized: true,
                 initialized_at: "1".to_string(),
+                cf_schema_downloaded_at: "1".to_string(),
             })
         });
         mock_workspace_config_io.expect_read().returning(|_, _| {
