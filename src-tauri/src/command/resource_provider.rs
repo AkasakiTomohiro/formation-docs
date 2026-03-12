@@ -1,7 +1,7 @@
 use crate::api::context::api_context::ApiContext;
 use crate::config::context::config_context::ConfigContext;
 use crate::utils::context::app_context::AppContext;
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use tauri::State;
 use thiserror::Error;
 
@@ -24,13 +24,30 @@ async fn setup_app(
         .app_config_io
         .read(app_context.file_system.clone())
         .await?;
-    if app_config.initialized == false {
+
+    let mut exceeded_download_span = true;
+    if let Ok(last_downloaded_at) =
+        DateTime::parse_from_rfc3339(&app_config.cf_schema_downloaded_at)
+    {
+        // CloudFormationSchemeの最終ダウンロード時刻と現在時刻の差分を取得
+        let last_downloaded_diff = Utc::now()
+            .signed_duration_since(last_downloaded_at)
+            .num_days();
+        exceeded_download_span = last_downloaded_diff >= 7;
+    }
+    // 初回起動時またはCloudFormationSchemeの最終ダウンロードから7日以上経過している場合
+    if app_config.initialized == false || exceeded_download_span {
+        // TODO: dl_resource_providerからエラーが返却されたとき、初回起動時でなければ無視してOkを返すようにする（次回起動時にダウンロード）
         api_context
             .cloudformation_schema
             .dl_resource_provider(&app_context, "us-east-1")
             .await?;
-        app_config.initialized = true;
-        app_config.initialized_at = Utc::now().to_rfc3339();
+        let now = Utc::now().to_rfc3339();
+        if app_config.initialized == false {
+            app_config.initialized_at = now.clone();
+            app_config.initialized = true;
+        }
+        app_config.cf_schema_downloaded_at = now;
         config_context
             .app_config_io
             .write(app_config, app_context.file_system.clone())
