@@ -5,12 +5,13 @@ import {
   Flashbar,
   Header,
   Link,
+  Modal,
   Pagination,
   SpaceBetween,
   Table,
 } from '@cloudscape-design/components';
 import type { useCollection } from '@cloudscape-design/collection-hooks';
-import type { ButtonProps, FlashbarProps, LinkProps, TableProps } from '@cloudscape-design/components';
+import type { ButtonProps, FlashbarProps, LinkProps, ModalProps, TableProps } from '@cloudscape-design/components';
 import type { WorkspaceExpand } from '../../hooks/useWorkspaces';
 
 export type WorkspacesPresentationProps = {
@@ -58,6 +59,21 @@ export type WorkspacesPresentationProps = {
    * 選択状態が変更されたときのハンドラー
    */
   onSelectionChange: TableProps['onSelectionChange'];
+
+  /**
+   * モーダルの表示状態
+   */
+  isVisibleModal: boolean;
+
+  /**
+   * モーダルを閉じる際のハンドラー
+   */
+  onDismissModal: ModalProps['onDismiss'];
+
+  /**
+   * モーダルでキャンセルボタンクリック時のハンドラー
+   */
+  onClickCancelModal: ButtonProps['onClick'];
 };
 
 export const WorkspacesPresentation = ({
@@ -70,6 +86,9 @@ export const WorkspacesPresentation = ({
   onClickDeleteWorkspace,
   onClickUpdateWorkspace,
   onSelectionChange,
+  isVisibleModal,
+  onDismissModal,
+  onClickCancelModal,
 }: WorkspacesPresentationProps): JSX.Element => {
   return (
     <ContentLayout
@@ -80,6 +99,23 @@ export const WorkspacesPresentation = ({
         </SpaceBetween>
       }
     >
+      <Modal
+        onDismiss={onDismissModal}
+        visible={isVisibleModal}
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button variant="link" onClick={onClickCancelModal}>
+                このバージョンはスキップする
+              </Button>
+              <Button variant="primary">はい</Button>
+            </SpaceBetween>
+          </Box>
+        }
+        header="タイトル"
+      >
+        最新バージョンを取得してください。
+      </Modal>
       <Table
         {...tableCollection.collectionProps}
         columnDefinitions={[
