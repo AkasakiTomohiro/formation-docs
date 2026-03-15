@@ -15,7 +15,9 @@ import type { WorkspacesPresentationProps } from './Workspaces.presentation';
 
 export const Workspaces = (): JSX.Element => {
   const workspace = useLoaderData<WorkspacesLoaderData>();
-  const [isVisibleModal, setIsVisibleModal] = useState(Boolean(workspace.newVersion));
+  const [isVisibleModal, setIsVisibleModal] = useState(
+    Boolean(workspace.newVersion && workspace.newVersion !== window.localStorage.getItem('skipVersion')),
+  );
   const isFirstRender = useRef(true);
   const { flashbarItems, addFlashbarItem } = useFlashbarContext();
   const { state, workspaces, createWorkspace, loadWorkspaces, deleteWorkspace } = useWorkspaces();
@@ -32,7 +34,11 @@ export const Workspaces = (): JSX.Element => {
     setIsVisibleModal(false);
   };
 
-  const onClickCancelModal = () => setIsVisibleModal(false);
+  const onClickSkipVersion = () => {
+    // バージョンスキップ時はモーダルを再表示しないため、ローカルストレージにskipVersionを保存
+    window.localStorage.setItem('skipVersion', workspace.newVersion || '');
+    setIsVisibleModal(false);
+  };
 
   const onClickDownloadButton = async () => {
     // リリースページへ遷移する
@@ -113,7 +119,7 @@ export const Workspaces = (): JSX.Element => {
       onSelectionChange={({ detail }) => setSelectedItems(detail.selectedItems)}
       isVisibleModal={isVisibleModal}
       onDismissModal={onDismissModal}
-      onClickCancelModal={onClickCancelModal}
+      onClickSkipVersion={onClickSkipVersion}
       onClickDownload={onClickDownloadButton}
     />
   );

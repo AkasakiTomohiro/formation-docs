@@ -1,6 +1,6 @@
 use crate::utils::context::app_context::AppContext;
 
-pub const LATEST_VERSION_URL: &str = "https://raw.githubusercontent.com/AkasakiTomohiro/formation-docs/refs/heads/feature/version-check/version.json";
+pub const LATEST_VERSION_URL: &str = "https://raw.githubusercontent.com/AkasakiTomohiro/formation-docs/refs/heads/master/version.json";
 
 pub async fn get_latest_version(ctx: &AppContext) -> Option<String> {
     // version.jsonを取得

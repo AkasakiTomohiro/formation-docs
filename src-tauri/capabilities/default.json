@@ -16,7 +16,7 @@
           "url": "https://schema.cloudformation.*.amazonaws.com/CloudformationSchema.zip"
         },
         {
-          "url": "https://raw.githubusercontent.com/AkasakiTomohiro/formation-docs/refs/heads/feature/version-check/version.json"
+          "url": "https://raw.githubusercontent.com/AkasakiTomohiro/formation-docs/refs/heads/master/version.json"
         }
       ]
     },

@@ -71,9 +71,9 @@ export type WorkspacesPresentationProps = {
   onDismissModal: ModalProps['onDismiss'];
 
   /**
-   * モーダルでキャンセルボタンクリック時のハンドラー
+   * モーダルでスキップボタンクリック時のハンドラー
    */
-  onClickCancelModal: ButtonProps['onClick'];
+  onClickSkipVersion: ButtonProps['onClick'];
 
   /**
    * モーダルでリリースページへ遷移するボタンクリック時のハンドラー
@@ -93,7 +93,7 @@ export const WorkspacesPresentation = ({
   onSelectionChange,
   isVisibleModal,
   onDismissModal,
-  onClickCancelModal,
+  onClickSkipVersion,
   onClickDownload,
 }: WorkspacesPresentationProps): JSX.Element => {
   return (
@@ -111,7 +111,7 @@ export const WorkspacesPresentation = ({
         footer={
           <Box float="right">
             <SpaceBetween direction="horizontal" size="xs">
-              <Button variant="link" onClick={onClickCancelModal}>
+              <Button variant="link" onClick={onClickSkipVersion}>
                 このバージョンはスキップする
               </Button>
               <Button variant="primary" onClick={onClickDownload}>
