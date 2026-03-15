@@ -6,7 +6,6 @@
   "permissions": [
     "core:default",
     "core:window:allow-set-focus",
-    "opener:default",
     "log:default",
     "dialog:default",
     "dialog:allow-open",
@@ -18,6 +17,14 @@
         },
         {
           "url": "https://raw.githubusercontent.com/AkasakiTomohiro/formation-docs/refs/heads/feature/version-check/version.json"
+        }
+      ]
+    },
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "https://github.com/AkasakiTomohiro/formation-docs/releases"
         }
       ]
     }

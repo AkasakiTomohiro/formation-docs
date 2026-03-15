@@ -74,6 +74,11 @@ export type WorkspacesPresentationProps = {
    * モーダルでキャンセルボタンクリック時のハンドラー
    */
   onClickCancelModal: ButtonProps['onClick'];
+
+  /**
+   * モーダルでリリースページへ遷移するボタンクリック時のハンドラー
+   */
+  onClickDownload: ButtonProps['onClick'];
 };
 
 export const WorkspacesPresentation = ({
@@ -89,6 +94,7 @@ export const WorkspacesPresentation = ({
   isVisibleModal,
   onDismissModal,
   onClickCancelModal,
+  onClickDownload,
 }: WorkspacesPresentationProps): JSX.Element => {
   return (
     <ContentLayout
@@ -108,13 +114,15 @@ export const WorkspacesPresentation = ({
               <Button variant="link" onClick={onClickCancelModal}>
                 このバージョンはスキップする
               </Button>
-              <Button variant="primary">はい</Button>
+              <Button variant="primary" onClick={onClickDownload}>
+                はい
+              </Button>
             </SpaceBetween>
           </Box>
         }
-        header="タイトル"
+        header="アプリを更新してください"
       >
-        最新バージョンを取得してください。
+        リリースページへ移動します。
       </Modal>
       <Table
         {...tableCollection.collectionProps}
