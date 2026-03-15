@@ -1,15 +1,14 @@
 import { invoke } from '@tauri-apps/api/core';
 import type { CommandResult } from '../../../../../../../../../lib/CommandResult';
 
-export type UpdateStackMetaProps = {
-  stack_id: string;
-  logical_id: string;
+type ManualManagementResourceMeta = {
   reasons: Record<string, string>;
   description: string;
 };
-
-export async function updateStackMeta(props: UpdateStackMetaProps): Promise<any> {
-  const result = await invoke<CommandResult<any>>('update_stack_meta_command', props);
+export async function getManualManagementResourceMeta(props: {
+  resource_id: string;
+}): Promise<ManualManagementResourceMeta> {
+  const result = await invoke<CommandResult<any>>('get_manual_resource_meta_command', props);
   if (!result.success) {
     throw new Error(result.value);
   }

@@ -6,7 +6,7 @@ import { createResourceTableItems } from '../../../../lib/CreateResourceTableIte
 import { createExpandedItems } from '../../../PropertyTable';
 import { EditorContentLayoutPresentation } from './EditorContentLayout.presentation';
 import { getManualManagementResourceProperties } from './lib/GetManualManagementResourceProperties';
-import { getManualManagementResourceReasons } from './lib/GetManualManagementResourceReasons';
+import { getManualManagementResourceMeta } from './lib/getManualManagementResourceMeta';
 import { updateManualResourceMeta } from './lib/UpdateManualResourceMeta';
 import { updateManualResourceProperties } from './lib/UpdateManualResourceProperties';
 import type { ManualResourceTabInfo, ViewMode } from '../../../../../../contexts';
@@ -20,6 +20,7 @@ export type EditorContentLayoutProps = {
   serviceName: string;
   resourceName: string;
   editingValues?: {
+    description: string;
     properties: string;
     reasons: Record<string, string>;
   };
@@ -40,6 +41,8 @@ export const EditorContentLayout = ({
   const { addFlashbarItem } = useFlashbarContext();
   const [isValid, setIsValid] = useState(true);
   const { viewMode, setViewMode, modifyResourceTab } = useWorkspaceResourceContext();
+  // リソースの説明を管理するためのステート
+  const [description, setDescription] = useState<string>('');
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
@@ -48,17 +51,18 @@ export const EditorContentLayout = ({
       getManualManagementResourceProperties({
         resource_id: selectedResourceId,
       }),
-      getManualManagementResourceReasons({
+      getManualManagementResourceMeta({
         resource_id: selectedResourceId,
       }),
-    ]).then(([cloudformationSchema, properties, reasons]) => {
+    ]).then(([cloudformationSchema, properties, resourceMeta]) => {
       console.log('properties', properties);
-      console.log('reasons', reasons);
+      console.log('meta', resourceMeta);
       setSchema(cloudformationSchema);
       const resourceTableItems = createResourceTableItems(cloudformationSchema, properties);
       setProperties(resourceTableItems);
       setExpandedItems(createExpandedItems(resourceTableItems));
-      setReasons(reasons);
+      setReasons(resourceMeta.reasons);
+      setDescription(resourceMeta.description);
       setValues(JSON.stringify(properties, undefined, 2));
     });
   }, [selectedResourceId]);
@@ -68,6 +72,7 @@ export const EditorContentLayout = ({
       return {
         ...originTab,
         editingValues: {
+          description: description,
           reasons: reasons,
           properties: values,
         },
@@ -95,7 +100,8 @@ export const EditorContentLayout = ({
     }
     await updateManualResourceMeta({
       resource_id: selectedResourceId as string,
-      reasons: editingValues?.reasons || {},
+      reasons: editingValues?.reasons,
+      description: editingValues?.description,
     });
     await updateManualResourceProperties({
       resource_id: selectedResourceId as string,
@@ -118,11 +124,12 @@ export const EditorContentLayout = ({
       getManualManagementResourceProperties({
         resource_id: selectedResourceId,
       }),
-      getManualManagementResourceReasons({
+      getManualManagementResourceMeta({
         resource_id: selectedResourceId,
       }),
-    ]).then(([properties, reasons]) => {
-      setReasons(reasons);
+    ]).then(([properties, resourceMeta]) => {
+      setReasons(resourceMeta.reasons);
+      setDescription(resourceMeta.description);
       setValues(JSON.stringify(properties, undefined, 2));
     });
   };
@@ -134,8 +141,22 @@ export const EditorContentLayout = ({
       return {
         ...originTab,
         editingValues: {
+          description: editingValues?.description || '',
           reasons: editingValues?.reasons || {},
           properties: detail.value,
+        },
+      };
+    });
+  };
+
+  const onChangeDescription: EditorContentLayoutPresentationProps['setDescription'] = (description) => {
+    modifyResourceTab(tabId, (originTab: ManualResourceTabInfo) => {
+      return {
+        ...originTab,
+        editingValues: {
+          description: description,
+          reasons: editingValues?.reasons || {},
+          properties: editingValues?.properties || '{}',
         },
       };
     });
@@ -146,6 +167,9 @@ export const EditorContentLayout = ({
       tabId={tabId}
       selectedResourceId={selectedResourceId}
       viewMode={viewMode(tabId)}
+      description={description}
+      editingDescription={editingValues?.description ?? ''}
+      setDescription={onChangeDescription}
       onClickEdit={onEdit}
       onClickCancel={onCancel}
       onClickSave={onSave}

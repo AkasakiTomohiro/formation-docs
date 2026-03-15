@@ -1,3 +1,4 @@
+import { useCollection } from '@cloudscape-design/collection-hooks';
 import { useState } from 'react';
 import { useWorkspaceResourceContext } from '../../../../contexts';
 import { PropertyTablePresentation } from './PropertyTable.presentation';
@@ -44,6 +45,10 @@ export const PropertyTable = ({
       { id: 'reason', visible: true },
     ],
   });
+  // テーブルのデータを管理するフック
+  const { items, collectionProps, filterProps } = useCollection<ResourceTableItem>(properties, {
+    filtering: {},
+  });
   const { addResourceTab, modifyResourceTab } = useWorkspaceResourceContext();
 
   const onChangeReason: PropertyTablePresentationProps['onChangeReason'] =
@@ -55,6 +60,7 @@ export const PropertyTable = ({
           return {
             ...originTab,
             editingValues: {
+              description: originTab.editingValues?.description || '',
               reasons: {
                 ...editingReasons,
                 [item.id]: detail.value,
@@ -66,6 +72,7 @@ export const PropertyTable = ({
         return {
           ...originTab,
           editingValues: {
+            description: originTab.editingValues?.description || '',
             reasons: {
               ...editingReasons,
               [item.id]: detail.value,
@@ -77,7 +84,9 @@ export const PropertyTable = ({
 
   return (
     <PropertyTablePresentation
-      properties={properties}
+      collectionProps={collectionProps}
+      filterProps={filterProps}
+      properties={items}
       reasons={reasons}
       header={header}
       editingReasons={editingReasons}
