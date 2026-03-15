@@ -41,6 +41,9 @@ importers:
       ace-builds:
         specifier: ^1.43.1
         version: 1.43.1
+      opener:
+        specifier: ^1.5.2
+        version: 1.5.2
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -969,6 +972,10 @@ packages:
   object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
+
+  opener@1.5.2:
+    resolution: {integrity: sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==}
+    hasBin: true
 
   p-map@7.0.3:
     resolution: {integrity: sha512-VkndIv2fIB99swvQoA65bm+fsmt6UNdGeIB0oxBs+WhAhdh08QA04JXpI7rbB9r08/nkbysKoya9rtDERYOYMA==}
@@ -1954,6 +1961,8 @@ snapshots:
   normalize-path@3.0.0: {}
 
   object-assign@4.1.1: {}
+
+  opener@1.5.2: {}
 
   p-map@7.0.3: {}
 

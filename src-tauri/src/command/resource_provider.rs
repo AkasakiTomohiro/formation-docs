@@ -1,7 +1,9 @@
 use crate::api::context::api_context::ApiContext;
 use crate::config::context::config_context::ConfigContext;
 use crate::utils::context::app_context::AppContext;
+use crate::utils::CommandResult;
 use chrono::Utc;
+use serde::{Deserialize, Serialize};
 use tauri::State;
 use thiserror::Error;
 
@@ -15,11 +17,17 @@ pub enum ResourceProviderError {
     Cloudformation(#[from] super::super::api::cloudformation::schema::DlSchemaError),
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SetupAppResult {
+    pub new_version: Option<String>,
+}
+
 async fn setup_app(
     app_context: &AppContext,
     config_context: &ConfigContext,
     api_context: &ApiContext,
-) -> Result<(), ResourceProviderError> {
+) -> Result<SetupAppResult, ResourceProviderError> {
     let mut app_config = config_context
         .app_config_io
         .read(app_context.file_system.clone())
@@ -36,7 +44,23 @@ async fn setup_app(
             .write(app_config, app_context.file_system.clone())
             .await?;
     }
-    return Ok(());
+    let app_version = env!("CARGO_PKG_VERSION").to_string();
+    println!("Version: {}", app_version);
+    let latest_version = api_context
+        .get_latest_version
+        .get_latest_version(app_context)
+        .await;
+    println!("app_version: {}", app_version);
+    println!("latest_version: {:?}", latest_version);
+    if let Some(latest_version) = latest_version {
+        if latest_version != app_version {
+            println!("A new version is available: {}", latest_version);
+            return Ok(SetupAppResult {
+                new_version: Some(latest_version),
+            });
+        }
+    }
+    return Ok(SetupAppResult { new_version: None });
 }
 
 #[tauri::command]
@@ -45,7 +69,7 @@ pub async fn setup_app_command(
     app_context_state: State<'_, AppContext>,
     config_context_state: State<'_, ConfigContext>,
     api_context_state: State<'_, ApiContext>,
-) -> Result<(), ()> {
+) -> Result<CommandResult<SetupAppResult>, CommandResult> {
     match setup_app(
         &app_context_state,
         &config_context_state,
@@ -53,8 +77,8 @@ pub async fn setup_app_command(
     )
     .await
     {
-        Ok(_) => Ok(()),
-        Err(_) => Err(()),
+        Ok(result) => Ok(CommandResult::success(result)),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     }
 }
 
