@@ -20,6 +20,7 @@ struct StackMetaConfigV1 {
     pub name: String,
     pub description: String,
     pub reasons: HashMap<String, HashMap<String, String>>,
+    pub descriptions: HashMap<String, String>,
 }
 
 impl StackMetaConfigV1 {
@@ -29,6 +30,7 @@ impl StackMetaConfigV1 {
             name: name.to_string(),
             description: "".to_string(),
             reasons: HashMap::new(),
+            descriptions: HashMap::new(),
         }
     }
 }
@@ -42,6 +44,7 @@ impl ConfigMigratable for StackMetaConfigV1 {
             name: self.name,
             description: self.description,
             reasons: self.reasons,
+            descriptions: self.descriptions,
         })
     }
     fn as_any(self: Box<Self>) -> Box<dyn Any> {
@@ -59,6 +62,7 @@ pub struct StackMetaConfig {
     pub name: String,
     pub description: String,
     pub reasons: HashMap<String, HashMap<String, String>>,
+    pub descriptions: HashMap<String, String>,
 }
 
 impl StackMetaConfig {
@@ -213,6 +217,8 @@ mod stack_meta_config_v1_tests {
         // ######### 実行 #########
         let boxed: Box<dyn ConfigMigratable<Latest = StackMetaConfig>> = Box::new(config_v1);
         let migrated = boxed.migrate_boxed();
+
+        // V1 -> StackMetaConfigへマイグレーション
         let config_latest = migrated
             .as_any()
             .downcast::<StackMetaConfig>()
@@ -223,6 +229,7 @@ mod stack_meta_config_v1_tests {
         assert_eq!(config_latest.name, name.to_string());
         assert_eq!(config_latest.description, "".to_string());
         assert_eq!(config_latest.reasons.is_empty(), true);
+        assert_eq!(config_latest.descriptions.is_empty(), true);
     }
 
     #[test]
@@ -346,7 +353,8 @@ mod stack_meta_config_tests {
                     "version": 1,
                     "name": "name",
                     "description": "description",
-                    "reasons": {}
+                    "reasons": {},
+                    "descriptions": {}
                 }"#;
                 Ok(config_json.to_string())
             });
@@ -362,10 +370,11 @@ mod stack_meta_config_tests {
 
             // readの戻り値の内容が期待通りであること
             let config = result.unwrap();
-            assert_eq!(config.version, 1);
+            assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
             assert_eq!(config.name, "name".to_string());
             assert_eq!(config.description, "description".to_string());
             assert_eq!(config.reasons.is_empty(), true);
+            assert_eq!(config.descriptions.is_empty(), true);
         }
 
         #[tokio::test]
@@ -402,10 +411,11 @@ mod stack_meta_config_tests {
 
             // readの戻り値の内容が期待通りであること
             let config = result.unwrap();
-            assert_eq!(config.version, 1);
+            assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
             assert_eq!(config.name, stack_name.to_string());
             assert_eq!(config.description, "".to_string());
             assert_eq!(config.reasons.is_empty(), true);
+            assert_eq!(config.descriptions.is_empty(), true);
         }
 
         #[tokio::test]
@@ -432,10 +442,11 @@ mod stack_meta_config_tests {
 
             // readの戻り値の内容が期待通りであること
             let config = result.unwrap();
-            assert_eq!(config.version, 1);
+            assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
             assert_eq!(config.name, stack_name.to_string());
             assert_eq!(config.description, "".to_string());
             assert_eq!(config.reasons.is_empty(), true);
+            assert_eq!(config.descriptions.is_empty(), true);
         }
 
         #[tokio::test]

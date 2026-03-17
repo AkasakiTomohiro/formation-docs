@@ -37,17 +37,14 @@ pub struct ManualManagementResources {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ManualManagementMeta {
     pub reasons: HashMap<String, HashMap<String, String>>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ManualManagementMetaReasonsUpdate {
-    pub resource_id: String,
-    pub reasons: HashMap<String, String>,
+    pub descriptions: HashMap<String, String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ManualManagementMetaUpdate {
-    pub reasons: Option<ManualManagementMetaReasonsUpdate>,
+    pub resource_id: String,
+    pub reasons: Option<HashMap<String, String>>,
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Error)]
@@ -284,6 +281,7 @@ pub async fn load_manual_resource_meta(
         // 空のJSONを作成
         let empty_json = ManualManagementMeta {
             reasons: HashMap::new(),
+            descriptions: HashMap::new(),
         };
         let empty_json = serde_json::to_string(&empty_json).unwrap();
         state
@@ -317,23 +315,42 @@ async fn get_manual_resource_properties(
     return Ok(resource.properties.clone());
 }
 
-async fn get_manual_resource_reasons(
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ManualResourceMeta {
+    pub reasons: Value,
+    pub description: String,
+}
+
+async fn get_manual_resource_meta(
     state: &AppContext,
     command_context: &CommandContext,
     workspace_directory: &str,
     resource_id: &str,
-) -> Result<Value, ManualManagementResourceError> {
+) -> Result<ManualResourceMeta, ManualManagementResourceError> {
     let meta_json = command_context
         .manual_management_resource
         .load_manual_resource_meta(state, workspace_directory)
         .await?;
-    if let Some(reasons) = meta_json.reasons.get(resource_id) {
+
+    let reasons_value = if let Some(reasons) = meta_json.reasons.get(resource_id) {
         // 指定されたリソースIDのreasonsが存在する場合はそのまま返す
-        return Ok(serde_json::to_value(reasons.clone())?);
+        serde_json::to_value(reasons.clone())?
     } else {
         // 指定されたリソースIDのreasonsが存在しない場合は空のオブジェクトを返す
-        return Ok(Value::Object(serde_json::Map::new()));
-    }
+        Value::Object(serde_json::Map::new())
+    };
+
+    let description = if let Some(description_value) = meta_json.descriptions.get(resource_id) {
+        description_value.to_string()
+    } else {
+        String::new()
+    };
+
+    return Ok(ManualResourceMeta {
+        reasons: reasons_value,
+        description,
+    });
 }
 
 async fn update_manual_resource_meta(
@@ -348,12 +365,26 @@ async fn update_manual_resource_meta(
         .await?;
     let new_manual_resource_meta = ManualManagementMeta {
         reasons: match update_manual_resource_meta.reasons {
-            Some(update_meta) => {
+            Some(update_reasons) => {
                 let mut new_reasons = manual_resource_meta.reasons.clone();
-                new_reasons.insert(update_meta.resource_id, update_meta.reasons);
+                new_reasons.insert(
+                    update_manual_resource_meta.resource_id.clone(),
+                    update_reasons,
+                );
                 new_reasons
             }
             None => manual_resource_meta.reasons,
+        },
+        descriptions: match update_manual_resource_meta.description {
+            Some(update_description) => {
+                let mut new_descriptions = manual_resource_meta.descriptions.clone();
+                new_descriptions.insert(
+                    update_manual_resource_meta.resource_id.clone(),
+                    update_description,
+                );
+                new_descriptions
+            }
+            None => manual_resource_meta.descriptions,
         },
     };
     let meta_path = PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_META_FILE);
@@ -518,19 +549,19 @@ pub async fn get_manual_resource_properties_command(
 
 #[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
-pub async fn get_manual_resource_reasons_command(
+pub async fn get_manual_resource_meta_command(
     app_context_state: State<'_, AppContext>,
     command_context_state: State<'_, command_context::CommandContext>,
     window: tauri::Window,
     resource_id: &str,
-) -> Result<CommandResult<Value>, CommandResult> {
+) -> Result<CommandResult<ManualResourceMeta>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
         None => {
             return Err(CommandResult::failed("Window state not found"));
         }
     };
-    return match get_manual_resource_reasons(
+    return match get_manual_resource_meta(
         &app_context_state,
         &command_context_state,
         window_state.workspace_directory.as_str(),
@@ -538,7 +569,7 @@ pub async fn get_manual_resource_reasons_command(
     )
     .await
     {
-        Ok(reasons) => Ok(CommandResult::success(reasons)),
+        Ok(meta) => Ok(CommandResult::success(meta)),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }
@@ -549,8 +580,7 @@ pub async fn update_manual_resource_meta_command(
     app_context_state: State<'_, AppContext>,
     command_context_state: State<'_, command_context::CommandContext>,
     window: tauri::Window,
-    resource_id: &str,
-    reasons: HashMap<String, String>,
+    update_info: ManualManagementMetaUpdate,
 ) -> Result<CommandResult<()>, CommandResult> {
     let window_state = match get_window_state(window) {
         Some(state) => state,
@@ -562,12 +592,7 @@ pub async fn update_manual_resource_meta_command(
         &app_context_state,
         &command_context_state,
         window_state.workspace_directory.as_str(),
-        ManualManagementMetaUpdate {
-            reasons: Some(ManualManagementMetaReasonsUpdate {
-                resource_id: resource_id.to_string(),
-                reasons,
-            }),
-        },
+        update_info,
     )
     .await
     {
@@ -808,6 +833,8 @@ mod get_manual_management_resources_tests {
             ManualManagementResourceError::Io(_)
         ));
     }
+
+    // serde_json::to_stringが失敗するケースは通常起こりえないためテストは実装しない
 }
 
 #[cfg(test)]
@@ -2063,6 +2090,9 @@ mod load_manual_resource_meta_tests {
                     "TestResource": {
                         "Reason1": "test reason"
                     }
+                },
+                "descriptions": {
+                    "TestResource": "Test Description"
                 }
             }"#
             .to_string())
@@ -2081,6 +2111,8 @@ mod load_manual_resource_meta_tests {
         let meta = result.unwrap();
         let reasons = meta.reasons.get("TestResource").unwrap();
         assert_eq!(reasons.get("Reason1").unwrap(), "test reason");
+        let descriptions = meta.descriptions.get("TestResource").unwrap();
+        assert_eq!(descriptions, "Test Description");
     }
 
     /// ファイルが存在しないとき、空のmetaファイルを作成してから読み込みできること
@@ -2097,7 +2129,7 @@ mod load_manual_resource_meta_tests {
 
         mock_file_system
             .expect_read_file()
-            .returning(|_| Ok(r#"{ "reasons": {} }"#.to_string()));
+            .returning(|_| Ok(r#"{ "reasons": {}, "descriptions": {} }"#.to_string()));
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -2111,6 +2143,7 @@ mod load_manual_resource_meta_tests {
         assert!(result.is_ok());
         let meta = result.unwrap();
         assert_eq!(meta.reasons.len(), 0);
+        assert_eq!(meta.descriptions.len(), 0);
     }
 
     /// write_file に失敗し、エラーを返すこと
@@ -2385,7 +2418,7 @@ mod get_manual_resource_properties_tests {
 
 #[cfg(test)]
 #[coverage(off)]
-mod get_manual_resource_reasons_tests {
+mod get_manual_resource_meta_tests {
     use std::sync::Arc;
 
     use crate::{
@@ -2400,9 +2433,9 @@ mod get_manual_resource_reasons_tests {
 
     use super::*;
 
-    /// 指定されたリソースIDのreasonsが存在する場合、reasonsを返すこと
+    /// 指定されたリソースIDのreasonsとdescriptionが存在する場合、reasonsとdescriptionを返すこと
     #[tokio::test]
-    async fn success_reasons_exist() {
+    async fn success_reasons_and_description_exist() {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
@@ -2424,7 +2457,12 @@ mod get_manual_resource_reasons_tests {
                 let mut resource_reasons = HashMap::new();
                 resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
                 reasons.insert("TestResource".to_string(), resource_reasons);
-                Ok(ManualManagementMeta { reasons })
+                let mut descriptions = HashMap::new();
+                descriptions.insert("TestResource".to_string(), "Old Description".to_string());
+                Ok(ManualManagementMeta {
+                    reasons,
+                    descriptions,
+                })
             });
 
         let command_context = CommandContext {
@@ -2438,7 +2476,7 @@ mod get_manual_resource_reasons_tests {
         let resource_id = "TestResource";
 
         // ######### 実行 #########
-        let result = get_manual_resource_reasons(
+        let result = get_manual_resource_meta(
             &app_context,
             &command_context,
             workspace_directory,
@@ -2448,13 +2486,17 @@ mod get_manual_resource_reasons_tests {
 
         // ######### 検証 #########
         assert!(result.is_ok());
-        let reasons = result.unwrap();
-        assert_eq!(reasons, serde_json::json!({ "Reason1": "Old Reason" }));
+        let resource_meta = result.unwrap();
+        assert_eq!(
+            resource_meta.reasons,
+            serde_json::json!({ "Reason1": "Old Reason" })
+        );
+        assert_eq!(resource_meta.description, "Old Description".to_string());
     }
 
-    /// 指定されたリソースIDのreasonsが存在しない場合、空のオブジェクトを返すこと
+    /// 指定されたリソースIDのreasons,descriptionが存在しない場合、空のオブジェクトを返すこと
     #[tokio::test]
-    async fn success_reasons_not_exist() {
+    async fn success_reasons_and_description_not_exist() {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
@@ -2474,6 +2516,7 @@ mod get_manual_resource_reasons_tests {
             .returning(|_, _| {
                 Ok(ManualManagementMeta {
                     reasons: HashMap::new(),
+                    descriptions: HashMap::new(),
                 })
             });
 
@@ -2488,7 +2531,7 @@ mod get_manual_resource_reasons_tests {
         let resource_id = "NonExistentResource";
 
         // ######### 実行 #########
-        let result = get_manual_resource_reasons(
+        let result = get_manual_resource_meta(
             &app_context,
             &command_context,
             workspace_directory,
@@ -2498,8 +2541,9 @@ mod get_manual_resource_reasons_tests {
 
         // ######### 検証 #########
         assert!(result.is_ok());
-        let reasons = result.unwrap();
-        assert_eq!(reasons, Value::Object(serde_json::Map::new()));
+        let resource_meta = result.unwrap();
+        assert_eq!(resource_meta.reasons, Value::Object(serde_json::Map::new()));
+        assert_eq!(resource_meta.description, Value::String("".to_string()));
     }
 
     /// load_manual_resource_meta に失敗し、エラーを返すこと
@@ -2539,7 +2583,7 @@ mod get_manual_resource_reasons_tests {
         let resource_id = "TestResource";
 
         // ######### 実行 #########
-        let result = get_manual_resource_reasons(
+        let result = get_manual_resource_meta(
             &app_context,
             &command_context,
             workspace_directory,
@@ -2597,7 +2641,11 @@ mod update_manual_resource_meta_tests {
                 let mut resource_reasons = HashMap::new();
                 resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
                 reasons.insert("TestResource".to_string(), resource_reasons);
-                Ok(ManualManagementMeta { reasons })
+                let descriptions = HashMap::new();
+                Ok(ManualManagementMeta {
+                    reasons,
+                    descriptions,
+                })
             });
 
         let command_context = CommandContext {
@@ -2613,10 +2661,69 @@ mod update_manual_resource_meta_tests {
         reasons.insert("Reason1".to_string(), "New Reason".to_string());
         reasons.insert("Reason2".to_string(), "Another Reason".to_string());
         let meta = ManualManagementMetaUpdate {
-            reasons: Some(ManualManagementMetaReasonsUpdate {
-                resource_id: resource_id.to_string(),
-                reasons: reasons.clone(),
-            }),
+            resource_id: resource_id.to_string(),
+            reasons: Some(reasons.clone()),
+            description: None,
+        };
+
+        // ######### 実行 #########
+        let result =
+            update_manual_resource_meta(&app_context, &command_context, workspace_directory, meta)
+                .await;
+
+        // ######### 検証 #########
+        assert!(result.is_ok());
+    }
+
+    /// 更新するメタデータに description がある場合、メタデータの更新に成功すること
+    #[tokio::test]
+    async fn success_description() {
+        // ######### 準備 #########
+        let mut mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        mock_file_system
+            .expect_write_file()
+            .returning(|_, _| Ok(()));
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+        };
+
+        let mock_app_config = MockAppConfigCommandTrait::new();
+        let mock_stack = MockStackCommandTrait::new();
+        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
+        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+
+        mock_manual_management_resource
+            .expect_load_manual_resource_meta()
+            .returning(|_, _| {
+                let mut reasons = HashMap::new();
+                let mut resource_reasons = HashMap::new();
+                resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
+                reasons.insert("TestResource".to_string(), resource_reasons);
+                let descriptions = HashMap::new();
+                Ok(ManualManagementMeta {
+                    reasons,
+                    descriptions,
+                })
+            });
+
+        let command_context = CommandContext {
+            app_config: Arc::new(mock_app_config),
+            stack: Arc::new(mock_stack),
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            manual_management_resource: Arc::new(mock_manual_management_resource),
+        };
+
+        let workspace_directory = "/test/workspace";
+        let resource_id = "TestResource";
+        let description = "New Description".to_string();
+        let meta = ManualManagementMetaUpdate {
+            resource_id: resource_id.to_string(),
+            reasons: None,
+            description: Some(description),
         };
 
         // ######### 実行 #########
@@ -2656,7 +2763,11 @@ mod update_manual_resource_meta_tests {
                 let mut resource_reasons = HashMap::new();
                 resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
                 reasons.insert("TestResource".to_string(), resource_reasons);
-                Ok(ManualManagementMeta { reasons })
+                let descriptions = HashMap::new();
+                Ok(ManualManagementMeta {
+                    reasons,
+                    descriptions,
+                })
             });
 
         let command_context = CommandContext {
@@ -2667,7 +2778,11 @@ mod update_manual_resource_meta_tests {
         };
 
         let workspace_directory = "/test/workspace";
-        let meta = ManualManagementMetaUpdate { reasons: None };
+        let meta = ManualManagementMetaUpdate {
+            resource_id: "TestResource".to_string(),
+            reasons: None,
+            description: None,
+        };
 
         // ######### 実行 #########
         let result =
@@ -2716,10 +2831,9 @@ mod update_manual_resource_meta_tests {
         let mut reasons = HashMap::new();
         reasons.insert("Reason1".to_string(), "New Reason".to_string());
         let meta = ManualManagementMetaUpdate {
-            reasons: Some(ManualManagementMetaReasonsUpdate {
-                resource_id: resource_id.to_string(),
-                reasons,
-            }),
+            resource_id: resource_id.to_string(),
+            reasons: Some(reasons),
+            description: None,
         };
 
         // ######### 実行 #########
@@ -2762,7 +2876,10 @@ mod update_manual_resource_meta_tests {
                 let mut resource_reasons = HashMap::new();
                 resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
                 reasons.insert("TestResource".to_string(), resource_reasons);
-                Ok(ManualManagementMeta { reasons })
+                Ok(ManualManagementMeta {
+                    reasons,
+                    descriptions: HashMap::new(),
+                })
             });
 
         let command_context = CommandContext {
@@ -2777,10 +2894,9 @@ mod update_manual_resource_meta_tests {
         let mut reasons = HashMap::new();
         reasons.insert("Reason1".to_string(), "New Reason".to_string());
         let meta = ManualManagementMetaUpdate {
-            reasons: Some(ManualManagementMetaReasonsUpdate {
-                resource_id: resource_id.to_string(),
-                reasons,
-            }),
+            resource_id: resource_id.to_string(),
+            reasons: Option::Some(reasons),
+            description: None,
         };
 
         // ######### 実行 #########

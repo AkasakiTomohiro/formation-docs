@@ -7,15 +7,28 @@ import {
   Textarea,
   TextFilter,
 } from '@cloudscape-design/components';
+import type { UseCollectionResult } from '@cloudscape-design/collection-hooks';
 import type { CollectionPreferencesProps, LinkProps, TableProps, TextareaProps } from '@cloudscape-design/components';
 import type { WorkspaceTabInfo } from '../../../../contexts';
 import type { ResourceTableItem } from '../../lib/CreateResourceTableItems';
 
 export type PropertyTablePresentationProps = {
   /**
+   * useCollectionフックから取得した`collectionProps`
+   * @see https://cloudscape.design/get-started/dev-guides/collection-hooks/
+   */
+  collectionProps: UseCollectionResult<ResourceTableItem>['collectionProps'];
+
+  /**
+   * useCollectionフックから取得した`filterProps`
+   * @see https://cloudscape.design/get-started/dev-guides/collection-hooks/#sorting-and-filtering-on-nested-properties
+   */
+  filterProps: UseCollectionResult<ResourceTableItem>['filterProps'];
+
+  /**
    * リソースのプロパティ一覧
    */
-  properties: ResourceTableItem[];
+  properties: readonly ResourceTableItem[];
 
   /**
    * Reasonの値
@@ -60,6 +73,8 @@ export type PropertyTablePresentationProps = {
 };
 
 export const PropertyTablePresentation = ({
+  collectionProps,
+  filterProps,
   properties,
   expandableRows,
   reasons,
@@ -72,6 +87,7 @@ export const PropertyTablePresentation = ({
 }: PropertyTablePresentationProps): JSX.Element => {
   return (
     <Table
+      {...collectionProps}
       renderLoaderLoading={() => <StatusIndicator type="loading">読み込み中</StatusIndicator>}
       renderLoaderError={() => <StatusIndicator type="error">読み込みエラー</StatusIndicator>}
       renderLoaderEmpty={() => <Box>プロパティが見つかりません</Box>}
@@ -157,7 +173,7 @@ export const PropertyTablePresentation = ({
           <b>プロパティがありません</b>
         </Box>
       }
-      filter={<TextFilter filteringPlaceholder="プロパティ検索" filteringText="" countText="0 件の一致" />}
+      filter={<TextFilter {...filterProps} filteringPlaceholder="検索" />}
       header={header}
       preferences={
         <CollectionPreferences
