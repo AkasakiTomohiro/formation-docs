@@ -1,5 +1,6 @@
 use crate::api::context::api_context::ApiContext;
 use crate::config::context::config_context::ConfigContext;
+use crate::utils::app_error::AppError;
 use crate::utils::context::app_context::AppContext;
 use chrono::{DateTime, Utc};
 use tauri::State;
@@ -7,6 +8,8 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ResourceProviderError {
+    #[error("app error: {0}")]
+    App(#[from] AppError),
     #[error("app config error: {0}")]
     AppConfig(#[from] crate::config::app_config::AppConfigError),
     #[error("app config command error: {0}")]
@@ -37,11 +40,20 @@ async fn setup_app(
     }
     // 初回起動時またはCloudFormationSchemeの最終ダウンロードから7日以上経過している場合
     if app_config.initialized == false || exceeded_download_span {
-        // TODO: dl_resource_providerからエラーが返却されたとき、初回起動時でなければ無視してOkを返すようにする（次回起動時にダウンロード）
-        api_context
+        let dl_resource_result = api_context
             .cloudformation_schema
             .dl_resource_provider(&app_context, "us-east-1")
-            .await?;
+            .await
+            .ok();
+        if dl_resource_result.is_none() && app_config.initialized == false {
+            // 初回起動時にダウンロードに失敗した場合はエラーを返す
+            return Err(ResourceProviderError::App(AppError::new(
+                "Failed to download CloudFormation schema",
+            )));
+        } else if dl_resource_result.is_none() && app_config.initialized == true {
+            // 初回起動時以外でダウンロードに失敗した場合はエラーを返さず、次回起動時にダウンロードする
+            return Ok(());
+        }
         let now = Utc::now().to_rfc3339();
         if app_config.initialized == false {
             app_config.initialized_at = now.clone();
