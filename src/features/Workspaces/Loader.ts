@@ -1,5 +1,10 @@
+import { redirect } from 'react-router';
 import { setupApp } from '../../invoke/AppConfig';
 
 export const workspacesLoader = async (): Promise<void> => {
-  await setupApp();
+  try {
+    await setupApp();
+  } catch {
+    throw redirect('/errorScreen');
+  }
 };
