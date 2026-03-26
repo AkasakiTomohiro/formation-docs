@@ -941,6 +941,7 @@ mod new_manual_management_resource_tests {
     use crate::{
         api::context::{
             api_context::ApiContext, cloudformation_schema_trait::MockCloudformationSchemaTrait,
+            get_latest_version_trait::MockGetLatestVersionTrait,
         },
         command::context::{
             app_config_command_trait::MockAppConfigCommandTrait,
@@ -971,9 +972,11 @@ mod new_manual_management_resource_tests {
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+        let mock_get_latest_version = MockGetLatestVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+            get_latest_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1040,9 +1043,11 @@ mod new_manual_management_resource_tests {
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+        let mock_get_latest_version = MockGetLatestVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+            get_latest_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1095,9 +1100,11 @@ mod new_manual_management_resource_tests {
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+        let mock_get_latest_version = MockGetLatestVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+            get_latest_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1155,9 +1162,11 @@ mod new_manual_management_resource_tests {
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+        let mock_get_latest_version = MockGetLatestVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+            get_latest_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1231,9 +1240,11 @@ mod new_manual_management_resource_tests {
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+        let mock_get_latest_version = MockGetLatestVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+            get_latest_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1288,9 +1299,11 @@ mod new_manual_management_resource_tests {
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+        let mock_get_latest_version = MockGetLatestVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+            get_latest_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1354,9 +1367,11 @@ mod new_manual_management_resource_tests {
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+        let mock_get_latest_version = MockGetLatestVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+            get_latest_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1428,9 +1443,11 @@ mod new_manual_management_resource_tests {
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
+        let mock_get_latest_version = MockGetLatestVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema_api),
+            get_latest_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
