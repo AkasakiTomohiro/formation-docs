@@ -165,9 +165,10 @@ mod setup_app_tests {
             .returning(|_, _| Ok(()));
 
         // GetLatestVersion::get_latest_versionのモック
+        let latest_version = "1.1.1";
         mock_get_latest_version
             .expect_get_latest_version()
-            .returning(|_| Some(String::from("1.1.1")));
+            .returning(|_| Some(latest_version.to_string()));
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
@@ -187,9 +188,13 @@ mod setup_app_tests {
 
         // ######### 検証 #########
         assert!(initialized.is_ok());
+        assert_eq!(
+            initialized.unwrap().new_version,
+            Some(latest_version.to_string())
+        );
     }
 
-    /// app_configが初期化済み、かつ、latest_versionとapp_versionが同じ場合、何もせずにnew_version: Noneを返すことを確認
+    /// app_configが初期化済み、かつ、latest_versionとapp_versionが同じ場合、何もせずに{ new_version: None }を返すことを確認
     #[tokio::test]
     async fn setup_app_not_initialized() {
         // ######### 準備 #########
@@ -227,9 +232,10 @@ mod setup_app_tests {
             .times(0); // dl_resource_providerは呼ばれないことを確認
 
         // GetLatestVersion::get_latest_versionのモック
+        let latest_version = "0.1.2"; // TODO: env!("CARGO_PKG_VERSION")のモック方法を検討
         mock_get_latest_version
             .expect_get_latest_version()
-            .returning(|_| Some(String::from("1.1.1")));
+            .returning(|_| Some(latest_version.to_string()));
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
@@ -249,6 +255,7 @@ mod setup_app_tests {
 
         // ######### 検証 #########
         assert!(initialized.is_ok());
+        assert_eq!(initialized.unwrap().new_version, None);
     }
 
     /// readの戻り値がErrの場合、setup_appがErrを返すことを確認
