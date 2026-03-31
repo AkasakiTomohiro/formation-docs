@@ -634,6 +634,7 @@ pub async fn update_manual_resource_properties_command(
 #[coverage(off)]
 mod get_manual_management_resources_tests {
     use super::*;
+    use crate::utils::context::clock::MockClock;
     use crate::utils::context::file::MockFileSystem;
     use crate::utils::context::http_client::MockHttpClient;
     use std::collections::HashMap;
@@ -669,10 +670,12 @@ mod get_manual_management_resources_tests {
         });
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let workspace_dir = "/test/workspace";
@@ -713,10 +716,12 @@ mod get_manual_management_resources_tests {
         });
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let workspace_dir = "/test/workspace";
@@ -747,10 +752,12 @@ mod get_manual_management_resources_tests {
             .returning(|_| Ok("{ invalid json }".to_string()));
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let workspace_dir = "/test/workspace";
@@ -781,10 +788,12 @@ mod get_manual_management_resources_tests {
         });
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let workspace_dir = "/test/workspace";
@@ -815,10 +824,12 @@ mod get_manual_management_resources_tests {
         });
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let workspace_dir = "/test/workspace";
@@ -841,6 +852,7 @@ mod get_manual_management_resources_tests {
 #[coverage(off)]
 mod save_manual_management_resources_tests {
     use super::*;
+    use crate::utils::context::clock::MockClock;
     use crate::utils::context::file::MockFileSystem;
     use crate::utils::context::http_client::MockHttpClient;
     use std::sync::Arc;
@@ -875,10 +887,12 @@ mod save_manual_management_resources_tests {
             })
             .returning(|_, _| Ok(()));
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -910,10 +924,12 @@ mod save_manual_management_resources_tests {
             ))
         });
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -949,7 +965,8 @@ mod new_manual_management_resource_tests {
             stack_command_trait::MockStackCommandTrait,
         },
         utils::context::{
-            app_context::AppContext, file::MockFileSystem, http_client::MockHttpClient,
+            app_context::AppContext, clock::MockClock, file::MockFileSystem,
+            http_client::MockHttpClient,
         },
     };
 
@@ -964,10 +981,12 @@ mod new_manual_management_resource_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
@@ -1033,10 +1052,12 @@ mod new_manual_management_resource_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
@@ -1088,10 +1109,12 @@ mod new_manual_management_resource_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
@@ -1148,10 +1171,12 @@ mod new_manual_management_resource_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
@@ -1224,10 +1249,12 @@ mod new_manual_management_resource_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
@@ -1281,10 +1308,12 @@ mod new_manual_management_resource_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
@@ -1347,10 +1376,12 @@ mod new_manual_management_resource_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
@@ -1421,10 +1452,12 @@ mod new_manual_management_resource_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_cloudformation_schema_api = MockCloudformationSchemaTrait::new();
@@ -1484,7 +1517,8 @@ mod get_manual_management_resource_list_tests {
             stack_command_trait::MockStackCommandTrait,
         },
         utils::context::{
-            app_context::AppContext, file::MockFileSystem, http_client::MockHttpClient,
+            app_context::AppContext, clock::MockClock, file::MockFileSystem,
+            http_client::MockHttpClient,
         },
     };
 
@@ -1496,10 +1530,12 @@ mod get_manual_management_resource_list_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1564,10 +1600,12 @@ mod get_manual_management_resource_list_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1619,10 +1657,12 @@ mod get_manual_management_resource_list_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1694,10 +1734,12 @@ mod get_manual_management_resource_list_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1748,7 +1790,7 @@ mod load_manual_management_resource_summary_tests {
             manual_management_resource_trait::MockManualManagementResourceTrait,
             stack_command_trait::MockStackCommandTrait,
         },
-        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+        utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
     };
 
     use super::*;
@@ -1759,10 +1801,12 @@ mod load_manual_management_resource_summary_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1842,10 +1886,12 @@ mod load_manual_management_resource_summary_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1909,10 +1955,12 @@ mod load_manual_management_resource_summary_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -1955,10 +2003,12 @@ mod load_manual_management_resource_summary_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2027,10 +2077,12 @@ mod load_manual_management_resource_summary_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2072,7 +2124,9 @@ mod load_manual_management_resource_summary_tests {
 mod load_manual_resource_meta_tests {
     use std::sync::Arc;
 
-    use crate::utils::context::{file::MockFileSystem, http_client::MockHttpClient};
+    use crate::utils::context::{
+        clock::MockClock, file::MockFileSystem, http_client::MockHttpClient,
+    };
 
     use super::*;
 
@@ -2082,6 +2136,7 @@ mod load_manual_resource_meta_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         mock_file_system.expect_path_exists().return_const(true);
         mock_file_system.expect_read_file().returning(|_| {
@@ -2101,6 +2156,7 @@ mod load_manual_resource_meta_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -2121,6 +2177,7 @@ mod load_manual_resource_meta_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         mock_file_system.expect_path_exists().return_const(false);
         mock_file_system
@@ -2134,6 +2191,7 @@ mod load_manual_resource_meta_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -2152,6 +2210,7 @@ mod load_manual_resource_meta_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         mock_file_system.expect_path_exists().return_const(false);
         mock_file_system.expect_write_file().returning(|_, _| {
@@ -2164,6 +2223,7 @@ mod load_manual_resource_meta_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -2179,6 +2239,7 @@ mod load_manual_resource_meta_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         mock_file_system.expect_path_exists().return_const(true);
         mock_file_system.expect_read_file().returning(|_| {
@@ -2191,6 +2252,7 @@ mod load_manual_resource_meta_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -2206,6 +2268,7 @@ mod load_manual_resource_meta_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         mock_file_system.expect_path_exists().return_const(true);
         mock_file_system.expect_read_file().returning(|_| {
@@ -2222,6 +2285,7 @@ mod load_manual_resource_meta_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -2244,7 +2308,7 @@ mod get_manual_resource_properties_tests {
             manual_management_resource_trait::MockManualManagementResourceTrait,
             stack_command_trait::MockStackCommandTrait,
         },
-        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+        utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
     };
 
     use super::*;
@@ -2255,10 +2319,12 @@ mod get_manual_resource_properties_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2312,6 +2378,7 @@ mod get_manual_resource_properties_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         // get_manual_management_resources のモック
         mock_file_system.expect_path_exists().return_const(true);
@@ -2325,6 +2392,7 @@ mod get_manual_resource_properties_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2367,10 +2435,12 @@ mod get_manual_resource_properties_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2428,7 +2498,7 @@ mod get_manual_resource_meta_tests {
             manual_management_resource_trait::MockManualManagementResourceTrait,
             stack_command_trait::MockStackCommandTrait,
         },
-        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+        utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
     };
 
     use super::*;
@@ -2439,10 +2509,12 @@ mod get_manual_resource_meta_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2500,10 +2572,12 @@ mod get_manual_resource_meta_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2552,10 +2626,12 @@ mod get_manual_resource_meta_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2608,7 +2684,7 @@ mod update_manual_resource_meta_tests {
             manual_management_resource_trait::MockManualManagementResourceTrait,
             stack_command_trait::MockStackCommandTrait,
         },
-        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+        utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
     };
 
     use super::*;
@@ -2619,6 +2695,7 @@ mod update_manual_resource_meta_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         mock_file_system
             .expect_write_file()
@@ -2627,6 +2704,7 @@ mod update_manual_resource_meta_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2681,6 +2759,7 @@ mod update_manual_resource_meta_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         mock_file_system
             .expect_write_file()
@@ -2689,6 +2768,7 @@ mod update_manual_resource_meta_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2741,6 +2821,7 @@ mod update_manual_resource_meta_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         mock_file_system
             .expect_write_file()
@@ -2749,6 +2830,7 @@ mod update_manual_resource_meta_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2799,10 +2881,12 @@ mod update_manual_resource_meta_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2851,6 +2935,7 @@ mod update_manual_resource_meta_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         mock_file_system.expect_write_file().returning(|_, _| {
             Err(std::io::Error::new(
@@ -2862,6 +2947,7 @@ mod update_manual_resource_meta_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2921,7 +3007,7 @@ mod update_manual_resource_properties_tests {
             manual_management_resource_trait::MockManualManagementResourceTrait,
             stack_command_trait::MockStackCommandTrait,
         },
-        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+        utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
     };
 
     use super::*;
@@ -2932,6 +3018,7 @@ mod update_manual_resource_properties_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         // save_manual_management_resources のモック
         mock_file_system
@@ -2941,6 +3028,7 @@ mod update_manual_resource_properties_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -2996,10 +3084,12 @@ mod update_manual_resource_properties_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -3047,10 +3137,12 @@ mod update_manual_resource_properties_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -3104,10 +3196,12 @@ mod update_manual_resource_properties_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -3161,10 +3255,12 @@ mod update_manual_resource_properties_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();
@@ -3218,6 +3314,7 @@ mod update_manual_resource_properties_tests {
         // ######### 準備 #########
         let mut mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         // save_manual_management_resources のモック
         mock_file_system.expect_write_file().returning(|_, _| {
@@ -3230,6 +3327,7 @@ mod update_manual_resource_properties_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config = MockAppConfigCommandTrait::new();

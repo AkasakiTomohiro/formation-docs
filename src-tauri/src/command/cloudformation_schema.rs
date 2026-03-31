@@ -118,7 +118,8 @@ mod get_cloudformation_schema_tests {
             context::cloudformation_schema_trait::MockCloudformationSchemaTrait,
         },
         utils::context::{
-            app_context::AppContext, file::MockFileSystem, http_client::MockHttpClient,
+            app_context::AppContext, clock::MockClock, file::MockFileSystem,
+            http_client::MockHttpClient,
         },
     };
 
@@ -164,10 +165,12 @@ mod get_cloudformation_schema_tests {
             });
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let api_context = ApiContext {
@@ -204,10 +207,12 @@ mod get_cloudformation_schema_tests {
             });
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let api_context = ApiContext {
@@ -244,10 +249,12 @@ mod get_cloudformation_schema_tests {
         mock_file_system.expect_path_exists().return_const(false);
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let api_context = ApiContext {
@@ -289,10 +296,12 @@ mod get_cloudformation_schema_tests {
             .returning(|_path| return Err(Error::new(ErrorKind::Other, "read_file error")));
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let api_context = ApiContext {
@@ -327,7 +336,8 @@ mod get_aws_service_list_tests {
             context::cloudformation_schema_trait::MockCloudformationSchemaTrait,
         },
         utils::context::{
-            app_context::AppContext, file::MockFileSystem, http_client::MockHttpClient,
+            app_context::AppContext, clock::MockClock, file::MockFileSystem,
+            http_client::MockHttpClient,
         },
     };
 
@@ -379,10 +389,12 @@ mod get_aws_service_list_tests {
             });
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let api_context = ApiContext {
@@ -464,10 +476,12 @@ mod get_aws_service_list_tests {
             });
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let api_context = ApiContext {
@@ -510,10 +524,12 @@ mod get_aws_service_list_tests {
             });
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let api_context = ApiContext {
@@ -559,10 +575,12 @@ mod get_aws_service_list_tests {
             });
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let api_context = ApiContext {
@@ -604,10 +622,12 @@ mod get_aws_service_list_tests {
             .returning(|_path| Err(Error::new(ErrorKind::Other, "read_file error")));
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let api_context = ApiContext {
@@ -650,10 +670,12 @@ mod get_aws_service_list_tests {
         });
 
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let api_context = ApiContext {

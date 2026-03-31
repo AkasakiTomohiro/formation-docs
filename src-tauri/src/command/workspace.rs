@@ -286,7 +286,7 @@ mod create_workspace_tests {
             },
             workspace_config::WorkspaceConfig,
         },
-        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+        utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
     };
 
     use super::*;
@@ -297,9 +297,11 @@ mod create_workspace_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config_io = MockAppConfigTrait::new();
@@ -356,9 +358,11 @@ mod create_workspace_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config_io = MockAppConfigTrait::new();
@@ -404,9 +408,11 @@ mod create_workspace_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_app_config_io = MockAppConfigTrait::new();
@@ -474,7 +480,7 @@ mod load_workspace_merge_info_tests {
             },
             workspace_config::WorkspaceConfig,
         },
-        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+        utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
     };
 
     use super::*;
@@ -485,9 +491,11 @@ mod load_workspace_merge_info_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
@@ -541,9 +549,11 @@ mod load_workspace_merge_info_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
@@ -583,9 +593,11 @@ mod load_workspace_merge_info_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
@@ -618,9 +630,11 @@ mod load_workspace_merge_info_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
@@ -673,7 +687,7 @@ mod load_workspaces_tests {
             },
             workspace_config::WorkspaceConfig,
         },
-        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+        utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
     };
 
     use super::*;
@@ -684,9 +698,11 @@ mod load_workspaces_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
@@ -764,9 +780,11 @@ mod load_workspaces_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
@@ -797,9 +815,11 @@ mod load_workspaces_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
@@ -850,7 +870,7 @@ mod update_workspace_tests {
             },
             workspace_config::WorkspaceConfig,
         },
-        utils::context::{file::MockFileSystem, http_client::MockHttpClient},
+        utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
     };
 
     use super::*;
@@ -860,9 +880,11 @@ mod update_workspace_tests {
     async fn success() {
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
@@ -920,9 +942,11 @@ mod update_workspace_tests {
     async fn fail_read_workspace_config() {
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
@@ -964,9 +988,11 @@ mod update_workspace_tests {
     async fn fail_write_workspace_config() {
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         let mock_stack_meta_config_io = MockStackMetaConfigTrait::new();
