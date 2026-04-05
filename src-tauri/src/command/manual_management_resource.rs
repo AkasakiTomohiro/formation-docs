@@ -2,6 +2,9 @@ use crate::api::context::api_context::ApiContext;
 use crate::command::context::command_context;
 use crate::command::context::command_context::CommandContext;
 use crate::command::stack::Resource;
+use crate::config::context::config_context::ConfigContext;
+use crate::config::manual_management_resources_meta_config::ManualManagementResourcesMetaConfigError;
+use crate::config::manual_management_resources_meta_config::ManualManagementResourcesMetaConfigResource;
 use crate::utils::context::app_context::AppContext;
 use crate::utils::get_window_state;
 use crate::utils::AppError;
@@ -11,14 +14,12 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::PathBuf;
+use tauri::utils::config;
 use tauri::State;
 use thiserror::Error;
 
 /// 手動管理リソースのJSONファイル名
 const MANUAL_MANAGEMENT_RESOURCES_FILE: &str = "manual_management_resources.json";
-
-/// 手動管理リソースのmetaファイル名
-const MANUAL_MANAGEMENT_RESOURCES_META_FILE: &str = "manual_management_resources.meta.json";
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -43,8 +44,8 @@ pub struct ManualManagementMeta {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ManualManagementMetaUpdate {
     pub resource_id: String,
-    pub reasons: Option<HashMap<String, String>>,
-    pub description: Option<String>,
+    pub reasons: HashMap<String, String>,
+    pub description: String,
 }
 
 #[derive(Debug, Error)]
@@ -59,6 +60,8 @@ pub enum ManualManagementResourceError {
     CloudFormationSchemaError(
         #[from] crate::command::cloudformation_schema::CloudFormationSchemaError,
     ),
+    #[error("manual management resources meta config error: {0}")]
+    ManualManagementResourcesMetaConfigError(#[from] ManualManagementResourcesMetaConfigError),
 }
 
 /// ワークスペース内にある手動管理リソース用のJSONファイルを読み込む
@@ -271,31 +274,6 @@ async fn load_manual_management_resource_summary(
     return Ok(result);
 }
 
-pub async fn load_manual_resource_meta(
-    state: &AppContext,
-    workspace_directory: &str,
-) -> Result<ManualManagementMeta, ManualManagementResourceError> {
-    // 手動管理リソースのmeta.jsonが存在するか確認
-    let meta_path = PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_META_FILE);
-    if !state.file_system.path_exists(&meta_path) {
-        // 空のJSONを作成
-        let empty_json = ManualManagementMeta {
-            reasons: HashMap::new(),
-            descriptions: HashMap::new(),
-        };
-        let empty_json = serde_json::to_string(&empty_json).unwrap();
-        state
-            .file_system
-            .write_file(&meta_path, empty_json.as_bytes())
-            .await?;
-    }
-
-    // meta.jsonを読み込む
-    let meta_json = state.file_system.read_file(&meta_path).await?;
-    let meta_json = serde_json::from_str::<ManualManagementMeta>(&meta_json)?;
-    return Ok(meta_json);
-}
-
 async fn get_manual_resource_properties(
     state: &AppContext,
     command_context: &CommandContext,
@@ -318,80 +296,55 @@ async fn get_manual_resource_properties(
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ManualResourceMeta {
-    pub reasons: Value,
+    pub reasons: HashMap<String, String>,
     pub description: String,
 }
 
 async fn get_manual_resource_meta(
     state: &AppContext,
-    command_context: &CommandContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     resource_id: &str,
 ) -> Result<ManualResourceMeta, ManualManagementResourceError> {
-    let meta_json = command_context
-        .manual_management_resource
-        .load_manual_resource_meta(state, workspace_directory)
+    let meta_json = config_context
+        .manual_management_resources_meta_config_io
+        .read(state.file_system.clone(), workspace_directory)
         .await?;
-
-    let reasons_value = if let Some(reasons) = meta_json.reasons.get(resource_id) {
-        // 指定されたリソースIDのreasonsが存在する場合はそのまま返す
-        serde_json::to_value(reasons.clone())?
-    } else {
-        // 指定されたリソースIDのreasonsが存在しない場合は空のオブジェクトを返す
-        Value::Object(serde_json::Map::new())
-    };
-
-    let description = if let Some(description_value) = meta_json.descriptions.get(resource_id) {
-        description_value.to_string()
-    } else {
-        String::new()
-    };
+    let resource_meta = meta_json.resources.get(resource_id);
+    if resource_meta.is_none() {
+        return Ok(ManualResourceMeta {
+            reasons: HashMap::new(),
+            description: String::new(),
+        });
+    }
+    let resource_meta = resource_meta.unwrap();
 
     return Ok(ManualResourceMeta {
-        reasons: reasons_value,
-        description,
+        reasons: resource_meta.reasons.clone(),
+        description: resource_meta.description.clone(),
     });
 }
 
 async fn update_manual_resource_meta(
     state: &AppContext,
-    command_context: &CommandContext,
+    config_context: &ConfigContext,
     workspace_directory: &str,
     update_manual_resource_meta: ManualManagementMetaUpdate,
 ) -> Result<(), ManualManagementResourceError> {
-    let manual_resource_meta = command_context
-        .manual_management_resource
-        .load_manual_resource_meta(state, workspace_directory)
+    let mut meta_json = config_context
+        .manual_management_resources_meta_config_io
+        .read(state.file_system.clone(), workspace_directory)
         .await?;
-    let new_manual_resource_meta = ManualManagementMeta {
-        reasons: match update_manual_resource_meta.reasons {
-            Some(update_reasons) => {
-                let mut new_reasons = manual_resource_meta.reasons.clone();
-                new_reasons.insert(
-                    update_manual_resource_meta.resource_id.clone(),
-                    update_reasons,
-                );
-                new_reasons
-            }
-            None => manual_resource_meta.reasons,
+    meta_json.resources.insert(
+        update_manual_resource_meta.resource_id,
+        ManualManagementResourcesMetaConfigResource {
+            reasons: update_manual_resource_meta.reasons.clone(),
+            description: update_manual_resource_meta.description.clone(),
         },
-        descriptions: match update_manual_resource_meta.description {
-            Some(update_description) => {
-                let mut new_descriptions = manual_resource_meta.descriptions.clone();
-                new_descriptions.insert(
-                    update_manual_resource_meta.resource_id.clone(),
-                    update_description,
-                );
-                new_descriptions
-            }
-            None => manual_resource_meta.descriptions,
-        },
-    };
-    let meta_path = PathBuf::from(workspace_directory).join(MANUAL_MANAGEMENT_RESOURCES_META_FILE);
-    let manual_resource_meta_json = serde_json::to_string(&new_manual_resource_meta).unwrap();
-    state
-        .file_system
-        .write_file(&meta_path, manual_resource_meta_json.as_bytes())
+    );
+    config_context
+        .manual_management_resources_meta_config_io
+        .write(meta_json, state.file_system.clone(), workspace_directory)
         .await?;
     return Ok(());
 }
@@ -551,7 +504,7 @@ pub async fn get_manual_resource_properties_command(
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_manual_resource_meta_command(
     app_context_state: State<'_, AppContext>,
-    command_context_state: State<'_, command_context::CommandContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     resource_id: &str,
 ) -> Result<CommandResult<ManualResourceMeta>, CommandResult> {
@@ -563,7 +516,7 @@ pub async fn get_manual_resource_meta_command(
     };
     return match get_manual_resource_meta(
         &app_context_state,
-        &command_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         resource_id,
     )
@@ -578,7 +531,7 @@ pub async fn get_manual_resource_meta_command(
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_manual_resource_meta_command(
     app_context_state: State<'_, AppContext>,
-    command_context_state: State<'_, command_context::CommandContext>,
+    config_context_state: State<'_, ConfigContext>,
     window: tauri::Window,
     update_info: ManualManagementMetaUpdate,
 ) -> Result<CommandResult<()>, CommandResult> {
@@ -590,7 +543,7 @@ pub async fn update_manual_resource_meta_command(
     };
     return match update_manual_resource_meta(
         &app_context_state,
-        &command_context_state,
+        &config_context_state,
         window_state.workspace_directory.as_str(),
         update_info,
     )
