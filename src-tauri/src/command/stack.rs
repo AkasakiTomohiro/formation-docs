@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use crate::command::context::command_context::CommandContext;
 use crate::config::context::config_context::ConfigContext;
-use crate::config::stack_meta_config::StackMetaConfigError;
+use crate::config::stack_meta_config::{StackMetaConfigError, StackMetaConfigResource};
 use crate::config::workspace_config::WorkspaceConfigError;
 use crate::utils::context::app_context::AppContext;
 use crate::utils::get_window_state;
@@ -450,7 +450,7 @@ async fn get_stack_resource_properties(
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StackMeta {
-    pub reasons: Value,
+    pub reasons: HashMap<String, String>,
     pub description: String,
 }
 
@@ -471,29 +471,45 @@ async fn get_stack_meta(
             return Err(StackError::App(AppError::new("Stack not found")));
         }
     };
-    let meta_path = PathBuf::from(format!(
-        "{}/{}.meta.json",
-        workspace_directory,
-        stack_file_name.replace(".template.json", "")
-    ));
-    let meta_json = app_context.file_system.read_file(&meta_path).await?;
-    let meta_json: Value = serde_json::from_str(&meta_json).unwrap_or_default();
-    let mut reasons_json = meta_json["reasons"][logical_id].clone();
-    if reasons_json.is_null() {
-        reasons_json = Value::Object(serde_json::Map::new());
+    let meta_json = config_context
+        .stack_meta_config_io
+        .read(
+            app_context.file_system.clone(),
+            workspace_directory,
+            &stack_file_name.replace(".template.json", ""),
+        )
+        .await?;
+    let resource_meta = meta_json.resources.get(logical_id);
+    if resource_meta.is_none() {
+        return Ok(StackMeta {
+            reasons: HashMap::new(),
+            description: String::new(),
+        });
     }
-    let description_value = meta_json["descriptions"][logical_id].clone();
-    let description = if description_value.is_string() {
-        description_value.as_str().unwrap_or_default().to_string()
-    } else if description_value.is_null() {
-        String::new()
-    } else {
-        serde_json::to_string(&description_value).unwrap_or_default()
-    };
+    // let meta_path = PathBuf::from(format!(
+    //     "{}/{}.meta.json",
+    //     workspace_directory,
+    //     stack_file_name.replace(".template.json", "")
+    // ));
+    // let meta_json = app_context.file_system.read_file(&meta_path).await?;
+    // let meta_json: Value = serde_json::from_str(&meta_json).unwrap_or_default();
+    // let mut reasons_json = meta_json["reasons"][logical_id].clone();
+    // if reasons_json.is_null() {
+    //     reasons_json = Value::Object(serde_json::Map::new());
+    // }
+    // let description_value = meta_json["descriptions"][logical_id].clone();
+    // let description = if description_value.is_string() {
+    //     description_value.as_str().unwrap_or_default().to_string()
+    // } else if description_value.is_null() {
+    //     String::new()
+    // } else {
+    //     serde_json::to_string(&description_value).unwrap_or_default()
+    // };
+    let resource_meta = resource_meta.unwrap();
 
     return Ok(StackMeta {
-        reasons: reasons_json,
-        description,
+        reasons: resource_meta.reasons.clone(),
+        description: resource_meta.description.clone(),
     });
 }
 
@@ -639,10 +655,13 @@ async fn update_stack_meta(
             &stack_name,
         )
         .await?;
-    stack_meta.reasons.insert(logical_id.to_string(), reasons);
-    stack_meta
-        .descriptions
-        .insert(logical_id.to_string(), description);
+    stack_meta.resources.insert(
+        logical_id.to_string(),
+        StackMetaConfigResource {
+            description,
+            reasons,
+        },
+    );
     config_context
         .stack_meta_config_io
         .write(
