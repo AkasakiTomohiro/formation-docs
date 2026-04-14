@@ -15,12 +15,16 @@ const STACK_META_CONFIG_LATEST_VERSION: u32 = 1;
 ///
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct StackMetaConfigResource {
+    pub description: String,
+    pub reasons: HashMap<String, String>,
+}
+#[derive(Debug, Serialize, Deserialize)]
 struct StackMetaConfigV1 {
     pub version: u32,
     pub name: String,
     pub description: String,
-    pub reasons: HashMap<String, HashMap<String, String>>,
-    pub descriptions: HashMap<String, String>,
+    pub resources: HashMap<String, StackMetaConfigResource>,
 }
 
 impl StackMetaConfigV1 {
@@ -29,8 +33,7 @@ impl StackMetaConfigV1 {
             version: 1,
             name: name.to_string(),
             description: "".to_string(),
-            reasons: HashMap::new(),
-            descriptions: HashMap::new(),
+            resources: HashMap::new(),
         }
     }
 }
@@ -43,8 +46,7 @@ impl ConfigMigratable for StackMetaConfigV1 {
             version: STACK_META_CONFIG_LATEST_VERSION,
             name: self.name,
             description: self.description,
-            reasons: self.reasons,
-            descriptions: self.descriptions,
+            resources: self.resources,
         })
     }
     fn as_any(self: Box<Self>) -> Box<dyn Any> {
@@ -61,8 +63,7 @@ pub struct StackMetaConfig {
     pub version: u32,
     pub name: String,
     pub description: String,
-    pub reasons: HashMap<String, HashMap<String, String>>,
-    pub descriptions: HashMap<String, String>,
+    pub resources: HashMap<String, StackMetaConfigResource>,
 }
 
 impl StackMetaConfig {
