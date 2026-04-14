@@ -14,7 +14,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::path::PathBuf;
-use tauri::utils::config;
+
 use tauri::State;
 use thiserror::Error;
 
@@ -33,12 +33,6 @@ pub struct ManualManagementResource {
 #[serde(rename_all = "PascalCase")]
 pub struct ManualManagementResources {
     pub resources: HashMap<String, ManualManagementResource>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ManualManagementMeta {
-    pub reasons: HashMap<String, HashMap<String, String>>,
-    pub descriptions: HashMap<String, String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -2091,183 +2085,6 @@ mod load_manual_management_resource_summary_tests {
 
 #[cfg(test)]
 #[coverage(off)]
-mod load_manual_resource_meta_tests {
-    use std::sync::Arc;
-
-    use crate::utils::context::{
-        clock::MockClock, file::MockFileSystem, http_client::MockHttpClient,
-    };
-
-    use super::*;
-
-    /// 既にファイルが存在するとき、手動管理リソースのmetaファイルを読み込みできること
-    #[tokio::test]
-    async fn file_exists() {
-        // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
-        let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
-
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{
-                "reasons": {
-                    "TestResource": {
-                        "Reason1": "test reason"
-                    }
-                },
-                "descriptions": {
-                    "TestResource": "Test Description"
-                }
-            }"#
-            .to_string())
-        });
-
-        let app_context = AppContext {
-            file_system: Arc::new(mock_file_system),
-            http_client: Arc::new(mock_http_client),
-            clock: Arc::new(mock_clock),
-        };
-
-        // ######### 実行 #########
-        let result = load_manual_resource_meta(&app_context, "/test/workspace").await;
-
-        // ######### 検証 #########
-        assert!(result.is_ok());
-        let meta = result.unwrap();
-        let reasons = meta.reasons.get("TestResource").unwrap();
-        assert_eq!(reasons.get("Reason1").unwrap(), "test reason");
-        let descriptions = meta.descriptions.get("TestResource").unwrap();
-        assert_eq!(descriptions, "Test Description");
-    }
-
-    /// ファイルが存在しないとき、空のmetaファイルを作成してから読み込みできること
-    #[tokio::test]
-    async fn file_not_exists() {
-        // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
-        let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
-
-        mock_file_system.expect_path_exists().return_const(false);
-        mock_file_system
-            .expect_write_file()
-            .returning(|_, _| Ok(()));
-
-        mock_file_system
-            .expect_read_file()
-            .returning(|_| Ok(r#"{ "reasons": {}, "descriptions": {} }"#.to_string()));
-
-        let app_context = AppContext {
-            file_system: Arc::new(mock_file_system),
-            http_client: Arc::new(mock_http_client),
-            clock: Arc::new(mock_clock),
-        };
-
-        // ######### 実行 #########
-        let result = load_manual_resource_meta(&app_context, "/test/workspace").await;
-
-        // ######### 検証 #########
-        assert!(result.is_ok());
-        let meta = result.unwrap();
-        assert_eq!(meta.reasons.len(), 0);
-        assert_eq!(meta.descriptions.len(), 0);
-    }
-
-    /// write_file に失敗し、エラーを返すこと
-    #[tokio::test]
-    async fn write_file_err() {
-        // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
-        let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
-
-        mock_file_system.expect_path_exists().return_const(false);
-        mock_file_system.expect_write_file().returning(|_, _| {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                "write_file error",
-            ))
-        });
-
-        let app_context = AppContext {
-            file_system: Arc::new(mock_file_system),
-            http_client: Arc::new(mock_http_client),
-            clock: Arc::new(mock_clock),
-        };
-
-        // ######### 実行 #########
-        let result = load_manual_resource_meta(&app_context, "/test/workspace").await;
-
-        // ######### 検証 #########
-        assert!(result.is_err());
-    }
-
-    /// read_file に失敗し、エラーを返すこと
-    #[tokio::test]
-    async fn read_file_err() {
-        // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
-        let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
-
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                "read_file error",
-            ))
-        });
-
-        let app_context = AppContext {
-            file_system: Arc::new(mock_file_system),
-            http_client: Arc::new(mock_http_client),
-            clock: Arc::new(mock_clock),
-        };
-
-        // ######### 実行 #########
-        let result = load_manual_resource_meta(&app_context, "/test/workspace").await;
-
-        // ######### 検証 #########
-        assert!(result.is_err());
-    }
-
-    /// metaファイルの形式が不正なとき、serde_json::from_str に失敗しエラーを返すこと
-    #[tokio::test]
-    async fn from_str_err() {
-        // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
-        let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
-
-        mock_file_system.expect_path_exists().return_const(true);
-        mock_file_system.expect_read_file().returning(|_| {
-            Ok(r#"{
-                "invalid": {
-                    "TestResource": {
-                        "Reason1": "test reason"
-                    }
-                }
-            }"#
-            .to_string())
-        });
-
-        let app_context = AppContext {
-            file_system: Arc::new(mock_file_system),
-            http_client: Arc::new(mock_http_client),
-            clock: Arc::new(mock_clock),
-        };
-
-        // ######### 実行 #########
-        let result = load_manual_resource_meta(&app_context, "/test/workspace").await;
-
-        // ######### 検証 #########
-        assert!(result.is_err());
-    }
-}
-
-#[cfg(test)]
-#[coverage(off)]
 mod get_manual_resource_properties_tests {
     use std::sync::Arc;
 
@@ -2462,11 +2279,16 @@ mod get_manual_resource_meta_tests {
     use std::sync::Arc;
 
     use crate::{
-        command::context::{
-            app_config_command_trait::MockAppConfigCommandTrait,
-            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
-            manual_management_resource_trait::MockManualManagementResourceTrait,
-            stack_command_trait::MockStackCommandTrait,
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait, config_context::ConfigContext,
+                manual_management_resources_meta_config_trait::MockManualManagementResourcesMetaConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            manual_management_resources_meta_config::{
+                ManualManagementResourcesMetaConfig, ManualManagementResourcesMetaConfigResource,
+            },
         },
         utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
     };
@@ -2487,31 +2309,30 @@ mod get_manual_resource_meta_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_app_config = MockAppConfigCommandTrait::new();
-        let mock_stack = MockStackCommandTrait::new();
-        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
-
-        mock_manual_management_resource
-            .expect_load_manual_resource_meta()
-            .returning(|_, _| {
-                let mut reasons = HashMap::new();
-                let mut resource_reasons = HashMap::new();
-                resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
-                reasons.insert("TestResource".to_string(), resource_reasons);
-                let mut descriptions = HashMap::new();
-                descriptions.insert("TestResource".to_string(), "Old Description".to_string());
-                Ok(ManualManagementMeta {
+        let mut mock_meta_config = MockManualManagementResourcesMetaConfigTrait::new();
+        mock_meta_config.expect_read().returning(|_, _| {
+            let mut resources = HashMap::new();
+            let mut reasons = HashMap::new();
+            reasons.insert("Reason1".to_string(), "Old Reason".to_string());
+            resources.insert(
+                "TestResource".to_string(),
+                ManualManagementResourcesMetaConfigResource {
                     reasons,
-                    descriptions,
-                })
-            });
+                    description: "Old Description".to_string(),
+                },
+            );
+            Ok(ManualManagementResourcesMetaConfig {
+                version: 1,
+                description: "".to_string(),
+                resources,
+            })
+        });
 
-        let command_context = CommandContext {
-            app_config: Arc::new(mock_app_config),
-            stack: Arc::new(mock_stack),
-            cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            manual_management_resource: Arc::new(mock_manual_management_resource),
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(MockAppConfigTrait::new()),
+            stack_meta_config_io: Arc::new(MockStackMetaConfigTrait::new()),
+            workspace_config_io: Arc::new(MockWorkspaceConfigTrait::new()),
+            manual_management_resources_meta_config_io: Arc::new(mock_meta_config),
         };
 
         let workspace_directory = "/test/workspace";
@@ -2520,7 +2341,7 @@ mod get_manual_resource_meta_tests {
         // ######### 実行 #########
         let result = get_manual_resource_meta(
             &app_context,
-            &command_context,
+            &config_context,
             workspace_directory,
             resource_id,
         )
@@ -2529,10 +2350,7 @@ mod get_manual_resource_meta_tests {
         // ######### 検証 #########
         assert!(result.is_ok());
         let resource_meta = result.unwrap();
-        assert_eq!(
-            resource_meta.reasons,
-            serde_json::json!({ "Reason1": "Old Reason" })
-        );
+        assert_eq!(resource_meta.reasons.get("Reason1").unwrap(), "Old Reason");
         assert_eq!(resource_meta.description, "Old Description".to_string());
     }
 
@@ -2550,25 +2368,20 @@ mod get_manual_resource_meta_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_app_config = MockAppConfigCommandTrait::new();
-        let mock_stack = MockStackCommandTrait::new();
-        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_meta_config = MockManualManagementResourcesMetaConfigTrait::new();
+        mock_meta_config.expect_read().returning(|_, _| {
+            Ok(ManualManagementResourcesMetaConfig {
+                version: 1,
+                description: "".to_string(),
+                resources: HashMap::new(),
+            })
+        });
 
-        mock_manual_management_resource
-            .expect_load_manual_resource_meta()
-            .returning(|_, _| {
-                Ok(ManualManagementMeta {
-                    reasons: HashMap::new(),
-                    descriptions: HashMap::new(),
-                })
-            });
-
-        let command_context = CommandContext {
-            app_config: Arc::new(mock_app_config),
-            stack: Arc::new(mock_stack),
-            cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            manual_management_resource: Arc::new(mock_manual_management_resource),
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(MockAppConfigTrait::new()),
+            stack_meta_config_io: Arc::new(MockStackMetaConfigTrait::new()),
+            workspace_config_io: Arc::new(MockWorkspaceConfigTrait::new()),
+            manual_management_resources_meta_config_io: Arc::new(mock_meta_config),
         };
 
         let workspace_directory = "/test/workspace";
@@ -2577,7 +2390,7 @@ mod get_manual_resource_meta_tests {
         // ######### 実行 #########
         let result = get_manual_resource_meta(
             &app_context,
-            &command_context,
+            &config_context,
             workspace_directory,
             resource_id,
         )
@@ -2586,13 +2399,13 @@ mod get_manual_resource_meta_tests {
         // ######### 検証 #########
         assert!(result.is_ok());
         let resource_meta = result.unwrap();
-        assert_eq!(resource_meta.reasons, Value::Object(serde_json::Map::new()));
-        assert_eq!(resource_meta.description, Value::String("".to_string()));
+        assert_eq!(resource_meta.reasons.len(), 0);
+        assert_eq!(resource_meta.description, "");
     }
 
-    /// load_manual_resource_meta に失敗し、エラーを返すこと
+    /// read に失敗し、エラーを返すこと
     #[tokio::test]
-    async fn load_manual_resource_meta_err() {
+    async fn read_err() {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
@@ -2604,25 +2417,20 @@ mod get_manual_resource_meta_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_app_config = MockAppConfigCommandTrait::new();
-        let mock_stack = MockStackCommandTrait::new();
-        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_meta_config = MockManualManagementResourcesMetaConfigTrait::new();
+        mock_meta_config.expect_read().returning(|_, _| {
+            Err(
+                crate::config::manual_management_resources_meta_config::ManualManagementResourcesMetaConfigError::Io(
+                    std::io::Error::new(std::io::ErrorKind::NotFound, "read error"),
+                ),
+            )
+        });
 
-        mock_manual_management_resource
-            .expect_load_manual_resource_meta()
-            .returning(|_, _| {
-                Err(ManualManagementResourceError::Io(std::io::Error::new(
-                    std::io::ErrorKind::NotFound,
-                    "read_file error",
-                )))
-            });
-
-        let command_context = CommandContext {
-            app_config: Arc::new(mock_app_config),
-            stack: Arc::new(mock_stack),
-            cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            manual_management_resource: Arc::new(mock_manual_management_resource),
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(MockAppConfigTrait::new()),
+            stack_meta_config_io: Arc::new(MockStackMetaConfigTrait::new()),
+            workspace_config_io: Arc::new(MockWorkspaceConfigTrait::new()),
+            manual_management_resources_meta_config_io: Arc::new(mock_meta_config),
         };
 
         let workspace_directory = "/test/workspace";
@@ -2631,7 +2439,7 @@ mod get_manual_resource_meta_tests {
         // ######### 実行 #########
         let result = get_manual_resource_meta(
             &app_context,
-            &command_context,
+            &config_context,
             workspace_directory,
             resource_id,
         )
@@ -2648,206 +2456,23 @@ mod update_manual_resource_meta_tests {
     use std::sync::Arc;
 
     use crate::{
-        command::context::{
-            app_config_command_trait::MockAppConfigCommandTrait,
-            cloudformation_schema_trait::MockCloudFormationSchemaTrait,
-            manual_management_resource_trait::MockManualManagementResourceTrait,
-            stack_command_trait::MockStackCommandTrait,
+        config::{
+            context::{
+                app_config_trait::MockAppConfigTrait, config_context::ConfigContext,
+                manual_management_resources_meta_config_trait::MockManualManagementResourcesMetaConfigTrait,
+                stack_meta_config_trait::MockStackMetaConfigTrait,
+                workspace_config_trait::MockWorkspaceConfigTrait,
+            },
+            manual_management_resources_meta_config::ManualManagementResourcesMetaConfig,
         },
         utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
     };
 
     use super::*;
 
-    /// 更新するメタデータに reasons がある場合、メタデータの更新に成功すること
+    /// メタデータの更新に成功すること
     #[tokio::test]
-    async fn success_reasons() {
-        // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
-        let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
-
-        mock_file_system
-            .expect_write_file()
-            .returning(|_, _| Ok(()));
-
-        let app_context = AppContext {
-            file_system: Arc::new(mock_file_system),
-            http_client: Arc::new(mock_http_client),
-            clock: Arc::new(mock_clock),
-        };
-
-        let mock_app_config = MockAppConfigCommandTrait::new();
-        let mock_stack = MockStackCommandTrait::new();
-        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
-
-        mock_manual_management_resource
-            .expect_load_manual_resource_meta()
-            .returning(|_, _| {
-                let mut reasons = HashMap::new();
-                let mut resource_reasons = HashMap::new();
-                resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
-                reasons.insert("TestResource".to_string(), resource_reasons);
-                let descriptions = HashMap::new();
-                Ok(ManualManagementMeta {
-                    reasons,
-                    descriptions,
-                })
-            });
-
-        let command_context = CommandContext {
-            app_config: Arc::new(mock_app_config),
-            stack: Arc::new(mock_stack),
-            cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            manual_management_resource: Arc::new(mock_manual_management_resource),
-        };
-
-        let workspace_directory = "/test/workspace";
-        let resource_id = "TestResource";
-        let mut reasons = HashMap::new();
-        reasons.insert("Reason1".to_string(), "New Reason".to_string());
-        reasons.insert("Reason2".to_string(), "Another Reason".to_string());
-        let meta = ManualManagementMetaUpdate {
-            resource_id: resource_id.to_string(),
-            reasons: Some(reasons.clone()),
-            description: None,
-        };
-
-        // ######### 実行 #########
-        let result =
-            update_manual_resource_meta(&app_context, &command_context, workspace_directory, meta)
-                .await;
-
-        // ######### 検証 #########
-        assert!(result.is_ok());
-    }
-
-    /// 更新するメタデータに description がある場合、メタデータの更新に成功すること
-    #[tokio::test]
-    async fn success_description() {
-        // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
-        let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
-
-        mock_file_system
-            .expect_write_file()
-            .returning(|_, _| Ok(()));
-
-        let app_context = AppContext {
-            file_system: Arc::new(mock_file_system),
-            http_client: Arc::new(mock_http_client),
-            clock: Arc::new(mock_clock),
-        };
-
-        let mock_app_config = MockAppConfigCommandTrait::new();
-        let mock_stack = MockStackCommandTrait::new();
-        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
-
-        mock_manual_management_resource
-            .expect_load_manual_resource_meta()
-            .returning(|_, _| {
-                let mut reasons = HashMap::new();
-                let mut resource_reasons = HashMap::new();
-                resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
-                reasons.insert("TestResource".to_string(), resource_reasons);
-                let descriptions = HashMap::new();
-                Ok(ManualManagementMeta {
-                    reasons,
-                    descriptions,
-                })
-            });
-
-        let command_context = CommandContext {
-            app_config: Arc::new(mock_app_config),
-            stack: Arc::new(mock_stack),
-            cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            manual_management_resource: Arc::new(mock_manual_management_resource),
-        };
-
-        let workspace_directory = "/test/workspace";
-        let resource_id = "TestResource";
-        let description = "New Description".to_string();
-        let meta = ManualManagementMetaUpdate {
-            resource_id: resource_id.to_string(),
-            reasons: None,
-            description: Some(description),
-        };
-
-        // ######### 実行 #########
-        let result =
-            update_manual_resource_meta(&app_context, &command_context, workspace_directory, meta)
-                .await;
-
-        // ######### 検証 #########
-        assert!(result.is_ok());
-    }
-
-    /// 更新するメタデータに reasons がない場合、メタデータの更新に成功すること
-    #[tokio::test]
-    async fn success_no_reasons() {
-        // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
-        let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
-
-        mock_file_system
-            .expect_write_file()
-            .returning(|_, _| Ok(()));
-
-        let app_context = AppContext {
-            file_system: Arc::new(mock_file_system),
-            http_client: Arc::new(mock_http_client),
-            clock: Arc::new(mock_clock),
-        };
-
-        let mock_app_config = MockAppConfigCommandTrait::new();
-        let mock_stack = MockStackCommandTrait::new();
-        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
-
-        mock_manual_management_resource
-            .expect_load_manual_resource_meta()
-            .returning(|_, _| {
-                let mut reasons = HashMap::new();
-                let mut resource_reasons = HashMap::new();
-                resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
-                reasons.insert("TestResource".to_string(), resource_reasons);
-                let descriptions = HashMap::new();
-                Ok(ManualManagementMeta {
-                    reasons,
-                    descriptions,
-                })
-            });
-
-        let command_context = CommandContext {
-            app_config: Arc::new(mock_app_config),
-            stack: Arc::new(mock_stack),
-            cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            manual_management_resource: Arc::new(mock_manual_management_resource),
-        };
-
-        let workspace_directory = "/test/workspace";
-        let meta = ManualManagementMetaUpdate {
-            resource_id: "TestResource".to_string(),
-            reasons: None,
-            description: None,
-        };
-
-        // ######### 実行 #########
-        let result =
-            update_manual_resource_meta(&app_context, &command_context, workspace_directory, meta)
-                .await;
-
-        // ######### 検証 #########
-        assert!(result.is_ok());
-    }
-
-    /// load_manual_resource_meta に失敗し、エラーを返すこと
-    #[tokio::test]
-    async fn load_manual_resource_meta_err() {
+    async fn success() {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
@@ -2859,60 +2484,56 @@ mod update_manual_resource_meta_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_app_config = MockAppConfigCommandTrait::new();
-        let mock_stack = MockStackCommandTrait::new();
-        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_meta_config = MockManualManagementResourcesMetaConfigTrait::new();
 
-        mock_manual_management_resource
-            .expect_load_manual_resource_meta()
-            .returning(|_, _| {
-                Err(ManualManagementResourceError::Io(std::io::Error::new(
-                    std::io::ErrorKind::NotFound,
-                    "read_file error",
-                )))
-            });
+        mock_meta_config.expect_read().returning(|_, _| {
+            Ok(ManualManagementResourcesMetaConfig {
+                version: 1,
+                description: "".to_string(),
+                resources: HashMap::new(),
+            })
+        });
 
-        let command_context = CommandContext {
-            app_config: Arc::new(mock_app_config),
-            stack: Arc::new(mock_stack),
-            cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            manual_management_resource: Arc::new(mock_manual_management_resource),
+        mock_meta_config.expect_write().returning(|_, _, _| {
+            Ok(ManualManagementResourcesMetaConfig {
+                version: 1,
+                description: "".to_string(),
+                resources: HashMap::new(),
+            })
+        });
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(MockAppConfigTrait::new()),
+            stack_meta_config_io: Arc::new(MockStackMetaConfigTrait::new()),
+            workspace_config_io: Arc::new(MockWorkspaceConfigTrait::new()),
+            manual_management_resources_meta_config_io: Arc::new(mock_meta_config),
         };
 
         let workspace_directory = "/test/workspace";
-        let resource_id = "TestResource";
         let mut reasons = HashMap::new();
         reasons.insert("Reason1".to_string(), "New Reason".to_string());
         let meta = ManualManagementMetaUpdate {
-            resource_id: resource_id.to_string(),
-            reasons: Some(reasons),
-            description: None,
+            resource_id: "TestResource".to_string(),
+            reasons,
+            description: "New Description".to_string(),
         };
 
         // ######### 実行 #########
         let result =
-            update_manual_resource_meta(&app_context, &command_context, workspace_directory, meta)
+            update_manual_resource_meta(&app_context, &config_context, workspace_directory, meta)
                 .await;
 
         // ######### 検証 #########
-        assert!(result.is_err());
+        assert!(result.is_ok());
     }
 
-    /// write_file に失敗し、エラーを返すこと
+    /// read に失敗し、エラーを返すこと
     #[tokio::test]
-    async fn write_file_err() {
+    async fn read_err() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
         let mock_clock = MockClock::new();
-
-        mock_file_system.expect_write_file().returning(|_, _| {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::PermissionDenied,
-                "write_file error",
-            ))
-        });
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -2920,44 +2541,87 @@ mod update_manual_resource_meta_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_app_config = MockAppConfigCommandTrait::new();
-        let mock_stack = MockStackCommandTrait::new();
-        let mock_cloudformation_schema = MockCloudFormationSchemaTrait::new();
-        let mut mock_manual_management_resource = MockManualManagementResourceTrait::new();
+        let mut mock_meta_config = MockManualManagementResourcesMetaConfigTrait::new();
+        mock_meta_config.expect_read().returning(|_, _| {
+            Err(
+                crate::config::manual_management_resources_meta_config::ManualManagementResourcesMetaConfigError::Io(
+                    std::io::Error::new(std::io::ErrorKind::NotFound, "read error"),
+                ),
+            )
+        });
 
-        mock_manual_management_resource
-            .expect_load_manual_resource_meta()
-            .returning(|_, _| {
-                let mut reasons = HashMap::new();
-                let mut resource_reasons = HashMap::new();
-                resource_reasons.insert("Reason1".to_string(), "Old Reason".to_string());
-                reasons.insert("TestResource".to_string(), resource_reasons);
-                Ok(ManualManagementMeta {
-                    reasons,
-                    descriptions: HashMap::new(),
-                })
-            });
-
-        let command_context = CommandContext {
-            app_config: Arc::new(mock_app_config),
-            stack: Arc::new(mock_stack),
-            cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            manual_management_resource: Arc::new(mock_manual_management_resource),
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(MockAppConfigTrait::new()),
+            stack_meta_config_io: Arc::new(MockStackMetaConfigTrait::new()),
+            workspace_config_io: Arc::new(MockWorkspaceConfigTrait::new()),
+            manual_management_resources_meta_config_io: Arc::new(mock_meta_config),
         };
 
         let workspace_directory = "/test/workspace";
-        let resource_id = "TestResource";
-        let mut reasons = HashMap::new();
-        reasons.insert("Reason1".to_string(), "New Reason".to_string());
         let meta = ManualManagementMetaUpdate {
-            resource_id: resource_id.to_string(),
-            reasons: Option::Some(reasons),
-            description: None,
+            resource_id: "TestResource".to_string(),
+            reasons: HashMap::new(),
+            description: "Test".to_string(),
         };
 
         // ######### 実行 #########
         let result =
-            update_manual_resource_meta(&app_context, &command_context, workspace_directory, meta)
+            update_manual_resource_meta(&app_context, &config_context, workspace_directory, meta)
+                .await;
+
+        // ######### 検証 #########
+        assert!(result.is_err());
+    }
+
+    /// write に失敗し、エラーを返すこと
+    #[tokio::test]
+    async fn write_err() {
+        // ######### 準備 #########
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
+        };
+
+        let mut mock_meta_config = MockManualManagementResourcesMetaConfigTrait::new();
+
+        mock_meta_config.expect_read().returning(|_, _| {
+            Ok(ManualManagementResourcesMetaConfig {
+                version: 1,
+                description: "".to_string(),
+                resources: HashMap::new(),
+            })
+        });
+
+        mock_meta_config.expect_write().returning(|_, _, _| {
+            Err(
+                crate::config::manual_management_resources_meta_config::ManualManagementResourcesMetaConfigError::Io(
+                    std::io::Error::new(std::io::ErrorKind::PermissionDenied, "write error"),
+                ),
+            )
+        });
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(MockAppConfigTrait::new()),
+            stack_meta_config_io: Arc::new(MockStackMetaConfigTrait::new()),
+            workspace_config_io: Arc::new(MockWorkspaceConfigTrait::new()),
+            manual_management_resources_meta_config_io: Arc::new(mock_meta_config),
+        };
+
+        let workspace_directory = "/test/workspace";
+        let meta = ManualManagementMetaUpdate {
+            resource_id: "TestResource".to_string(),
+            reasons: HashMap::new(),
+            description: "Test".to_string(),
+        };
+
+        // ######### 実行 #########
+        let result =
+            update_manual_resource_meta(&app_context, &config_context, workspace_directory, meta)
                 .await;
 
         // ######### 検証 #########

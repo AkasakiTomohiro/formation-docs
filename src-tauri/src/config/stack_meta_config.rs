@@ -205,7 +205,7 @@ mod stack_meta_config_v1_tests {
         assert_eq!(config_v1.version, 1);
         assert_eq!(config_v1.name, name.to_string());
         assert_eq!(config_v1.description, "".to_string());
-        assert_eq!(config_v1.reasons.is_empty(), true);
+        assert_eq!(config_v1.resources.is_empty(), true);
     }
 
     /// StackMetaConfigV1をマイグレーションしたときに、StackMetaConfigに変換できることを確認
@@ -229,8 +229,7 @@ mod stack_meta_config_v1_tests {
         assert_eq!(config_latest.version, STACK_META_CONFIG_LATEST_VERSION);
         assert_eq!(config_latest.name, name.to_string());
         assert_eq!(config_latest.description, "".to_string());
-        assert_eq!(config_latest.reasons.is_empty(), true);
-        assert_eq!(config_latest.descriptions.is_empty(), true);
+        assert_eq!(config_latest.resources.is_empty(), true);
     }
 
     #[test]
@@ -250,7 +249,7 @@ mod stack_meta_config_v1_tests {
         assert_eq!(downcasted.version, 1);
         assert_eq!(downcasted.name, name.to_string());
         assert_eq!(downcasted.description, "".to_string());
-        assert_eq!(downcasted.reasons.is_empty(), true);
+        assert_eq!(downcasted.resources.is_empty(), true);
     }
 }
 
@@ -272,7 +271,7 @@ mod stack_meta_config_tests {
         assert_eq!(config_latest.version, STACK_META_CONFIG_LATEST_VERSION);
         assert_eq!(config_latest.name, name.to_string());
         assert_eq!(config_latest.description, "".to_string());
-        assert_eq!(config_latest.reasons.is_empty(), true);
+        assert_eq!(config_latest.resources.is_empty(), true);
     }
 
     #[test]
@@ -296,7 +295,7 @@ mod stack_meta_config_tests {
         assert_eq!(config_latest.version, STACK_META_CONFIG_LATEST_VERSION);
         assert_eq!(config_latest.name, name.to_string());
         assert_eq!(config_latest.description, "".to_string());
-        assert_eq!(config_latest.reasons.is_empty(), true);
+        assert_eq!(config_latest.resources.is_empty(), true);
     }
 
     mod write_func {
@@ -374,8 +373,7 @@ mod stack_meta_config_tests {
             assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
             assert_eq!(config.name, "name".to_string());
             assert_eq!(config.description, "description".to_string());
-            assert_eq!(config.reasons.is_empty(), true);
-            assert_eq!(config.descriptions.is_empty(), true);
+            assert_eq!(config.resources.is_empty(), true);
         }
 
         #[tokio::test]
@@ -415,8 +413,7 @@ mod stack_meta_config_tests {
             assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
             assert_eq!(config.name, stack_name.to_string());
             assert_eq!(config.description, "".to_string());
-            assert_eq!(config.reasons.is_empty(), true);
-            assert_eq!(config.descriptions.is_empty(), true);
+            assert_eq!(config.resources.is_empty(), true);
         }
 
         #[tokio::test]
@@ -446,8 +443,7 @@ mod stack_meta_config_tests {
             assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
             assert_eq!(config.name, stack_name.to_string());
             assert_eq!(config.description, "".to_string());
-            assert_eq!(config.reasons.is_empty(), true);
-            assert_eq!(config.descriptions.is_empty(), true);
+            assert_eq!(config.resources.is_empty(), true);
         }
 
         #[tokio::test]
