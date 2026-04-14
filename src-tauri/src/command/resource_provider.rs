@@ -1,14 +1,17 @@
 use crate::api::context::api_context::ApiContext;
 use crate::config::context::config_context::ConfigContext;
+use crate::utils::app_error::AppError;
 use crate::utils::context::app_context::AppContext;
 use crate::utils::CommandResult;
-use chrono::Utc;
+use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use tauri::State;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ResourceProviderError {
+    #[error("app error: {0}")]
+    App(#[from] AppError),
     #[error("app config error: {0}")]
     AppConfig(#[from] crate::config::app_config::AppConfigError),
     #[error("app config command error: {0}")]
@@ -32,13 +35,41 @@ async fn setup_app(
         .app_config_io
         .read(app_context.file_system.clone())
         .await?;
-    if app_config.initialized == false {
-        api_context
+
+    let mut exceeded_download_span = true;
+    if let Ok(last_downloaded_at) =
+        DateTime::parse_from_rfc3339(&app_config.cf_schema_downloaded_at)
+    {
+        // CloudFormationSchemeの最終ダウンロード時刻と現在時刻の差分を取得
+        let last_downloaded_diff = app_context
+            .clock
+            .utc_now()
+            .signed_duration_since(last_downloaded_at)
+            .num_days();
+        exceeded_download_span = last_downloaded_diff >= 7;
+    }
+    // 初回起動時またはCloudFormationSchemeの最終ダウンロードから7日以上経過している場合
+    if app_config.initialized == false || exceeded_download_span {
+        let dl_resource_result = api_context
             .cloudformation_schema
             .dl_resource_provider(&app_context, "us-east-1")
-            .await?;
-        app_config.initialized = true;
-        app_config.initialized_at = Utc::now().to_rfc3339();
+            .await
+            .ok();
+        if dl_resource_result.is_none() && app_config.initialized == false {
+            // 初回起動時にダウンロードに失敗した場合はエラーを返す
+            return Err(ResourceProviderError::App(AppError::new(
+                "Failed to download CloudFormation schema",
+            )));
+        } else if dl_resource_result.is_none() && app_config.initialized == true {
+            // 初回起動時以外でダウンロードに失敗した場合はエラーを返さず、次回起動時にダウンロードする
+            return Ok(SetupAppResult { new_version: None });
+        }
+        let now = app_context.clock.utc_now().to_rfc3339();
+        if app_config.initialized == false {
+            app_config.initialized_at = now.clone();
+            app_config.initialized = true;
+        }
+        app_config.cf_schema_downloaded_at = now;
         config_context
             .app_config_io
             .write(app_config, app_context.file_system.clone())
@@ -108,7 +139,10 @@ mod setup_app_tests {
             },
         },
         utils::{
-            context::{app_context::AppContext, file::MockFileSystem, http_client::MockHttpClient},
+            context::{
+                app_context::AppContext, clock::MockClock, file::MockFileSystem,
+                http_client::MockHttpClient,
+            },
             AppError,
         },
     };
@@ -126,6 +160,7 @@ mod setup_app_tests {
                 initialized: false, // 初期化されていない状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from(""),
             };
             return Ok(app_config);
         });
@@ -177,10 +212,12 @@ mod setup_app_tests {
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -207,6 +244,7 @@ mod setup_app_tests {
                 initialized: true, // 初期化済みの状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from(""),
             };
             return Ok(app_config);
         });
@@ -244,10 +282,12 @@ mod setup_app_tests {
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -255,7 +295,10 @@ mod setup_app_tests {
 
         // ######### 検証 #########
         assert!(initialized.is_ok());
-        assert_eq!(initialized.unwrap().new_version, None);
+        assert_eq!(
+            initialized.unwrap().new_version,
+            Some(latest_version.to_string())
+        );
     }
 
     /// latest_versionがNoneの場合、{ new_version: None }を返すことを確認
@@ -271,6 +314,7 @@ mod setup_app_tests {
                 initialized: true, // 初期化済みの状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from(""),
             };
             return Ok(app_config);
         });
@@ -307,10 +351,12 @@ mod setup_app_tests {
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -364,10 +410,12 @@ mod setup_app_tests {
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -390,6 +438,7 @@ mod setup_app_tests {
                 initialized: false, // 初期化されていない状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from(""),
             };
             return Ok(app_config);
         });
@@ -431,10 +480,12 @@ mod setup_app_tests {
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -457,6 +508,7 @@ mod setup_app_tests {
                 initialized: false, // 初期化されていない状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from(""),
             };
             return Ok(app_config);
         });
@@ -496,10 +548,12 @@ mod setup_app_tests {
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########

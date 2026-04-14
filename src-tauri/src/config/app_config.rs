@@ -22,6 +22,7 @@ struct AppConfigV1 {
     pub workspaces: HashMap<String, String>,
     pub initialized: bool,
     pub initialized_at: String,
+    pub cf_schema_downloaded_at: String,
 }
 
 impl AppConfigV1 {
@@ -31,6 +32,7 @@ impl AppConfigV1 {
             workspaces: HashMap::new(),
             initialized: false,
             initialized_at: "".to_string(),
+            cf_schema_downloaded_at: "".to_string(),
         }
     }
 }
@@ -44,6 +46,7 @@ impl ConfigMigratable for AppConfigV1 {
             workspaces: self.workspaces,
             initialized: self.initialized,
             initialized_at: self.initialized_at,
+            cf_schema_downloaded_at: self.cf_schema_downloaded_at,
         })
     }
     fn as_any(self: Box<Self>) -> Box<dyn Any> {
@@ -61,6 +64,7 @@ pub struct AppConfig {
     pub workspaces: HashMap<String, String>,
     pub initialized: bool,
     pub initialized_at: String,
+    pub cf_schema_downloaded_at: String,
 }
 impl AppConfig {
     pub fn new() -> Self {
@@ -558,7 +562,8 @@ mod app_config {
                     "version": 1,
                     "workspaces": {},
                     "initialized": false,
-                    "initialized_at": ""
+                    "initialized_at": "",
+                    "cf_schema_downloaded_at": ""
                 }"#;
                 Ok(app_config_json.to_string())
             });
@@ -578,6 +583,7 @@ mod app_config {
             assert!(app_config.workspaces.is_empty());
             assert!(app_config.initialized == false);
             assert!(app_config.initialized_at.is_empty());
+            assert!(app_config.cf_schema_downloaded_at.is_empty());
         }
 
         /// app_configが存在しない場合、AppConfig::readが正しく動作することを確認
