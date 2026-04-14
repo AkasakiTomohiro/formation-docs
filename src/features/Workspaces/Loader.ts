@@ -1,9 +1,12 @@
 import { redirect } from 'react-router';
 import { setupApp } from '../../invoke/AppConfig';
+import type { SetupAppResult } from '../../invoke/AppConfig';
 
-export const workspacesLoader = async (): Promise<void> => {
+export type WorkspacesLoaderData = SetupAppResult;
+
+export const workspacesLoader = async (): Promise<WorkspacesLoaderData> => {
   try {
-    await setupApp();
+    return setupApp();
   } catch {
     throw redirect('/errorScreen');
   }

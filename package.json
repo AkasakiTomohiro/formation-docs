@@ -12,10 +12,10 @@
     "tauri:build": "tauri build"
   },
   "dependencies": {
+    "@cloudscape-design/code-view": "^3.0.66",
     "@cloudscape-design/collection-hooks": "^1.0.62",
     "@cloudscape-design/components": "^3.0.907",
     "@cloudscape-design/global-styles": "^1.0.37",
-    "@cloudscape-design/code-view": "^3.0.66",
     "@hookform/resolvers": "^5.0.0",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "~2",
@@ -23,6 +23,7 @@
     "@tauri-apps/plugin-log": "~2.2.1",
     "@tauri-apps/plugin-opener": "^2",
     "ace-builds": "^1.43.1",
+    "opener": "^1.5.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",

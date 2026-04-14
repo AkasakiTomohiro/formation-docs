@@ -1,15 +1,23 @@
 import { useCollection } from '@cloudscape-design/collection-hooks';
 import { Window } from '@tauri-apps/api/window';
 import { open } from '@tauri-apps/plugin-dialog';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLoaderData } from 'react-router';
 import { useFlashbarContext } from '../../contexts/FlashbarContext';
 import { useWorkspaces } from '../../hooks/useWorkspaces';
 import { openWorkspace } from './lib/OpenWorkspace';
 import { WorkspacesPresentation } from './Workspaces.presentation';
+import type { ModalProps } from '@cloudscape-design/components';
 import type { WorkspaceExpand } from '../../hooks/useWorkspaces';
+import type { WorkspacesLoaderData } from './Loader';
 import type { WorkspacesPresentationProps } from './Workspaces.presentation';
 
 export const Workspaces = (): JSX.Element => {
+  const workspace = useLoaderData<WorkspacesLoaderData>();
+  const [isVisibleModal, setIsVisibleModal] = useState(
+    Boolean(workspace.newVersion && workspace.newVersion !== window.localStorage.getItem('skipVersion')),
+  );
   const isFirstRender = useRef(true);
   const { flashbarItems, addFlashbarItem } = useFlashbarContext();
   const { state, workspaces, createWorkspace, loadWorkspaces, deleteWorkspace } = useWorkspaces();
@@ -17,6 +25,25 @@ export const Workspaces = (): JSX.Element => {
     pagination: { pageSize: 10 },
   });
   const [selectedItems, setSelectedItems] = useState<WorkspaceExpand[]>([]);
+
+  const onDismissModal: ModalProps['onDismiss'] = (event) => {
+    if (event.detail.reason === 'overlay') {
+      // モーダル外クリック時は閉じないようにする
+      return;
+    }
+    setIsVisibleModal(false);
+  };
+
+  const onClickSkipVersion = () => {
+    // バージョンスキップ時はモーダルを再表示しないため、ローカルストレージにskipVersionを保存
+    window.localStorage.setItem('skipVersion', workspace.newVersion || '');
+    setIsVisibleModal(false);
+  };
+
+  const onClickDownloadButton = async () => {
+    // リリースページへ遷移する
+    await openUrl('https://github.com/AkasakiTomohiro/formation-docs/releases');
+  };
 
   const openWorkspaceWrap = useCallback<WorkspacesPresentationProps['onClickWorkspaceLink']>(
     (workspace: WorkspaceExpand) => async (_) => {
@@ -90,6 +117,10 @@ export const Workspaces = (): JSX.Element => {
       onClickDeleteWorkspace={onClickDeleteWorkspace}
       onClickUpdateWorkspace={loadWorkspaces}
       onSelectionChange={({ detail }) => setSelectedItems(detail.selectedItems)}
+      isVisibleModal={isVisibleModal}
+      onDismissModal={onDismissModal}
+      onClickSkipVersion={onClickSkipVersion}
+      onClickDownload={onClickDownloadButton}
     />
   );
 };

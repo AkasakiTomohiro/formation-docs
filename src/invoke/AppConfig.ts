@@ -20,6 +20,10 @@ export interface WorkspacesFile {
 
 export const APP_CONFIG_FILE_NAME = 'app_config.json';
 
+export type SetupAppResult = {
+  newVersion: string | null;
+};
+
 /**
  * ワークスペースのファイルを読み込む。ない場合は作成する。
  * @param workspaceName
@@ -45,6 +49,10 @@ export async function deleteWorkspaceFromAppConfig(workspaceId: string): Promise
   }
 }
 
-export async function setupApp() {
-  await invoke<CommandResult<[]>>('setup_app_command');
+export async function setupApp(): Promise<SetupAppResult> {
+  const result = await invoke<CommandResult<SetupAppResult>>('setup_app_command');
+  if (!result.success) {
+    return { newVersion: null };
+  }
+  return result.value;
 }

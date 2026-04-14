@@ -6,7 +6,6 @@
   "permissions": [
     "core:default",
     "core:window:allow-set-focus",
-    "opener:default",
     "log:default",
     "dialog:default",
     "dialog:allow-open",
@@ -17,10 +16,15 @@
           "url": "https://schema.cloudformation.*.amazonaws.com/CloudformationSchema.zip"
         },
         {
-          "url": "https://api.github.com/repos/*/*/branches/*"
-        },
+          "url": "https://raw.githubusercontent.com/AkasakiTomohiro/formation-docs/refs/heads/master/version.json"
+        }
+      ]
+    },
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
         {
-          "url": "https://api.github.com/repos/*/*/zipball/*"
+          "url": "https://github.com/AkasakiTomohiro/formation-docs/releases"
         }
       ]
     }
