@@ -1196,6 +1196,7 @@ mod load_stacks_tests {
         config::{
             context::{
                 app_config_trait::MockAppConfigTrait,
+                manual_management_resources_meta_config_trait::MockManualManagementResourcesMetaConfigTrait,
                 stack_meta_config_trait::MockStackMetaConfigTrait,
                 workspace_config_trait::MockWorkspaceConfigTrait,
             },
@@ -1216,6 +1217,8 @@ mod load_stacks_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
         let mock_command_app_config = MockAppConfigCommandTrait::new();
         let mut mock_command_stack = MockStackCommandTrait::new();
 
@@ -1278,6 +1281,9 @@ mod load_stacks_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         let command_context = CommandContext {
@@ -1328,6 +1334,8 @@ mod load_stacks_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
         let mock_command_app_config = MockAppConfigCommandTrait::new();
         let mock_command_stack = MockStackCommandTrait::new();
 
@@ -1356,6 +1364,9 @@ mod load_stacks_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         let command_context = CommandContext {
@@ -1391,6 +1402,8 @@ mod load_stacks_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
         let mock_command_app_config = MockAppConfigCommandTrait::new();
         let mock_command_stack = MockStackCommandTrait::new();
 
@@ -1416,6 +1429,9 @@ mod load_stacks_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         let command_context = CommandContext {
@@ -1449,6 +1465,8 @@ mod load_stacks_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
         let mock_command_app_config = MockAppConfigCommandTrait::new();
         let mut mock_command_stack = MockStackCommandTrait::new();
 
@@ -1503,6 +1521,9 @@ mod load_stacks_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         let command_context = CommandContext {
@@ -1536,6 +1557,7 @@ mod delete_stack_tests {
         config::{
             context::{
                 app_config_trait::MockAppConfigTrait,
+                manual_management_resources_meta_config_trait::MockManualManagementResourcesMetaConfigTrait,
                 stack_meta_config_trait::MockStackMetaConfigTrait,
                 workspace_config_trait::MockWorkspaceConfigTrait,
             },
@@ -1556,6 +1578,8 @@ mod delete_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
@@ -1631,6 +1655,9 @@ mod delete_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -1652,6 +1679,8 @@ mod delete_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
@@ -1732,6 +1761,9 @@ mod delete_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -1753,6 +1785,8 @@ mod delete_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
@@ -1778,6 +1812,9 @@ mod delete_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -1799,6 +1836,8 @@ mod delete_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
@@ -1832,6 +1871,9 @@ mod delete_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -1853,6 +1895,8 @@ mod delete_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
@@ -1911,6 +1955,9 @@ mod delete_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -1932,6 +1979,8 @@ mod delete_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
@@ -1991,6 +2040,9 @@ mod delete_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2012,6 +2064,8 @@ mod delete_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
@@ -2083,6 +2137,9 @@ mod delete_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2103,6 +2160,7 @@ mod import_stack_tests {
         config::{
             context::{
                 app_config_trait::MockAppConfigTrait,
+                manual_management_resources_meta_config_trait::MockManualManagementResourcesMetaConfigTrait,
                 stack_meta_config_trait::MockStackMetaConfigTrait,
                 workspace_config_trait::MockWorkspaceConfigTrait,
             },
@@ -2123,6 +2181,8 @@ mod import_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "sample_workspace";
         let file_name = "new_stack.template.json";
@@ -2185,6 +2245,9 @@ mod import_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2212,6 +2275,8 @@ mod import_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "sample_workspace";
         let file_name = "existing_stack.template.json";
@@ -2257,6 +2322,9 @@ mod import_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2284,6 +2352,8 @@ mod import_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "sample_workspace";
         let file_name = "existing_stack.template.yaml";
@@ -2348,6 +2418,9 @@ mod import_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2375,6 +2448,8 @@ mod import_stack_tests {
         let mock_app_config: MockAppConfigTrait = MockAppConfigTrait::new();
         let mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "sample_workspace";
         let file_name = "existing_stack.template.yml";
@@ -2402,6 +2477,9 @@ mod import_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2429,6 +2507,8 @@ mod import_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "sample_workspace";
         let file_name = "existing_stack.template.yaml";
@@ -2466,6 +2546,9 @@ mod import_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2493,6 +2576,8 @@ mod import_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "sample_workspace";
         let file_name = "existing_stack.template.json";
@@ -2524,6 +2609,9 @@ mod import_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2551,6 +2639,8 @@ mod import_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "sample_workspace";
         let file_name = "new_stack.template.json";
@@ -2577,6 +2667,9 @@ mod import_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2604,6 +2697,8 @@ mod import_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "sample_workspace";
         let file_name = "new_stack.template.json";
@@ -2645,6 +2740,9 @@ mod import_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2671,6 +2769,8 @@ mod import_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "sample_workspace";
         let file_name = "existing_stack.template.yaml";
@@ -2698,6 +2798,9 @@ mod import_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2724,6 +2827,8 @@ mod import_stack_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "sample_workspace";
         let file_name = "existing_stack.template.yaml";
@@ -2752,6 +2857,9 @@ mod import_stack_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2779,6 +2887,7 @@ mod load_stack_from_info_tests {
         config::{
             context::{
                 app_config_trait::MockAppConfigTrait,
+                manual_management_resources_meta_config_trait::MockManualManagementResourcesMetaConfigTrait,
                 stack_meta_config_trait::MockStackMetaConfigTrait,
                 workspace_config_trait::MockWorkspaceConfigTrait,
             },
@@ -2797,6 +2906,8 @@ mod load_stack_from_info_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "sample_stack_id";
@@ -2845,6 +2956,9 @@ mod load_stack_from_info_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2884,6 +2998,8 @@ mod load_stack_from_info_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "sample_stack_id";
@@ -2929,6 +3045,9 @@ mod load_stack_from_info_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -2962,6 +3081,8 @@ mod load_stack_from_info_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "sample_stack_id";
@@ -2989,6 +3110,9 @@ mod load_stack_from_info_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -3016,6 +3140,8 @@ mod load_stack_from_info_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "sample_stack_id";
@@ -3056,6 +3182,9 @@ mod load_stack_from_info_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -3090,6 +3219,7 @@ mod load_stack_from_id_tests {
         config::{
             context::{
                 app_config_trait::MockAppConfigTrait,
+                manual_management_resources_meta_config_trait::MockManualManagementResourcesMetaConfigTrait,
                 stack_meta_config_trait::MockStackMetaConfigTrait,
                 workspace_config_trait::MockWorkspaceConfigTrait,
             },
@@ -3108,6 +3238,8 @@ mod load_stack_from_id_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
         let mock_command_app_config = MockAppConfigCommandTrait::new();
         let mut mock_command_stack = MockStackCommandTrait::new();
 
@@ -3175,6 +3307,9 @@ mod load_stack_from_id_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         let command_context = CommandContext {
@@ -3221,6 +3356,8 @@ mod load_stack_from_id_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
         let mock_command_app_config = MockAppConfigCommandTrait::new();
         let mock_command_stack = MockStackCommandTrait::new();
 
@@ -3247,6 +3384,9 @@ mod load_stack_from_id_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         let command_context = CommandContext {
@@ -3281,6 +3421,8 @@ mod load_stack_from_id_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
         let mock_command_app_config = MockAppConfigCommandTrait::new();
         let mock_command_stack = MockStackCommandTrait::new();
 
@@ -3318,6 +3460,9 @@ mod load_stack_from_id_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         let command_context = CommandContext {
@@ -3351,6 +3496,7 @@ mod load_template_summary_tests {
         config::{
             context::{
                 app_config_trait::MockAppConfigTrait,
+                manual_management_resources_meta_config_trait::MockManualManagementResourcesMetaConfigTrait,
                 stack_meta_config_trait::MockStackMetaConfigTrait,
                 workspace_config_trait::MockWorkspaceConfigTrait,
             },
@@ -3371,6 +3517,8 @@ mod load_template_summary_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id_1 = "stack_id_1";
@@ -3475,6 +3623,9 @@ mod load_template_summary_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -3513,6 +3664,8 @@ mod load_template_summary_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -3572,6 +3725,9 @@ mod load_template_summary_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -3597,6 +3753,8 @@ mod load_template_summary_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
 
@@ -3620,6 +3778,9 @@ mod load_template_summary_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -3640,6 +3801,8 @@ mod load_template_summary_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -3695,6 +3858,9 @@ mod load_template_summary_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -3715,6 +3881,8 @@ mod load_template_summary_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -3774,6 +3942,9 @@ mod load_template_summary_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -3794,6 +3965,8 @@ mod load_template_summary_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -3869,6 +4042,9 @@ mod load_template_summary_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -3907,6 +4083,8 @@ mod load_template_summary_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -3982,6 +4160,9 @@ mod load_template_summary_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -4035,6 +4216,7 @@ mod get_stack_resource_list_tests {
         config::{
             context::{
                 app_config_trait::MockAppConfigTrait,
+                manual_management_resources_meta_config_trait::MockManualManagementResourcesMetaConfigTrait,
                 stack_meta_config_trait::MockStackMetaConfigTrait,
                 workspace_config_trait::MockWorkspaceConfigTrait,
             },
@@ -4054,6 +4236,8 @@ mod get_stack_resource_list_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -4112,6 +4296,9 @@ mod get_stack_resource_list_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -4143,6 +4330,8 @@ mod get_stack_resource_list_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -4197,6 +4386,9 @@ mod get_stack_resource_list_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -4226,6 +4418,8 @@ mod get_stack_resource_list_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -4271,6 +4465,9 @@ mod get_stack_resource_list_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -4300,6 +4497,8 @@ mod get_stack_resource_list_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -4326,6 +4525,9 @@ mod get_stack_resource_list_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -4353,6 +4555,8 @@ mod get_stack_resource_list_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "non_existent_stack_id";
@@ -4388,6 +4592,9 @@ mod get_stack_resource_list_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -4415,6 +4622,8 @@ mod get_stack_resource_list_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -4460,6 +4669,9 @@ mod get_stack_resource_list_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -4486,6 +4698,7 @@ mod get_stack_resource_properties_tests {
         config::{
             context::{
                 app_config_trait::MockAppConfigTrait,
+                manual_management_resources_meta_config_trait::MockManualManagementResourcesMetaConfigTrait,
                 stack_meta_config_trait::MockStackMetaConfigTrait,
                 workspace_config_trait::MockWorkspaceConfigTrait,
             },
@@ -4505,6 +4718,8 @@ mod get_stack_resource_properties_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -4559,6 +4774,9 @@ mod get_stack_resource_properties_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -4593,6 +4811,8 @@ mod get_stack_resource_properties_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -4641,6 +4861,9 @@ mod get_stack_resource_properties_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -4670,6 +4893,8 @@ mod get_stack_resource_properties_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "stack_id";
@@ -4695,6 +4920,9 @@ mod get_stack_resource_properties_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########
@@ -4721,6 +4949,8 @@ mod get_stack_resource_properties_tests {
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_manual_management_resources_meta_config =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let workspace_directory = "test/sample_workspace";
         let stack_id = "non_existent_stack_id";
@@ -4755,6 +4985,9 @@ mod get_stack_resource_properties_tests {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config,
+            ),
         };
 
         // ######### 実行 #########

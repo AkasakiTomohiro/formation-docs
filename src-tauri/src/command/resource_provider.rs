@@ -134,6 +134,7 @@ mod setup_app_tests {
             app_config::{AppConfig, AppConfigError},
             context::{
                 app_config_trait::MockAppConfigTrait, config_context::ConfigContext,
+                manual_management_resources_meta_config_trait::MockManualManagementResourcesMetaConfigTrait,
                 stack_meta_config_trait::MockStackMetaConfigTrait,
                 workspace_config_trait::MockWorkspaceConfigTrait,
             },
@@ -184,11 +185,16 @@ mod setup_app_tests {
 
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
         let mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_manual_management_resources_meta_config_io =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let config_context = ConfigContext {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config_io),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config_io,
+            ),
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
@@ -254,11 +260,16 @@ mod setup_app_tests {
 
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
         let mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_manual_management_resources_meta_config_io =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let config_context = ConfigContext {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config_io),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config_io,
+            ),
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
@@ -324,11 +335,16 @@ mod setup_app_tests {
 
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
         let mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_manual_management_resources_meta_config_io =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let config_context = ConfigContext {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config_io),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config_io,
+            ),
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
@@ -383,11 +399,16 @@ mod setup_app_tests {
 
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
         let mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_manual_management_resources_meta_config_io =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let config_context = ConfigContext {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config_io),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config_io,
+            ),
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
@@ -448,11 +469,16 @@ mod setup_app_tests {
 
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
         let mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_manual_management_resources_meta_config_io =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let config_context = ConfigContext {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config_io),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config_io,
+            ),
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
@@ -521,11 +547,16 @@ mod setup_app_tests {
 
         let mock_stack_meta_config = MockStackMetaConfigTrait::new();
         let mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_manual_management_resources_meta_config_io =
+            MockManualManagementResourcesMetaConfigTrait::new();
 
         let config_context = ConfigContext {
             app_config_io: Arc::new(mock_app_config),
             workspace_config_io: Arc::new(mock_workspace_config_io),
             stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config_io,
+            ),
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
