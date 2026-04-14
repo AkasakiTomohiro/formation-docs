@@ -100,8 +100,8 @@ export const EditorContentLayout = ({
     }
     await updateManualResourceMeta({
       resource_id: selectedResourceId as string,
-      reasons: editingValues?.reasons,
-      description: editingValues?.description,
+      reasons: editingValues?.reasons ?? {},
+      description: editingValues?.description ?? '',
     });
     await updateManualResourceProperties({
       resource_id: selectedResourceId as string,
@@ -141,8 +141,8 @@ export const EditorContentLayout = ({
       return {
         ...originTab,
         editingValues: {
-          description: editingValues?.description || '',
-          reasons: editingValues?.reasons || {},
+          description: editingValues?.description ?? '',
+          reasons: editingValues?.reasons ?? {},
           properties: detail.value,
         },
       };
@@ -155,8 +155,8 @@ export const EditorContentLayout = ({
         ...originTab,
         editingValues: {
           description: description,
-          reasons: editingValues?.reasons || {},
-          properties: editingValues?.properties || '{}',
+          reasons: editingValues?.reasons ?? {},
+          properties: editingValues?.properties ?? '{}',
         },
       };
     });
