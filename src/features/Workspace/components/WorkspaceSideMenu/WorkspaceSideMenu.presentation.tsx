@@ -21,6 +21,11 @@ export type WorkspaceSideMenuPresentationProps = {
    * サイドメニューアイテム
    */
   sidMenuItems: SideNavigationProps.Item[];
+
+  /**
+   * サイドメニューの「AWSリソースの説明」アイテムがクリックされたときのハンドラー
+   */
+  onClickSideMenuResourceDescriptionSettings: MouseEventHandler<HTMLAnchorElement>;
 };
 
 const StyledLink = styled.a`
@@ -46,6 +51,9 @@ export const WorkspaceSideMenuPresentation = (props: WorkspaceSideMenuPresentati
         <SpaceBetween direction="vertical" size="m">
           <StyledLink href="#" onClick={props.onClickSideMenuHome}>
             ホーム
+          </StyledLink>
+          <StyledLink href="#" onClick={props.onClickSideMenuResourceDescriptionSettings}>
+            AWSリソースの説明
           </StyledLink>
           <SearchForm />
         </SpaceBetween>
