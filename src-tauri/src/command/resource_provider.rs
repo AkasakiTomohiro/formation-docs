@@ -153,6 +153,13 @@ mod setup_app_tests {
     async fn setup_app_initialized() {
         // ######### 準備 #########
         let mut mock_app_config = MockAppConfigTrait::new();
+        let mut mock_clock = MockClock::new();
+
+        // Clock::utc_nowのモック
+        let now = DateTime::parse_from_rfc3339("2024-01-02T00:00:00Z")
+            .expect("Failed to parse datetime")
+            .with_timezone(&chrono::Utc);
+        mock_clock.expect_utc_now().returning(move || now.clone());
 
         // AppConfig::readのモック
         mock_app_config.expect_read().returning(|_| {
@@ -161,7 +168,7 @@ mod setup_app_tests {
                 initialized: false, // 初期化されていない状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
-                cf_schema_downloaded_at: String::from(""),
+                cf_schema_downloaded_at: String::from("2024-01-01T00:00:00Z"),
             };
             return Ok(app_config);
         });
@@ -218,7 +225,6 @@ mod setup_app_tests {
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -242,6 +248,13 @@ mod setup_app_tests {
     async fn setup_app_not_initialized() {
         // ######### 準備 #########
         let mut mock_app_config = MockAppConfigTrait::new();
+        let mut mock_clock = MockClock::new();
+
+        // Clock::utc_nowのモック
+        let now = DateTime::parse_from_rfc3339("2024-01-02T00:00:00Z")
+            .expect("Failed to parse datetime")
+            .with_timezone(&chrono::Utc);
+        mock_clock.expect_utc_now().returning(move || now.clone());
 
         // AppConfig::readのモック
         mock_app_config.expect_read().returning(|_| {
@@ -250,7 +263,7 @@ mod setup_app_tests {
                 initialized: true, // 初期化済みの状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
-                cf_schema_downloaded_at: String::from(""),
+                cf_schema_downloaded_at: String::from("2024-01-01T00:00:00Z"),
             };
             return Ok(app_config);
         });
@@ -293,7 +306,6 @@ mod setup_app_tests {
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -317,6 +329,13 @@ mod setup_app_tests {
     async fn setup_app_latest_version_none() {
         // ######### 準備 #########
         let mut mock_app_config = MockAppConfigTrait::new();
+        let mut mock_clock = MockClock::new();
+
+        // Clock::utc_nowのモック
+        let now = DateTime::parse_from_rfc3339("2024-01-02T00:00:00Z")
+            .expect("Failed to parse datetime")
+            .with_timezone(&chrono::Utc);
+        mock_clock.expect_utc_now().returning(move || now.clone());
 
         // AppConfig::readのモック
         mock_app_config.expect_read().returning(|_| {
@@ -325,7 +344,7 @@ mod setup_app_tests {
                 initialized: true, // 初期化済みの状態
                 initialized_at: String::from(""),
                 workspaces: HashMap::new(),
-                cf_schema_downloaded_at: String::from(""),
+                cf_schema_downloaded_at: String::from("2024-01-01T00:00:00Z"),
             };
             return Ok(app_config);
         });
@@ -367,7 +386,6 @@ mod setup_app_tests {
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
@@ -526,6 +544,13 @@ mod setup_app_tests {
     async fn setup_app_err_write() {
         // ######### 準備 #########
         let mut mock_app_config = MockAppConfigTrait::new();
+        let mut mock_clock = MockClock::new();
+
+        // Clock::utc_nowのモック
+        let now = DateTime::parse_from_rfc3339("2024-01-01T00:00:00Z")
+            .expect("Failed to parse datetime")
+            .with_timezone(&chrono::Utc);
+        mock_clock.expect_utc_now().returning(move || now.clone());
 
         // AppConfig::readのモック
         mock_app_config.expect_read().returning(|_| {
@@ -579,7 +604,6 @@ mod setup_app_tests {
 
         let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
-        let mock_clock = MockClock::new();
 
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
