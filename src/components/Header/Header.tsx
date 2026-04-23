@@ -22,6 +22,22 @@ export const Header = (props: HeaderProps): JSX.Element => {
             });
           },
         }}
+        utilities={[
+          {
+            type: 'button',
+            iconName: 'settings',
+            title: 'Settings',
+            onClick: () => {
+              Window.getByLabel('settings').then((settingsWindow) => {
+                if (settingsWindow) {
+                  settingsWindow.setFocus();
+                } else {
+                  invoke('open_settings_command');
+                }
+              });
+            },
+          },
+        ]}
       />
       {props.children}
     </>

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ResourceDescriptionSettingsPresentation } from './ResourceDescriptionSettings.presentation';
+import { SettingsPresentation } from './Settings.presentation';
 import type { SelectProps } from '@cloudscape-design/components';
 
-export const ResourceDescriptionSettings = () => {
+export const Settings = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<SelectProps['selectedOption']>(null);
 
   const handleChangeSelectedLanguage: SelectProps['onChange'] = (event) => {
@@ -10,7 +10,7 @@ export const ResourceDescriptionSettings = () => {
   };
 
   return (
-    <ResourceDescriptionSettingsPresentation
+    <SettingsPresentation
       selectedLanguage={selectedLanguage}
       onChangeSelectedLanguage={handleChangeSelectedLanguage}
       services={[]}

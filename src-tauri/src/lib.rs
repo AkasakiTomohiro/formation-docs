@@ -21,6 +21,15 @@ async fn open_workspace_command(handle: tauri::AppHandle, id: &str) -> Result<bo
 }
 
 #[coverage(off)]
+#[tauri::command(rename_all = "snake_case")]
+async fn open_settings_command(handle: tauri::AppHandle) -> Result<bool, ()> {
+    match command::workspace::open_settings(handle).await {
+        Ok(result) => Ok(result),
+        Err(_) => Err(()),
+    }
+}
+
+#[coverage(off)]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -34,6 +43,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             open_workspace_command,
+            open_settings_command,
             command::app_config::read_app_config_command,
             command::app_config::delete_workspace_from_app_config_command,
             command::workspace::create_workspace_command,

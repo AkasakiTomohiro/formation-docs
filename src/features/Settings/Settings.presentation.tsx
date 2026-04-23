@@ -10,7 +10,7 @@ import {
   TextContent,
 } from '@cloudscape-design/components';
 
-export type ResourceDescriptionSettingsPresentationProps = {
+export type SettingsPresentationProps = {
   /**
    * 選択中の優先言語
    */
@@ -57,7 +57,7 @@ export type ResourceDescriptionSettingsPresentationProps = {
   onClickResourceSelect: () => void;
 };
 
-export const ResourceDescriptionSettingsPresentation = ({
+export const SettingsPresentation = ({
   selectedLanguage,
   onChangeSelectedLanguage,
   services,
@@ -67,7 +67,7 @@ export const ResourceDescriptionSettingsPresentation = ({
   selectedResource,
   onChangeResource,
   onClickResourceSelect,
-}: ResourceDescriptionSettingsPresentationProps) => {
+}: SettingsPresentationProps) => {
   return (
     <ContentLayout header={<Header variant="h1">AWSリソースの説明</Header>}>
       <SpaceBetween size="l">

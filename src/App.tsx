@@ -2,8 +2,8 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import { Header } from './components/Header';
 import { FlashbarProvider } from './contexts/FlashbarContext';
 import { ErrorScreen } from './features/ErrorScreen';
+import { Settings } from './features/Settings';
 import {
-  ResourceDescriptionSettings,
   WorkspaceEdit,
   WorkspaceHome,
   WorkspaceLayout,
@@ -49,11 +49,16 @@ const router = createBrowserRouter([
         path: 'resources',
         element: <WorkspaceResource />,
       },
-      {
-        path: 'resourceDescriptionSettings',
-        element: <ResourceDescriptionSettings />,
-      },
     ],
+  },
+  {
+    id: 'settings',
+    path: 'settings',
+    element: (
+      <Header>
+        <Settings />
+      </Header>
+    ),
   },
   {
     id: 'errorScreen',

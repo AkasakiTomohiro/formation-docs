@@ -189,6 +189,21 @@ pub async fn open_workspace(
 }
 
 #[coverage(off)]
+pub async fn open_settings(handle: tauri::AppHandle) -> Result<bool, WorkspaceCommandError> {
+    let window = tauri::WebviewWindowBuilder::new(
+        &handle,
+        "settings".to_string(),
+        tauri::WebviewUrl::App(PathBuf::from("settings")),
+    )
+    .title("settings")
+    .build()
+    .expect("failed to create new window");
+
+    window.show().expect("failed to show window");
+    return Ok(true);
+}
+
+#[coverage(off)]
 #[tauri::command]
 pub async fn create_workspace_command(
     app_context_state: State<'_, AppContext>,
