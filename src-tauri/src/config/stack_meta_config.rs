@@ -353,8 +353,7 @@ mod stack_meta_config_tests {
                     "version": 1,
                     "name": "name",
                     "description": "description",
-                    "reasons": {},
-                    "descriptions": {}
+                    "resources": {}
                 }"#;
                 Ok(config_json.to_string())
             });
@@ -390,7 +389,7 @@ mod stack_meta_config_tests {
                     "version": 0,
                     "name": "name",
                     "description": "description",
-                    "reasons": {}
+                    "resources": {}
                 }"#;
                 Ok(config_json.to_string())
             });
@@ -495,7 +494,7 @@ mod stack_meta_config_tests {
                                 "version": 1,
                                 "name": "name",
                                 "description": "description",
-                                "reasons": {}
+                                "resources": {}
                             }"#;
                             Ok(config_json.to_string())
                         }
@@ -568,7 +567,7 @@ mod stack_meta_config_tests {
                                 "version": 1,
                                 "name": "name",
                                 "description": "description",
-                                "reasons": {}
+                                "resources": {}
                             }"#;
                             Ok(config_json.to_string())
                         }

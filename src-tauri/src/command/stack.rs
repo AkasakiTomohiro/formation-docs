@@ -5084,6 +5084,7 @@ mod get_stack_meta_tests {
                 stack_meta_config_trait::MockStackMetaConfigTrait,
                 workspace_config_trait::MockWorkspaceConfigTrait,
             },
+            stack_meta_config::{StackMetaConfig, StackMetaConfigResource},
             workspace_config::WorkspaceConfig,
         },
         utils::context::{clock::MockClock, file::MockFileSystem, http_client::MockHttpClient},
@@ -5094,12 +5095,12 @@ mod get_stack_meta_tests {
     #[tokio::test]
     async fn success() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
         let mock_clock = MockClock::new();
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
-        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
         let mock_manual_management_resources_meta_config =
             MockManualManagementResourcesMetaConfigTrait::new();
 
@@ -5124,28 +5125,39 @@ mod get_stack_meta_tests {
                 })
             });
 
-        // file_systemのread_fileのモック設定（メタファイル用）
-        let meta_path = PathBuf::from(format!(
-            "{}/{}.meta.json",
-            workspace_directory,
-            stack_file_name.replace(".template.json", "")
-        ));
-        mock_file_system
-            .expect_read_file()
-            .withf(move |path| path == &meta_path)
-            .returning(move |_path| {
-                let meta_json = serde_json::json!({
-                    "reasons": {
-                        "MyBucket": {
-                            "BucketName": "This is the reason for BucketName",
-                            "VersioningConfiguration": "Versioning is enabled for compliance"
-                        }
+        // stack_meta_configのreadのモック設定
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "stack"
+            })
+            .returning(move |_file_system, _workspace_dir, _stack_name| {
+                let mut reasons = HashMap::new();
+                reasons.insert(
+                    "BucketName".to_string(),
+                    "This is the reason for BucketName".to_string(),
+                );
+                reasons.insert(
+                    "VersioningConfiguration".to_string(),
+                    "Versioning is enabled for compliance".to_string(),
+                );
+
+                let mut resources = HashMap::new();
+                resources.insert(
+                    logical_id.to_string(),
+                    StackMetaConfigResource {
+                        description:
+                            "This stack contains S3 bucket with versioning enabled.".to_string(),
+                        reasons,
                     },
-                    "descriptions": {
-                        "MyBucket": "This stack contains S3 bucket with versioning enabled."
-                    }
-                });
-                Ok(meta_json.to_string())
+                );
+
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "Sample Stack".to_string(),
+                    description: "".to_string(),
+                    resources,
+                })
             });
 
         let app_context = AppContext {
@@ -5196,12 +5208,12 @@ mod get_stack_meta_tests {
     #[tokio::test]
     async fn success_no_reasons() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
         let mock_clock = MockClock::new();
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
-        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
         let mock_manual_management_resources_meta_config =
             MockManualManagementResourcesMetaConfigTrait::new();
 
@@ -5226,21 +5238,19 @@ mod get_stack_meta_tests {
                 })
             });
 
-        // file_systemのread_fileのモック設定（メタファイル用）
-        let meta_path = PathBuf::from(format!(
-            "{}/{}.meta.json",
-            workspace_directory,
-            stack_file_name.replace(".template.json", "")
-        ));
-        mock_file_system
-            .expect_read_file()
-            .withf(move |path| path == &meta_path)
-            .returning(move |_path| {
-                let meta_json = serde_json::json!({
-                    "reasons": {},
-                    "descriptions": {}
-                });
-                Ok(meta_json.to_string())
+        // stack_meta_configのreadのモック設定（logical_idが存在しない）
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "stack"
+            })
+            .returning(move |_file_system, _workspace_dir, _stack_name| {
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "Sample Stack".to_string(),
+                    description: "".to_string(),
+                    resources: HashMap::new(),
+                })
             });
 
         let app_context = AppContext {
@@ -5402,12 +5412,12 @@ mod get_stack_meta_tests {
     #[tokio::test]
     async fn read_file_error() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
         let mock_clock = MockClock::new();
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
-        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
         let mock_manual_management_resources_meta_config =
             MockManualManagementResourcesMetaConfigTrait::new();
 
@@ -5432,20 +5442,17 @@ mod get_stack_meta_tests {
                 })
             });
 
-        // file_systemのread_fileのモック設定（エラーを返す）
-        let meta_path = PathBuf::from(format!(
-            "{}/{}.meta.json",
-            workspace_directory,
-            stack_file_name.replace(".template.json", "")
-        ));
-        mock_file_system
-            .expect_read_file()
-            .withf(move |path| path == &meta_path)
-            .returning(move |_path| {
-                Err(tokio::io::Error::new(
-                    tokio::io::ErrorKind::NotFound,
+        // stack_meta_configのreadでエラーを返す
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "stack"
+            })
+            .returning(move |_file_system, _workspace_dir, _stack_name| {
+                Err(StackMetaConfigError::Io(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
                     "File not found",
-                ))
+                )))
             });
 
         let app_context = AppContext {
@@ -5481,12 +5488,12 @@ mod get_stack_meta_tests {
     #[tokio::test]
     async fn success_description_not_string() {
         // ######### 準備 #########
-        let mut mock_file_system = MockFileSystem::new();
+        let mock_file_system = MockFileSystem::new();
         let mock_http_client = MockHttpClient::new();
         let mock_clock = MockClock::new();
         let mock_app_config = MockAppConfigTrait::new();
         let mut mock_workspace_config = MockWorkspaceConfigTrait::new();
-        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mut mock_stack_meta_config = MockStackMetaConfigTrait::new();
         let mock_manual_management_resources_meta_config =
             MockManualManagementResourcesMetaConfigTrait::new();
 
@@ -5511,28 +5518,38 @@ mod get_stack_meta_tests {
                 })
             });
 
-        // file_systemのread_fileのモック設定（メタファイル用）
-        let meta_path = PathBuf::from(format!(
-            "{}/{}.meta.json",
-            workspace_directory,
-            stack_file_name.replace(".template.json", "")
-        ));
-        mock_file_system
-            .expect_read_file()
-            .withf(move |path| path == &meta_path)
-            .returning(move |_path| {
-                let meta_json = serde_json::json!({
-                    "reasons": {
-                        "MyBucket": {
-                            "BucketName": "This is the reason for BucketName",
-                            "VersioningConfiguration": "Versioning is enabled for compliance"
-                        }
+        // stack_meta_configのreadのモック設定
+        mock_stack_meta_config
+            .expect_read()
+            .withf(move |_file_system, workspace_dir, stack_name| {
+                workspace_dir == workspace_directory && stack_name == "stack"
+            })
+            .returning(move |_file_system, _workspace_dir, _stack_name| {
+                let mut reasons = HashMap::new();
+                reasons.insert(
+                    "BucketName".to_string(),
+                    "This is the reason for BucketName".to_string(),
+                );
+                reasons.insert(
+                    "VersioningConfiguration".to_string(),
+                    "Versioning is enabled for compliance".to_string(),
+                );
+
+                let mut resources = HashMap::new();
+                resources.insert(
+                    logical_id.to_string(),
+                    StackMetaConfigResource {
+                        description: "100".to_string(),
+                        reasons,
                     },
-                    "descriptions": {
-                        "MyBucket": 100
-                    }
-                });
-                Ok(meta_json.to_string())
+                );
+
+                Ok(StackMetaConfig {
+                    version: 1,
+                    name: "Sample Stack".to_string(),
+                    description: "".to_string(),
+                    resources,
+                })
             });
 
         let app_context = AppContext {
