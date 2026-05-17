@@ -28,6 +28,7 @@ mod get_latest_version_tests {
         api::get_latest_version::get_latest_version::get_latest_version,
         utils::context::{
             app_context::AppContext,
+            clock::MockClock,
             file::MockFileSystem,
             http_client::{HttpClientError, MockHttpClient},
         },
@@ -39,6 +40,7 @@ mod get_latest_version_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mut mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let json = r#"{ "version": "1.1.1" }"#;
         mock_http_client
@@ -48,6 +50,7 @@ mod get_latest_version_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -64,6 +67,7 @@ mod get_latest_version_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mut mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         mock_http_client.expect_get().returning(move |_| {
             Err(HttpClientError::Reqwest(
@@ -74,6 +78,7 @@ mod get_latest_version_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -89,6 +94,7 @@ mod get_latest_version_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mut mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let json = "not json";
         mock_http_client
@@ -98,6 +104,7 @@ mod get_latest_version_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -113,6 +120,7 @@ mod get_latest_version_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mut mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let json = r#"{ "noVersion": "1.1.1" }"#;
         mock_http_client
@@ -122,6 +130,7 @@ mod get_latest_version_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########
@@ -137,6 +146,7 @@ mod get_latest_version_tests {
         // ######### 準備 #########
         let mock_file_system = MockFileSystem::new();
         let mut mock_http_client = MockHttpClient::new();
+        let mock_clock = MockClock::new();
 
         let json = r#"{ "version": 123 }"#;
         mock_http_client
@@ -146,6 +156,7 @@ mod get_latest_version_tests {
         let app_context = AppContext {
             file_system: Arc::new(mock_file_system),
             http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
         };
 
         // ######### 実行 #########

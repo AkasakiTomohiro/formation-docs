@@ -117,7 +117,7 @@ mod get_cloudformation_schema_tests {
             cloudformation::schema::DlSchemaError,
             context::{
                 cloudformation_schema_trait::MockCloudformationSchemaTrait,
-                get_latest_version_trait::MockGetLatestVersionTrait,
+                get_app_version_trait::MockGetAppVersionTrait,
             },
         },
         utils::context::{
@@ -176,11 +176,11 @@ mod get_cloudformation_schema_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mock_get_latest_version = MockGetAppVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         // ######### 実行 #########
@@ -221,11 +221,11 @@ mod get_cloudformation_schema_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mock_get_latest_version = MockGetAppVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         // ######### 実行 #########
@@ -266,11 +266,11 @@ mod get_cloudformation_schema_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mock_get_latest_version = MockGetAppVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         // ######### 実行 #########
@@ -316,11 +316,11 @@ mod get_cloudformation_schema_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mock_get_latest_version = MockGetAppVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         // ######### 実行 #########
@@ -350,7 +350,7 @@ mod get_aws_service_list_tests {
             cloudformation::schema::DlSchemaError,
             context::{
                 cloudformation_schema_trait::MockCloudformationSchemaTrait,
-                get_latest_version_trait::MockGetLatestVersionTrait,
+                get_app_version_trait::MockGetAppVersionTrait,
             },
         },
         utils::context::{
@@ -415,11 +415,11 @@ mod get_aws_service_list_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mock_get_latest_version = MockGetAppVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         // ######### 実行 #########
@@ -505,11 +505,11 @@ mod get_aws_service_list_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mock_get_latest_version = MockGetAppVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         // ######### 実行 #########
@@ -556,11 +556,11 @@ mod get_aws_service_list_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mock_get_latest_version = MockGetAppVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         // ######### 実行 #########
@@ -610,11 +610,11 @@ mod get_aws_service_list_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mock_get_latest_version = MockGetAppVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         // ######### 実行 #########
@@ -660,11 +660,11 @@ mod get_aws_service_list_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mock_get_latest_version = MockGetAppVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         // ######### 実行 #########
@@ -711,11 +711,11 @@ mod get_aws_service_list_tests {
             clock: Arc::new(mock_clock),
         };
 
-        let mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mock_get_latest_version = MockGetAppVersionTrait::new();
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         // ######### 実行 #########

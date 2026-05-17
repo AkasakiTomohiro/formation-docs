@@ -328,21 +328,18 @@ mod generate_summary_service_list_tests {
         mock_file_system.expect_read_dir().returning(|_| {
             Ok(vec![
                 PathBuf::from("aws-s3-bucket.json"),
-                PathBuf::from("aws-lambda-function.json"), // TODO: file_nameがNoneになるケースを模擬する方法を検討
+                PathBuf::from(".."), // file_name() が None を返すパス
                 PathBuf::from("aws-lambda-version.json"),
             ])
         });
 
         mock_file_system
             .expect_read_file()
-            .times(3)
+            .times(2)
             .returning(|path| {
                 let file_name = path.file_name().unwrap().to_str().unwrap();
                 match file_name {
                     "aws-s3-bucket.json" => Ok(r#"{ "typeName": "AWS::S3::Bucket" }"#.to_string()),
-                    "aws-lambda-function.json" => {
-                        Ok(r#"{ "typeName": "AWS::Lambda::Function" }"#.to_string())
-                    }
                     "aws-lambda-version.json" => {
                         Ok(r#"{ "typeName": "AWS::Lambda::Version" }"#.to_string())
                     }
@@ -360,9 +357,9 @@ mod generate_summary_service_list_tests {
                 return summary.len() == 2
                 // S3サービスが["Bucket"]であるか
                 && summary.get("S3").map_or(false, |s| s.contains("Bucket") && s.len() == 1)
-                // Lambdaサービスが["Function", "Version"]であるか
+                // Lambdaサービスが["Version"]であるか
                 && summary.get("Lambda").map_or(false, |s| {
-                    s.contains("Function") && s.contains("Version") && s.len() == 2
+                    s.contains("Version") && s.len() == 1
                 });
             })
             .returning(|_, _| Ok(()));

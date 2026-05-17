@@ -4,14 +4,18 @@ use async_trait::async_trait;
 
 #[mockall::automock]
 #[async_trait]
-pub trait GetLatestVersionTrait: Send + Sync {
+pub trait GetAppVersionTrait: Send + Sync {
+    fn get_app_version(&self) -> String;
     async fn get_latest_version(&self, ctx: &AppContext) -> Option<String>;
 }
 
-pub struct GetLatestVersion;
+pub struct GetAppVersion;
 #[coverage(off)]
 #[async_trait]
-impl GetLatestVersionTrait for GetLatestVersion {
+impl GetAppVersionTrait for GetAppVersion {
+    fn get_app_version(&self) -> String {
+        env!("CARGO_PKG_VERSION").to_string()
+    }
     async fn get_latest_version(&self, ctx: &AppContext) -> Option<String> {
         get_latest_version(ctx).await
     }
