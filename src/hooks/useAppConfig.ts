@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { loadAppConfig, setupApp } from '../invoke/AppConfig';
+import { getAppConfig, setupApp } from '../invoke/AppConfig';
 import type { AppConfig } from '../invoke/AppConfig';
 
 export type UseAppConfigResult = {
@@ -17,7 +17,7 @@ export function useAppConfig(): UseAppConfigResult {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   const loadAppConfigWrap = useCallback(async () => {
-    const config = await loadAppConfig();
+    const config = await getAppConfig();
     setAppConfig(config);
     await setupApp().then(() => {
       navigate('/workspaces');

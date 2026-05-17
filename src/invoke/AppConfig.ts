@@ -8,10 +8,13 @@ export type WorkspaceInfo = {
   directory: string;
 };
 
+export type Language = 0 | 1; // 0: English, 1: Japanese
+
 export type AppConfig = {
   workspaces: WorkspaceInfo[];
   initialized: boolean;
   initialized_at: string;
+  language: Language;
 };
 
 export interface WorkspacesFile {
@@ -29,7 +32,7 @@ export type SetupAppResult = {
  * @param workspaceName
  * @returns
  */
-export async function loadAppConfig(): Promise<AppConfig> {
+export async function getAppConfig(): Promise<AppConfig> {
   const result = await invoke<CommandResult<AppConfig>>('read_app_config_command');
   if (result.success) {
     return result.value;
