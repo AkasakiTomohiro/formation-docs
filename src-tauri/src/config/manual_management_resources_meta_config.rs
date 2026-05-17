@@ -177,3 +177,84 @@ async fn read_config_version(
         false => Ok(0),
     }
 }
+
+#[cfg(test)]
+#[coverage(off)]
+/// ManualManagementResourcesMetaConfigV1構造体用のテスト
+mod manual_management_resources_meta_config_v1_tests {
+    use super::*;
+
+    /// ManualManagementResourcesMetaConfigV1の初期生成データが正しいことを確認
+    #[test]
+    fn stack_meta_config_v1_new() {
+        // ######### 実行 #########
+        let config_v1 = ManualManagementResourcesMetaConfigV1::new();
+
+        // ######### 検証 #########
+        assert_eq!(config_v1.version, 1);
+        assert_eq!(config_v1.description, "".to_string());
+        assert_eq!(config_v1.resources.is_empty(), true);
+    }
+
+    /// ManualManagementResourcesMetaConfigV1をマイグレーションしたときに、ManualManagementResourcesMetaConfigに変換できることを確認
+    #[test]
+    fn stack_meta_config_v1_migrate() {
+        // ######### 準備 #########
+        let config_v1 = ManualManagementResourcesMetaConfigV1::new();
+
+        // ######### 実行 #########
+        let boxed: Box<dyn ConfigMigratable<Latest = ManualManagementResourcesMetaConfig>> =
+            Box::new(config_v1);
+        let migrated = boxed.migrate_boxed();
+
+        // V1 -> ManualManagementResourcesMetaConfigへマイグレーション
+        let config_latest = migrated
+            .as_any()
+            .downcast::<ManualManagementResourcesMetaConfig>()
+            .expect("must be ManualManagementResourcesMetaConfig at latest");
+
+        // ######### 検証 #########
+        assert_eq!(config_latest.version, STACK_META_CONFIG_LATEST_VERSION);
+        assert_eq!(config_latest.description, "".to_string());
+        assert_eq!(config_latest.resources.is_empty(), true);
+    }
+
+    #[test]
+    fn stack_meta_config_v1_as_any() {
+        // ######### 準備 #########
+        let config_v1 = ManualManagementResourcesMetaConfigV1::new();
+
+        // ######### 実行 #########
+        let boxed: Box<dyn ConfigMigratable<Latest = ManualManagementResourcesMetaConfig>> =
+            Box::new(config_v1);
+        let any_boxed = boxed.as_any();
+        let downcasted = any_boxed
+            .downcast::<ManualManagementResourcesMetaConfigV1>()
+            .expect("must be ManualManagementResourcesMetaConfigV1");
+
+        // ######### 検証 #########
+        assert_eq!(downcasted.version, 1);
+        assert_eq!(downcasted.description, "".to_string());
+        assert_eq!(downcasted.resources.is_empty(), true);
+    }
+}
+
+#[cfg(test)]
+#[coverage(off)]
+/// ManualManagementResourcesMetaConfig構造体用のテスト
+mod manual_management_resources_meta_config_tests {
+    use super::*;
+
+    #[test]
+    fn manual_management_resources_meta_config_new() {
+        // ######### 準備 #########
+
+        // ######### 実行 #########
+        let config_latest = ManualManagementResourcesMetaConfig::new();
+
+        // ######### 検証 #########
+        assert_eq!(config_latest.version, STACK_META_CONFIG_LATEST_VERSION);
+        assert_eq!(config_latest.description, "".to_string());
+        assert_eq!(config_latest.resources.is_empty(), true);
+    }
+}
