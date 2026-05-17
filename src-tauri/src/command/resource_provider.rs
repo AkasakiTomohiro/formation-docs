@@ -75,10 +75,10 @@ async fn setup_app(
             .write(app_config, app_context.file_system.clone())
             .await?;
     }
-    let app_version = env!("CARGO_PKG_VERSION").to_string();
+    let app_version = api_context.get_app_version.get_app_version();
     println!("Version: {}", app_version);
     let latest_version = api_context
-        .get_latest_version
+        .get_app_version
         .get_latest_version(app_context)
         .await;
     println!("app_version: {}", app_version);
@@ -127,7 +127,7 @@ mod setup_app_tests {
             context::{
                 api_context::ApiContext,
                 cloudformation_schema_trait::MockCloudformationSchemaTrait,
-                get_latest_version_trait::MockGetLatestVersionTrait,
+                get_app_version_trait::MockGetAppVersionTrait,
             },
         },
         config::{
@@ -205,7 +205,7 @@ mod setup_app_tests {
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
-        let mut mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mut mock_get_latest_version = MockGetAppVersionTrait::new();
 
         // CloudformationSchema::dl_resource_providerのモック
         mock_cloudformation_schema
@@ -220,7 +220,7 @@ mod setup_app_tests {
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_file_system = MockFileSystem::new();
@@ -286,7 +286,7 @@ mod setup_app_tests {
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
-        let mut mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mut mock_get_latest_version = MockGetAppVersionTrait::new();
 
         // CloudformationSchema::dl_resource_providerのモック
         mock_cloudformation_schema
@@ -301,7 +301,7 @@ mod setup_app_tests {
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_file_system = MockFileSystem::new();
@@ -367,7 +367,7 @@ mod setup_app_tests {
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
-        let mut mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mut mock_get_latest_version = MockGetAppVersionTrait::new();
 
         // CloudformationSchema::dl_resource_providerのモック
         mock_cloudformation_schema
@@ -381,7 +381,7 @@ mod setup_app_tests {
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_file_system = MockFileSystem::new();
@@ -430,7 +430,7 @@ mod setup_app_tests {
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
-        let mut mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mut mock_get_latest_version = MockGetAppVersionTrait::new();
 
         // CloudformationSchema::dl_resource_providerのモック
         mock_cloudformation_schema
@@ -444,7 +444,7 @@ mod setup_app_tests {
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_file_system = MockFileSystem::new();
@@ -500,7 +500,7 @@ mod setup_app_tests {
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
-        let mut mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mut mock_get_latest_version = MockGetAppVersionTrait::new();
 
         // CloudformationSchema::dl_resource_providerのモック
         mock_cloudformation_schema
@@ -519,7 +519,7 @@ mod setup_app_tests {
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_file_system = MockFileSystem::new();
@@ -585,7 +585,7 @@ mod setup_app_tests {
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
-        let mut mock_get_latest_version = MockGetLatestVersionTrait::new();
+        let mut mock_get_latest_version = MockGetAppVersionTrait::new();
 
         // CloudformationSchema::dl_resource_providerのモック
         mock_cloudformation_schema
@@ -599,7 +599,7 @@ mod setup_app_tests {
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_latest_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_latest_version),
         };
 
         let mock_file_system = MockFileSystem::new();
