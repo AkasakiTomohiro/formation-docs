@@ -257,4 +257,339 @@ mod manual_management_resources_meta_config_tests {
         assert_eq!(config_latest.description, "".to_string());
         assert_eq!(config_latest.resources.is_empty(), true);
     }
+
+    #[test]
+    fn manual_management_resources_meta_config_migrate_boxed() {
+        // ######### 準備 #########
+        let config_latest = ManualManagementResourcesMetaConfig::new();
+
+        // ######### 実行 #########
+        let boxed: Box<dyn ConfigMigratable<Latest = ManualManagementResourcesMetaConfig>> =
+            Box::new(config_latest);
+
+        // ######### 検証 #########
+        let migrated = boxed.migrate_boxed();
+        let downcasted = migrated
+            .as_any()
+            .downcast::<ManualManagementResourcesMetaConfig>();
+
+        // downcastに成功していること
+        assert!(downcasted.is_ok());
+
+        // ManualManagementResourcesMetaConfigがManualManagementResourcesMetaConfigに変換されていること
+        let config_latest = downcasted.unwrap();
+        assert_eq!(config_latest.version, STACK_META_CONFIG_LATEST_VERSION);
+        assert_eq!(config_latest.description, "".to_string());
+        assert_eq!(config_latest.resources.is_empty(), true);
+    }
+
+    mod write_func {
+        use super::super::*;
+        use crate::utils::context::file::MockFileSystem;
+
+        #[tokio::test]
+        async fn manual_management_resources_meta_config_write_normal() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let mut mock_file_system = MockFileSystem::new();
+
+            // returningはvitestのimplmentationと同様の動作をする関数
+            mock_file_system
+                .expect_write_file()
+                .returning(|_path, _contents| Ok(()));
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result = ManualManagementResourcesMetaConfig::write(
+                ManualManagementResourcesMetaConfig::new(),
+                file_system,
+                workspace_dir,
+            )
+            .await;
+
+            // ######### 検証 #########
+            // readの戻り値がOkであること
+            assert!(result.is_ok());
+        }
+    }
+
+    mod read_func {
+        use super::super::*;
+        use crate::utils::context::file::MockFileSystem;
+        use tokio::io::{Error, ErrorKind};
+
+        #[tokio::test]
+        async fn manual_management_resources_meta_config_read_normal() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| true);
+
+            mock_file_system.expect_read_file().returning(move |_path| {
+                let config_json = r#"{
+                    "version": 1,
+                    "name": "name",
+                    "description": "description",
+                    "resources": {}
+                }"#;
+                Ok(config_json.to_string())
+            });
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result =
+                ManualManagementResourcesMetaConfig::read(file_system, workspace_dir).await;
+
+            // ######### 検証 #########
+            // readの戻り値がOkであること
+            assert!(result.is_ok());
+
+            // readの戻り値の内容が期待通りであること
+            let config = result.unwrap();
+            assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
+            assert_eq!(config.description, "description".to_string());
+            assert_eq!(config.resources.is_empty(), true);
+        }
+
+        #[tokio::test]
+        async fn manual_management_resources_meta_config_read_other_version() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system.expect_path_exists().return_const(true);
+
+            mock_file_system.expect_read_file().returning(move |_path| {
+                let config_json = r#"{
+                    "version": 0,
+                    "name": "name",
+                    "description": "description",
+                    "resources": {}
+                }"#;
+                Ok(config_json.to_string())
+            });
+
+            mock_file_system
+                .expect_write_file()
+                .returning(|_path, _contents| Ok(()));
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result =
+                ManualManagementResourcesMetaConfig::read(file_system, workspace_dir).await;
+
+            // ######### 検証 #########
+            // readの戻り値がOkであること
+            assert!(result.is_ok());
+
+            // readの戻り値の内容が期待通りであること
+            let config = result.unwrap();
+            assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
+            assert_eq!(config.description, "".to_string());
+            assert_eq!(config.resources.is_empty(), true);
+        }
+
+        #[tokio::test]
+        async fn manual_management_resources_meta_config_read_file_not_exist() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system.expect_path_exists().return_const(false);
+
+            mock_file_system
+                .expect_write_file()
+                .returning(|_path, _contents| Ok(()));
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result =
+                ManualManagementResourcesMetaConfig::read(file_system, workspace_dir).await;
+
+            // ######### 検証 #########
+            // readの戻り値がOkであること
+            assert!(result.is_ok());
+
+            // readの戻り値の内容が期待通りであること
+            let config = result.unwrap();
+            assert_eq!(config.version, STACK_META_CONFIG_LATEST_VERSION);
+            assert_eq!(config.description, "".to_string());
+            assert_eq!(config.resources.is_empty(), true);
+        }
+
+        #[tokio::test]
+        async fn read_config_version_read_file_err() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| true);
+
+            mock_file_system
+                .expect_read_file()
+                .returning(|_path| Err(Error::new(ErrorKind::Other, "read_file error")));
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result =
+                ManualManagementResourcesMetaConfig::read(file_system, workspace_dir).await;
+
+            // ######### 検証 #########
+            // readの戻り値がErrであること
+            assert!(result.is_err());
+        }
+
+        #[tokio::test]
+        async fn read_from_str_err() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| true);
+
+            // read_fileのモック
+            let mut call_count = 0;
+            mock_file_system
+                .expect_read_file()
+                .times(2)
+                .returning_st(move |_path| {
+                    call_count += 1;
+                    match call_count {
+                        1 => {
+                            let config_json = r#"{
+                                "version": 1,
+                                "name": "name",
+                                "description": "description",
+                                "resources": {}
+                            }"#;
+                            Ok(config_json.to_string())
+                        }
+                        2 => {
+                            let config_json = r#"invalid json"#;
+                            Ok(config_json.to_string())
+                        }
+                        _ => panic!("Unexpected call"),
+                    }
+                });
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result =
+                ManualManagementResourcesMetaConfig::read(file_system, workspace_dir).await;
+
+            // ######### 検証 #########
+            // readの戻り値がErrであること
+            assert!(result.is_err());
+        }
+
+        #[tokio::test]
+        async fn read_config_version_from_str_err() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| true);
+
+            // read_fileのモック
+            mock_file_system.expect_read_file().returning(move |_path| {
+                let config_json = r#"invalid json"#;
+                Ok(config_json.to_string())
+            });
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result =
+                ManualManagementResourcesMetaConfig::read(file_system, workspace_dir).await;
+
+            // ######### 検証 #########
+            // readの戻り値がErrであること
+            assert!(result.is_err());
+        }
+
+        #[tokio::test]
+        async fn manual_management_resources_meta_config_read_second_err_read_file() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| true);
+
+            // read_fileのモック
+            let mut call_count = 0;
+            mock_file_system
+                .expect_read_file()
+                .times(2)
+                .returning_st(move |_path| {
+                    call_count += 1;
+                    match call_count {
+                        1 => {
+                            let config_json = r#"{
+                                "version": 1,
+                                "name": "name",
+                                "description": "description",
+                                "resources": {}
+                            }"#;
+                            Ok(config_json.to_string())
+                        }
+                        2 => Err(Error::new(ErrorKind::Other, "read_file error")), // 2回目の呼び出しでErrを返す
+                        _ => panic!("Unexpected call"),
+                    }
+                });
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result =
+                ManualManagementResourcesMetaConfig::read(file_system, workspace_dir).await;
+
+            // ######### 検証 #########
+            // readの戻り値がErrであること
+            assert!(result.is_err());
+        }
+
+        #[tokio::test]
+        async fn manual_management_resources_meta_config_read_unexpected_version_write_file_err() {
+            // ######### 準備 #########
+            let workspace_dir = "workspace_dir";
+            let mut mock_file_system = MockFileSystem::new();
+
+            mock_file_system
+                .expect_path_exists()
+                .returning(|_path| false);
+
+            mock_file_system
+                .expect_write_file()
+                .returning(|_path, _contents| {
+                    Err(Error::new(ErrorKind::Other, "write_file error"))
+                });
+
+            let file_system = Arc::new(mock_file_system);
+
+            // ######### 実行 #########
+            let result =
+                ManualManagementResourcesMetaConfig::read(file_system, workspace_dir).await;
+
+            // ######### 検証 #########
+            // readの戻り値がErrであること
+            assert!(result.is_err());
+        }
+    }
 }
