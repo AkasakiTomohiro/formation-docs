@@ -7,7 +7,6 @@ import {
   Select,
   type SelectProps,
   SpaceBetween,
-  TextContent,
 } from '@cloudscape-design/components';
 
 export type SettingsPresentationProps = {
@@ -69,12 +68,8 @@ export const SettingsPresentation = ({
   onClickResourceSelect,
 }: SettingsPresentationProps) => {
   return (
-    <ContentLayout header={<Header variant="h1">AWSリソースの説明</Header>}>
+    <ContentLayout defaultPadding header={<Header variant="h1">設定</Header>}>
       <SpaceBetween size="l">
-        <TextContent>
-          <p>FIXME: このメニューでできることの説明</p>
-        </TextContent>
-
         <Container
           header={
             <Header variant="h2" description="プロパティの説明の言語を設定できます">

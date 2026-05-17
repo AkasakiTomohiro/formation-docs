@@ -52,9 +52,6 @@ export const WorkspaceSideMenuPresentation = (props: WorkspaceSideMenuPresentati
           <StyledLink href="#" onClick={props.onClickSideMenuHome}>
             ホーム
           </StyledLink>
-          <StyledLink href="#" onClick={props.onClickSideMenuResourceDescriptionSettings}>
-            AWSリソースの説明
-          </StyledLink>
           <SearchForm />
         </SpaceBetween>
       }
