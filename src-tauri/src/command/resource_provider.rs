@@ -150,7 +150,7 @@ mod setup_app_tests {
 
     /// app_configが初期化されていない、かつ、latest_versionがapp_versionと違う場合、初期化されてlatest_versionを返すことを確認
     #[tokio::test]
-    async fn setup_app_initialized() {
+    async fn setup_app_not_initialized() {
         // ######### 準備 #########
         let mut mock_app_config = MockAppConfigTrait::new();
         let mut mock_clock = MockClock::new();
@@ -205,22 +205,27 @@ mod setup_app_tests {
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
-        let mut mock_get_latest_version = MockGetAppVersionTrait::new();
+        let mut mock_get_app_version = MockGetAppVersionTrait::new();
 
         // CloudformationSchema::dl_resource_providerのモック
         mock_cloudformation_schema
             .expect_dl_resource_provider()
             .returning(|_, _| Ok(()));
 
+        // GetAppVersion::get_app_versionのモック
+        mock_get_app_version
+            .expect_get_app_version()
+            .returning(|| "1.0.0".to_string());
+
         // GetLatestVersion::get_latest_versionのモック
-        let latest_version = "1.1.1";
-        mock_get_latest_version
+        let latest_version = "1.1.1"; // 現在のバージョンより新しいバージョン
+        mock_get_app_version
             .expect_get_latest_version()
             .returning(|_| Some(latest_version.to_string()));
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_app_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_app_version),
         };
 
         let mock_file_system = MockFileSystem::new();
@@ -243,9 +248,106 @@ mod setup_app_tests {
         );
     }
 
+    /// app_configが初期化済み、かつ、CloudFormationSchemeの最終ダウンロードが7日以上前の場合、cf_schema_downloaded_atを現在時刻に更新することを確認
+    #[tokio::test]
+    async fn setup_app_initialized_and_dl_7days_ago() {
+        // ######### 準備 #########
+        let mut mock_app_config = MockAppConfigTrait::new();
+        let mut mock_clock = MockClock::new();
+
+        // Clock::utc_nowのモック
+        let now = DateTime::parse_from_rfc3339("2024-01-10T00:00:00Z")
+            .expect("Failed to parse datetime")
+            .with_timezone(&chrono::Utc);
+        mock_clock.expect_utc_now().returning(move || now.clone());
+
+        // AppConfig::readのモック
+        mock_app_config.expect_read().returning(|_| {
+            let app_config = AppConfig {
+                version: 1,
+                initialized: true, // 初期化済みの状態
+                initialized_at: String::from("2024-01-01T00:00:00Z"),
+                workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from("2024-01-01T00:00:00Z"), // 最終ダウンロードが7日以上前
+            };
+            return Ok(app_config);
+        });
+
+        // AppConfig::writeのモック
+        mock_app_config
+            .expect_write()
+            .withf(|app_config, _| {
+                match DateTime::parse_from_rfc3339(&app_config.initialized_at) {
+                    Ok(_) => {
+                        // cf_schema_downloaded_atが更新され、initialized_atが更新されていないこと
+                        return app_config.cf_schema_downloaded_at
+                            == "2024-01-10T00:00:00+00:00".to_string()
+                            && app_config.initialized_at == "2024-01-01T00:00:00Z".to_string();
+                    }
+                    Err(_) => return false,
+                };
+            })
+            .returning(|app_config, _| {
+                return Ok(app_config);
+            });
+
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_manual_management_resources_meta_config_io =
+            MockManualManagementResourcesMetaConfigTrait::new();
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config_io,
+            ),
+        };
+
+        let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
+        let mut mock_get_app_version = MockGetAppVersionTrait::new();
+
+        // CloudformationSchema::dl_resource_providerのモック
+        mock_cloudformation_schema
+            .expect_dl_resource_provider()
+            .returning(|_, _| Ok(()));
+
+        // GetAppVersion::get_app_versionのモック
+        mock_get_app_version
+            .expect_get_app_version()
+            .returning(|| "1.0.0".to_string());
+
+        // GetAppVersion::get_latest_versionのモック
+        mock_get_app_version
+            .expect_get_latest_version()
+            .returning(|_| Some("1.0.0".to_string()));
+
+        let api_context = ApiContext {
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            get_app_version: Arc::new(mock_get_app_version),
+        };
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
+        };
+
+        // ######### 実行 #########
+        let initialized = setup_app(&app_context, &config_context, &api_context).await;
+
+        // ######### 検証 #########
+        assert!(initialized.is_ok());
+        assert_eq!(initialized.unwrap().new_version, None);
+    }
+
     /// app_configが初期化済み、かつ、latest_versionとapp_versionが同じ場合、何もせずに{ new_version: None }を返すことを確認
     #[tokio::test]
-    async fn setup_app_not_initialized() {
+    async fn setup_app_initialized() {
         // ######### 準備 #########
         let mut mock_app_config = MockAppConfigTrait::new();
         let mut mock_clock = MockClock::new();
@@ -286,22 +388,26 @@ mod setup_app_tests {
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
-        let mut mock_get_latest_version = MockGetAppVersionTrait::new();
+        let mut mock_get_app_version = MockGetAppVersionTrait::new();
 
         // CloudformationSchema::dl_resource_providerのモック
         mock_cloudformation_schema
             .expect_dl_resource_provider()
             .times(0); // dl_resource_providerは呼ばれないことを確認
 
+        // GetAppVersion::get_app_versionのモック
+        mock_get_app_version
+            .expect_get_app_version()
+            .returning(|| "1.0.0".to_string());
+
         // GetLatestVersion::get_latest_versionのモック
-        let latest_version = "0.1.2"; // TODO: env!("CARGO_PKG_VERSION")のモック方法を検討
-        mock_get_latest_version
+        mock_get_app_version
             .expect_get_latest_version()
-            .returning(|_| Some(latest_version.to_string()));
+            .returning(|_| Some("1.0.0".to_string()));
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_app_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_app_version),
         };
 
         let mock_file_system = MockFileSystem::new();
@@ -318,10 +424,84 @@ mod setup_app_tests {
 
         // ######### 検証 #########
         assert!(initialized.is_ok());
-        assert_eq!(
-            initialized.unwrap().new_version,
-            Some(latest_version.to_string())
-        );
+        assert_eq!(initialized.unwrap().new_version, None);
+    }
+
+    /// app_configが初期化済み、かつ、CloudFormationSchemeのダウンロードに失敗した場合は、エラーを返さずに次回起動時にダウンロードすることを確認
+    #[tokio::test]
+    async fn setup_app_initialized_and_dl_failed() {
+        // ######### 準備 #########
+        let mut mock_app_config = MockAppConfigTrait::new();
+        let mut mock_clock = MockClock::new();
+
+        // AppConfig::readのモック
+        mock_app_config.expect_read().returning(|_| {
+            let app_config = AppConfig {
+                version: 1,
+                initialized: true, // 初期化済みの状態
+                initialized_at: String::from(""),
+                workspaces: HashMap::new(),
+                cf_schema_downloaded_at: String::from("2024-01-01T00:00:00Z"),
+            };
+            return Ok(app_config);
+        });
+
+        // Clock::utc_nowのモック
+        let now = DateTime::parse_from_rfc3339("2024-01-10T00:00:00Z")
+            .expect("Failed to parse datetime")
+            .with_timezone(&chrono::Utc);
+        mock_clock.expect_utc_now().returning(move || now.clone());
+
+        // AppConfig::writeのモック
+        mock_app_config.expect_write().times(0); // writeは呼ばれないことを確認
+
+        let mock_stack_meta_config = MockStackMetaConfigTrait::new();
+        let mock_workspace_config_io = MockWorkspaceConfigTrait::new();
+        let mock_manual_management_resources_meta_config_io =
+            MockManualManagementResourcesMetaConfigTrait::new();
+
+        let config_context = ConfigContext {
+            app_config_io: Arc::new(mock_app_config),
+            workspace_config_io: Arc::new(mock_workspace_config_io),
+            stack_meta_config_io: Arc::new(mock_stack_meta_config),
+            manual_management_resources_meta_config_io: Arc::new(
+                mock_manual_management_resources_meta_config_io,
+            ),
+        };
+
+        let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
+        let mut mock_get_app_version = MockGetAppVersionTrait::new();
+
+        // CloudformationSchema::dl_resource_providerのモック
+        mock_cloudformation_schema
+            .expect_dl_resource_provider()
+            .returning(|_, _| {
+                return Err(DlSchemaError::App(AppError::new("download failed")));
+            });
+
+        // GetAppVersion::get_app_versionのモック
+        mock_get_app_version.expect_get_app_version().times(0);
+
+        let api_context = ApiContext {
+            cloudformation_schema: Arc::new(mock_cloudformation_schema),
+            get_app_version: Arc::new(mock_get_app_version),
+        };
+
+        let mock_file_system = MockFileSystem::new();
+        let mock_http_client = MockHttpClient::new();
+
+        let app_context = AppContext {
+            file_system: Arc::new(mock_file_system),
+            http_client: Arc::new(mock_http_client),
+            clock: Arc::new(mock_clock),
+        };
+
+        // ######### 実行 #########
+        let initialized = setup_app(&app_context, &config_context, &api_context).await;
+
+        // ######### 検証 #########
+        assert!(initialized.is_ok());
+        assert_eq!(initialized.unwrap().new_version, None);
     }
 
     /// latest_versionがNoneの場合、{ new_version: None }を返すことを確認
@@ -367,21 +547,26 @@ mod setup_app_tests {
         };
 
         let mut mock_cloudformation_schema = MockCloudformationSchemaTrait::new();
-        let mut mock_get_latest_version = MockGetAppVersionTrait::new();
+        let mut mock_get_app_version = MockGetAppVersionTrait::new();
 
         // CloudformationSchema::dl_resource_providerのモック
         mock_cloudformation_schema
             .expect_dl_resource_provider()
             .times(0); // dl_resource_providerは呼ばれないことを確認
 
+        // GetAppVersion::get_app_versionのモック
+        mock_get_app_version
+            .expect_get_app_version()
+            .returning(|| "1.0.0".to_string());
+
         // GetLatestVersion::get_latest_versionのモック
-        mock_get_latest_version
+        mock_get_app_version
             .expect_get_latest_version()
             .returning(|_| None); // latest_versionがNoneを返すように設定
 
         let api_context = ApiContext {
             cloudformation_schema: Arc::new(mock_cloudformation_schema),
-            get_app_version: Arc::new(mock_get_latest_version),
+            get_app_version: Arc::new(mock_get_app_version),
         };
 
         let mock_file_system = MockFileSystem::new();
