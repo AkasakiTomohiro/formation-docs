@@ -1,10 +1,10 @@
-import { createContext, useContext, useState } from 'react';
-import { type AppConfig, getAppConfig } from '../invoke/AppConfig';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { type AppConfig, getAppConfig, updateAppConfigLanguage } from '../invoke/AppConfig';
 
 export type AppConfigContext = {
   loadAppConfig: () => Promise<void>;
   appConfig: AppConfig | null;
-  setLanguage: (language: AppConfig['language']) => Promise<void>;
+  setLanguage: (language: AppConfig['language']) => Promise<boolean>;
 };
 
 const AppConfigContext = createContext<AppConfigContext>({
@@ -31,25 +31,34 @@ export const AppConfigContextProvider = ({ children }: AppConfigContextProviderP
   /**
    * AppConfig読み込み関数
    */
-  const loadAppConfig = async (): Promise<void> => {
+  const loadAppConfig = useCallback(async (): Promise<void> => {
     try {
       const config = await getAppConfig();
       setAppConfig(config);
     } catch (error) {
       console.error('Failed to load app config:', error);
     }
-  };
+  }, []);
 
   /**
    *  AppConfigの言語設定を変更する関数
-   * @param language "en" or "ja"
    */
-  const setLanguage = async (language: AppConfig['language']): Promise<void> => {
-    // TODO: AppConfigの言語設定を変更するinvoke関数を作成し呼び出す
-    // 例: await invoke('set_app_config_language_command', { language });
+  const setLanguage = async (language: AppConfig['language']): Promise<boolean> => {
+    try {
+      console.log('Updating app config language to:', language);
+      await updateAppConfigLanguage(language);
+    } catch (error) {
+      console.error('Failed to update app config language:', error);
+      return false;
+    }
     // 変更後、再度AppConfigを読み込む
     await loadAppConfig();
+    return true;
   };
+
+  useEffect(() => {
+    loadAppConfig();
+  }, [loadAppConfig]);
 
   return (
     <AppConfigContext.Provider

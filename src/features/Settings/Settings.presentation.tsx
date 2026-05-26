@@ -21,6 +21,11 @@ export type SettingsPresentationProps = {
   onChangeSelectedLanguage: SelectProps['onChange'];
 
   /**
+   * 優先言語保存のイベントハンドラ
+   */
+  onClickSaveSelectedLanguage: () => void;
+
+  /**
    * サービスのリスト
    */
   services: SelectProps['options'];
@@ -56,9 +61,14 @@ export type SettingsPresentationProps = {
   onClickResourceSelect: () => void;
 };
 
+export const ENGLISH_OPTION = { label: 'English', value: 'En' } satisfies SelectProps['selectedOption'];
+export const JAPANESE_OPTION = { label: '日本語', value: 'Ja' } satisfies SelectProps['selectedOption'];
+const LANGUAGE_OPTIONS = [ENGLISH_OPTION, JAPANESE_OPTION] satisfies SelectProps['options'];
+
 export const SettingsPresentation = ({
   selectedLanguage,
   onChangeSelectedLanguage,
+  onClickSaveSelectedLanguage,
   services,
   selectedService,
   onChangeService,
@@ -77,16 +87,20 @@ export const SettingsPresentation = ({
             </Header>
           }
         >
-          <div style={{ width: 300 }}>
-            <Select
-              selectedOption={selectedLanguage}
-              onChange={onChangeSelectedLanguage}
-              options={[
-                { label: '日本語', value: 'ja' },
-                { label: 'English', value: 'en' },
-              ]}
-            />
-          </div>
+          <SpaceBetween direction="vertical" size="s">
+            <div style={{ width: 300 }}>
+              <Select
+                selectedOption={selectedLanguage}
+                onChange={onChangeSelectedLanguage}
+                options={LANGUAGE_OPTIONS}
+              />
+            </div>
+            <Box float="right">
+              <Button variant="primary" onClick={onClickSaveSelectedLanguage}>
+                保存
+              </Button>
+            </Box>
+          </SpaceBetween>
         </Container>
 
         <Container

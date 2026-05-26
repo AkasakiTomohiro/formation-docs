@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { Header } from './components/Header';
+import { AppConfigContextProvider } from './contexts/AppConfigContext';
 import { FlashbarProvider } from './contexts/FlashbarContext';
 import { ErrorScreen } from './features/ErrorScreen';
 import { Settings } from './features/Settings';
@@ -74,7 +75,9 @@ const router = createBrowserRouter([
 function App() {
   return (
     <FlashbarProvider>
-      <RouterProvider router={router} />
+      <AppConfigContextProvider>
+        <RouterProvider router={router} />
+      </AppConfigContextProvider>
     </FlashbarProvider>
   );
 }

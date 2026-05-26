@@ -8,7 +8,7 @@ export type WorkspaceInfo = {
   directory: string;
 };
 
-export type Language = 0 | 1; // 0: English, 1: Japanese
+export type Language = 'En' | 'Ja';
 
 export type AppConfig = {
   workspaces: WorkspaceInfo[];
@@ -58,4 +58,14 @@ export async function setupApp(): Promise<SetupAppResult> {
     return { newVersion: null };
   }
   return result.value;
+}
+
+/**
+ * AppConfigの言語設定を更新する関数
+ */
+export async function updateAppConfigLanguage(language: Language): Promise<void> {
+  const result = await invoke<CommandResult<[]>>('update_app_config_language_command', { language });
+  if (!result.success) {
+    throw new Error(result.value);
+  }
 }
