@@ -1,5 +1,6 @@
 use crate::config::app_config::AppConfig;
 use crate::config::app_config::AppConfigError;
+use crate::config::app_config::Language;
 use crate::config::context::config_context::ConfigContext;
 use crate::utils::context::app_context::AppContext;
 use crate::utils::AppError;
@@ -65,6 +66,23 @@ async fn delete_workspace_from_app_config(
     return Ok(());
 }
 
+async fn update_app_config_language(
+    app_context: &AppContext,
+    config_context: &ConfigContext,
+    language: Language,
+) -> Result<(), AppConfigCommandError> {
+    let mut app_config = config_context
+        .app_config_io
+        .read(app_context.file_system.clone())
+        .await?;
+    app_config.language = language;
+    config_context
+        .app_config_io
+        .write(app_config, app_context.file_system.clone())
+        .await?;
+    Ok(())
+}
+
 #[coverage(off)]
 #[tauri::command]
 pub async fn read_app_config_command(
@@ -94,6 +112,21 @@ pub async fn delete_workspace_from_app_config_command(
         workspace_id,
     )
     .await
+    {
+        Ok(_) => Ok(CommandResult::success(())),
+        Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
+    };
+}
+
+#[coverage(off)]
+#[tauri::command(rename_all = "snake_case")]
+pub async fn update_app_config_language_command(
+    app_context_state: State<'_, AppContext>,
+    config_context_state: State<'_, ConfigContext>,
+    language: Language,
+) -> Result<CommandResult<()>, CommandResult<String>> {
+    return match update_app_config_language(&app_context_state, &config_context_state, language)
+        .await
     {
         Ok(_) => Ok(CommandResult::success(())),
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),

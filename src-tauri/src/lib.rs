@@ -46,6 +46,7 @@ pub fn run() {
             open_settings_command,
             command::app_config::read_app_config_command,
             command::app_config::delete_workspace_from_app_config_command,
+            command::app_config::update_app_config_language_command,
             command::workspace::create_workspace_command,
             command::workspace::load_workspace_merge_info_command,
             command::workspace::update_workspace_details_command,
