@@ -1,4 +1,4 @@
-import { AppLayout, SpaceBetween } from '@cloudscape-design/components';
+import { AppLayout } from '@cloudscape-design/components';
 import { useEffect } from 'react';
 import { Outlet } from 'react-router';
 import { WorkspaceSideMenu } from './components/WorkspaceSideMenu';
