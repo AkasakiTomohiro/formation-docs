@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useAppConfigContext } from '../../contexts/AppConfigContext';
-import { useFlashbarContext } from '../../contexts/FlashbarContext';
-import { getAWSServiceList } from '../../invoke/GetAWSServiceList';
+import { useNavigate } from 'react-router';
+import { useAppConfigContext } from '../../../../contexts/AppConfigContext';
+import { useFlashbarContext } from '../../../../contexts/FlashbarContext';
+import { getAWSServiceList } from '../../../../invoke/GetAWSServiceList';
 import { ENGLISH_OPTION, JAPANESE_OPTION, SettingsPresentation } from './Settings.presentation';
 import type { SelectProps } from '@cloudscape-design/components';
-import type { Language } from '../../invoke/AppConfig';
+import type { Language } from '../../../../invoke/AppConfig';
 
 export type AWSService = {
   service_name: string;
@@ -12,6 +13,7 @@ export type AWSService = {
 };
 
 export const Settings = () => {
+  const navigate = useNavigate();
   const { appConfig, setLanguage } = useAppConfigContext();
   const { addFlashbarItem } = useFlashbarContext();
   const [selectedLanguage, setSelectedLanguage] = useState<SelectProps['selectedOption']>(null);
@@ -72,6 +74,12 @@ export const Settings = () => {
     setSelectedResource(event.detail.selectedOption);
   };
 
+  const handleClickResourceSelect = () => {
+    if (selectedService && selectedResource) {
+      navigate(`description-translate/${selectedService.value}/${selectedResource.value}`);
+    }
+  };
+
   return (
     <SettingsPresentation
       selectedLanguage={selectedLanguage}
@@ -85,7 +93,7 @@ export const Settings = () => {
         ?.resources.map((resource) => ({ value: resource }))}
       selectedResource={selectedResource}
       onChangeResource={handleChangeSelectedResource}
-      onClickResourceSelect={() => {}}
+      onClickResourceSelect={handleClickResourceSelect}
     />
   );
 };

@@ -1,9 +1,10 @@
-import { createBrowserRouter, RouterProvider } from 'react-router';
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router';
 import { Header } from './components/Header';
 import { AppConfigContextProvider } from './contexts/AppConfigContext';
 import { FlashbarProvider } from './contexts/FlashbarContext';
 import { ErrorScreen } from './features/ErrorScreen';
 import { Settings } from './features/Settings';
+import { DescriptionTranslate } from './features/Settings/pages';
 import {
   WorkspaceEdit,
   WorkspaceHome,
@@ -57,9 +58,19 @@ const router = createBrowserRouter([
     path: 'settings',
     element: (
       <Header>
-        <Settings />
+        <Outlet />
       </Header>
     ),
+    children: [
+      {
+        index: true,
+        element: <Settings />,
+      },
+      {
+        path: 'description-translate/:serviceName/:resourceType',
+        element: <DescriptionTranslate />,
+      },
+    ],
   },
   {
     id: 'errorScreen',
