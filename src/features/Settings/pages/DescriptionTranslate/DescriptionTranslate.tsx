@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
+import { useAppConfigContext } from '../../../../contexts/AppConfigContext';
 import { getCloudFormationSchema } from '../../../../invoke/CloudFormationSchema';
+import { getTranslation } from '../../../../invoke/Translation';
 import { createExpandedItems } from '../../../Workspace/pages/WorkspaceResource/components/PropertyTable';
 import { createResourceTableItems } from '../../../Workspace/pages/WorkspaceResource/lib/CreateResourceTableItems';
 import {
@@ -12,20 +14,30 @@ import type { CloudFormationSchema } from '../../../Workspace/pages/WorkspaceRes
 
 export const DescriptionTranslate = () => {
   const navigate = useNavigate();
+  const { appConfig } = useAppConfigContext();
   const { serviceName, resourceType } = useParams() as { serviceName: string; resourceType: string };
   const [properties, setProperties] = useState<DescriptionTranslatePresentationProps['properties']>([]);
   const [expandedItems, setExpandedItems] = useState<any>(); // ネストされたプロパティの展開状態を管理するためのステート
   const [editingTranslations, setEditingTranslations] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    getCloudFormationSchema(serviceName, resourceType).then((schema) => {
+    Promise.all([
+      getCloudFormationSchema(serviceName, resourceType),
+      getTranslation({
+        lang: appConfig?.language ?? 'En',
+        serviceName,
+        resourceType,
+      }),
+    ]).then(([schema, translation]) => {
+      console.log('translation', translation);
       const schemaParsed = JSON.parse(schema) as CloudFormationSchema;
       const resourceTableItems = createResourceTableItems(schemaParsed, {});
       setProperties(resourceTableItems);
       const expandedItems = createExpandedItems(resourceTableItems);
       setExpandedItems(expandedItems);
+      setEditingTranslations(translation);
     });
-  }, [serviceName, resourceType]);
+  }, [serviceName, resourceType, appConfig?.language]);
 
   const onChangeTranslation: DescriptionTranslatePresentationProps['onChangeTranslation'] =
     (item) =>

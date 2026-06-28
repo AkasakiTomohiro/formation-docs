@@ -1,0 +1,21 @@
+import { invoke } from '@tauri-apps/api/core';
+import type { CommandResult } from '../lib/CommandResult';
+import type { Language } from './AppConfig';
+
+export type GetTranslationCommand = {
+  lang: Language;
+  serviceName: string;
+  resourceType: string;
+};
+
+export async function getTranslation(props: GetTranslationCommand): Promise<Record<string, string>> {
+  const result = await invoke<CommandResult<Record<string, string>>>('get_translation_command', {
+    lang: props.lang,
+    service_name: props.serviceName,
+    resource_type: props.resourceType,
+  });
+  if (result.success) {
+    return result.value;
+  }
+  throw new Error(result.value);
+}
