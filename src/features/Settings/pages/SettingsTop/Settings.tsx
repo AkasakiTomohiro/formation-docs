@@ -80,6 +80,10 @@ export const Settings = () => {
     }
   };
 
+  const handleClickImport = () => {};
+
+  const handleClickExport = async () => {};
+
   return (
     <SettingsPresentation
       selectedLanguage={selectedLanguage}
@@ -94,6 +98,8 @@ export const Settings = () => {
       selectedResource={selectedResource}
       onChangeResource={handleChangeSelectedResource}
       onClickResourceSelect={handleClickResourceSelect}
+      onClickImport={handleClickImport}
+      onClickExport={handleClickExport}
     />
   );
 };

@@ -8,6 +8,7 @@ import {
   type SelectProps,
   SpaceBetween,
 } from '@cloudscape-design/components';
+import { useAppConfigContext } from '../../../../contexts/AppConfigContext';
 
 export type SettingsPresentationProps = {
   /**
@@ -59,6 +60,16 @@ export type SettingsPresentationProps = {
    * リソース選択ボタンのクリックイベントハンドラ
    */
   onClickResourceSelect: () => void;
+
+  /**
+   * インポートボタンのクリックイベントハンドラ
+   */
+  onClickImport: () => void;
+
+  /**
+   * エクスポートボタンのクリックイベントハンドラ
+   */
+  onClickExport: () => void;
 };
 
 export const ENGLISH_OPTION = { label: 'English', value: 'En' } satisfies SelectProps['selectedOption'];
@@ -76,7 +87,11 @@ export const SettingsPresentation = ({
   selectedResource,
   onChangeResource,
   onClickResourceSelect,
+  onClickImport,
+  onClickExport,
 }: SettingsPresentationProps) => {
+  const { appConfig } = useAppConfigContext();
+
   return (
     <ContentLayout defaultPadding header={<Header variant="h1">設定</Header>}>
       <SpaceBetween size="l">
@@ -96,7 +111,11 @@ export const SettingsPresentation = ({
               />
             </div>
             <Box float="right">
-              <Button variant="primary" onClick={onClickSaveSelectedLanguage}>
+              <Button
+                variant="primary"
+                onClick={onClickSaveSelectedLanguage}
+                disabled={appConfig?.language === selectedLanguage?.value || appConfig?.language === undefined}
+              >
                 保存
               </Button>
             </Box>
@@ -105,15 +124,35 @@ export const SettingsPresentation = ({
 
         <Container
           header={
-            <Header variant="h2" description="プロパティの説明文をカスタマイズできます">
+            <Header
+              variant="h2"
+              description="プロパティの説明文をカスタマイズできます"
+              actions={
+                <SpaceBetween direction="horizontal" size="xs">
+                  <Button
+                    onClick={onClickImport}
+                    disabled={appConfig?.language === ENGLISH_OPTION.value || appConfig?.language === undefined}
+                  >
+                    インポート
+                  </Button>
+                  <Button
+                    onClick={onClickExport}
+                    disabled={appConfig?.language === ENGLISH_OPTION.value || appConfig?.language === undefined}
+                  >
+                    エクスポート
+                  </Button>
+                </SpaceBetween>
+              }
+            >
               プロパティの説明文のカスタマイズ
             </Header>
           }
         >
           <SpaceBetween direction="vertical" size="s">
+            <Header variant="h3">手動入力</Header>
             <Select
               placeholder="サービス名"
-              disabled={selectedLanguage?.value === ENGLISH_OPTION.value}
+              disabled={appConfig?.language === ENGLISH_OPTION.value || appConfig?.language === undefined}
               selectedOption={selectedService}
               onChange={onChangeService}
               options={services}
@@ -121,7 +160,9 @@ export const SettingsPresentation = ({
             />
             <Select
               placeholder="リソース名"
-              disabled={!selectedService || selectedLanguage?.value === ENGLISH_OPTION.value}
+              disabled={
+                !selectedService || appConfig?.language === ENGLISH_OPTION.value || appConfig?.language === undefined
+              }
               selectedOption={selectedResource}
               onChange={onChangeResource}
               options={resources}
@@ -130,7 +171,9 @@ export const SettingsPresentation = ({
             <Box float="right">
               <Button
                 variant="primary"
-                disabled={!selectedResource || selectedLanguage?.value === ENGLISH_OPTION.value}
+                disabled={
+                  !selectedResource || appConfig?.language === ENGLISH_OPTION.value || appConfig?.language === undefined
+                }
                 onClick={onClickResourceSelect}
               >
                 選択

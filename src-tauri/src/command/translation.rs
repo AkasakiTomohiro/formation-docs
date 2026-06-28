@@ -6,6 +6,7 @@ use crate::{
 };
 use serde_json::Value;
 use tauri::State;
+use tauri_plugin_dialog::DialogExt;
 use thiserror::Error;
 
 use crate::utils::{context::file::FileSystem, AppError};
@@ -91,6 +92,49 @@ async fn save_translation(
         .await?;
 
     Ok(())
+}
+
+async fn export_translation_file(
+    app_handler: tauri::AppHandle,
+    file_system: Arc<dyn FileSystem>,
+    lang: String,
+) -> Result<bool, TranslationError> {
+    let dir = file_system
+        .config_local_dir()
+        .ok_or(TranslationError::App(AppError::new(
+            "Failed to get local config directory",
+        )))?;
+    let translation_dir_path = dir
+        .join(APP_CONFIG_DIRECTORY_NAME)
+        .join(TRANSLATION_DIR)
+        .join(&lang);
+    match translation_dir_path.try_exists() {
+        Ok(exists) => {
+            // 翻訳ディレクトリが存在しない場合は、エクスポートを中止してfalseを返す
+            if !exists {
+                return Ok(false);
+            }
+        }
+        Err(_) => {
+            return Ok(false);
+        }
+    }
+    // TODO: 翻訳ディレクトリをzip化
+
+    app_handler
+        .dialog()
+        .file()
+        .set_file_name("translation.zip")
+        .save_file(|path| match path {
+            Some(path) => {
+                println!("保存先のパス: {:?}", path);
+                // TODO: zip化した翻訳ディレクトリを保存先のパスにコピーする処理を実装
+            }
+            None => {
+                println!("保存がキャンセルされました");
+            }
+        });
+    Ok(true)
 }
 
 #[coverage(off)]
