@@ -9,6 +9,9 @@ export type GetTranslationCommand = {
 };
 
 export async function getTranslation(props: GetTranslationCommand): Promise<Record<string, string>> {
+  if (props.lang === 'En') {
+    return {};
+  }
   const result = await invoke<CommandResult<Record<string, string>>>('get_translation_command', {
     lang: props.lang,
     service_name: props.serviceName,

@@ -113,6 +113,7 @@ export const SettingsPresentation = ({
           <SpaceBetween direction="vertical" size="s">
             <Select
               placeholder="サービス名"
+              disabled={selectedLanguage?.value === ENGLISH_OPTION.value}
               selectedOption={selectedService}
               onChange={onChangeService}
               options={services}
@@ -120,14 +121,18 @@ export const SettingsPresentation = ({
             />
             <Select
               placeholder="リソース名"
-              disabled={!selectedService}
+              disabled={!selectedService || selectedLanguage?.value === ENGLISH_OPTION.value}
               selectedOption={selectedResource}
               onChange={onChangeResource}
               options={resources}
               filteringType="auto"
             />
             <Box float="right">
-              <Button variant="primary" onClick={onClickResourceSelect}>
+              <Button
+                variant="primary"
+                disabled={!selectedResource || selectedLanguage?.value === ENGLISH_OPTION.value}
+                onClick={onClickResourceSelect}
+              >
                 選択
               </Button>
             </Box>

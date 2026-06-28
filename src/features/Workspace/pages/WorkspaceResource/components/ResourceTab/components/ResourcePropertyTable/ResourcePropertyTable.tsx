@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useAppConfigContext } from '../../../../../../../../contexts/AppConfigContext';
 import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFormationSchema';
+import { getTranslation } from '../../../../../../../../invoke/Translation';
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
 import { createExpandedItems } from '../../../PropertyTable';
@@ -60,6 +62,7 @@ export const ResourcePropertyTable = ({
   selectedLogicalId,
   editingValues,
 }: ResourcePropertyTableProps): JSX.Element => {
+  const { appConfig } = useAppConfigContext();
   // ネストされたプロパティの展開状態を管理するためのステート
   const [expandedItems, setExpandedItems] = useState<any>();
 
@@ -78,9 +81,13 @@ export const ResourcePropertyTable = ({
   // ファイルに保存されているリソースの説明を管理するためのステート
   const [description, setDescription] = useState<string>('');
 
+  // プロパティの説明の翻訳を管理するためのステート
+  const [translation, setTranslation] = useState<Record<string, string>>({});
+
   const { sideMenu, allStackOutputs, modifyResourceTab } = useWorkspaceResourceContext();
 
   useEffect(() => {
+    console.log('lang', appConfig?.language);
     Promise.all([
       getCloudFormationSchema(serviceName, resourceName),
       getStackResourceProperties({
@@ -92,10 +99,16 @@ export const ResourcePropertyTable = ({
         logical_id: selectedLogicalId,
       }),
       loadParameterAndResourceList({ stack_id: stackId }),
-    ]).then(([schemaStr, properties, stackMeta, parameterAndResourceList]) => {
+      getTranslation({
+        lang: appConfig?.language ?? 'En',
+        serviceName,
+        resourceType: resourceName,
+      }),
+    ]).then(([schemaStr, properties, stackMeta, parameterAndResourceList, translation]) => {
       console.log('properties', properties);
       console.log('stackMeta', stackMeta);
       console.log('parameterAndResourceList', parameterAndResourceList);
+      console.log('translation', translation);
       const schemaParsed = JSON.parse(schemaStr) as CloudFormationSchema;
       const resourceTableItems = createResourceTableItems(schemaParsed, properties, {
         ...parameterAndResourceList,
@@ -108,8 +121,18 @@ export const ResourcePropertyTable = ({
       setReasons(stackMeta.reasons);
       setDescription(stackMeta.description);
       setParameterAndResourceList(parameterAndResourceList);
+      setTranslation(translation);
     });
-  }, [stackId, stackName, serviceName, resourceName, selectedLogicalId, allStackOutputs, sideMenu]);
+  }, [
+    stackId,
+    stackName,
+    serviceName,
+    resourceName,
+    selectedLogicalId,
+    allStackOutputs,
+    sideMenu,
+    appConfig?.language,
+  ]);
 
   const onSave = async () => {
     await updateStackMeta({
@@ -196,6 +219,7 @@ export const ResourcePropertyTable = ({
       setExpandedItems={setExpandedItems}
       description={description}
       setDescription={onChangeDescription}
+      translation={translation}
     />
   );
 };

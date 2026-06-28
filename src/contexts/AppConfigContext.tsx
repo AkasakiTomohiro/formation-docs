@@ -1,3 +1,4 @@
+import { listen } from '@tauri-apps/api/event';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { type AppConfig, getAppConfig, updateAppConfigLanguage } from '../invoke/AppConfig';
 
@@ -55,6 +56,14 @@ export const AppConfigContextProvider = ({ children }: AppConfigContextProviderP
     await loadAppConfig();
     return true;
   };
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: 初回レンダリング時のみ実行
+  useEffect(() => {
+    // 言語変更イベントのリスナーを設定
+    listen('language_changed', async (_event) => {
+      await loadAppConfig();
+    });
+  }, []);
 
   useEffect(() => {
     loadAppConfig();

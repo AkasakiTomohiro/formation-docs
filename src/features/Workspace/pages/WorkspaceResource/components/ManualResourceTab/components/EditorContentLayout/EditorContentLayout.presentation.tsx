@@ -128,6 +128,7 @@ export const EditorContentLayoutPresentation = ({
             expandedItems={propertyTableProps.expandedItems}
             setExpandedItems={propertyTableProps.setExpandedItems}
             editingReasons={propertyTableProps.editingReasons}
+            translation={propertyTableProps.translation}
             header={
               <Header
                 variant="h2"

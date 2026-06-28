@@ -8,7 +8,7 @@ import type { PropertyTablePresentationProps } from './PropertyTable.presentatio
 
 export type PropertyTableProps = Pick<
   PropertyTablePresentationProps,
-  'properties' | 'reasons' | 'editingReasons' | 'header'
+  'properties' | 'reasons' | 'editingReasons' | 'header' | 'translation'
 > & {
   /**
    * タブID
@@ -34,6 +34,7 @@ export const PropertyTable = ({
   setExpandedItems,
   editingReasons,
   header,
+  translation,
 }: PropertyTableProps) => {
   // テーブルの表示カラムの設定を管理するためのステート
   const [preferences, setPreferences] = useState({
@@ -109,6 +110,7 @@ export const PropertyTable = ({
           contentDisplay: detail.contentDisplay ? [...detail.contentDisplay] : [],
         })
       }
+      translation={translation}
     />
   );
 };

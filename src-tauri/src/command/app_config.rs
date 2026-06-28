@@ -5,6 +5,7 @@ use crate::config::context::config_context::ConfigContext;
 use crate::utils::context::app_context::AppContext;
 use crate::utils::AppError;
 use crate::utils::CommandResult;
+use tauri::Emitter;
 use tauri::State;
 use thiserror::Error;
 use uuid::Uuid;
@@ -121,6 +122,7 @@ pub async fn delete_workspace_from_app_config_command(
 #[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_app_config_language_command(
+    app_handle: tauri::AppHandle,
     app_context_state: State<'_, AppContext>,
     config_context_state: State<'_, ConfigContext>,
     language: Language,
@@ -128,7 +130,11 @@ pub async fn update_app_config_language_command(
     return match update_app_config_language(&app_context_state, &config_context_state, language)
         .await
     {
-        Ok(_) => Ok(CommandResult::success(())),
+        Ok(_) => {
+            // 翻訳言語変更イベントをフロントエンドに通知
+            app_handle.emit("language_changed", true).unwrap();
+            Ok(CommandResult::success(()))
+        }
         Err(e) => Err(CommandResult::failed(e.to_string().as_str())),
     };
 }

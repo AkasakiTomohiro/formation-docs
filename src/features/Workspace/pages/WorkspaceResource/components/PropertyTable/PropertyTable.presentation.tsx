@@ -70,6 +70,11 @@ export type PropertyTablePresentationProps = {
    * テーブルのヘッダー
    */
   header?: TableProps['header'];
+
+  /**
+   * 翻訳
+   */
+  translation: Record<string, string>;
 };
 
 export const PropertyTablePresentation = ({
@@ -84,6 +89,7 @@ export const PropertyTablePresentation = ({
   preferences,
   onConfirmPreferences,
   header,
+  translation,
 }: PropertyTablePresentationProps): JSX.Element => {
   return (
     <Table
@@ -112,7 +118,10 @@ export const PropertyTablePresentation = ({
         {
           id: 'description',
           header: '説明',
-          cell: (e) => <div style={{ whiteSpace: 'pre-line' }}>{e.description}</div>,
+          cell: (e) => {
+            const translatedDescription = translation?.[e.id] ?? e.description;
+            return <div style={{ whiteSpace: 'pre-line' }}>{translatedDescription}</div>;
+          },
           width: 500,
         },
         {
