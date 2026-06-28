@@ -75,7 +75,8 @@ pub fn run() {
             command::manual_management_resource::get_manual_resource_meta_command,
             command::manual_management_resource::update_manual_resource_meta_command,
             command::manual_management_resource::update_manual_resource_properties_command,
-            command::translation::get_translation_command
+            command::translation::get_translation_command,
+            command::translation::save_translation_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

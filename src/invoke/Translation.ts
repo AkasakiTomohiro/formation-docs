@@ -19,3 +19,20 @@ export async function getTranslation(props: GetTranslationCommand): Promise<Reco
   }
   throw new Error(result.value);
 }
+
+export type SaveTranslationCommand = {
+  lang: Language;
+  serviceName: string;
+  resourceType: string;
+  translation: Record<string, string>;
+};
+
+export async function saveTranslation(props: SaveTranslationCommand): Promise<CommandResult<void>> {
+  const result = await invoke<CommandResult<void>>('save_translation_command', {
+    lang: props.lang,
+    service_name: props.serviceName,
+    resource_type: props.resourceType,
+    translation: props.translation,
+  });
+  return result;
+}

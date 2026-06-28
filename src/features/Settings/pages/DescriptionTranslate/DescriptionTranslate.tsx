@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useAppConfigContext } from '../../../../contexts/AppConfigContext';
+import { useFlashbarContext } from '../../../../contexts/FlashbarContext';
 import { getCloudFormationSchema } from '../../../../invoke/CloudFormationSchema';
-import { getTranslation } from '../../../../invoke/Translation';
+import { getTranslation, saveTranslation } from '../../../../invoke/Translation';
 import { createExpandedItems } from '../../../Workspace/pages/WorkspaceResource/components/PropertyTable';
 import { createResourceTableItems } from '../../../Workspace/pages/WorkspaceResource/lib/CreateResourceTableItems';
 import {
@@ -14,6 +15,7 @@ import type { CloudFormationSchema } from '../../../Workspace/pages/WorkspaceRes
 
 export const DescriptionTranslate = () => {
   const navigate = useNavigate();
+  const { addFlashbarItem } = useFlashbarContext();
   const { appConfig } = useAppConfigContext();
   const { serviceName, resourceType } = useParams() as { serviceName: string; resourceType: string };
   const [properties, setProperties] = useState<DescriptionTranslatePresentationProps['properties']>([]);
@@ -51,6 +53,29 @@ export const DescriptionTranslate = () => {
     navigate('/settings');
   };
 
+  const onClickSave = async () => {
+    console.log('onClickSave', editingTranslations);
+    const result = await saveTranslation({
+      lang: appConfig?.language ?? 'En',
+      serviceName,
+      resourceType,
+      translation: editingTranslations,
+    });
+    if (result.success) {
+      addFlashbarItem({
+        type: 'success',
+        header: '保存成功',
+        content: '翻訳の保存に成功しました',
+      });
+    } else {
+      addFlashbarItem({
+        type: 'error',
+        header: '保存失敗',
+        content: '翻訳の保存に失敗しました',
+      });
+    }
+  };
+
   return (
     <DescriptionTranslatePresentation
       properties={properties}
@@ -65,7 +90,7 @@ export const DescriptionTranslate = () => {
             return [...next].map((id) => ({ id }));
           }),
       }}
-      onClickSave={() => {}}
+      onClickSave={onClickSave}
       onClickCancel={onClickCancel}
       editingTranslations={editingTranslations}
       onChangeTranslation={onChangeTranslation}
