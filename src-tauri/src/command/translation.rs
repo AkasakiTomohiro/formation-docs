@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{fs::File, io::Write, path::PathBuf, sync::Arc};
 
 use crate::{
     config::app_config::APP_CONFIG_DIRECTORY_NAME,
@@ -8,6 +8,7 @@ use serde_json::Value;
 use tauri::State;
 use tauri_plugin_dialog::DialogExt;
 use thiserror::Error;
+use zip::{write::SimpleFileOptions, CompressionMethod, ZipWriter};
 
 use crate::utils::{context::file::FileSystem, AppError};
 
@@ -19,6 +20,8 @@ pub enum TranslationError {
     Io(#[from] std::io::Error),
     #[error("json error: {0}")]
     Json(#[from] serde_json::Error),
+    #[error("zip error: {0:?}")]
+    Zip(#[from] zip::result::ZipError),
 }
 
 const TRANSLATION_DIR: &str = "translations";
@@ -119,22 +122,68 @@ async fn export_translation_file(
             return Ok(false);
         }
     }
-    // TODO: 翻訳ディレクトリをzip化
 
+    // ファイル保存ダイアログを表示して、ユーザーに保存先を選択させる
     app_handler
         .dialog()
         .file()
         .set_file_name("translation.zip")
-        .save_file(|path| match path {
-            Some(path) => {
+        .save_file(move |path| {
+            if let Some(path) = path {
                 println!("保存先のパス: {:?}", path);
-                // TODO: zip化した翻訳ディレクトリを保存先のパスにコピーする処理を実装
-            }
-            None => {
-                println!("保存がキャンセルされました");
+
+                let output_path = match path {
+                    tauri_plugin_dialog::FilePath::Path(path) => path,
+                    _ => {
+                        eprintln!("Failed to export translation zip: Invalid file path");
+                        return;
+                    }
+                };
+
+                // 非同期処理を実行するために、分離した関数をspawnで呼び出す
+                tauri::async_runtime::spawn(async move {
+                    if let Err(err) = write_translation_zip(
+                        file_system.clone(),
+                        translation_dir_path.clone(),
+                        output_path,
+                    )
+                    .await
+                    {
+                        eprintln!("Failed to export translation zip: {err}");
+                    }
+                });
             }
         });
+
     Ok(true)
+}
+
+async fn write_translation_zip(
+    file_system: Arc<dyn FileSystem>,
+    translation_dir_path: PathBuf,
+    output_path: PathBuf,
+) -> Result<(), TranslationError> {
+    let zip_file = File::create(output_path)?;
+    let mut zip = ZipWriter::new(zip_file);
+    let options = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);
+
+    for entry in file_system.read_dir(&translation_dir_path).await? {
+        if entry.is_file() {
+            let mut file = file_system.open(&entry)?;
+            let mut contents = Vec::new();
+            std::io::copy(&mut file, &mut contents)?;
+            let file_name = entry
+                .file_name()
+                .ok_or_else(|| AppError::new("Failed to get file name"))?
+                .to_string_lossy() // OsStringをStringに変換
+                .into_owned();
+            zip.start_file(file_name, options)?;
+            zip.write_all(&contents)?;
+        }
+    }
+    zip.finish()?;
+
+    Ok(())
 }
 
 #[coverage(off)]
@@ -180,5 +229,19 @@ pub async fn save_translation_command(
     {
         Ok(_) => Ok(CommandResult::success(())),
         Err(_) => Err(CommandResult::failed("Failed to save translation.")),
+    }
+}
+
+#[coverage(off)]
+#[tauri::command(rename_all = "snake_case")]
+pub async fn export_translation_file_command(
+    app_context_state: State<'_, AppContext>,
+    app_handler: tauri::AppHandle,
+    lang: String,
+) -> Result<CommandResult<bool>, CommandResult> {
+    let app_context = app_context_state.inner();
+    match export_translation_file(app_handler, app_context.file_system.clone(), lang).await {
+        Ok(result) => Ok(CommandResult::success(result)),
+        Err(_) => Err(CommandResult::failed("Failed to export translation file.")),
     }
 }

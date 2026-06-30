@@ -24,6 +24,7 @@ pub trait FileSystem: Send + Sync {
     fn create_dir_all_sync(&self, path: &Path) -> std::io::Result<()>;
     fn config_local_dir(&self) -> Option<PathBuf>;
     fn path_exists(&self, path: &Path) -> bool;
+    fn open(&self, path: &Path) -> std::io::Result<File>;
 }
 
 pub struct LocalFileSystem;
@@ -81,5 +82,9 @@ impl FileSystem for LocalFileSystem {
 
     fn path_exists(&self, path: &Path) -> bool {
         path.exists()
+    }
+
+    fn open(&self, path: &Path) -> std::io::Result<File> {
+        return std::fs::File::open(path);
     }
 }

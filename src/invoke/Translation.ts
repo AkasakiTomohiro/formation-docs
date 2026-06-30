@@ -39,3 +39,14 @@ export async function saveTranslation(props: SaveTranslationCommand): Promise<Co
   });
   return result;
 }
+
+export type ExportTranslationZipCommand = {
+  lang: Language;
+};
+
+export async function exportTranslationZip(props: ExportTranslationZipCommand): Promise<CommandResult<void>> {
+  const result = await invoke<CommandResult<void>>('export_translation_file_command', {
+    lang: props.lang,
+  });
+  return result;
+}
