@@ -1,0 +1,234 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_config_context_config_context_rs",
+      "label": "config_context.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext",
+      "label": "ConfigContext",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L8"
+    },
+    {
+      "id": "arc",
+      "label": "Arc",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/config_context.rs"
+    },
+    {
+      "id": "appconfigtrait",
+      "label": "AppConfigTrait",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/config_context.rs"
+    },
+    {
+      "id": "stackmetaconfigtrait",
+      "label": "StackMetaConfigTrait",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/config_context.rs"
+    },
+    {
+      "id": "workspaceconfigtrait",
+      "label": "WorkspaceConfigTrait",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/config_context.rs"
+    },
+    {
+      "id": "manualmanagementresourcesmetaconfigtrait",
+      "label": "ManualManagementResourcesMetaConfigTrait",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/config_context.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext_new",
+      "label": ".new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L19"
+    },
+    {
+      "id": "self",
+      "label": "Self",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/config_context.rs"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_rs",
+      "target": "app_config_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_rs",
+      "target": "manual_management_resources_meta_config_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_rs",
+      "target": "stack_meta_config_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_rs",
+      "target": "workspace_config_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_rs",
+      "target": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext",
+      "target": "appconfigtrait",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext",
+      "target": "stackmetaconfigtrait",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext",
+      "target": "workspaceconfigtrait",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext",
+      "target": "manualmanagementresourcesmetaconfigtrait",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext",
+      "target": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext_new",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_config_context_configcontext_new",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/config_context.rs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "context": "return_type"
+    }
+  ],
+  "raw_calls": []
+}

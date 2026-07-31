@@ -1,0 +1,335 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_rs",
+      "label": "cloudformation_schema_trait.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschematrait",
+      "label": "CloudformationSchemaTrait",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L12"
+    },
+    {
+      "id": "send",
+      "label": "Send",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/cloudformation_schema_trait.rs"
+    },
+    {
+      "id": "sync",
+      "label": "Sync",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/cloudformation_schema_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema",
+      "label": "CloudformationSchema",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L32"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_generate_summary_service_list",
+      "label": ".generate_summary_service_list()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L36"
+    },
+    {
+      "id": "appcontext",
+      "label": "AppContext",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/cloudformation_schema_trait.rs"
+    },
+    {
+      "id": "pathbuf",
+      "label": "PathBuf",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/cloudformation_schema_trait.rs"
+    },
+    {
+      "id": "result",
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/cloudformation_schema_trait.rs"
+    },
+    {
+      "id": "dlschemaerror",
+      "label": "DlSchemaError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/cloudformation_schema_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_get_resource_provider_save_dir",
+      "label": ".get_resource_provider_save_dir()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L44"
+    },
+    {
+      "id": "arc",
+      "label": "Arc",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/cloudformation_schema_trait.rs"
+    },
+    {
+      "id": "filesystem",
+      "label": "FileSystem",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/cloudformation_schema_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_dl_resource_provider",
+      "label": ".dl_resource_provider()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L52"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_rs",
+      "target": "async_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_rs",
+      "target": "crate",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_rs",
+      "target": "std",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschematrait",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschematrait",
+      "target": "send",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschematrait",
+      "target": "sync",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema",
+      "target": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschematrait",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema",
+      "target": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_generate_summary_service_list",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_generate_summary_service_list",
+      "target": "appcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_generate_summary_service_list",
+      "target": "pathbuf",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_generate_summary_service_list",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_generate_summary_service_list",
+      "target": "dlschemaerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema",
+      "target": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_get_resource_provider_save_dir",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_get_resource_provider_save_dir",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L44",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_get_resource_provider_save_dir",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L44",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_get_resource_provider_save_dir",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L44",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_get_resource_provider_save_dir",
+      "target": "pathbuf",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L44",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_get_resource_provider_save_dir",
+      "target": "dlschemaerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L44",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema",
+      "target": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_dl_resource_provider",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_dl_resource_provider",
+      "target": "appcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_dl_resource_provider",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_cloudformation_schema_trait_cloudformationschema_dl_resource_provider",
+      "target": "dlschemaerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/cloudformation_schema_trait.rs",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "generic_arg"
+    }
+  ],
+  "raw_calls": []
+}

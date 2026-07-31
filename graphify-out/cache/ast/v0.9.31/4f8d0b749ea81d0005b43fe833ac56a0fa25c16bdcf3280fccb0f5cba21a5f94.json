@@ -1,0 +1,273 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_rs",
+      "label": "manual_management_resource_trait.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresourcetrait",
+      "label": "ManualManagementResourceTrait",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L8"
+    },
+    {
+      "id": "send",
+      "label": "Send",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/manual_management_resource_trait.rs"
+    },
+    {
+      "id": "sync",
+      "label": "Sync",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/manual_management_resource_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource",
+      "label": "ManualManagementResource",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L22"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_get_manual_management_resources",
+      "label": ".get_manual_management_resources()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L26"
+    },
+    {
+      "id": "appcontext",
+      "label": "AppContext",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/manual_management_resource_trait.rs"
+    },
+    {
+      "id": "result",
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/manual_management_resource_trait.rs"
+    },
+    {
+      "id": "manualmanagementresources",
+      "label": "ManualManagementResources",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/manual_management_resource_trait.rs"
+    },
+    {
+      "id": "manualmanagementresourceerror",
+      "label": "ManualManagementResourceError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/manual_management_resource_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_save_manual_management_resources",
+      "label": ".save_manual_management_resources()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L38"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_rs",
+      "target": "manualmanagementresourceerror",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_rs",
+      "target": "manualmanagementresources",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_rs",
+      "target": "appcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_rs",
+      "target": "async_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresourcetrait",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresourcetrait",
+      "target": "send",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresourcetrait",
+      "target": "sync",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource",
+      "target": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresourcetrait",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource",
+      "target": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_get_manual_management_resources",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_get_manual_management_resources",
+      "target": "appcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_get_manual_management_resources",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_get_manual_management_resources",
+      "target": "manualmanagementresources",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_get_manual_management_resources",
+      "target": "manualmanagementresourceerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L26",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource",
+      "target": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_save_manual_management_resources",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_save_manual_management_resources",
+      "target": "appcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L38",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_save_manual_management_resources",
+      "target": "manualmanagementresources",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L38",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_save_manual_management_resources",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L38",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_manual_management_resource_trait_manualmanagementresource_save_manual_management_resources",
+      "target": "manualmanagementresourceerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/manual_management_resource_trait.rs",
+      "source_location": "L38",
+      "weight": 1.0,
+      "context": "generic_arg"
+    }
+  ],
+  "raw_calls": []
+}

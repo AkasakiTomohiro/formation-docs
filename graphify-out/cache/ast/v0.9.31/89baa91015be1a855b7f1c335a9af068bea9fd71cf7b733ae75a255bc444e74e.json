@@ -1,0 +1,196 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_app_context_rs",
+      "label": "app_context.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext",
+      "label": "AppContext",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L7"
+    },
+    {
+      "id": "arc",
+      "label": "Arc",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/app_context.rs"
+    },
+    {
+      "id": "filesystem",
+      "label": "FileSystem",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/app_context.rs"
+    },
+    {
+      "id": "httpclient",
+      "label": "HttpClient",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/app_context.rs"
+    },
+    {
+      "id": "clock",
+      "label": "Clock",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/app_context.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext_new",
+      "label": ".new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L15"
+    },
+    {
+      "id": "self",
+      "label": "Self",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/app_context.rs"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_rs",
+      "target": "clock",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_rs",
+      "target": "file",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_rs",
+      "target": "http_client",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext",
+      "target": "httpclient",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext",
+      "target": "clock",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext",
+      "target": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext_new",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_app_context_appcontext_new",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/app_context.rs",
+      "source_location": "L15",
+      "weight": 1.0,
+      "context": "return_type"
+    }
+  ],
+  "raw_calls": []
+}

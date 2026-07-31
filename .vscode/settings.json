@@ -27,5 +27,28 @@
   "testing.coverageToolbarEnabled": true,
   "coverage-gutters.showGutterCoverage": true,
   "coverage-gutters.showLineCoverage": true,
-  "coverage-gutters.showRulerCoverage": true
+  "coverage-gutters.showRulerCoverage": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/target/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/graphify-out/**": true
+  },
+  "files.watcherExclude": {
+    ".git/objects/**": true,
+    ".git/subtree-cache/**": true,
+    ".hg/store/**": true,
+    "*/.git/objects/**": true,
+    "*/.git/subtree-cache/**": true,
+    "*/.hg/store/**": true,
+    "**/graphify-out/**": true
+  }
 }

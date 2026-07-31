@@ -1,0 +1,191 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_window_state_rs",
+      "label": "window_state.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_window_state_windowstate",
+      "label": "WindowState",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L6"
+    },
+    {
+      "id": "string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/window_state.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_window_state_get_window_state",
+      "label": "get_window_state()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L13"
+    },
+    {
+      "id": "window",
+      "label": "Window",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/window_state.rs"
+    },
+    {
+      "id": "option",
+      "label": "Option",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/window_state.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_window_state_set_window_state",
+      "label": "set_window_state()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L21"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_rs",
+      "target": "dashmap",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_rs",
+      "target": "lazylock",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_rs",
+      "target": "window",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_window_state_windowstate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_windowstate",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_window_state_get_window_state",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_get_window_state",
+      "target": "window",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_get_window_state",
+      "target": "option",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_get_window_state",
+      "target": "$graphify-root$_src_tauri_src_utils_window_state_windowstate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_window_state_set_window_state",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_set_window_state",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L21",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_window_state_set_window_state",
+      "target": "$graphify-root$_src_tauri_src_utils_window_state_windowstate",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L21",
+      "weight": 1.0,
+      "context": "parameter_type"
+    }
+  ],
+  "raw_calls": [
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_utils_window_state_get_window_state",
+      "callee": "label",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L14"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_utils_window_state_get_window_state",
+      "callee": "as_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/utils/window_state.rs",
+      "source_location": "L16"
+    }
+  ]
+}

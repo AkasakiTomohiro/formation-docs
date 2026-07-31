@@ -1,0 +1,158 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_api_context_rs",
+      "label": "api_context.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_api_context_apicontext",
+      "label": "ApiContext",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L6"
+    },
+    {
+      "id": "arc",
+      "label": "Arc",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/api_context.rs"
+    },
+    {
+      "id": "cloudformationschematrait",
+      "label": "CloudformationSchemaTrait",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/api_context.rs"
+    },
+    {
+      "id": "getappversiontrait",
+      "label": "GetAppVersionTrait",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/api_context.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_api_context_apicontext_new",
+      "label": ".new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L13"
+    },
+    {
+      "id": "self",
+      "label": "Self",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/api_context.rs"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_api_context_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_api_context_rs",
+      "target": "cloudformation_schema_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_api_context_rs",
+      "target": "get_app_version_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_api_context_rs",
+      "target": "$graphify-root$_src_tauri_src_api_context_api_context_apicontext",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_api_context_apicontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_api_context_apicontext",
+      "target": "cloudformationschematrait",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_api_context_apicontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_api_context_apicontext",
+      "target": "getappversiontrait",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_api_context_apicontext",
+      "target": "$graphify-root$_src_tauri_src_api_context_api_context_apicontext_new",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_api_context_apicontext_new",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/api_context.rs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "context": "return_type"
+    }
+  ],
+  "raw_calls": []
+}

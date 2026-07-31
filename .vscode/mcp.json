@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "my-mcp-server-bbd59ab0": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "graphify-mcp", ".\\graphify-out\\graph.json"]
+    }
+  },
+  "inputs": []
+}

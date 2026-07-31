@@ -1,0 +1,57 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_config_migratable_rs",
+      "label": "config_migratable.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/config_migratable.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_config_migratable_configmigratable",
+      "label": "ConfigMigratable",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/config_migratable.rs",
+      "source_location": "L8"
+    },
+    {
+      "id": "any",
+      "label": "Any",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/config_migratable.rs"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_config_migratable_rs",
+      "target": "any",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/config_migratable.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_config_migratable_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_config_migratable_configmigratable",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/config_migratable.rs",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_config_migratable_configmigratable",
+      "target": "any",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/config_migratable.rs",
+      "source_location": "L8",
+      "weight": 1.0
+    }
+  ],
+  "raw_calls": []
+}

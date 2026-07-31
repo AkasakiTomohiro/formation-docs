@@ -1,0 +1,322 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_rs",
+      "label": "stack_command_trait.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommandtrait",
+      "label": "StackCommandTrait",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L11"
+    },
+    {
+      "id": "send",
+      "label": "Send",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/stack_command_trait.rs"
+    },
+    {
+      "id": "sync",
+      "label": "Sync",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/stack_command_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand",
+      "label": "StackCommand",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L30"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_load_stack_from_info",
+      "label": ".load_stack_from_info()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L34"
+    },
+    {
+      "id": "appcontext",
+      "label": "AppContext",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/stack_command_trait.rs"
+    },
+    {
+      "id": "configcontext",
+      "label": "ConfigContext",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/stack_command_trait.rs"
+    },
+    {
+      "id": "result",
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/stack_command_trait.rs"
+    },
+    {
+      "id": "stack",
+      "label": "Stack",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/stack_command_trait.rs"
+    },
+    {
+      "id": "stackerror",
+      "label": "StackError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/stack_command_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_get_stack_outputs",
+      "label": ".get_stack_outputs()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L52"
+    },
+    {
+      "id": "vec",
+      "label": "Vec",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/stack_command_trait.rs"
+    },
+    {
+      "id": "stackoutput",
+      "label": "StackOutput",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/stack_command_trait.rs"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_rs",
+      "target": "async_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_rs",
+      "target": "crate",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommandtrait",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommandtrait",
+      "target": "send",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommandtrait",
+      "target": "sync",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand",
+      "target": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommandtrait",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand",
+      "target": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_load_stack_from_info",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_load_stack_from_info",
+      "target": "appcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_load_stack_from_info",
+      "target": "configcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_load_stack_from_info",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_load_stack_from_info",
+      "target": "stack",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_load_stack_from_info",
+      "target": "stackerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand",
+      "target": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_get_stack_outputs",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_get_stack_outputs",
+      "target": "appcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_get_stack_outputs",
+      "target": "configcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_get_stack_outputs",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_get_stack_outputs",
+      "target": "vec",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_get_stack_outputs",
+      "target": "stackoutput",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_get_stack_outputs",
+      "target": "stackerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L52",
+      "weight": 1.0,
+      "context": "generic_arg"
+    }
+  ],
+  "raw_calls": [
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_load_stack_from_info",
+      "callee": "load_stack_from_info",
+      "is_member_call": false,
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L42"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_command_context_stack_command_trait_stackcommand_get_stack_outputs",
+      "callee": "get_stack_outputs",
+      "is_member_call": false,
+      "source_file": "src-tauri/src/command/context/stack_command_trait.rs",
+      "source_location": "L59"
+    }
+  ]
+}

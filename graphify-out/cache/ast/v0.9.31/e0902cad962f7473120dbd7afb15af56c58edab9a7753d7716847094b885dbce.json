@@ -1,0 +1,3926 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "label": "schema.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "label": "DlSchemaError",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L17"
+    },
+    {
+      "id": "apperror",
+      "label": "AppError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "httpclienterror",
+      "label": "HttpClientError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "error",
+      "label": "Error",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "ziperror",
+      "label": "ZipError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "joinerror",
+      "label": "JoinError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_dl_path",
+      "label": "get_resource_provider_dl_path()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L35"
+    },
+    {
+      "id": "string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "label": "get_resource_provider_save_path()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L42"
+    },
+    {
+      "id": "arc",
+      "label": "Arc",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "filesystem",
+      "label": "FileSystem",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "result",
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "pathbuf",
+      "label": "PathBuf",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "label": "generate_summary_service_list()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L56"
+    },
+    {
+      "id": "appcontext",
+      "label": "AppContext",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "label": "get_resource_provider_save_dir()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L98"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "label": "dl_resource_provider()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L113"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "label": "success()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L169"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_error",
+      "label": "error()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L199"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_dir_err",
+      "label": "read_dir_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L296"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "label": "file_name_none()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L323"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_to_str_none",
+      "label": "file_name_to_str_none()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L386"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "label": "file_name_not_matching_regex()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L392"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_file_err",
+      "label": "read_file_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L451"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "label": "from_str_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L488"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "label": "non_object_schema_file()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L536"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "label": "non_string_type_name()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L599"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "label": "non_a_b_c_type_name()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L662"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_to_string_err",
+      "label": "to_string_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L728"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "label": "write_file_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L734"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "label": "create_test_zip_bytes()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L866"
+    },
+    {
+      "id": "vec",
+      "label": "Vec",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/cloudformation/schema.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "label": "create_test_zip_bytes_with_dir()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L890"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "label": "success_first()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L921"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "label": "success_second_and_later()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L991"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "label": "success_with_dir()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1064"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path_err",
+      "label": "get_resource_provider_save_path_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1134"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_remove_file_err",
+      "label": "remove_file_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1157"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_http_client_get_err",
+      "label": "http_client_get_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1192"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "label": "get_resource_provider_save_dir_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1225"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_new_err",
+      "label": "zip_archive_new_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1267"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_by_index_err",
+      "label": "zip_archive_by_index_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1311"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "label": "create_dir_all_sync_err_with_dir()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1317"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "label": "create_dir_all_sync_err_without_dir()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1368"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "label": "touch_and_open_file_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1411"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "label": "copy_file_stream_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1458"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_out_path_parent_none",
+      "label": "out_path_parent_none()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1512"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "label": "generate_summary_service_list_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1518"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_cloudformation_schema_spawn_blocking_err",
+      "label": "spawn_blocking_err()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1576"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "apperror",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "appcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "http_client",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "crate",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "regex",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "value",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "std",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "error",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "ziparchive",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L14",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "target": "apperror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "target": "httpclienterror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L21",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "target": "error",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "target": "ziperror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "target": "error",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L27",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "target": "joinerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_dl_path",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_dl_path",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L35",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "target": "pathbuf",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L56",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "target": "appcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "target": "pathbuf",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L56",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L98",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L98",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L98",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L98",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "target": "pathbuf",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L98",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L98",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L113",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "target": "appcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L113",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L113",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dlschemaerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L113",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L159",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L161",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "super",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L165",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L169",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_error",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L199",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L224",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L226",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "super",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L230",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L234",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_dir_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L296",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L323",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_to_str_none",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L386",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L392",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_file_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L451",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L488",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L536",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L599",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L662",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_to_string_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L728",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L734",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L788",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L790",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "super",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L794",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L798",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_error",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L829",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L854",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "bytes",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L859",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "std",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L860",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "simplefileoptions",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L861",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "super",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L863",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L866",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "target": "vec",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L866",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L890",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "target": "vec",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L890",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L921",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L991",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1064",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1134",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_remove_file_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1157",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_http_client_get_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1192",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1225",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_new_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1267",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_by_index_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1311",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1317",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1368",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1411",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1458",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_out_path_parent_none",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1512",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1518",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_rs",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_spawn_blocking_err",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1576",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_dl_path",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L114",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L123",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L152",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L185",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_error",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L214",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L288",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_dir_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L315",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L374",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L443",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_file_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L480",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L528",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L591",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L654",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L717",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L778",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L814",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_error",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L844",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L935",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L983",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1008",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1056",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1078",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1126",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1149",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_remove_file_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1184",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_http_client_get_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1217",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1247",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1259",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_new_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1294",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1331",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1360",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1382",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1403",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1425",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1450",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1472",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1501",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1532",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "target": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1564",
+      "weight": 1.0
+    }
+  ],
+  "raw_calls": [
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "callee": "config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L46"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L47"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L47"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L62"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "and_then",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L64"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L64"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L64"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "is_match",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L65"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L66"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L67"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "is_object",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L69"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "unwrap_or_default",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L70"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "as_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L70"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "split",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L74"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "get_mut",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L79"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L90"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L92"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list",
+      "callee": "as_bytes",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L93"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "callee": "config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L102"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L103"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L103"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L103"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "callee": "path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L116"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "callee": "remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L117"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "callee": "by_index",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L134"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L135"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "callee": "name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L135"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "callee": "is_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L137"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "callee": "create_dir_all_sync",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L138"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "callee": "parent",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L140"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "callee": "create_dir_all_sync",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L141"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "callee": "touch_and_open_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L144"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_dl_resource_provider",
+      "callee": "copy_file_stream",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L145"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L174"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L174"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_error",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L203"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_error",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L203"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L239"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L239"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L247"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L247"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L247"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L251"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L251"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L264"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "withf",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L264"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L264"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L273"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L275"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_dir_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L301"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_dir_err",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L301"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L328"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L328"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L336"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L336"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L336"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L340"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L340"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L350"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "withf",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L350"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L350"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L359"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_none",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L361"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L397"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L397"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L405"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L405"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L405"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L409"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L409"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L419"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "withf",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L419"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L419"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L428"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_file_name_not_matching_regex",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L430"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_file_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L456"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_file_err",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L456"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_file_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L464"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_file_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L464"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_file_err",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L464"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_file_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L471"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_read_file_err",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L471"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L493"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L493"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L501"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L501"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L501"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L505"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L505"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L519"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_from_str_err",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L519"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L541"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L541"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L549"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L549"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L549"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L553"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L553"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L567"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "withf",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L567"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L567"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L576"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_object_schema_file",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L578"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L604"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L604"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L612"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L612"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L612"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L616"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L616"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L630"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "withf",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L630"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L630"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L639"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_string_type_name",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L641"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L667"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L667"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L675"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L675"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L675"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L679"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L679"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L693"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "withf",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L693"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L693"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L702"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_non_a_b_c_type_name",
+      "callee": "map_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L704"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L739"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L739"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L747"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L747"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L747"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L751"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L751"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L764"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_write_file_err",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L764"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L803"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L803"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_error",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L833"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_error",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L833"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "callee": "compression_method",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L871"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "callee": "start_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L874"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "callee": "write_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L875"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "callee": "start_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L877"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "callee": "write_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L878"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "callee": "start_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L881"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "callee": "write_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L882"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes",
+      "callee": "finish",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L885"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "callee": "compression_method",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L895"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "callee": "add_directory",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L898"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "callee": "start_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L901"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "callee": "write_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L903"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "callee": "start_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L905"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "callee": "write_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L907"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "callee": "start_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L910"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "callee": "write_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L912"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_test_zip_bytes_with_dir",
+      "callee": "finish",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L915"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L927"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L927"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L931"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L931"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L933"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "expect_remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L933"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L936"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "expect_get",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L936"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L940"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "expect_create_dir_all_sync",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L940"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L944"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "expect_touch_and_open_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L944"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L946"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L948"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "expect_copy_file_stream",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L948"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L954"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L954"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L961"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L961"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L962"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L962"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L972"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_first",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L972"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L997"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L997"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1001"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1001"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1003"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1003"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "expect_remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1003"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1009"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "expect_get",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1009"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1013"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "expect_create_dir_all_sync",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1013"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1017"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "expect_touch_and_open_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1017"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1019"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1021"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "expect_copy_file_stream",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1021"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1027"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1027"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1034"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1034"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1035"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1035"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1045"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_second_and_later",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1045"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1070"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1070"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1074"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1074"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1076"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "expect_remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1076"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1079"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "expect_get",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1079"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1083"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "expect_create_dir_all_sync",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1083"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1087"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "expect_touch_and_open_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1087"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1089"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1091"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "expect_copy_file_stream",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1091"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1097"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1097"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1104"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1104"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1105"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1105"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1115"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_success_with_dir",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1115"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1138"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_path_err",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1138"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_remove_file_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1161"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_remove_file_err",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1161"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_remove_file_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1165"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_remove_file_err",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1165"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_remove_file_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1167"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_remove_file_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1167"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_remove_file_err",
+      "callee": "expect_remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1167"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_http_client_get_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1198"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_http_client_get_err",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1198"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_http_client_get_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1202"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_http_client_get_err",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1202"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_http_client_get_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1204"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_http_client_get_err",
+      "callee": "expect_get",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1204"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1232"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1232"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1243"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1243"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1245"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "callee": "expect_remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1245"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1248"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1248"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_get_resource_provider_save_dir_err",
+      "callee": "expect_get",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1248"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_new_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1273"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_new_err",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1273"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_new_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1277"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_new_err",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1277"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_new_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1279"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_new_err",
+      "callee": "expect_remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1279"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_new_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1283"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_zip_archive_new_err",
+      "callee": "expect_get",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1283"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1323"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1323"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1327"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1327"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1329"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "expect_remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1329"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1332"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "expect_get",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1332"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1336"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "expect_create_dir_all_sync",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1336"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1345"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "expect_touch_and_open_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1345"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1347"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1349"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_with_dir",
+      "callee": "expect_copy_file_stream",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1349"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1374"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1374"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1378"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1378"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1380"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "callee": "expect_remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1380"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1383"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "callee": "expect_get",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1383"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1387"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_create_dir_all_sync_err_without_dir",
+      "callee": "expect_create_dir_all_sync",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1387"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1417"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1417"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1421"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1421"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1423"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "expect_remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1423"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1426"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "expect_get",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1426"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1430"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "expect_create_dir_all_sync",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1430"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1434"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_touch_and_open_file_err",
+      "callee": "expect_touch_and_open_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1434"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1464"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1464"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1468"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1468"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1470"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "expect_remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1470"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1473"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "expect_get",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1473"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1477"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "expect_create_dir_all_sync",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1477"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1481"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "expect_touch_and_open_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1481"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1483"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1485"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_copy_file_stream_err",
+      "callee": "expect_copy_file_stream",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1485"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1524"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1524"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1528"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1528"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1530"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "expect_remove_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1530"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1533"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "expect_get",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1533"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1537"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "expect_create_dir_all_sync",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1537"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1541"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "expect_touch_and_open_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1541"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1543"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1545"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "expect_copy_file_stream",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1545"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1550"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_cloudformation_schema_generate_summary_service_list_err",
+      "callee": "expect_read_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/api/cloudformation/schema.rs",
+      "source_location": "L1550"
+    }
+  ]
+}

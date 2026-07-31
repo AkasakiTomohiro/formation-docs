@@ -1,0 +1,2785 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "label": "app_config.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_language",
+      "label": "Language",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L16"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "label": "AppConfigV1",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L26"
+    },
+    {
+      "id": "hashmap",
+      "label": "HashMap",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_new",
+      "label": ".new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L36"
+    },
+    {
+      "id": "self",
+      "label": "Self",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "configmigratable",
+      "label": "ConfigMigratable",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_migrate_boxed",
+      "label": ".migrate_boxed()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L51"
+    },
+    {
+      "id": "box",
+      "label": "Box",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "latest",
+      "label": "Latest",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_as_any",
+      "label": ".as_any()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L61"
+    },
+    {
+      "id": "any",
+      "label": "Any",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "label": "AppConfig",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L71"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "label": ".new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L80"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "label": ".read()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L93"
+    },
+    {
+      "id": "arc",
+      "label": "Arc",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "filesystem",
+      "label": "FileSystem",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "result",
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "appconfigerror",
+      "label": "AppConfigError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "label": ".write()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L115"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfig_migrate_boxed",
+      "label": ".migrate_boxed()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L138"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfig_is_latest",
+      "label": ".is_latest()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L141"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfig_as_any",
+      "label": ".as_any()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L144"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_appconfigerror",
+      "label": "AppConfigError",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L154"
+    },
+    {
+      "id": "apperror",
+      "label": "AppError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "error",
+      "label": "Error",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "label": "app_config_path()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L164"
+    },
+    {
+      "id": "pathbuf",
+      "label": "PathBuf",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/app_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "label": "read_config_version()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L177"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_new",
+      "label": "app_config_v1_new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L201"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_migrate_boxed",
+      "label": "app_config_v1_migrate_boxed()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L217"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_as_any",
+      "label": "app_config_v1_as_any()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L245"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_new",
+      "label": "app_config_new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L273"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_migrate_boxed",
+      "label": "app_config_migrate_boxed()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L289"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "label": "app_config_read_err_first_write()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L324"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_second_write",
+      "label": "app_config_read_err_second_write()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L385"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_normal",
+      "label": "app_config_write_normal()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L431"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_config_local_dir",
+      "label": "app_config_write_err_config_local_dir()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L464"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_create_dir_all",
+      "label": "app_config_write_err_create_dir_all()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L485"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_write_file",
+      "label": "app_config_write_err_write_file()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L513"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_normal",
+      "label": "app_config_read_normal()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L557"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "label": "app_config_read_no_exist()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L601"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "label": "app_config_read_unexpected_version()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L642"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "label": "app_config_read_invalid()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L694"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_config_local_dir",
+      "label": "app_config_read_first_err_config_local_dir()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L745"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_read_file",
+      "label": "app_config_read_first_err_read_file()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L766"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_json_from_str",
+      "label": "app_config_read_err_json_from_str()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L795"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_config_local_dir",
+      "label": "app_config_read_second_err_config_local_dir()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L825"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_read_file",
+      "label": "app_config_read_second_err_read_file()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L870"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "filesystem",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "serde",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "value",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "any",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "hashmap",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "pathbuf",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "error",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_language",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "target": "hashmap",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L30",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L31",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_language",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L32",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_new",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_new",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "target": "configmigratable",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L48",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_migrate_boxed",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L51",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_migrate_boxed",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_migrate_boxed",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_migrate_boxed",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_migrate_boxed",
+      "target": "configmigratable",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_migrate_boxed",
+      "target": "latest",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_migrate_boxed",
+      "target": "latest",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L51",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_as_any",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_as_any",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_as_any",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_as_any",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_as_any",
+      "target": "any",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L71",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "hashmap",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L73",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L73",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L73",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L75",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L76",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_language",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L77",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L80",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L80",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L93",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L93",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L93",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L93",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L93",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "target": "appconfigerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L93",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L115",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L115",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L115",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L115",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L115",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "target": "appconfigerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L115",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "configmigratable",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L135",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_migrate_boxed",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L138",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_migrate_boxed",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L138",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_migrate_boxed",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L138",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_migrate_boxed",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L138",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_migrate_boxed",
+      "target": "configmigratable",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L138",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_migrate_boxed",
+      "target": "latest",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L138",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_migrate_boxed",
+      "target": "latest",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L138",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_is_latest",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L141",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_as_any",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L144",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_as_any",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L144",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_as_any",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L144",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_as_any",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L144",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_as_any",
+      "target": "any",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L144",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfigerror",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L154",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigerror",
+      "target": "apperror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L156",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigerror",
+      "target": "error",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L158",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigerror",
+      "target": "error",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L160",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L164",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L164",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L164",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L164",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "target": "pathbuf",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L164",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfigerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L164",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L177",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L177",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L177",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L177",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfigerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L177",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "configmigratable",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L197",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_new",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L201",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_migrate_boxed",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L217",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_as_any",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L245",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "super",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L268",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "configmigratable",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L269",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_new",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L273",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_migrate_boxed",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L289",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "mockfilesystem",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L316",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "io",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L317",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "pathbuf",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L318",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "fromstr",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L319",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L320",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L324",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_second_write",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L385",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_normal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L431",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_config_local_dir",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L464",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_create_dir_all",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L485",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_write_file",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L513",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "super",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L548",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "mockfilesystem",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L549",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "io",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L550",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "pathbuf",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L551",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "fromstr",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L552",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L553",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_normal",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L557",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L601",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L642",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L694",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_config_local_dir",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L745",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_read_file",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L766",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_json_from_str",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L795",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_config_local_dir",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L825",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_read_file",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L870",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_new",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfigv1_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_as_any",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_migrate_boxed",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L100",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L104",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L167",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L178",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_new",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L205",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L219",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_migrate_boxed",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L226",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_as_any",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L229",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_as_any",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L247",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_v1_as_any",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_as_any",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L254",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_new",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L277",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L291",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_migrate_boxed",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L298",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_as_any",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L301",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L326",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L376",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_second_write",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L387",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_second_write",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L422",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_normal",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L433",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_normal",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L455",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_config_local_dir",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L466",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_config_local_dir",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L476",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_create_dir_all",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L487",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_create_dir_all",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L504",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_write_file",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L515",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_write_file",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L539",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_normal",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L559",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_normal",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L584",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L603",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L626",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L644",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L678",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L696",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L729",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_config_local_dir",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L747",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_config_local_dir",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L757",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_read_file",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L768",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_read_file",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L786",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_json_from_str",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L797",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_json_from_str",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L816",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_config_local_dir",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L827",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_config_local_dir",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L861",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_read_file",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L872",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_read_file",
+      "target": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L906",
+      "weight": 1.0
+    }
+  ],
+  "raw_calls": [
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "callee": "read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L98"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_appconfig_read",
+      "callee": "migrate_until_latest",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L101"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "callee": "create_dir_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L124"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "callee": "parent",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L125"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "callee": "write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L128"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_appconfig_write",
+      "callee": "as_bytes",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L129"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "callee": "ok_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L165"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "callee": "config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L165"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L171"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_path",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L171"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "callee": "path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L179"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "callee": "read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L181"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "callee": "unwrap_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L183"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "callee": "and_then",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L183"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_read_config_version",
+      "callee": "as_u64",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L185"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "callee": "returning_st",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L329"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L329"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L329"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L346"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L346"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "callee": "returning_st",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L350"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L350"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_first_write",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L350"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_second_write",
+      "callee": "returning_st",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L390"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_second_write",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L390"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_second_write",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L390"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_second_write",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L407"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_second_write",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L407"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_second_write",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L410"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_second_write",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L410"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_normal",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L436"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_normal",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L436"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_normal",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L443"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_normal",
+      "callee": "expect_create_dir_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L443"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_normal",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L448"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_normal",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L448"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_config_local_dir",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L469"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_config_local_dir",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L469"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_create_dir_all",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L490"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_create_dir_all",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L490"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_create_dir_all",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L497"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_create_dir_all",
+      "callee": "expect_create_dir_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L497"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_write_file",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L518"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_write_file",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L518"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_write_file",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L525"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_write_file",
+      "callee": "expect_create_dir_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L525"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_write_file",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L530"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_write_err_write_file",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L530"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_normal",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L562"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_normal",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L562"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_normal",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L567"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_normal",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L567"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_normal",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L570"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_normal",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L570"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L606"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L606"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L611"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L611"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L614"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L614"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L619"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_no_exist",
+      "callee": "expect_create_dir_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L619"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L647"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L647"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L652"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L652"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L655"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L655"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L666"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L666"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L671"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_unexpected_version",
+      "callee": "expect_create_dir_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L671"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L699"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L699"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L704"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L704"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L707"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L707"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L717"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L717"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L722"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_invalid",
+      "callee": "expect_create_dir_all",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L722"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_config_local_dir",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L750"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_config_local_dir",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L750"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_read_file",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L771"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_read_file",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L771"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_read_file",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L776"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_read_file",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L776"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_read_file",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L779"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_first_err_read_file",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L779"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_json_from_str",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L800"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_json_from_str",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L800"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_json_from_str",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L805"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_json_from_str",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L805"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_json_from_str",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L808"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_err_json_from_str",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L808"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_config_local_dir",
+      "callee": "returning_st",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L830"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_config_local_dir",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L830"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_config_local_dir",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L830"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_config_local_dir",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L846"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_config_local_dir",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L846"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_config_local_dir",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L849"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_config_local_dir",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L849"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_read_file",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L875"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_read_file",
+      "callee": "expect_config_local_dir",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L875"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_read_file",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L880"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_read_file",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L880"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_read_file",
+      "callee": "returning_st",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L884"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_read_file",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L884"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_app_config_app_config_read_second_err_read_file",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/app_config.rs",
+      "source_location": "L884"
+    }
+  ]
+}

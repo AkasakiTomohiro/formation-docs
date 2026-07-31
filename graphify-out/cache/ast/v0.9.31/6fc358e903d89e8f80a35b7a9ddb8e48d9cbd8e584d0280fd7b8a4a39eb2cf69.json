@@ -1,0 +1,753 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_rs",
+      "label": "file.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_filesystem",
+      "label": "FileSystem",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L11"
+    },
+    {
+      "id": "send",
+      "label": "Send",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "sync",
+      "label": "Sync",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "label": "LocalFileSystem",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L30"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_file",
+      "label": ".read_file()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L34"
+    },
+    {
+      "id": "path",
+      "label": "Path",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "result",
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_write_file",
+      "label": ".write_file()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L38"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_remove_file",
+      "label": ".remove_file()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L42"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file",
+      "label": ".copy_file()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L46"
+    },
+    {
+      "id": "error",
+      "label": "Error",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file_stream",
+      "label": ".copy_file_stream()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L50"
+    },
+    {
+      "id": "read",
+      "label": "Read",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "write",
+      "label": "Write",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_touch_and_open_file",
+      "label": ".touch_and_open_file()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L58"
+    },
+    {
+      "id": "file",
+      "label": "File",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_dir",
+      "label": ".read_dir()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L62"
+    },
+    {
+      "id": "vec",
+      "label": "Vec",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "pathbuf",
+      "label": "PathBuf",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_create_dir_all",
+      "label": ".create_dir_all()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L71"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_create_dir_all_sync",
+      "label": ".create_dir_all_sync()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L75"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_config_local_dir",
+      "label": ".config_local_dir()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L79"
+    },
+    {
+      "id": "option",
+      "label": "Option",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/file.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_path_exists",
+      "label": ".path_exists()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L83"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_open",
+      "label": ".open()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L87"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_rs",
+      "target": "async_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_rs",
+      "target": "std",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_rs",
+      "target": "io",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_filesystem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_filesystem",
+      "target": "send",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_filesystem",
+      "target": "sync",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_filesystem",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_file",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_file",
+      "target": "path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_file",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_file",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L34",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_write_file",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_write_file",
+      "target": "path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L38",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_write_file",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L38",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_remove_file",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_remove_file",
+      "target": "path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_remove_file",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L42",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file",
+      "target": "path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L46",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file",
+      "target": "path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L46",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L46",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file",
+      "target": "error",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L46",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file_stream",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file_stream",
+      "target": "read",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file_stream",
+      "target": "send",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file_stream",
+      "target": "write",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file_stream",
+      "target": "send",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_copy_file_stream",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L50",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_touch_and_open_file",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_touch_and_open_file",
+      "target": "path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L58",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_touch_and_open_file",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L58",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_touch_and_open_file",
+      "target": "file",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L58",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_dir",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L62",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_dir",
+      "target": "path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L62",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_dir",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L62",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_dir",
+      "target": "vec",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L62",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_dir",
+      "target": "pathbuf",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L62",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_create_dir_all",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L71",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_create_dir_all",
+      "target": "path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L71",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_create_dir_all",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L71",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_create_dir_all_sync",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_create_dir_all_sync",
+      "target": "path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L75",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_create_dir_all_sync",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L75",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_config_local_dir",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_config_local_dir",
+      "target": "option",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_config_local_dir",
+      "target": "pathbuf",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L79",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_path_exists",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L83",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_path_exists",
+      "target": "path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L83",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_open",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L87",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_open",
+      "target": "path",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L87",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_open",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L87",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_open",
+      "target": "file",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L87",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_create_dir_all_sync",
+      "target": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_create_dir_all",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L76",
+      "weight": 1.0
+    }
+  ],
+  "raw_calls": [
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_dir",
+      "callee": "next_entry",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L65"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_read_dir",
+      "callee": "path",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L66"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_utils_context_file_localfilesystem_path_exists",
+      "callee": "exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/utils/context/file.rs",
+      "source_location": "L84"
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_mod_rs",
+      "label": "mod.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/mod.rs",
+      "source_location": "L1"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_mod_rs",
+      "target": "apperror",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/mod.rs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_mod_rs",
+      "target": "commandresult",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/mod.rs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_mod_rs",
+      "target": "configmigratable",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/mod.rs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_mod_rs",
+      "target": "get_window_state",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/mod.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_mod_rs",
+      "target": "set_window_state",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/mod.rs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_mod_rs",
+      "target": "windowstate",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/mod.rs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "context": "import"
+    }
+  ],
+  "raw_calls": []
+}

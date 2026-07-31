@@ -1,0 +1,222 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_lib_rs",
+      "label": "lib.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_lib_open_workspace_command",
+      "label": "open_workspace_command()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L16"
+    },
+    {
+      "id": "apphandle",
+      "label": "AppHandle",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/lib.rs"
+    },
+    {
+      "id": "result",
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/lib.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_lib_open_settings_command",
+      "label": "open_settings_command()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L25"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_lib_run",
+      "label": "run()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L34"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_lib_rs",
+      "target": "apicontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_lib_rs",
+      "target": "commandcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_lib_rs",
+      "target": "configcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_lib_rs",
+      "target": "appcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_lib_rs",
+      "target": "$graphify-root$_src_tauri_src_lib_open_workspace_command",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_lib_open_workspace_command",
+      "target": "apphandle",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_lib_open_workspace_command",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_lib_rs",
+      "target": "$graphify-root$_src_tauri_src_lib_open_settings_command",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_lib_open_settings_command",
+      "target": "apphandle",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_lib_open_settings_command",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L25",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_lib_rs",
+      "target": "$graphify-root$_src_tauri_src_lib_run",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L34",
+      "weight": 1.0
+    }
+  ],
+  "raw_calls": [
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_lib_run",
+      "callee": "invoke_handler",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L35"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_lib_run",
+      "callee": "plugin",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L35"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_lib_run",
+      "callee": "plugin",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L35"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_lib_run",
+      "callee": "plugin",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L35"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_lib_run",
+      "callee": "plugin",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L35"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_lib_run",
+      "callee": "manage",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L35"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_lib_run",
+      "callee": "manage",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L35"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_lib_run",
+      "callee": "manage",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L35"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_lib_run",
+      "callee": "manage",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/lib.rs",
+      "source_location": "L35"
+    }
+  ]
+}

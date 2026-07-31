@@ -1,0 +1,2275 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "label": "workspace_config.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1",
+      "label": "WorkspaceConfigV1",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L19"
+    },
+    {
+      "id": "hashmap",
+      "label": "HashMap",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_new",
+      "label": ".new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L28"
+    },
+    {
+      "id": "self",
+      "label": "Self",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "configmigratable",
+      "label": "ConfigMigratable",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_migrate_boxed",
+      "label": ".migrate_boxed()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L41"
+    },
+    {
+      "id": "box",
+      "label": "Box",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "latest",
+      "label": "Latest",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_as_any",
+      "label": ".as_any()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L49"
+    },
+    {
+      "id": "any",
+      "label": "Any",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "label": "WorkspaceConfig",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L59"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "label": ".new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L66"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "label": ".read()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L80"
+    },
+    {
+      "id": "arc",
+      "label": "Arc",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "filesystem",
+      "label": "FileSystem",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "result",
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "workspaceconfigerror",
+      "label": "WorkspaceConfigError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "label": ".write()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L116"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_migrate_boxed",
+      "label": ".migrate_boxed()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L133"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_is_latest",
+      "label": ".is_latest()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L136"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_as_any",
+      "label": ".as_any()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L139"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigerror",
+      "label": "WorkspaceConfigError",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L145"
+    },
+    {
+      "id": "apperror",
+      "label": "AppError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "error",
+      "label": "Error",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_path",
+      "label": "workspace_config_path()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L155"
+    },
+    {
+      "id": "pathbuf",
+      "label": "PathBuf",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/workspace_config.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "label": "read_config_version()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L160"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_new",
+      "label": "workspace_config_v1_new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L186"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_migrate_boxed",
+      "label": "workspace_config_v1_migrate_boxed()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L201"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_as_any",
+      "label": "workspace_config_v1_as_any()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L224"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_new",
+      "label": "workspace_config_new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L244"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_migrate_boxed",
+      "label": "workspace_config_migrate_boxed()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L259"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_as_any",
+      "label": "workspace_config_as_any()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L282"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_is_latest",
+      "label": "workspace_config_is_latest()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L296"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read",
+      "label": "workspace_config_read()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L313"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_version",
+      "label": "workspace_config_read_nonexistent_version()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L357"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_invalid_version_type",
+      "label": "workspace_config_read_invalid_version_type()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L397"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_workspace_json",
+      "label": "workspace_config_read_nonexistent_workspace_json()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L437"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_read_file_error",
+      "label": "workspace_config_first_read_file_error()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L463"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_read_file_error",
+      "label": "workspace_config_second_read_file_error()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L488"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_from_str_error",
+      "label": "workspace_config_first_from_str_error()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L536"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_from_str_error",
+      "label": "workspace_config_second_from_str_error()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L570"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_invalid_workspace_directory",
+      "label": "workspace_config_invalid_workspace_directory()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L626"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_error",
+      "label": "workspace_config_write_error()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L648"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write",
+      "label": "workspace_config_write()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L683"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_file_error",
+      "label": "workspace_config_write_file_error()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L707"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "filesystem",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "serde",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "value",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "any",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "hashmap",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "path",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L7",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "error",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1",
+      "target": "hashmap",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L22",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_new",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_new",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1",
+      "target": "configmigratable",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_migrate_boxed",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_migrate_boxed",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_migrate_boxed",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_migrate_boxed",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_migrate_boxed",
+      "target": "configmigratable",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_migrate_boxed",
+      "target": "latest",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_migrate_boxed",
+      "target": "latest",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L41",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_as_any",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_as_any",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L49",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_as_any",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L49",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_as_any",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L49",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_as_any",
+      "target": "any",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L49",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "hashmap",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L61",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L62",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L63",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L66",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L66",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L80",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L80",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L80",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L80",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L80",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "target": "workspaceconfigerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L80",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L116",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L116",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L116",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L116",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L116",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L116",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "target": "workspaceconfigerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L116",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "configmigratable",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L130",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_migrate_boxed",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L133",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_migrate_boxed",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L133",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_migrate_boxed",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L133",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_migrate_boxed",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L133",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_migrate_boxed",
+      "target": "configmigratable",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L133",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_migrate_boxed",
+      "target": "latest",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L133",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_migrate_boxed",
+      "target": "latest",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L133",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_is_latest",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L136",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_as_any",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L139",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_as_any",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L139",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_as_any",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L139",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_as_any",
+      "target": "box",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L139",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_as_any",
+      "target": "any",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L139",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigerror",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L145",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigerror",
+      "target": "apperror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L147",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigerror",
+      "target": "error",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L149",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigerror",
+      "target": "error",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L151",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_path",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L155",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_path",
+      "target": "pathbuf",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L155",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L160",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L160",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L160",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L160",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L160",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "super",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L182",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_new",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L186",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_migrate_boxed",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L201",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_as_any",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L224",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "super",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L240",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_new",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L244",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_migrate_boxed",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L259",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_as_any",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L282",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_is_latest",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L296",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "super",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L308",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "mockfilesystem",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L309",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L313",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_version",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L357",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_invalid_version_type",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L397",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_workspace_json",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L437",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_read_file_error",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L463",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_read_file_error",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L488",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_from_str_error",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L536",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_from_str_error",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L570",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_invalid_workspace_directory",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L626",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_error",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L648",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "super",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L678",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "mockfilesystem",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L679",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L683",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_rs",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_file_error",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L707",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_new",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_as_any",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_migrate_boxed",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L84",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_path",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L91",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L106",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_path",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L122",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_path",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L164",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_new",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L190",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L203",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_migrate_boxed",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L210",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_as_any",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L215",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_as_any",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L226",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_v1_as_any",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_as_any",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L229",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_new",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L248",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L261",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_migrate_boxed",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L268",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_migrate_boxed",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_as_any",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L273",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_as_any",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L284",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_as_any",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_as_any",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L287",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_is_latest",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L298",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_is_latest",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_is_latest",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L301",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L315",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L337",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_version",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L359",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_version",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L384",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_invalid_version_type",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L399",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_invalid_version_type",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L424",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_workspace_json",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L439",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_workspace_json",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L450",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_read_file_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L465",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_read_file_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L479",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_read_file_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L490",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_read_file_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L527",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_from_str_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L538",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_from_str_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L561",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_from_str_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L572",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_from_str_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L617",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_invalid_workspace_directory",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L628",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_invalid_workspace_directory",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L636",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L650",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L666",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L685",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L697",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_file_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_new",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L709",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_file_error",
+      "target": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L726",
+      "weight": 1.0
+    }
+  ],
+  "raw_calls": [
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_new",
+      "callee": "take",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L32"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_new",
+      "callee": "chars",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L32"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_new",
+      "callee": "take",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L33"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfigv1_new",
+      "callee": "chars",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L33"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "callee": "read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L89"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "callee": "migrate_until_latest",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L92"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "callee": "and_then",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L95"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "callee": "file_name",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L95"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "callee": "to_str",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L97"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_read",
+      "callee": "is_none",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L98"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "callee": "write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L123"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspaceconfig_write",
+      "callee": "as_bytes",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L124"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_path",
+      "callee": "join",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L156"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "callee": "path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L165"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "callee": "read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L167"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "callee": "unwrap_or",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L169"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "callee": "and_then",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L169"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_read_config_version",
+      "callee": "as_u64",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L171"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L318"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L318"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L319"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L319"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_version",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L362"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_version",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L362"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_version",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L363"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_version",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L363"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_version",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L377"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_version",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L377"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_invalid_version_type",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L402"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_invalid_version_type",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L402"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_invalid_version_type",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L403"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_invalid_version_type",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L403"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_invalid_version_type",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L417"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_invalid_version_type",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L417"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_workspace_json",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L442"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_workspace_json",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L442"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_workspace_json",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L443"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_read_nonexistent_workspace_json",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L443"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_read_file_error",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L468"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_read_file_error",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L468"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_read_file_error",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L469"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_read_file_error",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L469"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_read_file_error",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L493"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_read_file_error",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L493"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_read_file_error",
+      "callee": "returning_st",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L496"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_read_file_error",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L496"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_read_file_error",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L496"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_from_str_error",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L541"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_from_str_error",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L541"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_from_str_error",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L542"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_first_from_str_error",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L542"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_from_str_error",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L575"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_from_str_error",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L575"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_from_str_error",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L578"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_from_str_error",
+      "callee": "times",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L578"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_second_from_str_error",
+      "callee": "expect_read_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L578"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_invalid_workspace_directory",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L631"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_invalid_workspace_directory",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L631"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_error",
+      "callee": "return_const",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L653"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_error",
+      "callee": "expect_path_exists",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L653"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_error",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L654"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_error",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L654"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L688"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L688"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_file_error",
+      "callee": "returning",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L712"
+    },
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_config_workspace_config_workspace_config_write_file_error",
+      "callee": "expect_write_file",
+      "is_member_call": true,
+      "source_file": "src-tauri/src/config/workspace_config.rs",
+      "source_location": "L712"
+    }
+  ]
+}

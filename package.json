@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "graphify:update": "uv run graphify . --code-only --update && uv run graphify . --code-only --cluster-only"
   },
   "dependencies": {
     "@cloudscape-design/code-view": "^3.0.66",

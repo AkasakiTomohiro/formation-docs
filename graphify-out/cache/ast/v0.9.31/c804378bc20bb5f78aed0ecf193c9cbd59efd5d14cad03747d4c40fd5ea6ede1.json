@@ -1,0 +1,304 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_http_client_rs",
+      "label": "http_client.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclienterror",
+      "label": "HttpClientError",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L6"
+    },
+    {
+      "id": "string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/http_client.rs"
+    },
+    {
+      "id": "from",
+      "label": "From",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/http_client.rs"
+    },
+    {
+      "id": "error",
+      "label": "Error",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/http_client.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclienterror_from",
+      "label": ".from()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L13"
+    },
+    {
+      "id": "self",
+      "label": "Self",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/http_client.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclient",
+      "label": "HttpClient",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L20"
+    },
+    {
+      "id": "send",
+      "label": "Send",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/http_client.rs"
+    },
+    {
+      "id": "sync",
+      "label": "Sync",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/http_client.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_http_client_realhttpclient",
+      "label": "RealHttpClient",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L24"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_context_http_client_realhttpclient_get",
+      "label": ".get()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L28"
+    },
+    {
+      "id": "result",
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/http_client.rs"
+    },
+    {
+      "id": "bytes",
+      "label": "Bytes",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/context/http_client.rs"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_rs",
+      "target": "async_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_rs",
+      "target": "bytes",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_rs",
+      "target": "error",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclienterror",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclienterror",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L8",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclienterror",
+      "target": "from",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclienterror",
+      "target": "error",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclienterror",
+      "target": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclienterror_from",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclienterror_from",
+      "target": "error",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclienterror_from",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L13",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclient",
+      "target": "send",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclient",
+      "target": "sync",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_context_http_client_realhttpclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_realhttpclient",
+      "target": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclient",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_realhttpclient",
+      "target": "$graphify-root$_src_tauri_src_utils_context_http_client_realhttpclient_get",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_realhttpclient_get",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_realhttpclient_get",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_realhttpclient_get",
+      "target": "bytes",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_context_http_client_realhttpclient_get",
+      "target": "$graphify-root$_src_tauri_src_utils_context_http_client_httpclienterror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/context/http_client.rs",
+      "source_location": "L28",
+      "weight": 1.0,
+      "context": "generic_arg"
+    }
+  ],
+  "raw_calls": []
+}
