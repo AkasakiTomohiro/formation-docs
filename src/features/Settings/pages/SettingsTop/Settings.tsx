@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useAppConfigContext } from '../../../../contexts/AppConfigContext';
 import { useFlashbarContext } from '../../../../contexts/FlashbarContext';
 import { getAWSServiceList } from '../../../../invoke/GetAWSServiceList';
-import { exportTranslationZip } from '../../../../invoke/Translation';
+import { exportTranslationZip, importTranslationZip } from '../../../../invoke/Translation';
 import { ENGLISH_OPTION, JAPANESE_OPTION, SettingsPresentation } from './Settings.presentation';
 import type { SelectProps } from '@cloudscape-design/components';
 import type { Language } from '../../../../invoke/AppConfig';
@@ -81,7 +81,18 @@ export const Settings = () => {
     }
   };
 
-  const handleClickImport = () => {};
+  const handleClickImport = async () => {
+    if (appConfig?.language) {
+      const result = await importTranslationZip({ lang: appConfig?.language });
+      if (!result.success) {
+        addFlashbarItem({
+          type: 'error',
+          header: 'インポート失敗',
+          content: 'プロパティの説明文の翻訳ファイルのインポートに失敗しました',
+        });
+      }
+    }
+  };
 
   const handleClickExport = async () => {
     if (appConfig?.language) {

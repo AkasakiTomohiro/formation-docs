@@ -78,6 +78,7 @@ pub fn run() {
             command::translation::get_translation_command,
             command::translation::save_translation_command,
             command::translation::export_translation_file_command,
+            command::translation::import_translation_file_command,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,4 +1,9 @@
-use std::{fs::File, io::Write, path::PathBuf, sync::Arc};
+use std::{
+    fs::File,
+    io::{Cursor, Write},
+    path::PathBuf,
+    sync::Arc,
+};
 
 use crate::{
     config::app_config::APP_CONFIG_DIRECTORY_NAME,
@@ -8,7 +13,7 @@ use serde_json::Value;
 use tauri::State;
 use tauri_plugin_dialog::DialogExt;
 use thiserror::Error;
-use zip::{write::SimpleFileOptions, CompressionMethod, ZipWriter};
+use zip::{write::SimpleFileOptions, CompressionMethod, ZipArchive, ZipWriter};
 
 use crate::utils::{context::file::FileSystem, AppError};
 
@@ -186,6 +191,91 @@ async fn write_translation_zip(
     Ok(())
 }
 
+async fn import_translation_file(
+    app_handler: tauri::AppHandle,
+    file_system: Arc<dyn FileSystem>,
+    lang: String,
+) -> Result<(), TranslationError> {
+    let dir = file_system
+        .config_local_dir()
+        .ok_or(TranslationError::App(AppError::new(
+            "Failed to get local config directory",
+        )))?;
+    let translation_dir_path = dir
+        .join(APP_CONFIG_DIRECTORY_NAME)
+        .join(TRANSLATION_DIR)
+        .join(&lang);
+    match translation_dir_path.try_exists() {
+        Ok(exists) => {
+            // 翻訳ディレクトリが存在しない場合は、作成する
+            if !exists {
+                file_system
+                    .create_dir_all(translation_dir_path.clone().as_path())
+                    .await?;
+            }
+        }
+        Err(_) => {
+            return Err(TranslationError::App(AppError::new(
+                "Failed to check translation directory existence",
+            )));
+        }
+    }
+
+    app_handler
+        .dialog()
+        .file()
+        .add_filter("translation zip", &["zip"])
+        .pick_file(move |file_path| {
+            if let Some(file_path) = file_path {
+                println!("選択されたファイルのパス: {:?}", file_path);
+
+                if let Some(file_path) = file_path.as_path() {
+                    let file_path = file_path.to_path_buf();
+                    if file_system.clone().path_exists(&file_path) {
+                        // 非同期処理を実行するために、分離した関数をspawnで呼び出す
+                        tauri::async_runtime::spawn(async move {
+                            if let Err(err) = unzip_translation_file(
+                                file_system.clone(),
+                                file_path,
+                                translation_dir_path.clone(),
+                            )
+                            .await
+                            {
+                                eprintln!("Failed to import translation zip: {err}");
+                            }
+                        });
+                    }
+                }
+            }
+        });
+
+    Ok(())
+}
+
+async fn unzip_translation_file(
+    file_system: Arc<dyn FileSystem>,
+    zip_file_path: PathBuf,
+    output_dir: PathBuf,
+) -> Result<(), TranslationError> {
+    let content = file_system.read_file_by_binary(&zip_file_path).await?;
+    let content = Cursor::new(content);
+    let mut archive = ZipArchive::new(content)?;
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i)?;
+        let out_path = output_dir.join(file.name());
+        if file.is_dir() {
+            file_system.create_dir_all(&out_path).await?;
+        } else {
+            if let Some(parent) = out_path.parent() {
+                file_system.create_dir_all(parent).await?;
+            }
+            let mut out_file = file_system.touch_and_open_file(&out_path)?;
+            file_system.copy_file_stream(&mut file, &mut out_file)?;
+        }
+    }
+    Ok(())
+}
+
 #[coverage(off)]
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_translation_command(
@@ -243,5 +333,19 @@ pub async fn export_translation_file_command(
     match export_translation_file(app_handler, app_context.file_system.clone(), lang).await {
         Ok(result) => Ok(CommandResult::success(result)),
         Err(_) => Err(CommandResult::failed("Failed to export translation file.")),
+    }
+}
+
+#[coverage(off)]
+#[tauri::command(rename_all = "snake_case")]
+pub async fn import_translation_file_command(
+    app_context_state: State<'_, AppContext>,
+    app_handler: tauri::AppHandle,
+    lang: String,
+) -> Result<CommandResult<()>, CommandResult> {
+    let app_context = app_context_state.inner();
+    match import_translation_file(app_handler, app_context.file_system.clone(), lang).await {
+        Ok(result) => Ok(CommandResult::success(())),
+        Err(_) => Err(CommandResult::failed("Failed to import translation file.")),
     }
 }

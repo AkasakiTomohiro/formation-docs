@@ -10,6 +10,7 @@ use tokio::io;
 #[async_trait]
 pub trait FileSystem: Send + Sync {
     async fn read_file(&self, path: &Path) -> io::Result<String>;
+    async fn read_file_by_binary(&self, path: &Path) -> io::Result<Vec<u8>>;
     async fn write_file(&self, path: &Path, contents: &[u8]) -> io::Result<()>;
     async fn remove_file(&self, path: &Path) -> io::Result<()>;
     async fn copy_file(&self, from: &Path, to: &Path) -> Result<u64, std::io::Error>;
@@ -33,6 +34,10 @@ pub struct LocalFileSystem;
 impl FileSystem for LocalFileSystem {
     async fn read_file(&self, path: &Path) -> io::Result<String> {
         return tokio::fs::read_to_string(path).await;
+    }
+
+    async fn read_file_by_binary(&self, path: &Path) -> io::Result<Vec<u8>> {
+        return tokio::fs::read(path).await;
     }
 
     async fn write_file(&self, path: &Path, contents: &[u8]) -> io::Result<()> {
