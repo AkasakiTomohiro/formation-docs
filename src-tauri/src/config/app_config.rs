@@ -12,6 +12,12 @@ const APP_CONFIG_LATEST_VERSION: u32 = 1;
 const APP_CONFIG_FILE_NAME: &str = "app_config.json";
 pub const APP_CONFIG_DIRECTORY_NAME: &str = "formation-docs";
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum Language {
+    En,
+    Ja,
+}
+
 ///
 /// アプリコンフィグ v1
 ///
@@ -23,6 +29,7 @@ struct AppConfigV1 {
     pub initialized: bool,
     pub initialized_at: String,
     pub cf_schema_downloaded_at: String,
+    pub language: Language,
 }
 
 impl AppConfigV1 {
@@ -33,6 +40,7 @@ impl AppConfigV1 {
             initialized: false,
             initialized_at: "".to_string(),
             cf_schema_downloaded_at: "".to_string(),
+            language: Language::En,
         }
     }
 }
@@ -47,6 +55,7 @@ impl ConfigMigratable for AppConfigV1 {
             initialized: self.initialized,
             initialized_at: self.initialized_at,
             cf_schema_downloaded_at: self.cf_schema_downloaded_at,
+            language: self.language,
         })
     }
     fn as_any(self: Box<Self>) -> Box<dyn Any> {
@@ -65,6 +74,7 @@ pub struct AppConfig {
     pub initialized: bool,
     pub initialized_at: String,
     pub cf_schema_downloaded_at: String,
+    pub language: Language,
 }
 impl AppConfig {
     pub fn new() -> Self {

@@ -1,0 +1,224 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_command_result_rs",
+      "label": "command_result.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_command_result_commandresult",
+      "label": "CommandResult",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L4"
+    },
+    {
+      "id": "t",
+      "label": "T",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/command_result.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_t",
+      "label": "CommandResult<T>",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L9"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_t_success",
+      "label": ".success()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L10"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_string",
+      "label": "CommandResult<String>",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L17"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_string_failed",
+      "label": ".failed()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L18"
+    },
+    {
+      "id": "string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/utils/command_result.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_command_result_command_result_success",
+      "label": "command_result_success()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L32"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_utils_command_result_command_result_failed",
+      "label": "command_result_failed()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L45"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_rs",
+      "target": "serde",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_command_result_commandresult",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_commandresult",
+      "target": "t",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_t",
+      "target": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_t_success",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_t_success",
+      "target": "t",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_t_success",
+      "target": "$graphify-root$_src_tauri_src_utils_command_result_commandresult",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_t_success",
+      "target": "t",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_string",
+      "target": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_string_failed",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_string_failed",
+      "target": "$graphify-root$_src_tauri_src_utils_command_result_commandresult",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_string_failed",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_rs",
+      "target": "super",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_command_result_command_result_success",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_rs",
+      "target": "$graphify-root$_src_tauri_src_utils_command_result_command_result_failed",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_command_result_success",
+      "target": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_t_success",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_utils_command_result_command_result_failed",
+      "target": "$graphify-root$_src_tauri_src_utils_command_result_commandresult_string_failed",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/utils/command_result.rs",
+      "source_location": "L50",
+      "weight": 1.0
+    }
+  ],
+  "raw_calls": []
+}

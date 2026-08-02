@@ -8,10 +8,13 @@ export type WorkspaceInfo = {
   directory: string;
 };
 
+export type Language = 'En' | 'Ja';
+
 export type AppConfig = {
   workspaces: WorkspaceInfo[];
   initialized: boolean;
   initialized_at: string;
+  language: Language;
 };
 
 export interface WorkspacesFile {
@@ -29,7 +32,7 @@ export type SetupAppResult = {
  * @param workspaceName
  * @returns
  */
-export async function loadAppConfig(): Promise<AppConfig> {
+export async function getAppConfig(): Promise<AppConfig> {
   const result = await invoke<CommandResult<AppConfig>>('read_app_config_command');
   if (result.success) {
     return result.value;
@@ -55,4 +58,14 @@ export async function setupApp(): Promise<SetupAppResult> {
     return { newVersion: null };
   }
   return result.value;
+}
+
+/**
+ * AppConfigの言語設定を更新する関数
+ */
+export async function updateAppConfigLanguage(language: Language): Promise<void> {
+  const result = await invoke<CommandResult<[]>>('update_app_config_language_command', { language });
+  if (!result.success) {
+    throw new Error(result.value);
+  }
 }

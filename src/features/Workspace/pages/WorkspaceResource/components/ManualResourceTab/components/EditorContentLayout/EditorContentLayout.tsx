@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useAppConfigContext } from '../../../../../../../../contexts/AppConfigContext';
 import { useFlashbarContext } from '../../../../../../../../contexts/FlashbarContext';
 import { getCloudFormationSchema } from '../../../../../../../../invoke/CloudFormationSchema';
+import { getTranslation } from '../../../../../../../../invoke/Translation';
 import { useWorkspaceResourceContext } from '../../../../../../contexts';
 import { createResourceTableItems } from '../../../../lib/CreateResourceTableItems';
 import { createExpandedItems } from '../../../PropertyTable';
@@ -33,6 +35,7 @@ export const EditorContentLayout = ({
   resourceName,
   editingValues,
 }: EditorContentLayoutProps) => {
+  const { appConfig } = useAppConfigContext();
   const [schema, setSchema] = useState<CloudFormationSchema | undefined>(undefined);
   const [properties, setProperties] = useState<ResourceTableItem[]>([]);
   const [expandedItems, setExpandedItems] = useState<any>();
@@ -44,6 +47,9 @@ export const EditorContentLayout = ({
   // リソースの説明を管理するためのステート
   const [description, setDescription] = useState<string>('');
 
+  // プロパティの説明の翻訳を管理するためのステート
+  const [translation, setTranslation] = useState<Record<string, string>>({});
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
     Promise.all([
@@ -54,7 +60,12 @@ export const EditorContentLayout = ({
       getManualManagementResourceMeta({
         resource_id: selectedResourceId,
       }),
-    ]).then(([cloudformationSchema, properties, resourceMeta]) => {
+      getTranslation({
+        lang: appConfig?.language ?? 'En',
+        serviceName,
+        resourceType: resourceName,
+      }),
+    ]).then(([cloudformationSchema, properties, resourceMeta, translation]) => {
       console.log('properties', properties);
       console.log('meta', resourceMeta);
       setSchema(cloudformationSchema);
@@ -64,6 +75,7 @@ export const EditorContentLayout = ({
       setReasons(resourceMeta.reasons);
       setDescription(resourceMeta.description);
       setValues(JSON.stringify(properties, undefined, 2));
+      setTranslation(translation);
     });
   }, [selectedResourceId]);
 
@@ -180,6 +192,7 @@ export const EditorContentLayout = ({
         editingReasons: editingValues?.reasons,
         expandedItems: expandedItems,
         setExpandedItems: setExpandedItems,
+        translation: translation,
       }}
       resourcePropertyEditorProps={{
         values: values,

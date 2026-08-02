@@ -21,6 +21,11 @@ export type WorkspaceSideMenuPresentationProps = {
    * サイドメニューアイテム
    */
   sidMenuItems: SideNavigationProps.Item[];
+
+  /**
+   * サイドメニューの「AWSリソースの説明」アイテムがクリックされたときのハンドラー
+   */
+  onClickSideMenuResourceDescriptionSettings: MouseEventHandler<HTMLAnchorElement>;
 };
 
 const StyledLink = styled.a`

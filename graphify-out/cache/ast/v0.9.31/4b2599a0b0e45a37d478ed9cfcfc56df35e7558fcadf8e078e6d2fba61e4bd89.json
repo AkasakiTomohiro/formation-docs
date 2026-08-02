@@ -1,0 +1,223 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_rs",
+      "label": "get_app_version_trait.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversiontrait",
+      "label": "GetAppVersionTrait",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L7"
+    },
+    {
+      "id": "send",
+      "label": "Send",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/get_app_version_trait.rs"
+    },
+    {
+      "id": "sync",
+      "label": "Sync",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/get_app_version_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion",
+      "label": "GetAppVersion",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L12"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion_get_app_version",
+      "label": ".get_app_version()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L16"
+    },
+    {
+      "id": "string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/get_app_version_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion_get_latest_version",
+      "label": ".get_latest_version()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L19"
+    },
+    {
+      "id": "appcontext",
+      "label": "AppContext",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/get_app_version_trait.rs"
+    },
+    {
+      "id": "option",
+      "label": "Option",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/api/context/get_app_version_trait.rs"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_rs",
+      "target": "get_latest_version",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_rs",
+      "target": "appcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_rs",
+      "target": "async_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversiontrait",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversiontrait",
+      "target": "send",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversiontrait",
+      "target": "sync",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion",
+      "target": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversiontrait",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion",
+      "target": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion_get_app_version",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion_get_app_version",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L16",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion",
+      "target": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion_get_latest_version",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion_get_latest_version",
+      "target": "appcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion_get_latest_version",
+      "target": "option",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion_get_latest_version",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L19",
+      "weight": 1.0,
+      "context": "generic_arg"
+    }
+  ],
+  "raw_calls": [
+    {
+      "caller_nid": "$graphify-root$_src_tauri_src_api_context_get_app_version_trait_getappversion_get_latest_version",
+      "callee": "get_latest_version",
+      "is_member_call": false,
+      "source_file": "src-tauri/src/api/context/get_app_version_trait.rs",
+      "source_location": "L20"
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_rs",
+      "label": "workspace_config_trait.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigtrait",
+      "label": "WorkspaceConfigTrait",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L11"
+    },
+    {
+      "id": "send",
+      "label": "Send",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/workspace_config_trait.rs"
+    },
+    {
+      "id": "sync",
+      "label": "Sync",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/workspace_config_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio",
+      "label": "WorkspaceConfigIO",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L25"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_read",
+      "label": ".read()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L29"
+    },
+    {
+      "id": "arc",
+      "label": "Arc",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/workspace_config_trait.rs"
+    },
+    {
+      "id": "filesystem",
+      "label": "FileSystem",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/workspace_config_trait.rs"
+    },
+    {
+      "id": "result",
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/workspace_config_trait.rs"
+    },
+    {
+      "id": "workspaceconfig",
+      "label": "WorkspaceConfig",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/workspace_config_trait.rs"
+    },
+    {
+      "id": "workspaceconfigerror",
+      "label": "WorkspaceConfigError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/config/context/workspace_config_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_write",
+      "label": ".write()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L36"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_rs",
+      "target": "async_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L2",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_rs",
+      "target": "crate",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigtrait",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigtrait",
+      "target": "send",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigtrait",
+      "target": "sync",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio",
+      "target": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigtrait",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio",
+      "target": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_read",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_read",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_read",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_read",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_read",
+      "target": "workspaceconfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_read",
+      "target": "workspaceconfigerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L29",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio",
+      "target": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_write",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_write",
+      "target": "workspaceconfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_write",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_write",
+      "target": "filesystem",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_write",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_write",
+      "target": "workspaceconfig",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_config_context_workspace_config_trait_workspaceconfigio_write",
+      "target": "workspaceconfigerror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/config/context/workspace_config_trait.rs",
+      "source_location": "L36",
+      "weight": 1.0,
+      "context": "generic_arg"
+    }
+  ],
+  "raw_calls": []
+}

@@ -1,0 +1,245 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_rs",
+      "label": "app_config_command_trait.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommandtrait",
+      "label": "AppConfigCommandTrait",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L10"
+    },
+    {
+      "id": "send",
+      "label": "Send",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/app_config_command_trait.rs"
+    },
+    {
+      "id": "sync",
+      "label": "Sync",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/app_config_command_trait.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommand",
+      "label": "AppConfigCommand",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L19"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommand_add_workspace_to_app_config",
+      "label": ".add_workspace_to_app_config()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L23"
+    },
+    {
+      "id": "appcontext",
+      "label": "AppContext",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/app_config_command_trait.rs"
+    },
+    {
+      "id": "configcontext",
+      "label": "ConfigContext",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/app_config_command_trait.rs"
+    },
+    {
+      "id": "result",
+      "label": "Result",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/app_config_command_trait.rs"
+    },
+    {
+      "id": "string",
+      "label": "String",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/app_config_command_trait.rs"
+    },
+    {
+      "id": "appconfigcommanderror",
+      "label": "AppConfigCommandError",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/app_config_command_trait.rs"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_rs",
+      "target": "async_trait",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_rs",
+      "target": "command",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_rs",
+      "target": "appconfigcommanderror",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L4",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_rs",
+      "target": "configcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L5",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_rs",
+      "target": "appcontext",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L6",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommandtrait",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommandtrait",
+      "target": "send",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommandtrait",
+      "target": "sync",
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_rs",
+      "target": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommand",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommand",
+      "target": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommandtrait",
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommand",
+      "target": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommand_add_workspace_to_app_config",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommand_add_workspace_to_app_config",
+      "target": "appcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommand_add_workspace_to_app_config",
+      "target": "configcontext",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "parameter_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommand_add_workspace_to_app_config",
+      "target": "result",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "return_type"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommand_add_workspace_to_app_config",
+      "target": "string",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_app_config_command_trait_appconfigcommand_add_workspace_to_app_config",
+      "target": "appconfigcommanderror",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/app_config_command_trait.rs",
+      "source_location": "L23",
+      "weight": 1.0,
+      "context": "generic_arg"
+    }
+  ],
+  "raw_calls": []
+}

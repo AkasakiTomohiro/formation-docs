@@ -1,0 +1,204 @@
+{
+  "nodes": [
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_command_context_rs",
+      "label": "command_context.rs",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L1"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext",
+      "label": "CommandContext",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L8"
+    },
+    {
+      "id": "arc",
+      "label": "Arc",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/command_context.rs"
+    },
+    {
+      "id": "appconfigcommandtrait",
+      "label": "AppConfigCommandTrait",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/command_context.rs"
+    },
+    {
+      "id": "stackcommandtrait",
+      "label": "StackCommandTrait",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/command_context.rs"
+    },
+    {
+      "id": "cloudformationschematrait",
+      "label": "CloudFormationSchemaTrait",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/command_context.rs"
+    },
+    {
+      "id": "manualmanagementresourcetrait",
+      "label": "ManualManagementResourceTrait",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/command_context.rs"
+    },
+    {
+      "id": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext_new",
+      "label": ".new()",
+      "file_type": "code",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L18"
+    },
+    {
+      "id": "self",
+      "label": "Self",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "origin_file": "$graphify-root$/src-tauri/src/command/context/command_context.rs"
+    }
+  ],
+  "edges": [
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_rs",
+      "target": "arc",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L1",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_rs",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L3",
+      "weight": 1.0,
+      "context": "import"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_rs",
+      "target": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext",
+      "target": "appconfigcommandtrait",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L9",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext",
+      "target": "stackcommandtrait",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L10",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext",
+      "target": "cloudformationschematrait",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L11",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext",
+      "target": "arc",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "context": "field"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext",
+      "target": "manualmanagementresourcetrait",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L12",
+      "weight": 1.0,
+      "context": "generic_arg"
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext",
+      "target": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext_new",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "$graphify-root$_src_tauri_src_command_context_command_context_commandcontext_new",
+      "target": "self",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "src-tauri/src/command/context/command_context.rs",
+      "source_location": "L18",
+      "weight": 1.0,
+      "context": "return_type"
+    }
+  ],
+  "raw_calls": []
+}

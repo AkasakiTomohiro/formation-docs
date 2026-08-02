@@ -85,6 +85,10 @@ export const WorkspaceSideMenu = (): JSX.Element => {
         event.preventDefault();
         deleteAllResourceTabs();
       }}
+      onClickSideMenuResourceDescriptionSettings={(event) => {
+        event.preventDefault();
+        navigate(`/workspaces/${workspace.id}/resourceDescriptionSettings`);
+      }}
     />
   );
 };

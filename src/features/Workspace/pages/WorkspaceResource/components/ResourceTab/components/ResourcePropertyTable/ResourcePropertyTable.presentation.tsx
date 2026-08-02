@@ -33,6 +33,11 @@ export type ResourcePropertyTablePresentationProps = {
   };
 
   /**
+   * プロパティの説明の翻訳
+   */
+  translation: Record<string, string>;
+
+  /**
    * リソースの説明
    */
   description: string;
@@ -81,6 +86,7 @@ export const ResourcePropertyTablePresentation = ({
   editingValues,
   description,
   setDescription,
+  translation,
 }: ResourcePropertyTablePresentationProps): JSX.Element => {
   return (
     <ContentLayout
@@ -122,6 +128,7 @@ export const ResourcePropertyTablePresentation = ({
           editingReasons={editingValues?.reasons}
           expandedItems={expandedItems}
           setExpandedItems={setExpandedItems}
+          translation={translation}
         />
       </SpaceBetween>
     </ContentLayout>
